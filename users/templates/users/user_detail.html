@@ -1,0 +1,163 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+
+{% block content %}
+  <!-- Title -->
+  <h3><br>
+    {{ user.get_long }}
+  </h3>
+
+  <!-- Content -->
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+      
+      <!-- Public Opinions -->
+      <div class="card my-3">
+        {% if current_user == user %}
+          <h5 class="card-header"> Public Opinions </h5>
+        {% else %}
+          <h5 class="card-header"> Opinions </h5>
+        {% endif %}
+        <div class="card-body text-justify">
+          {% if public_opinions %}
+            <table>
+              <tbody align="left" valign="top">
+                <tr>
+                  <td width="40">
+                  <td width="600">
+                </tr>
+                {% for opinion in public_opinions %}
+                  <tr>
+                    <td>
+                      <!-- Link -->
+                      {% include "include/link.html" with x=opinion.theory %}
+                      <!-- Info -->
+                      {% include "include/info.html" with x=opinion.theory %}
+                    </td>
+                    <td>
+                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.id %}"> {{ opinion }} </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% include "include/paginator.html" with list=public_opinions %}
+          {% else %}
+            None
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Private Opinions -->
+      {% if current_user == user %}
+      <div class="card my-3">
+        <h5 class="card-header"> Private Opinions </h5>
+        <div class="card-body text-justify">
+          {% if private_opinions %}
+            <table>
+              <tbody align="left" valign="top">
+                <tr>
+                  <td width="40">
+                  <td width="600">
+                </tr>
+                {% for opinion in private_opinions %}
+                  <tr>
+                    <td>
+                      <!-- Link -->
+                      {% include "include/link.html" with x=opinion.theory %}
+                      <!-- Info -->
+                      {% include "include/info.html" with x=opinion.theory %}
+                    </td>
+                    <td>
+                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.id %}"> {{ opinion }} </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% include "include/paginator.html" with list=private_opinions %}
+          {% else %}
+            None
+          {% endif %}
+        </div>
+      </div>
+      {% endif %}
+
+    </div> <!-- end column -->
+    <div class="col-md-4"> <!-- Sidebar Column -->
+
+      <!-- User Details -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Public Profile
+          {% if current_user == user %}
+            <small>
+              <a href="{% url 'users:profile-edit' %} "> edit </a>
+            </small>
+          {% endif %}
+        </h5>
+        <div class="card-body">
+          <table class="table table-borderless table-sm">
+
+            <!-- Age -->
+            <tr><th> Age: </th> <td class="text-right"> {{ user.get_age }} </td></tr>
+
+            <!-- Sex -->
+            <tr><th> Sex: </th> <td class="text-right"> {{ user.get_sex }} </td></tr>
+
+            <!-- Location -->
+            <tr><th> Location: </th><td class="text-right"> {{ user.get_location }} </td></tr>
+
+            <!-- Religion -->
+            <tr><th> Religion: </th><td class="text-right"> {{ user.get_religion }} </td></tr>
+
+            <!-- Politics -->
+            <tr><th> Politics: </th><td class="text-right"> {{ user.get_politics }} </td></tr>
+
+            <!-- Social Links -->
+<!--            <tr><th> Social Links: </th><td class="text-right">  </td></tr>-->
+
+          </table> 
+        </div>
+      </div>
+
+      <!-- User Stats -->
+      <div class="card my-3">
+        <h5 class="card-header">Stats</h5>
+        <div class="card-body">
+          <table class="table table-borderless table-sm">
+            <tr><th> # of Contributions: </th><td class="text-left"> {{ user.num_contributions }}                     </td></tr>
+            <tr><th> # of Strikes:       </th><td class="text-left">                                                  </td></tr>
+            <tr><th style="padding-left:3ex"> Soft        </th><td class="text-left"> {{ num_soft_strikes }}  </td></tr>
+            <tr><th style="padding-left:3ex"> Hard        </th><td class="text-left"> {{ num_hard_strikes }}  </td></tr>
+            <tr><th style="padding-left:3ex"> Expired     </th><td class="text-left"> {{ num_expired_strikes }} </td></tr>
+            <tr style="border-top:2px solid #000; padding-top:0; padding-bottom:0; padding-left:3ex; padding-right:3ex"> <td/><td/> </tr>
+            <tr><th style="padding-left:3ex"> Total       </th><td class="text-left"> {{ num_total_strikes }} </td></tr>
+          </table> 
+        </div>
+      </div>
+     
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
+
+

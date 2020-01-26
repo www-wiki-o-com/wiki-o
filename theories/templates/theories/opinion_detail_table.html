@@ -1,0 +1,67 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% load static %}
+{% load extra %}
+
+{% if opinion_nodes %}
+  <table style="margin:5px">
+    <tbody align="left" valign="top">
+        <tr>
+          <td width="10">
+          <td width="17">
+          <td width="17">
+          <td>
+        </tr>
+        <tr>
+          <th colspan="4"> {{ title }} </th>
+        </tr>
+        {% for x in opinion_nodes %}
+          <tr">
+            <!-- Blank -->
+            <td/>
+            <!-- Link -->
+            <td> {% include "include/link.html" with x=x.theory_node %} </td>
+            <!-- Info -->
+            <td> {% include "include/info.html" with x=x.theory_node %} </td>
+            <!-- Description -->
+            <td style="padding-left:5px">
+              {% if x.url %}
+                <a tag_id={{ x.tag_id }} class="plain" href={{ x.url|add:parms.get_next }}>
+                  {% if x.is_deleted %}
+                    <strike>{{ x }}</strike>
+                  {% else %}
+                    {{ x }}
+                  {% endif %}
+                </a>
+              {% else %}
+                <a tag_id={{ x.tag_id }} class="plain">
+                  {% if x.is_deleted %}
+                    <strike>{{ x }}</strike>
+                  {% else %}
+                    {{ x }}
+                  {% endif %}
+                </a>              
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+    </tbody>
+  </table>
+{% endif %}
+

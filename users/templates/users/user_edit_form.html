@@ -1,0 +1,127 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+
+{% block content %}
+  <!-- Title -->
+  <h3><br>
+    {{ user.get_long }}
+  </h3>
+
+
+  <form action="{% url_extra 'users:profile-edit' extra=path %}" method="post">
+  {% csrf_token %}
+
+    <!-- Content -->
+    <div class="row"> <!-- Row -->
+      <div class="col-lg-8"> <!-- Main Column -->
+
+          <div class="card my-3">
+            <h5 class="card-header">
+              Required Fields:
+            </h5>
+            <div class="card card-body">
+                {{ form.username|as_crispy_field }}
+                {{ form.email|as_crispy_field }}
+            </div>
+          </div>
+          
+
+          <div class="card my-3">
+            <h5 class="card-header">
+              Optional Fields:
+            </h5>
+            <div class="card card-body">
+                {{ form.fullname|as_crispy_field }}
+                {{ form.birth_date|as_crispy_field }}
+                {{ form.sex|as_crispy_field }}
+                {{ form.location|as_crispy_field }}
+                {{ form.religion|as_crispy_field }}
+                {{ form.politics|as_crispy_field }}
+            </div>
+          </div>
+          
+          
+          
+          <center>
+            <button><a class="plain" href={{ prev }}>Back</a></button>
+            &nbsp
+            <input type="submit" name="save" value="Save">
+          </center>
+   
+      </div> <!-- end column -->
+      <div class="col-md-4"> <!-- Sidebar Column -->
+      
+        <!-- Private -->
+        <div class="card my-3">
+          <h5 class="card-header">Privacy Settings</h5>
+          <div class="card-body">
+            <table class="table table-borderless table-sm">
+              <thead>
+                <tr>
+                  <th/>
+                  <th class="text-right">Visible</th>
+                </tr>
+              </thead>
+              <tr><td> {{ form.fullname_visible.label }}    </td><td class="text-right"> {{ form.fullname_visible }}    </td></tr>
+              <tr><td> {{ form.birth_date_visible.label }}  </td><td class="text-right"> {{ form.birth_date_visible }}  </td></tr>
+              <tr><td> {{ form.sex_visible.label }}         </td><td class="text-right"> {{ form.sex_visible }}         </td></tr>
+              <tr><td> {{ form.location_visible.label }}    </td><td class="text-right"> {{ form.location_visible }}    </td></tr>
+              <tr><td> {{ form.religion_visible.label }}    </td><td class="text-right"> {{ form.religion_visible }}    </td></tr>
+              <tr><td> {{ form.politics_visible.label }}    </td><td class="text-right"> {{ form.politics_visible }}    </td></tr>
+            </table>            
+          </div>
+        </div>
+      
+        <!-- Behaviour -->
+        <div class="card my-3">
+          <h5 class="card-header">Opinion Behaviour</h5>
+          <div class="card-body">
+            <table class="table table-borderless table-sm">
+              <thead>
+                <tr>
+                  <th/>
+                  <th class="text-right">Yes</th>
+                </tr>
+              </thead>
+              <tr><td> {{ form.hidden.label }}              </td><td class="text-right"> {{ form.hidden }}              </td></tr>
+              <tr><td> {{ form.use_wizard.label }}          </td><td class="text-right"> {{ form.use_wizard }}          </td></tr>
+            </table>            
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="card my-3">
+          <h5 class="card-header">Actions</h5>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/accounts/password/change"> Change Password </a></li>
+            </ul>
+          </div>
+        </div>
+
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+{% endblock %}
+
+

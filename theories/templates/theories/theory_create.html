@@ -1,0 +1,76 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+  <form action="{% url_extra 'theories:theory-create' category.slug extra=parms %}" method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <div class="row"> <!-- Row -->
+      <div class="col-lg-8"> <!-- Main Column -->
+
+        <div class="card my-3">
+          <h5 class="card-header">
+            Create New Theory:
+          </h5>
+          <div class="card card-body">
+              {{ form|crispy }}
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <center>
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+          
+          <!-- Save -->
+          <input accesskey="s" type="submit" name="save" value="Save">
+        </center>
+
+        <br>
+        {% include "theories/theory_how2.html" %}
+      
+      </div> <!-- end column -->
+      <div class="col-md-4"> <!-- Sidebar Column -->
+      
+        <!-- Categories -->
+        <div class="card my-3">
+          <h5 class="card-header"> Categories </h5>
+          <div class="card-body">
+            <ul class="list-unstyled row mb-0">
+              {% for x in formset %}
+                <li class="list-item col-lg-6">
+                  {{ x.id }}
+                  {{ x.member }}
+                  {{ x.instance }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+{% endblock %}

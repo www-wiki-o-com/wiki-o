@@ -1,0 +1,159 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+  
+  <!-- Title -->
+  <h3><br>{{ theory }}</h3>
+  {% with RestoreTab=True %}
+    {% include "theories/theory_edit_tabs.html" %}
+  {% endwith %}
+
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+
+      <form action="{% url_extra 'theories:theory-restore' theory.id extra=parms %}" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <!-- errors -->
+        {% include "include/formset_errors.html" with formset=formset %}
+        {% for form in formset %}
+          {{ form.id }}
+          <div class="card my-3">
+            <div class="card-header">
+              <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" 
+                 href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
+                <img src="{% static 'home/img/expand.svg' %}" height='13'>
+                &nbsp
+                {{ form.instance.revision.date_created.date }} ({{ form.instance.revision.comment }})
+              </a>
+              <!-- delete -->
+              {% has_perm 'theories.delete_reversion' user as can_delete %}
+              {% if can_delete %}
+                <div class="float-right">
+                  {{ form.delete }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="collapse" id="form{{forloop.counter}}">
+              <div class="card card-body">
+                  <!-- errors -->
+                  {% include "include/form_errors.html" with form=form %}
+                  <!-- data -->
+                  {{ form.title01|as_crispy_field }}
+                  {{ form.title00|as_crispy_field }}
+                  {{ form.details|as_crispy_field }}
+                  Edited by: {{ form.instance.revision.user }}
+
+                  <!-- Restore -->
+                  {% has_perm 'theories.restore_theorynode' user theory as can_restore %}
+                  {% if can_restore %}
+                    <a data-target="#restore_modal{{ forloop.counter }}" 
+                       data-toggle="modal" data-whatever="{{ forloop.counter }}" 
+                       href="#restore_modal"> 
+                      Restore 
+                    </a>
+                  {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+        {% include "include/paginator.html" with list=revisions %}
+        
+        <!-- Buttons -->
+        <center>
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+          
+          <!-- Delete -->
+          {% has_perm 'theories.delete_reversion' user theory as can_delete %}
+          <input type="submit" name="save" value="Delete" {% if not can_delete %} disabled {% endif %}>
+        </center>
+      </form>
+
+      <br>
+      {% include "theories/theory_how2.html" %}
+    
+    </div> <!-- end column -->
+    <div class="col-md-4"> <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="mb-0">
+          </ul>
+        </div>
+      </div>
+
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
+
+
+
+
+{% block extra_modals %}
+
+  <!-- Restore -->
+  {% for form in formset %}
+    <div class="modal" id="restore_modal{{ forloop.counter }}">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form action="{% url_extra 'theories:theory-revert' theory.id form.instance.id extra=parms %}" method="post">
+            {% csrf_token %}
+
+            <!-- Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Please confirm</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- body -->
+            <div class="modal-body">
+              This action will overwrite the exiting model. Are you sure you
+              want to restore {{ form.instance.revision.date_created.date }} 
+              ({{ form.instance.revision.comment }})?
+            </div>
+
+            <!-- footer -->
+            {% has_perm 'theories.restore_theorynode' user theory as can_restore %}
+            <div class="modal-footer">
+              <input type="submit" class="btn btn-danger" name="restore" value="Yes" {% if not can_restore %} disabled {% endif %}>
+              <button type="button" class="btn" data-dismiss="modal">No</button>
+            </div>
+
+          </form>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+
+{% endblock extra_modals %}
+
+
+

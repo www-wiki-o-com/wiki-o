@@ -1,0 +1,298 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+
+  <!-- Title -->
+  <h3><br>{{ theory }}</h3>
+  {% with TheoryTab=True %}
+    {% include "theories/theory_edit_tabs.html" %}
+  {% endwith %}
+
+  <form action="{% url_extra 'theories:theory-edit' theory.id extra=parms %}" method="post">
+    {% csrf_token %}
+    {{ formset.management_form }}
+    <div class="row"> <!-- Row -->
+      <div class="col-lg-8"> <!-- Main Column -->
+
+        <div class="card my-3">
+          <h5 class="card-header">
+            Edit:
+          </h5>
+          <div class="card card-body">
+              {{ form|crispy }}
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <center>
+
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+
+          <!-- Delete -->
+          {% has_perm 'theories.delete_theorynode' user theory as can_del %}
+          <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_del %} disabled {% endif %}>
+            Delete
+          </button>
+          &nbsp
+
+          <!-- Save -->
+          {% has_perm 'theories.change_theorynode' user theory as can_change %}
+          <input accesskey="s" type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
+
+        </center>
+
+        <br>
+        {% include "theories/theory_how2.html" %}
+
+      </div> <!-- end column -->
+      <div class="col-md-4"> <!-- Sidebar Column -->
+
+        <!-- Actions -->
+        <div class="card my-3">
+          <h5 class="card-header"> Actions </h5>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+
+              <!-- Swap titles -->
+              {% has_perm 'theories.swap_title' user theory as can_swap %}
+              {% if can_swap %}
+                <li><a data-target="#swap_modal" data-toggle="modal" href="#swap_modal"> Swap Statements </a></li>
+              {% endif %}
+
+              <!-- Convert to Evidence -->
+              {% has_perm 'theories.convert_theorynode' user theory as can_convert %}
+              {% if can_convert %}
+                <li><a data-target="#convert_modal" data-toggle="modal" href="#convert_modal"> Convert to Evidence </a></li>
+              {% endif %}
+
+              <!-- Add to categories -->
+              {% has_perm 'theories.add_category' user as can_add %}
+              {% if can_add %}
+                <li><a data-target="#home_modal" data-toggle="modal" href="#home_modal">
+                  {% if theory.is_root %}
+                    Remove from Home
+                  {% else %}
+                    Show in Home
+                  {% endif %}
+                </a></li>
+              {% endif %}
+
+            </ul>
+          </div>
+        </div>
+
+        <!-- Categories -->
+        {% for x in formset %}
+          {{ x.id }}
+        {% endfor %}
+        {% if theory.is_root %}
+        <div class="card my-3">
+          <h5 class="card-header"> Categories </h5>
+          <div class="card-body">
+            <ul class="list-unstyled row mb-0">
+              {% for x in formset %}
+                <li class="list-item col-lg-6">
+                  {{ x.id }}
+                  {{ x.member }}
+                  {{ x.instance }}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+        {% endif %}
+
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+{% endblock %}
+
+
+{% block extra_modals %}
+
+  <!-- Add to Home -->
+  <div class="modal" id="home_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Please confirm</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- body -->
+        <div class="modal-body">
+          {% if theory.is_root %}
+            Are you sure you want to remove &ldquo;{{ theory }}&rdquo; from the home screen?
+          {% else %}
+            Are you sure you want to add &ldquo;{{ theory }}&rdquo; to the home screen?
+          {% endif %}
+        </div>
+
+        <!-- footer -->
+        <div class="modal-footer">
+          {% has_perm 'theories.add_category' user as can_add %}
+          {% if theory.is_root %}
+            <form action="{% url_extra 'theories:theory-remove-from-home' theory.id extra=parms %}" method="post">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
+            </form>
+          {% else %}
+            <form action="{% url_extra 'theories:theory-add-to-home' theory.id extra=parms %}" method="post">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
+            </form>
+          {% endif %}
+          <button type="button" class="btn" data-dismiss="modal">No</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Swap true/false titles -->
+  <div class="modal" id="swap_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Please confirm</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- body -->
+        <div class="modal-body">
+          Swap the true and false statements. This operation will permeate the
+          changes in users opinions, which will bog down the system. Are you
+          sure you wish to continue?
+        </div>
+
+        <!-- footer -->
+        <div class="modal-footer">
+          {% has_perm 'theories.swap_title' user theory as can_swap %}
+          <form action="{% url_extra 'theories:theory-swap-titles' theory.id extra=parms %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_swap %} disabled {% endif %}>
+          </form>
+          <button type="button" class="btn" data-dismiss="modal">No</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Convert -->
+  <div class="modal" id="convert_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{% url_extra 'theories:theory-convert' theory.id extra=parms %}" method="post">
+          {% csrf_token %}
+
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Please confirm</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- body -->
+          <div class="modal-body">
+            Are you sure you want to convert "{{ theory }}" to evidence?
+            <div style="margin:10px;">
+              <input type="checkbox" name="verifiable" value="yes"> Verifiable?<br>
+            </div>
+          </div>
+
+          <!-- footer -->
+          {% has_perm 'theories.convert_theorynode' user theory as can_convert %}
+          <div class="modal-footer">
+            <input type="submit" class="btn btn-danger" name="convert" value="Yes" {% if not can_convert %} disabled {% endif %}>
+            <button type="button" class="btn" data-dismiss="modal">No</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete -->
+  <div class="modal" id="del_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Please confirm</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- body -->
+        <div class="modal-body">
+          {% if parms.path %}
+            Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
+            <b>remove</b> to remove from parent theory or <b>delete</b> to
+            remove from all theories.
+          {% else %}
+            Are you sure you want to delete "{{ theory }}"?
+          {% endif %}
+        </div>
+
+        <!-- footer -->
+        <div class="modal-footer">
+
+          <!-- remove edge -->
+          {% if parms.path %}
+            {% has_perm 'theories.delete_edge' user theory as can_remove %}
+            <form action="{% url_extra 'theories:theory-remove' theory.id extra=parms %}" method="post">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
+            </form>
+          {% endif %}
+
+          <!-- full delete -->
+          {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+          <form action="{% url_extra 'theories:theory-delete' theory.id extra=parms %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
+          </form>
+
+          <!-- cancel -->
+          <button type="button" class="btn" data-dismiss="modal">No</button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
+
+

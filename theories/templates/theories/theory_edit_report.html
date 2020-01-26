@@ -1,0 +1,108 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+
+  <!-- Title -->
+  <h3><br>{{ theory }}</h3>
+  {% with ReportTab=True %}
+    {% include "theories/theory_edit_tabs.html" %}
+  {% endwith %}
+
+  <form action="{% url_extra 'theories:theory-report' theory.id extra=parms %}" method="post">
+    {% csrf_token %}
+    <div class="row"> <!-- Row -->
+      <div class="col-lg-8"> <!-- Main Column -->
+
+        <div class="card my-3">
+          <h5 class="card-header">
+            Report User Violoation:
+          </h5>
+          <div class="card card-body">
+            {{ form.offender|as_crispy_field }}
+            {{ form.intent|as_crispy_field }}
+            Offences (choose all that apply)
+            <div style="padding-left:2ex">
+              {{ form.offences|as_crispy_field }}
+            </div>
+            {{ form.explanation|as_crispy_field }}
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <center>
+
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+
+          <!-- Report -->
+          {% has_perm 'theories.report' user as can_report %}
+          <input type="submit" name="report" value="Report" {% if not can_report %} disabled {% endif %}>
+
+        </center>
+
+        <br>
+        {% include "theories/theory_how2.html" %}
+
+      </div> <!-- end column -->
+      <div class="col-md-4"> <!-- Sidebar Column -->
+
+        <!-- Pending -->
+        <div class="card my-3">
+          <h5 class="card-header"> Open Violations </h5>
+          <div class="card-body">
+            <ul class="list mb-0">
+              {% for x in open_violations %}
+                <li><a href="{{ x.url|add:parms.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <!-- Past -->
+        <div class="card my-3">
+          <h5 class="card-header"> Archived Violations </h5>
+          <div class="card-body">
+            <ul class="list mb-0">
+              {% for x in closed_violations %}
+                <li><a href="{{ x.url|add:parms.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+{% endblock %}
+
+
+{% block extra_modals %}
+
+
+{% endblock %}
+
+

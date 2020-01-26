@@ -1,0 +1,327 @@
+[
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "user level: 0",
+    "permissions": [
+      [
+        "add_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "change_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "delete_opinion",
+        "theories",
+        "opinion"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "user level: 1",
+    "permissions": [
+      [
+        "add_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "change_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "delete_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "view_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "add_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "view_theorynode",
+        "theories",
+        "theorynode"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "user level: 2",
+    "permissions": [
+      [
+        "add_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "change_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "delete_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "view_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "add_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "view_theorynode",
+        "theories",
+        "theorynode"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "user level: 3",
+    "permissions": [
+      [
+        "add_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "change_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "delete_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "view_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "add_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "view_theorynode",
+        "theories",
+        "theorynode"
+      ]
+    ]
+  }
+},
+{
+  "model": "auth.group",
+  "fields": {
+    "name": "user level: 4",
+    "permissions": [
+      [
+        "add_revision",
+        "reversion",
+        "revision"
+      ],
+      [
+        "change_revision",
+        "reversion",
+        "revision"
+      ],
+      [
+        "delete_revision",
+        "reversion",
+        "revision"
+      ],
+      [
+        "view_revision",
+        "reversion",
+        "revision"
+      ],
+      [
+        "add_version",
+        "reversion",
+        "version"
+      ],
+      [
+        "change_version",
+        "reversion",
+        "version"
+      ],
+      [
+        "delete_version",
+        "reversion",
+        "version"
+      ],
+      [
+        "view_version",
+        "reversion",
+        "version"
+      ],
+      [
+        "add_category",
+        "theories",
+        "category"
+      ],
+      [
+        "change_category",
+        "theories",
+        "category"
+      ],
+      [
+        "delete_category",
+        "theories",
+        "category"
+      ],
+      [
+        "view_category",
+        "theories",
+        "category"
+      ],
+      [
+        "add_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "change_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "delete_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "view_opinion",
+        "theories",
+        "opinion"
+      ],
+      [
+        "add_edge",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "add_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "backup_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_details",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "change_title",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "convert_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_edge",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_reversion",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "delete_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "merge_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "restore_theorynode",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "swap_title",
+        "theories",
+        "theorynode"
+      ],
+      [
+        "view_theorynode",
+        "theories",
+        "theorynode"
+      ]
+    ]
+  }
+}
+]

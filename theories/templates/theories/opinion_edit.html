@@ -1,0 +1,464 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+  <!-- Title -->
+  <h3>
+    <br> 
+    &ldquo;{{ theory }}&rdquo; 
+    <small><small><small>
+      <a href="{% url_extra 'theories:opinion-wizard' theory.id extra=parms %}">
+        (switch to wizard)
+      </a>
+    </small></small></small>
+  </h3>
+  
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-12"> <!-- Main Column -->
+
+      <form action="{% url_extra 'theories:opinion-edit' theory.id extra=parms %}" method="post">
+        {% csrf_token %}
+        {{ node_formset.management_form }}
+        <!-- errors -->
+        {% include "include/form_errors.html"    with form=opinion_form %}
+        {% include "include/formset_errors.html" with formset=node_formset %}
+        <!-- hidden fields -->
+        {% for hidden in opinion_form.hidden_fields %}
+          {{ hidden }}
+        {% endfor %}
+        <div class="card my-3 text-justify"">
+          <h6 class="card-header">
+            Assign points (0-100) to show which statements you believe proves (true
+            points) or disproves (false points) the above theory.
+          </h6>
+          <div class="card card-body">
+            <table class="table-hover" align="center"  width="100%">
+              <thead style="text-align:center" valign="bottom">
+                
+                <!-- Link -->
+                <th width="17"/>
+                
+                <!-- Info -->
+                <th width="17"/>
+                
+                <!-- Swap Expand/Cycle -->
+                <th width="20" id=TF_SWAP style="display:table-cell; text-align:center;">
+                  <a onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
+                    <img src="{% static 'home/img/expand.svg' %}" height='12'>
+                  </a>
+                </th>
+                <th width="20" id=TF_EXP style="display:none; text-align:center;">
+                  <a onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
+                    <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                  </a>
+                </th>
+                
+                <th style="text-align:left"> Evidence/Sub-Theories </th> 
+                <th width="1" data-toggle="tooltip" data-placement="top" title="Award points to evidence and theories.">
+                  True
+                </th> 
+                <th width="1" data-toggle="tooltip" data-placement="top" title="Award points to evidence and theories.">
+                  False
+                </th> 
+                <th width="1" data-toggle="tooltip" data-placement="top" title="Force the ratio of awarded points to match input.">
+                  Force 
+                </th>
+              </thead>
+              <tbody align="center" valign="top">
+                <tr> <td/></td><td/><td/><td/>  </tr>
+                <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/><td/><td/><td/> </tr>
+                
+                <!-- Opinion Nodes-->
+                {% for form in node_formset %}
+
+                  <!-- Hidden Fields -->
+                  {% for hidden in form.hidden_fields %}
+                    {{ hidden }}
+                  {% endfor %}
+                  {{form.id}}
+
+                  {% with theory_node=form.instance.theory_node %}
+
+                    <!-- Evidence -->
+                    {% if theory_node.is_evidence %}
+
+                      <tr>
+                        <!-- Link -->
+                        <td> {% include "include/link.html" with x=theory_node %} </td>
+                        
+                        <!-- Info -->
+                        <td> {% include "include/info.html" with x=theory_node %} </td>
+                           
+                        <!-- Swap True/False -->
+                        <td/>
+                        
+                        <!-- Description -->
+                        <td style="text-align:left; padding-left:5px"> {{ theory_node.get_title }} </td>
+                        
+                        <!-- True Points -->
+                        <td> {{ form.tt_input }} {{ form.ft_input.as_hidden }} </td>
+
+                        <!-- False Points -->
+                        <td> {{ form.tf_input }} {{ form.ff_input.as_hidden }} </td>
+                        
+                        <!-- Force -->
+                        <td/>
+                      </tr>
+
+                    <!-- Sub-Theory -->
+                    {% else %}
+
+                      <!-- True Row -->
+                      {% if form.display_true %}
+                      <tr id={{ theory_node.tag_id }}T style="display:table-row">
+                      {% else %}
+                      <tr id={{ theory_node.tag_id }}T style="display:none">
+                      {% endif %}
+                        
+                        <!-- Link -->
+                        <td> {% include "include/link.html" with x=theory_node %} </td>
+                        
+                        <!-- Info -->
+                        <td> {% include "include/info.html" with x=theory_node %} </td>
+                        
+                        <!-- Swap True/False -->
+                        <td id={{ theory_node.tag_id }}TS style="display:table-cell; text-align:center;">
+                          {% if theory_node.is_subtheory %}
+                            <a onclick="TFSwap('{{ theory_node.tag_id }}')">
+                              <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                            </a>
+                          {% endif %}
+                        </td>
+                        <!-- Expand True/False -->
+                        <td id={{ theory_node.tag_id }}TC style="display:none; text-align:center;">
+                          {% if theory_node.is_subtheory %}
+                            <a onclick="TFExpand('{{ theory_node.tag_id }}')">
+                              <img src="{% static 'home/img/collapse.svg' %}" height='12'>
+                            </a>
+                          {% endif %}
+                        </td>
+                        <!-- Collapse True/False -->
+                        <td id={{ theory_node.tag_id }}TX style="display:none; text-align:center;">
+                          {% if theory_node.is_subtheory %}
+                            <a onclick="TFExpand('{{ theory_node.tag_id }}')">
+                              <img src="{% static 'home/img/expand.svg' %}" height='12'>
+                            </a>
+                          {% endif %}
+                        </td>
+                        
+                        <!-- Description -->
+                        <td style="text-align:left; padding-left:5px">
+                          {% if form.url %}
+                            <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+                              {{ theory_node.get_true_statement }}
+                            </a>
+                          {% else %}
+                              {{ theory_node.get_true_statement }}
+                          {% endif %}
+                        </td>
+
+                        <!-- True Points -->
+                        <td> {{ form.tt_input }} </td>
+
+                        <!-- False Points -->
+                        <td> {{ form.tf_input }} </td>
+                        
+                        <!-- Force -->
+                        <td/>
+                      </tr>
+
+                      <!-- False Row -->
+                      {% if form.display_true %}
+                      <tr id={{ theory_node.tag_id }}F style="display:none">
+                      {% else %}
+                      <tr id={{ theory_node.tag_id }}F style="display:table-row">
+                      {% endif %}
+                        
+                        <!-- Link -->
+                        <td id={{ theory_node.tag_id }}FL0 style="display:table-cell; text-align:right">
+                          {% include "include/link.html" with x=theory_node %}
+                        </td>
+                        <td id={{ theory_node.tag_id }}FL1 style="display:none"/>
+                        
+                        <!-- Info -->
+                        <td id={{ theory_node.tag_id }}FL2 style="display:table-cell; text-align:right">
+                          {% include "include/info.html" with x=theory_node %}
+                        </td>
+                        <td id={{ theory_node.tag_id }}FL3 style="display:none"/>
+                                                
+                        <!-- Swap True/False -->
+                        <td id={{ theory_node.tag_id }}FS style="display:table-cell; text-align:center;">
+                          {% if theory_node.is_subtheory %}
+                            <a onclick="TFSwap('{{ theory_node.tag_id }}')">
+                              <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                            </a>
+                          {% endif %}
+                        </td>
+                        <td id={{ theory_node.tag_id }}FX style="display:none; text-align:center;"/>
+                        
+                        <!-- Description -->
+                        <td style="text-align:left; padding-left:5px">
+                          {% if form.url %}
+                            <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+                              <font color="red"> {{ theory_node.get_false_statement }} </font>
+                            </a>
+                          {% else %}
+                              <font color="red"> {{ theory_node.getfalse_title }} </font>
+                          {% endif %}
+                        </td>
+
+                        <!-- True Points -->
+                        <td><font color="red"> {{ form.ft_input }} </font></td>
+
+                        <!-- False Points -->
+                        <td><font color="red"> {{ form.ff_input }} </font></td>
+                        
+                        <!-- Force -->
+                        <td/>
+                      </tr>
+
+                    {% endif %}
+                  {% endwith %}
+                {% endfor %}
+
+                <tr> <td/></td><td/><td/><td/>  </tr>
+                <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/><td/><td/><td/> </tr>
+                <tr>
+                  <td/>
+                  <td/>
+                  <td/>
+                  <td style="text-align:left"><b> Total points proving or disproving the theory (updated after save). </b></td>
+                  <td> {{ opinion_form.true_input  }}  </td>
+                  <td> {{ opinion_form.false_input }} </td>
+                  <td> {{ opinion_form.force }}  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <center>            
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button>
+          &nbsp
+          <!-- Delete -->
+          {% if opinion %}
+            {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
+            <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_delete %} disabled {% endif %}>
+              Delete
+            </button>
+            &nbsp
+          {% endif %}
+          
+          <!-- Save -->
+          {% has_perm 'theories.change_opinion' user opinion as can_change %}
+          <input type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
+        </center>
+      </form>
+    </div>
+
+    <br><br/>
+    {% include "theories/opinion_how2.html" %}
+
+  </div> <!-- end row -->
+{% endblock %}
+
+
+{% block extra_modals %}
+  
+  <!-- Delete -->
+  {% if opinion.id %}
+    <div class="modal" id="del_modal">
+      <div class="modal-dialog">
+        <div class="modal-content">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Please confirm</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- body -->
+          <div class="modal-body">
+            Are you sure you want to delete "{{ theory }}"?
+          </div>
+
+          <!-- footer -->
+          
+          <div class="modal-footer">
+            {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
+            <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=parms %}" method="post">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-danger" name="delete" value="Yes" {% if not can_delete %} disabled {% endif %}>
+            </form>
+            <button type="button" class="btn" data-dismiss="modal">No</button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  {% endif %}
+
+{% endblock extra_modals %}
+
+
+{% block extra_js %}
+  
+  <!-- Enable tool tip for True and False titles. -->
+  <script>
+    $(document).ready(function(){
+      $('[data-toggle="tooltip"]').tooltip();   
+    });
+  </script>
+
+  
+  <script>
+    function TFSwap(id) {
+      var true_row    = document.getElementById(id + 'T');
+      var false_row   = document.getElementById(id + 'F');
+      
+      if (true_row.style.display == 'none') {
+          true_row.style.display      = 'table-row';
+          false_row.style.display     = 'none';
+      } else {
+          true_row.style.display      = 'none';
+          false_row.style.display     = 'table-row';
+      }
+    }
+  </script>
+  
+  <script>
+    function TFExpand(id) {
+      var true_clp_col = document.getElementById(id + 'TC');
+      var true_exp_col = document.getElementById(id + 'TX');
+      var true_row     = document.getElementById(id + 'T');
+      var false_row    = document.getElementById(id + 'F');
+      
+      if (false_row.style.display == 'none') {
+          // row
+          true_row.style.display      = 'table-row';
+          false_row.style.display     = 'table-row';
+          
+          // icon
+          true_clp_col.style.display  = 'table-cell';
+          true_exp_col.style.display  = 'none';
+      } else {
+          // row
+          true_row.style.display      = 'table-row';
+          false_row.style.display     = 'none';
+
+          // icon
+          true_clp_col.style.display  = 'none';
+          true_exp_col.style.display  = 'table-cell';
+      }
+    }
+  </script>
+  
+  <script>
+    function ExpandCycleSwap(id) {
+        if (id == undefined) {
+            var swap_col  = document.getElementById('TF_SWAP');
+            var exp_col   = document.getElementById('TF_EXP');
+
+            if (swap_col.style.display == 'none') {
+                swap_col.style.display  = 'table-cell';
+                exp_col.style.display   = 'none';
+            } else {
+                swap_col.style.display  = 'none';
+                exp_col.style.display   = 'table-cell';
+            }
+        } else {
+          
+            var swap_col          = document.getElementById('TF_SWAP');
+            var true_row          = document.getElementById(id + 'T');
+            var false_row         = document.getElementById(id + 'F');
+            var true_swap_col     = document.getElementById(id + 'TS');
+            var false_swap_col    = document.getElementById(id + 'FS');
+            var true_clp_col      = document.getElementById(id + 'TC');
+            var true_exp_col      = document.getElementById(id + 'TX');
+            var false_exp_col     = document.getElementById(id + 'FX');
+            var false_link_col00  = document.getElementById(id + 'FL0');
+            var false_link_col01  = document.getElementById(id + 'FL1');
+            var false_link_col02  = document.getElementById(id + 'FL2');
+            var false_link_col03  = document.getElementById(id + 'FL3');
+            
+            if (true_swap_col.style.display == 'none') {
+                console.log(212, id);
+            
+                // rows
+                true_row.style.display          = 'table-row';
+                false_row.style.display         = 'none';
+
+                // swap
+                true_swap_col.style.display     = 'table-cell';
+                false_swap_col.style.display    = 'table-cell';
+                
+                // expand/collapse
+                true_clp_col.style.display      = 'none';
+                true_exp_col.style.display      = 'none';
+                false_exp_col.style.display     = 'none';
+                
+                // link
+                false_link_col00.style.display  = 'table-cell';
+                false_link_col01.style.display  = 'none';
+                
+                // info
+                false_link_col02.style.display  = 'table-cell';
+                false_link_col03.style.display  = 'none';
+
+            } else {
+                console.log(213, id);
+
+                // rows
+                true_row.style.display          = 'table-row';
+                false_row.style.display         = 'table-row';
+
+                // swap
+                true_swap_col.style.display     = 'none';
+                false_swap_col.style.display    = 'none';
+                
+                // expand/collapse
+                true_clp_col.style.display      = 'table-cell';
+                true_exp_col.style.display      = 'none';
+                false_exp_col.style.display     = 'table-cell';
+                
+                // link
+                false_link_col00.style.display  = 'none';
+                false_link_col01.style.display  = 'table-cell';
+
+                // info
+                false_link_col02.style.display  = 'none';
+                false_link_col03.style.display  = 'table-cell';
+
+            }
+
+        }
+    }
+  </script>
+{% endblock extra_js %}
+
+

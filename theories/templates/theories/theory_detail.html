@@ -1,0 +1,247 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+      <div class="my-3"> <!-- Main Card -->
+
+        <!-- Title -->
+        <h2>
+          {% if theory.is_deleted %}
+            <strike>{{ theory }}</strike>
+          {% else %}
+            {{ theory }}
+          {% endif %}
+        </h2>
+        <!-- Details -->
+        <div style="text-align: justify">{{  theory.details|bibliography }}</div>
+        
+        <!-- Nodes -->
+        {% if theory_nodes %}
+          <!-- Heading -->
+          <h4> Evidence: </h4>
+          <table style="margin-left: 1em">
+              <thead>
+                <tr>
+                  <td width="17">
+                  <td width="17">
+                  <td>
+                </tr>
+              </thead>
+            <tbody align="left" valign="top">
+                {% for node in theory_nodes %}
+                  <tr>
+                    <!-- Link -->
+                    <td> {% include "include/link.html" with x=node %} </td>
+                    <!-- Info -->
+                    <td> {% include "include/info.html" with x=node %} </td>
+                    <!-- Description -->
+                    <td style="padding-left:5px;">
+                      <a class="plain" href={{ node.url|add:parms.get_next }}>
+                      {% if node.is_deleted %}
+                        <strike>{{ node }}</strike>
+                      {% else %}
+                        {{ node }}
+                      {% endif %}
+                      </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+          {% include "include/paginator.html" with list=theory_nodes %}
+        {% else %}
+          No evidence.
+        {% endif %}
+        {% if prev %}
+          <a href={{ prev }}>Go to parent theory.</a>
+        {% endif %}
+
+      </div> <!-- end card -->
+    </div> <!-- end column -->
+    <div class="col-lg-4"> <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+
+            <!-- Edit -->
+            {% has_perm 'theories.change_theorynode' user theory as can_edit %}
+            {% if can_edit %}
+              <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=parms %}"> Edit Theory </a></li>
+            {% endif %}
+
+            <!-- Add to Theory -->
+            {% has_perm 'theories.add_theorynode' user as can_add %}
+            {% if can_add %}
+              <li><a href="{% url_extra 'theories:theory-edit-evidence' theory.id extra=parms %}"> Add to Theory </a></li>
+            {% endif %}
+
+            <!-- Delete -->
+            {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+            {% if can_delete %}
+              <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete Theory </a></li>
+            {% endif %}
+
+            <!-- Activity -->
+            <li><li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> View Activity Log </a></li>
+
+            <!-- Report -->
+            <li><li><a href="{% url_extra 'theories:theory-report' theory.id extra=parms %}"> Report a Violation </a></li>
+
+          </ul>
+        </div>
+      </div>
+     
+      <!-- Opinions -->
+      <div class="card my-3">
+        <h5 class="card-header">Opinions</h5>
+        <div class="card-body">
+          <table>
+            <tbody valign="top">
+              {% for x in opinion_list %}
+                <tr>
+                  <td style="color:black" align="center">
+                    <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
+                  </td>
+                  <td><a href="{{ x.url|add:parms }}">
+                    &nbsp; {{ x.text }} 
+                  </a></td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      
+      <!-- Parent -->
+      <div class="card my-3">
+        <h5 class="card-header">Parent Theories</h5>
+        <div class="card-body">
+          <div class="row">
+            <ul>
+              {% for x in parent_theories %}
+                <li><a href={{ x.url }}>{{ x }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Social Media -->
+      <div class="card my-3">
+        <h5 class="card-header">Social Media</h5>
+        <div class="card-body">
+          {% with request.build_absolute_uri as share_url %}
+          <div class="row">
+            <ul>
+              <li><a href="https://www.facebook.com/dialog/feed?app_id=416673199079931&display=popup&link={{ share_url }}">
+                Share on Facebook
+              </a></li>
+            </ul>
+          </div>
+          {% endwith %}
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
+
+
+{% block extra_modals %}
+
+  <!-- Delete -->
+  <div class="modal" id="del_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Please confirm</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- body -->
+        <div class="modal-body">
+          {% if parms.path %}
+            Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
+            <b>remove</b> to remove from parent theory or <b>delete</b> to
+            remove from all theories.
+          {% else %}
+            Are you sure you want to delete "{{ theory }}"?
+          {% endif %}
+        </div>
+
+        <!-- footer -->
+        <div class="modal-footer">
+        
+          <!-- remove edge -->
+          {% if parms.path %}
+            {% has_perm 'theories.delete_edge' user theory as can_remove %}
+            <form action="{% url_extra 'theories:theory-remove' theory.id extra=parms %}" method="post">
+              {% csrf_token %}
+              <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
+            </form>
+          {% endif %}
+          
+          <!-- full delete -->
+          {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+          <form action="{% url_extra 'theories:theory-delete' theory.id extra=parms %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
+          </form>
+          
+          <!-- cancel -->
+          <button type="button" class="btn" data-dismiss="modal">No</button>
+
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock extra_modals %}
+
+
+{% block extra_js %}
+  <script>
+    function HideElement(id) {
+      var div = document.getElementById(id);
+      if (div.style.display === 'none') {
+        div.style.display = 'block';
+      } else {
+        div.style.display = 'none';
+      }
+    }
+  </script>
+{% endblock extra_js %}
+
+
+
+

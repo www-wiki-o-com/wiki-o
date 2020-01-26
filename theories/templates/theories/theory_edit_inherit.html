@@ -1,0 +1,112 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+
+  <!-- Title -->
+  <h3><br>{{ theory }}</h3>
+  {% with InheritTab=True %}
+    {% include "theories/theory_edit_tabs.html" %}
+  {% endwith %}
+
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+
+      <form action="{% url_extra 'theories:theory-inherit' theory.id root_theory.id extra=parms %}" method="post">
+        {% csrf_token %}
+        {{ formset.management_form }}
+        <!-- errors -->
+        {% include "include/formset_errors.html" with formset=formset %}
+        <div class="card my-3">
+          <h5 class="card-header">
+            Inherit from &ldquo;{{ root_theory|truncatechars:60 }}&rdquo;
+          </h5>
+          <div class="card card-body">
+            <table>
+              <tbody align="left" valign="top">
+                {% for form in formset %}
+                  <tr>
+                    {{ form.id }}
+                    <td style="text-align:center">{{ form.select }}</td>
+                    <td/>
+                    <td>{{ form.instance }}</td>             
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            {% include "include/paginator.html" with list=candidates %}
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <center>
+
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+          
+          <!-- Inherit -->
+          {% has_perm 'theories.add_theorynode' user as can_inherit %}
+          <input type="submit" name="inherit" value="Inherit" {% if not can_inherit %} disabled {% endif %}>
+          
+        </center>
+      </form>
+
+    </div> <!-- end column -->
+    <div class="col-md-4"> <!-- Sidebar Column -->
+
+      <!-- Others -->
+      <div class="card my-3">
+        <h5 class="card-header">Inherit From Others</h5>
+        <div class="card-body">
+          <ul class="mb-0">
+            {% has_perm 'theories.add_theorynode' user as can_inherit %}
+            {% if can_inherit %}
+              {% for x in other_theories %}
+                <li> <a href="{% url_extra 'theories:theory-inherit' theory.id x.id extra=parms %}">{{ x }}</a> </li>
+              {% endfor %}
+            {% endif %}
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Search -->
+      <div class="card my-3">
+        <h5 class="card-header">Search</h5>
+        <div class="card-body">
+          <div class="input-group">
+            <input type="text" class="form-control" placeholder="Search for...">
+            <span class="input-group-btn">
+              <button class="btn btn-secondary" type="button">Go!</button>
+            </span>
+          </div>
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
+
+

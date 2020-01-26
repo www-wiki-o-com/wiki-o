@@ -1,0 +1,58 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+
+{% block content %}
+  <div class="row">
+    <div class="col-lg-8">
+
+      <div class="card my-3">
+        <h5 class="card-header">Contact Us</h5>
+        <div class="card-body">
+          <p> Currently, we do not have the resources to respond to indivual
+              messages. To allow for user feedback and questions we have
+              provided a <a href="{% url 'forum:index' %}">forum</a>. Please use
+              this framework to ask questions, make suggestions, share
+              criticisms, share testimonials and report bugs. </p>
+              
+          <p> Ricki-Oh appologies for the inconvience. </p>
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- Sidebar Widgets Column -->
+    <div class="col-lg-4">
+
+      <!-- Riki-Oh Widget -->
+      <div class="card my-3">
+        <h5 class="card-header text-center">Riki-Oh</h5>
+        <div class="card-body">
+          <img src="{% static 'home/img/profiles/riki-oh.jpg' %}" class="img-fluid" alt="Responsive image">
+          <h6 style="padding-top:1ex"> Our light to guide us through the darkness. </h6>
+        </div>
+      </div>
+
+    </div>  <!-- end side bar-->
+  </div> <!-- end row -->
+
+{% endblock %}
+

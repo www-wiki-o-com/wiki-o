@@ -1,0 +1,157 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}
+  <!-- Carousel -->
+  <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+    <ol class="carousel-indicators">
+      <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+      <li data-target="#carouselExampleIndicators" data-slide-to="3"></li>
+    </ol>
+    <div class="carousel-inner" role="listbox">
+      <!-- Slide One - Set the background image for this slide in the line below -->
+      <div class="carousel-item active" style="background-image:url({% static 'home/img/brains.svg' %})">
+        <div class="carousel-caption">
+          <h3>&ldquo;What's your opinion based on?&rdquo;</h3>
+          Show the world that you opinion is based on facts, not fiction.
+        </div>
+      </div>
+      <!-- Slide Two - Set the background image for this slide in the line below -->
+      <div class="carousel-item" style="background-image:url({% static 'home/img/brains.svg' %})">
+        <div class="carousel-caption">
+          <h3>&ldquo;Tired of people avoiding reason?&rdquo;</h3>
+          Challenge them with Wiki-O, but be warned only the confident will answer.
+        </div>
+      </div>
+      <!-- Slide Three - Set the background image for this slide in the line below -->
+      <div class="carousel-item" style="background-image:url({% static 'home/img/brains.svg' %})">
+        <div class="carousel-caption">
+          <h3>&ldquo;Liked Making A Murder?&rdquo;</h3>
+          Join Wiki-O and be part of the jury.
+        </div>
+      </div>
+      <!-- Slide Four - Set the background image for this slide in the line below -->
+      <div class="carousel-item" style="background-image:url({% static 'home/img/brains.svg' %})">
+        <div class="carousel-caption">
+          <h3>&ldquo;Tired of dealing with emotional people?&rdquo;</h3>
+          Wiki-O cuts out the emotion and gets straight to the facts.
+        </div>
+      </div>
+    </div>
+    <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button" data-slide="prev">
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="sr-only">Previous</span>
+    </a>
+    <a class="carousel-control-next" href="#carouselExampleIndicators" role="button" data-slide="next">
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="sr-only">Next</span>
+    </a>
+  </div>
+{% endblock %}
+
+
+{% block content %}
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+      <div class="my-3">
+        {% if theories %}
+          <!-- Heading -->
+          <h2> List of Theories </h2>
+          <table style="margin: 1em">
+            <tbody align="left" valign="top">
+                <tr>
+                  <td width="17">
+                  <td width="17">
+                  <td>
+                </tr>
+                {% for theory in theories %}
+                  <tr>
+                    <!-- Link -->
+                    <td> {% include "include/link.html" with x=theory %} </td>
+                    <!-- Info -->
+                    <td> {% include "include/info.html" with x=theory %} </td>
+                    <!-- Description -->
+                    <td style="padding-left:5px">
+                      <a class="plain" href={{ theory.url|add:parms.get_next }}> {{ theory }} </a>
+                    </td>
+                  </tr>
+                {% endfor %}
+            </tbody>
+          </table>
+          {% include "include/paginator.html" with list=theories %}
+        {% else %}
+          <p>No theories are available.</p>
+        {% endif %}
+      </div> <!-- end card -->
+    </div> <!-- end column -->
+    <div class="col-md-4 col-sx-0"> <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <!-- Demo -->                
+            <li><a href="{% url 'theories:opinion-demo' %}"> View Demo </a></li>              
+            <!-- Create Theory -->
+            {% has_perm 'theories.add_theorynode' user as can_add %}
+            {% if can_add %}
+              <li><a href="{% url 'theories:theory-create' category.slug %}">Create a Theory</a></li>
+            {% endif %}
+            <!-- Activity -->
+            <li><a href="{% url 'theories:activity' category.slug %}"> View Activity Log </a></li>
+            <!-- Violations -->
+            <li><a href="{% url 'users:violations' %}"> Review Violations </a></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="card my-3">
+        <h5 class="card-header">Categories</h5>
+        <div class="card-body">
+          <ul class="list-unstyled row mb-0">
+            {% for category in categories %}
+              <li class="list-item col-lg-6"><a href={{ category.url }}> {{ category }} </a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- Search -->
+      <div class="card my-3">
+        <h5 class="card-header">Search</h5>
+        <div class="card-body">
+          <form class="bd-search d-flex align-items-center">
+            <input type="search" class="form-control" name="search" placeholder="Enter keywords..." autocomplete="off">
+          </form>
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
+

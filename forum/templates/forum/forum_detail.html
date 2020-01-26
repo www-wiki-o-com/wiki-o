@@ -1,0 +1,61 @@
+<!-- Wiki-O: A web service for sharing opinions and avoiding arguments.
+     Copyright (C) 2018 Frank Imeson
+    
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+    
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+    
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+-->
+
+
+{% extends 'board_base.html' %}
+{% load i18n %}
+{% load mptt_tags %}
+{% load forum_tags %}
+{% load forum_conversation_tags %}
+{% load forum_permission_tags %}
+{% load forum_tracking_tags %}
+
+{% block sub_title %}{{ forum.name }}{% endblock sub_title %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12">
+    <h1>{{ forum.name }}</h1>
+  </div>
+</div>
+{% if forum.is_forum %}
+{% trans "Announcements" as announcements_title_trans %}
+{% with topic_list_title=announcements_title_trans topics=announces hide_if_empty=True unread_topics=unread_topics %}
+{% include "forum_conversation/topic_list.html" %}
+{% endwith %}
+{% trans "Topics" as topics_title_trans %}
+{% with topic_list_title=topics_title_trans unread_topics=unread_topics%}
+{% include "forum_conversation/topic_list.html" %}
+{% endwith %}
+<div class="row">
+  <div class="col-xs-6 col-md-4 forum-actions-block">
+    {% get_permission 'can_add_topic' forum request.user as user_can_add_topic %}
+    {% if user_can_add_topic %}
+    <a href="{% url 'forum_conversation:topic_create' forum.slug forum.pk %}"><i class="fa fa-comments fa-lg"></i>&nbsp;{% trans "New topic" %}</a>
+    {% endif %}
+  </div>
+  <div class="col-xs-12 col-md-8 pagination-block">
+    {% with "pagination-sm" as pagination_size %}
+    {% include "partials/pagination.html" %}
+    {% endwith %}
+    {% if topics|length > 0 and request.user.is_authenticated %}
+    <a href="{% url 'forum_tracking:mark_topics_read' forum.pk %}" class="btn btn-link mark-topics-read">{% trans "Mark topics read" %}</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+{% endblock content %}
