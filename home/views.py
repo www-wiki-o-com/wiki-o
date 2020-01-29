@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.shortcuts import render
@@ -22,16 +22,16 @@ from django.views import generic
 from django.views.generic.base import RedirectView
 
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 class IndexView(RedirectView):
     url = 'alpha'
 
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 class AlphaView(generic.ListView):
     template_name = 'home/alpha.html'
     context_object_name = 'alpha'
@@ -40,9 +40,11 @@ class AlphaView(generic.ListView):
         """Return nothing."""
         return None
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
+
+
 class HelpView(generic.ListView):
     template_name = 'home/help.html'
     context_object_name = 'help'
@@ -51,9 +53,11 @@ class HelpView(generic.ListView):
         """Return nothing."""
         return None
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
+
+
 class PolicyView(generic.ListView):
     template_name = 'home/policy01.html'
     context_object_name = 'policy'
@@ -62,9 +66,11 @@ class PolicyView(generic.ListView):
         """Return nothing."""
         return None
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
+
+
 class TermsView(generic.ListView):
     template_name = 'home/terms01.html'
     context_object_name = 'terms'
@@ -73,9 +79,11 @@ class TermsView(generic.ListView):
         """Return nothing."""
         return None
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
+
+
 class AboutView(generic.ListView):
     template_name = 'home/about.html'
     context_object_name = 'about'
@@ -85,11 +93,11 @@ class AboutView(generic.ListView):
         return None
 
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 def ContactView(request):
-    
+
     # Setup
     user = request.user
 
@@ -97,9 +105,7 @@ def ContactView(request):
     context = {
     }
     return render(
-              request,
-              'home/contact.html',
-              context,
-           )
-
-
+        request,
+        'home/contact.html',
+        context,
+    )

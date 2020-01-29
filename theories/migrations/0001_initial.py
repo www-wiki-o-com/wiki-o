@@ -16,7 +16,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Category',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('title', models.CharField(max_length=50)),
                 ('slug', models.SlugField()),
             ],
@@ -29,7 +30,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Opinion',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('pub_date', models.DateField(auto_now_add=True)),
                 ('modified_date', models.DateField(auto_now=True)),
                 ('anonymous', models.BooleanField(default=False)),
@@ -51,7 +53,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='OpinionNode',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('tt_input', models.SmallIntegerField(default=0)),
                 ('tf_input', models.SmallIntegerField(default=0)),
                 ('ft_input', models.SmallIntegerField(default=0)),
@@ -67,8 +70,10 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='Stats',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('stats_type', models.SmallIntegerField(choices=[(0, 'All'), (1, 'Supporters'), (2, 'Moderates'), (3, 'Opposers')])),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('stats_type', models.SmallIntegerField(choices=[
+                 (0, 'All'), (1, 'Supporters'), (2, 'Moderates'), (3, 'Opposers')])),
                 ('total_true_points', models.FloatField(default=0.0)),
                 ('total_false_points', models.FloatField(default=0.0)),
             ],
@@ -82,7 +87,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StatsFlatNode',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('total_true_points', models.FloatField(default=0.0)),
                 ('total_false_points', models.FloatField(default=0.0)),
             ],
@@ -96,7 +102,8 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='StatsNode',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
                 ('total_true_points', models.FloatField(default=0.0)),
                 ('total_false_points', models.FloatField(default=0.0)),
             ],
@@ -110,15 +117,19 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='TheoryNode',
             fields=[
-                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('node_type', models.SmallIntegerField(choices=[(10, 'Theory'), (20, 'Evidence (other)'), (21, 'Evidence (fact)'), (-10, 'Deleted Theory'), (-20, 'Deleted Evidence (other)'), (-21, 'Deleted Evidence (fact)')])),
+                ('id', models.AutoField(auto_created=True,
+                                        primary_key=True, serialize=False, verbose_name='ID')),
+                ('node_type', models.SmallIntegerField(choices=[(10, 'Theory'), (20, 'Evidence (other)'), (
+                    21, 'Evidence (fact)'), (-10, 'Deleted Theory'), (-20, 'Deleted Evidence (other)'), (-21, 'Deleted Evidence (fact)')])),
                 ('title00', models.CharField(blank=True, max_length=255, null=True)),
                 ('title01', models.CharField(max_length=255, unique=True)),
                 ('details', models.TextField(blank=True, max_length=10000)),
                 ('pub_date', models.DateField(auto_now_add=True)),
-                ('modified_date', models.DateTimeField(blank=True, null=True, verbose_name=django.db.models.deletion.SET_NULL)),
+                ('modified_date', models.DateTimeField(blank=True, null=True,
+                                                       verbose_name=django.db.models.deletion.SET_NULL)),
                 ('rank', models.SmallIntegerField(default=0)),
-                ('categories', models.ManyToManyField(blank=True, related_name='theories', to='theories.Category')),
+                ('categories', models.ManyToManyField(blank=True,
+                                                      related_name='theories', to='theories.Category')),
             ],
             options={
                 'verbose_name_plural': 'Theory Nodes',

@@ -18,77 +18,92 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='theorynode',
             name='created_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='created_nodes', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='created_nodes', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='theorynode',
             name='flat_nodes',
-            field=models.ManyToManyField(blank=True, related_name='parent_flat_nodes', to='theories.TheoryNode'),
+            field=models.ManyToManyField(
+                blank=True, related_name='parent_flat_nodes', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='theorynode',
             name='modified_by',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='edited_nodes', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL,
+                                    related_name='edited_nodes', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='theorynode',
             name='nodes',
-            field=models.ManyToManyField(blank=True, related_name='parent_nodes', to='theories.TheoryNode'),
+            field=models.ManyToManyField(
+                blank=True, related_name='parent_nodes', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='statsnode',
             name='parent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='nodes', to='theories.Stats'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name='nodes', to='theories.Stats'),
         ),
         migrations.AddField(
             model_name='statsnode',
             name='theory_node',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stats_nodes', to='theories.TheoryNode'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='stats_nodes', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='statsflatnode',
             name='parent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='flat_nodes', to='theories.Stats'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='flat_nodes', to='theories.Stats'),
         ),
         migrations.AddField(
             model_name='statsflatnode',
             name='theory_node',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stats_flat_nodes', to='theories.TheoryNode'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='stats_flat_nodes', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='stats',
             name='opinions',
-            field=models.ManyToManyField(blank=True, related_name='stats', to='theories.Opinion'),
+            field=models.ManyToManyField(
+                blank=True, related_name='stats', to='theories.Opinion'),
         ),
         migrations.AddField(
             model_name='stats',
             name='theory',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stats', to='theories.TheoryNode'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='stats', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='opinionnode',
             name='parent',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='nodes', to='theories.Opinion'),
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name='nodes', to='theories.Opinion'),
         ),
         migrations.AddField(
             model_name='opinionnode',
             name='theory_node',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='opinion_nodes', to='theories.TheoryNode'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='opinion_nodes', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='opinion',
             name='theory',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='opinions', to='theories.TheoryNode'),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='opinions', to='theories.TheoryNode'),
         ),
         migrations.AddField(
             model_name='opinion',
             name='user',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='opinions', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                                    related_name='opinions', to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
             model_name='category',
             name='deleted_theories',
-            field=models.ManyToManyField(blank=True, related_name='old_categories', to='theories.TheoryNode'),
+            field=models.ManyToManyField(
+                blank=True, related_name='old_categories', to='theories.TheoryNode'),
         ),
         migrations.AlterUniqueTogether(
             name='statsnode',

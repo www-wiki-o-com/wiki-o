@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.contrib import admin
@@ -24,10 +24,9 @@ from django.contrib.auth.models import Group
 from .models import *
 
 
-
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 class MyUserAdmin(UserAdmin):
     list_display = ['username', 'email', 'hidden']
     add_fieldsets = UserAdmin.add_fieldsets + (
@@ -36,10 +35,10 @@ class MyUserAdmin(UserAdmin):
         }),
     )
 
+    # ******************************
+    #
+    # ******************************
 
-    #******************************
-    # 
-    #******************************
     def __str__(self):
         return 'blah' + self.username
 
@@ -48,4 +47,3 @@ admin.site.register(User, MyUserAdmin)
 admin.site.register(Violation)
 admin.site.register(ViolationVote)
 admin.site.register(ViolationFeedback)
-

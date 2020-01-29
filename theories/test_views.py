@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,18 +14,14 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
-#*******************************************************************************
+# *******************************************************************************
 # imports
-#*******************************************************************************
+# *******************************************************************************
 from theories.tests.views01 import *
 from theories.tests.views02 import *
 from theories.tests.views03 import *
 from theories.tests.views04 import *
 from theories.tests.views07 import *
-
-
-
-

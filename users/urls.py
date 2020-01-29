@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.conf.urls import url
@@ -24,14 +24,11 @@ from notifications.views import mark_as_read
 
 app_name = 'users'
 urlpatterns = [
-    path('accounts/profile/',           PrivateProfileView,                   name='profile-edit'),
-    path('accounts/<int:pk>/',          PublicProfileView,                    name='profile-detail'),
-    path('accounts/notifications/',     NotificationsView,                    name='notifications'),
+    path('accounts/profile/', PrivateProfileView, name='profile-edit'),
+    path('accounts/<int:pk>/', PublicProfileView, name='profile-detail'),
+    path('accounts/notifications/', NotificationsView, name='notifications'),
 
-    path('violations/',                 ViolationIndexView,                   name='violations'),
-    path('violation/<int:pk>/resolve/', ViolationResolveView,                 name='violation-resolve'),
+    path('violations/', ViolationIndexView, name='violations'),
+    path('violation/<int:pk>/resolve/', ViolationResolveView,
+         name='violation-resolve'),
 ]
-
-
-
-

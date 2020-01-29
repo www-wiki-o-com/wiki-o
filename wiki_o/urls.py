@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 """wiki_o URL Configuration
@@ -40,16 +40,18 @@ from django.conf.urls import url
 from machina.app import board
 
 urlpatterns = [
-    path('',                          include('home.urls')),
-    path('',                          include('theories.urls')),
-    path('admin/',                    admin.site.urls),
-    path('feedback/',                 include(board.urls)),
-    path('',                          include('users.urls')),
-    path('accounts/',                 include('allauth.urls')),
-    path('accounts/',                 include('django.contrib.auth.urls')),
-    path('accounts/actstream/',       include('users.activity_urls',        namespace='activity')),
-    path('accounts/notifications/',   include('users.notifications_urls',   namespace='notifications')),
-    path('accounts/invitations/',     include('invitations.urls',           namespace='invitations')),
+    path('', include('home.urls')),
+    path('', include('theories.urls')),
+    path('admin/', admin.site.urls),
+    path('feedback/', include(board.urls)),
+    path('', include('users.urls')),
+    path('accounts/', include('allauth.urls')),
+    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/actstream/', include('users.activity_urls', namespace='activity')),
+    path('accounts/notifications/',
+         include('users.notifications_urls', namespace='notifications')),
+    path('accounts/invitations/',
+         include('invitations.urls', namespace='invitations')),
 ]
 
 # Django Toolbar
@@ -58,6 +60,3 @@ if settings.DEBUG:
     urlpatterns = [
         path('__debug__/', include(debug_toolbar.urls)),
     ] + urlpatterns
-
-
-
