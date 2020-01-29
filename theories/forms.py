@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
-#*******************************************************************************
+# *******************************************************************************
 # imports
-#*******************************************************************************
+# *******************************************************************************
 import copy
 
 from django import forms
@@ -35,16 +35,16 @@ from reversion.models import Version
 
 from .models import *
 
-#*******************************************************************************
+# *******************************************************************************
 # defines
-#*******************************************************************************
+# *******************************************************************************
 
-INT_VALUES   = {
+INT_VALUES = {
     "initial":    0,
     "min_value":  0,
     "max_value":  100,
 }
-TRUE_INPUT_WIDGET  = TextInput(attrs={
+TRUE_INPUT_WIDGET = TextInput(attrs={
     "size":         "3",
     "class":        "text-center",
     "style":        "border:1.25px solid gray;",
@@ -58,13 +58,12 @@ FALSE_INPUT_WIDGET = TextInput(attrs={
 })
 
 DETAILS_CHARFEILD = {
-  'widget':     forms.Textarea,
-  'help_text':  'Information pertaining to the theory that does not make assumptions about its correctness.',
+    'widget':     forms.Textarea,
+    'help_text':  'Information pertaining to the theory that does not make assumptions about its correctness.',
 }
 
 
-
-#*******************************************************************************
+# *******************************************************************************
 # forms
 #
 #
@@ -74,44 +73,44 @@ DETAILS_CHARFEILD = {
 #
 #
 #
-#*******************************************************************************
+# *******************************************************************************
 
-#************************************************************
+# ************************************************************
 # TheoryForm
-#************************************************************
+# ************************************************************
 class TheoryForm(forms.ModelForm):
     """Theory form."""
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     class Meta:
-        placeholder_text  = 'Use this area to provide details of the theory.\n\n'
+        placeholder_text = 'Use this area to provide details of the theory.\n\n'
         placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
         placeholder_text += '  - Evidence or theories that go towards proving or disproving the theory should\n'
         placeholder_text += '    be provided as evidence, not details.'
 
-        model     = TheoryNode
-        fields    = ('title01', 'title00', 'details')
-        labels    = {
-          'title01': 'True Statement',
-          'title00': 'False Statement',
+        model = TheoryNode
+        fields = ('title01', 'title00', 'details')
+        labels = {
+            'title01': 'True Statement',
+            'title00': 'False Statement',
         }
         help_texts = {
-          'details': 'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details': 'Information pertaining to the theory that does not make assumptions about its correctness.',
         }
         widgets = {
-          'details': forms.Textarea(attrs={
-            'placeholder': placeholder_text,
-          }),
-          'title01': forms.TextInput(attrs={
-            'placeholder': 'New',
-          }),
+            'details': forms.Textarea(attrs={
+                'placeholder': placeholder_text,
+            }),
+            'title01': forms.TextInput(attrs={
+                'placeholder': 'New',
+            }),
         }
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly."""
@@ -146,9 +145,9 @@ class TheoryForm(forms.ModelForm):
                 if self.user.has_perm('theories.change_details', self.instance):
                     self.fields['details'].widget.attrs['readonly'] = False
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def clean_title01(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -158,9 +157,9 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.title01
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def clean_title00(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -170,9 +169,9 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.title00
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -182,23 +181,23 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.details
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def get_verb(self):
         if hasattr(self, 'action_verb'):
             return self.action_verb
         else:
             return None
 
-    #******************************
+    # ******************************
     # TheoryForm
-    #******************************
+    # ******************************
     def save(self, commit=True):
         """Sets node_type to THEORY."""
-        created  = self.instance.pk is None
-        theory   = super().save(commit=False)
-        
+        created = self.instance.pk is None
+        theory = super().save(commit=False)
+
         # populate data
         theory.node_type = TheoryNode.TYPE.THEORY
         if created and self.user is not None:
@@ -223,45 +222,45 @@ class TheoryForm(forms.ModelForm):
         return theory
 
 
-#************************************************************
+# ************************************************************
 # EvidenceForm
 #   pop('user') needs to come before super
 #   super (needs to come before self.fields)
-#************************************************************
+# ************************************************************
 class EvidenceForm(forms.ModelForm):
     verifiable = forms.BooleanField(initial=False)
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     class Meta:
-        placeholder_text  = 'Use this area to provide details of the evidence.\n\n'
+        placeholder_text = 'Use this area to provide details of the evidence.\n\n'
         placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
         placeholder_text += '  - Evidence that could be interpreted as incorrect should either be:\n'
         placeholder_text += '      a) non-verifiable or\n'
         placeholder_text += '      b) a sub-theory.'
-        
-        model   = TheoryNode
-        fields  = ('title01', 'details', 'verifiable')
-        labels  = {
-          'title01':    'Statement',
-          'verifiable': 'Is this verifiable?',
+
+        model = TheoryNode
+        fields = ('title01', 'details', 'verifiable')
+        labels = {
+            'title01':    'Statement',
+            'verifiable': 'Is this verifiable?',
         }
         help_texts = {
-          'details':    'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details':    'Information pertaining to the theory that does not make assumptions about its correctness.',
         }
         widgets = {
-          'details': forms.Textarea(attrs={
-            'placeholder': placeholder_text,
-          }),
-          'title01': forms.TextInput(attrs={
-            'placeholder': 'New',
-          }),
+            'details': forms.Textarea(attrs={
+                'placeholder': placeholder_text,
+            }),
+            'title01': forms.TextInput(attrs={
+                'placeholder': 'New',
+            }),
         }
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly. Additionally, evidence
@@ -280,7 +279,7 @@ class EvidenceForm(forms.ModelForm):
             self.old_instance = copy.copy(self.instance)
 
         # config
-        self.fields['details'].required    = False
+        self.fields['details'].required = False
         self.fields['verifiable'].required = False
 
         # intial data
@@ -289,19 +288,19 @@ class EvidenceForm(forms.ModelForm):
 
         # permissions
         if self.instance.pk is not None:
-            self.fields['title01'].widget.attrs['readonly']    = True
-            self.fields['details'].widget.attrs['readonly']    = True
+            self.fields['title01'].widget.attrs['readonly'] = True
+            self.fields['details'].widget.attrs['readonly'] = True
             self.fields['verifiable'].widget.attrs['readonly'] = True
             if self.user.is_authenticated and not self.instance.is_deleted():
                 if self.user.has_perm('theories.change_title', self.instance):
-                    self.fields['title01'].widget.attrs['readonly']     = False
-                    self.fields['verifiable'].widget.attrs['readonly']  = False
+                    self.fields['title01'].widget.attrs['readonly'] = False
+                    self.fields['verifiable'].widget.attrs['readonly'] = False
                 if self.user.has_perm('theories.change_details', self.instance):
-                    self.fields['details'].widget.attrs['readonly']     = False
+                    self.fields['details'].widget.attrs['readonly'] = False
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def clean_title01(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -311,9 +310,9 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.title01
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -323,9 +322,9 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.details
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def clean_verifiable(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -335,22 +334,22 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.node_type == TheoryNode.TYPE.FACT
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def get_verb(self):
         if hasattr(self, 'action_verb'):
             return self.action_verb
         else:
             return None
 
-    #******************************
+    # ******************************
     # EvidenceForm
-    #******************************
+    # ******************************
     def save(self, commit=True):
         """Sets node_type to EVIDENCE (optinally, verifiable)."""
         # setup
-        created  = self.instance.pk is None
+        created = self.instance.pk is None
         evidence = super().save(commit=False)
 
         # populate data
@@ -380,56 +379,55 @@ class EvidenceForm(forms.ModelForm):
         return evidence
 
 
-
-#************************************************************
+# ************************************************************
 #
-#************************************************************
+# ************************************************************
 class CategoryForm(forms.ModelForm):
     """A form for choosing membership, not creating a category."""
 
     # non-model fields
     member = forms.BooleanField(initial=False)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model   = Category
-        fields  = ('member', 'title')
-        labels  = {
-          'title':    '',
-          'member':   '',
+        model = Category
+        fields = ('member', 'title')
+        labels = {
+            'title':    '',
+            'member':   '',
         }
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         super().__init__(*args, **kwargs)
         self.fields['member'].required = False
-        self.fields['title'].required  = False
+        self.fields['title'].required = False
 
 
-#************************************************************
+# ************************************************************
 #
-#************************************************************
+# ************************************************************
 class SelectTheoryNodeForm(forms.ModelForm):
     """A form for slecting theory nodes."""
 
     # non-model fields
     select = forms.BooleanField(initial=False)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model   = TheoryNode
-        fields  = ('select',)
+        model = TheoryNode
+        fields = ('select',)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         # setup
         if 'user' in kwargs.keys():
@@ -441,37 +439,39 @@ class SelectTheoryNodeForm(forms.ModelForm):
         self.fields['select'].required = False
 
 
-#************************************************************
+# ************************************************************
 #
-#************************************************************
+# ************************************************************
 class OpinionForm(forms.ModelForm):
     """A form for user's opinions (the root opinion)."""
     WIZARD_RESOLUTION = 10
     WIZARD_POINTS = []
     for x in range(WIZARD_RESOLUTION+1):
-        true_points  = 100 - 100//WIZARD_RESOLUTION*x
+        true_points = 100 - 100//WIZARD_RESOLUTION*x
         false_points = 100 - true_points
-        WIZARD_POINTS.append(('%d' % true_points, '%d/<font color="red">%d</font>' % (true_points, false_points)))
-    wizard_points = forms.ChoiceField(choices=WIZARD_POINTS, widget=forms.RadioSelect)
+        WIZARD_POINTS.append(
+            ('%d' % true_points, '%d/<font color="red">%d</font>' % (true_points, false_points)))
+    wizard_points = forms.ChoiceField(
+        choices=WIZARD_POINTS, widget=forms.RadioSelect)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model   = Opinion
-        fields  = ('true_input', 'false_input', 'force')
+        model = Opinion
+        fields = ('true_input', 'false_input', 'force')
         labels = {
-          'true_input':  'True Points',
-          'false_input': 'False Points',
+            'true_input':  'True Points',
+            'false_input': 'False Points',
         }
         widgets = {
             'true_input':   TRUE_INPUT_WIDGET,
             'false_input':  TRUE_INPUT_WIDGET,
         }
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         # setup
@@ -486,39 +486,40 @@ class OpinionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # widget config
-        self.fields['force'].required         = False
-        self.fields['true_input'].required    = False
-        self.fields['false_input'].required   = False
+        self.fields['force'].required = False
+        self.fields['true_input'].required = False
+        self.fields['false_input'].required = False
 
         # generate initial data
         if self.instance.id is not None:
-            x = round(self.instance.true_points() * self.WIZARD_RESOLUTION) * 100//self.WIZARD_RESOLUTION
+            x = round(self.instance.true_points() *
+                      self.WIZARD_RESOLUTION) * 100//self.WIZARD_RESOLUTION
             self.fields['wizard_points'].initial = str(x)
 
         # hidden inputs
         if self.wizard:
-            self.fields['force'].widget           = forms.HiddenInput()
-            self.fields['true_input'].widget      = forms.HiddenInput()
-            self.fields['false_input'].widget     = forms.HiddenInput()
+            self.fields['force'].widget = forms.HiddenInput()
+            self.fields['true_input'].widget = forms.HiddenInput()
+            self.fields['false_input'].widget = forms.HiddenInput()
         else:
             self.fields['wizard_points'].required = False
-            self.fields['wizard_points'].widget   = forms.HiddenInput()
+            self.fields['wizard_points'].widget = forms.HiddenInput()
 
-    #******************************
+    # ******************************
     # OpinionForm
-    #******************************
+    # ******************************
     def save(self, commit=True):
         # setup
         opinion = super().save(commit=False)
-        
+
         # translate wizard data
         if 'wizard_points' in self.changed_data:
-            data    = self.cleaned_data['wizard_points']
+            data = self.cleaned_data['wizard_points']
             initial = self.fields['wizard_points'].initial
             if len(data) > 0 and int(data) != initial:
-                opinion.true_input  = int(data)
+                opinion.true_input = int(data)
                 opinion.false_input = 100 - opinion.true_input
-                opinion.force       = True
+                opinion.force = True
 
         # save
         if commit:
@@ -526,31 +527,34 @@ class OpinionForm(forms.ModelForm):
         return opinion
 
 
-#************************************************************
+# ************************************************************
 #
-#************************************************************
+# ************************************************************
 class OpinionNodeForm(forms.ModelForm):
     """A form for user opinion node points."""
 
     # non-model fields
     CHOICES = [
-        (True,  'true'),
+        (True, 'true'),
         (False, 'false'),
     ]
-    select_collaborate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
-    select_contradict  = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
+    select_collaborate = forms.ChoiceField(
+        choices=CHOICES, widget=forms.RadioSelect())
+    select_contradict = forms.ChoiceField(
+        choices=CHOICES, widget=forms.RadioSelect())
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model   = OpinionNode
-        fields  = ('tt_input', 'tf_input', 'ft_input', 'ff_input', 'select_collaborate', 'select_contradict')
-        labels  = {
-          'tt_input': 'True Points',
-          'tf_input': 'False Points',
-          'ft_input': 'True Points',
-          'ff_input': 'False Points',
+        model = OpinionNode
+        fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input',
+                  'select_collaborate', 'select_contradict')
+        labels = {
+            'tt_input': 'True Points',
+            'tf_input': 'False Points',
+            'ft_input': 'True Points',
+            'ff_input': 'False Points',
         }
         widgets = {
             'tt_input':     TRUE_INPUT_WIDGET,
@@ -559,9 +563,9 @@ class OpinionNodeForm(forms.ModelForm):
             'ff_input':     FALSE_INPUT_WIDGET,
         }
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
 
@@ -573,29 +577,30 @@ class OpinionNodeForm(forms.ModelForm):
         else:
             self.wizard = False
         super().__init__(*args, **kwargs)
-        
+
         # initial data
         self.refresh_parent = False
         if self.instance.id is None and 'initial' in kwargs.keys():
             self.instance.theory_node = kwargs['initial']['theory_node']
-            self.instance.parent      = kwargs['initial']['parent']
+            self.instance.parent = kwargs['initial']['parent']
             if self.instance.parent.id is None:
                 self.refresh_parent = True
         theory_node = self.instance.theory_node
 
         # url
         if theory_node.is_theory():
-            self.url = reverse('theories:get_my_opinion', kwargs={'pk':theory_node.pk})
+            self.url = reverse('theories:get_my_opinion',
+                               kwargs={'pk': theory_node.pk})
         else:
             self.url = None
 
         # widget config
-        self.fields['tt_input'].required  = False
-        self.fields['tf_input'].required  = False
-        self.fields['ft_input'].required  = False
-        self.fields['ff_input'].required  = False
+        self.fields['tt_input'].required = False
+        self.fields['tf_input'].required = False
+        self.fields['ft_input'].required = False
+        self.fields['ff_input'].required = False
         self.fields['select_collaborate'].required = False
-        self.fields['select_contradict'].required  = False
+        self.fields['select_contradict'].required = False
 
         # wizard
         if self.wizard:
@@ -606,31 +611,32 @@ class OpinionNodeForm(forms.ModelForm):
             self.fields['ff_input'].widget = forms.HiddenInput()
             # generate initial data
             if self.instance.id is not None:
-                opinion_is_true  = self.instance.parent.true_points() > self.instance.parent.false_points()
+                opinion_is_true = self.instance.parent.true_points(
+                ) > self.instance.parent.false_points()
                 opinion_is_false = not opinion_is_true
-                
-                if   opinion_is_true  and self.instance.tt_input > 0:
+
+                if opinion_is_true and self.instance.tt_input > 0:
                     self.fields['select_collaborate'].initial = str(True)
-                elif opinion_is_true  and self.instance.ft_input > 0:
+                elif opinion_is_true and self.instance.ft_input > 0:
                     self.fields['select_collaborate'].initial = str(False)
                 elif opinion_is_false and self.instance.tf_input > 0:
                     self.fields['select_collaborate'].initial = str(True)
                 elif opinion_is_false and self.instance.ff_input > 0:
                     self.fields['select_collaborate'].initial = str(False)
 
-                if   opinion_is_true  and self.instance.tf_input > 0:
-                    self.fields['select_contradict'].initial  = str(True)
-                elif opinion_is_true  and self.instance.ff_input > 0:
-                    self.fields['select_contradict'].initial  = str(False)
+                if opinion_is_true and self.instance.tf_input > 0:
+                    self.fields['select_contradict'].initial = str(True)
+                elif opinion_is_true and self.instance.ff_input > 0:
+                    self.fields['select_contradict'].initial = str(False)
                 elif opinion_is_false and self.instance.tt_input > 0:
-                    self.fields['select_contradict'].initial  = str(True)
+                    self.fields['select_contradict'].initial = str(True)
                 elif opinion_is_false and self.instance.ft_input > 0:
-                    self.fields['select_contradict'].initial  = str(False)
+                    self.fields['select_contradict'].initial = str(False)
 
         # advanced
         else:
             self.fields['select_collaborate'].widget = forms.HiddenInput()
-            self.fields['select_contradict'].widget  = forms.HiddenInput()
+            self.fields['select_contradict'].widget = forms.HiddenInput()
 
         # setup initial display
         if theory_node.is_subtheory():
@@ -640,31 +646,32 @@ class OpinionNodeForm(forms.ModelForm):
                 else:
                     self.display_true = True
             else:
-                opinion_root = get_or_none(theory_node.opinions.all(), user=self.user)
+                opinion_root = get_or_none(
+                    theory_node.opinions.all(), user=self.user)
                 if opinion_root is None or opinion_root.is_true():
                     self.display_true = True
                 else:
                     self.dispaly_true = False
 
-    #******************************
+    # ******************************
     # OpinionNodeForm
-    #******************************
+    # ******************************
     def save(self, commit=True):
         # setup
         opinion_node = super().save(commit=False)
         # hack for refreshing parent
         if self.refresh_parent:
             opinion_node.parent = opinion_node.parent
-        
+
         # collaborate
         if 'select_collaborate' in self.changed_data:
-            data    = self.cleaned_data.get('select_collaborate')
+            data = self.cleaned_data.get('select_collaborate')
             initial = self.fields['select_collaborate'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true  = opinion_node.parent.true_input >= opinion_node.parent.false_input
-                if   data == 'True'  and opinion_is_true:
+                opinion_is_true = opinion_node.parent.true_input >= opinion_node.parent.false_input
+                if data == 'True' and opinion_is_true:
                     opinion_node.tt_input = 10
-                elif data == 'True'  and not opinion_is_true:
+                elif data == 'True' and not opinion_is_true:
                     opinion_node.tf_input = 10
                 elif data == 'False' and opinion_is_true:
                     opinion_node.ft_input = 10
@@ -673,13 +680,13 @@ class OpinionNodeForm(forms.ModelForm):
 
         # contradict
         if 'select_contradict' in self.changed_data:
-            data    = self.cleaned_data.get('select_contradict')
+            data = self.cleaned_data.get('select_contradict')
             initial = self.fields['select_contradict'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true  = opinion_node.parent.true_input >= opinion_node.parent.false_input
-                if   data == 'True'  and opinion_is_true:
+                opinion_is_true = opinion_node.parent.true_input >= opinion_node.parent.false_input
+                if data == 'True' and opinion_is_true:
                     opinion_node.tf_input = 10
-                elif data == 'True'  and not opinion_is_true:
+                elif data == 'True' and not opinion_is_true:
                     opinion_node.tt_input = 10
                 elif data == 'False' and opinion_is_true:
                     opinion_node.ff_input = 10
@@ -692,28 +699,28 @@ class OpinionNodeForm(forms.ModelForm):
         return opinion_node
 
 
-#************************************************************
+# ************************************************************
 # ToDo: merge with Evidence revision form
-#************************************************************
+# ************************************************************
 class TheoryRevisionForm(forms.ModelForm):
     """Theory Revision form."""
 
     # non-model fields
-    title01     = forms.CharField(label='True Statement')
-    title00     = forms.CharField(label='False Statement')
-    details     = forms.CharField(**DETAILS_CHARFEILD)
-    delete      = forms.BooleanField(initial=False)
+    title01 = forms.CharField(label='True Statement')
+    title00 = forms.CharField(label='False Statement')
+    details = forms.CharField(**DETAILS_CHARFEILD)
+    delete = forms.BooleanField(initial=False)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model     = Version
-        fields    = ('title01', 'title00', 'details', 'delete')
+        model = Version
+        fields = ('title01', 'title00', 'details', 'delete')
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
 
@@ -734,7 +741,7 @@ class TheoryRevisionForm(forms.ModelForm):
         self.fields['details'].initial = self.instance.field_dict['details']
 
         # config
-        self.fields['delete'].required  = False
+        self.fields['delete'].required = False
         self.fields['title00'].required = False
         self.fields['title01'].required = False
         self.fields['details'].required = False
@@ -747,29 +754,28 @@ class TheoryRevisionForm(forms.ModelForm):
             self.fields['delete'].widget = forms.HiddenInput()
 
 
-
-#************************************************************
+# ************************************************************
 #
-#************************************************************
+# ************************************************************
 class EvidenceRevisionForm(forms.ModelForm):
     """Theory Revision form."""
 
     # non-model fields
-    title01     = forms.CharField(label='Statement')
-    details     = forms.CharField(**DETAILS_CHARFEILD)
-    verifiable  = forms.BooleanField(label='Is this verifiable?')
-    delete      = forms.BooleanField(initial=False)
+    title01 = forms.CharField(label='Statement')
+    details = forms.CharField(**DETAILS_CHARFEILD)
+    verifiable = forms.BooleanField(label='Is this verifiable?')
+    delete = forms.BooleanField(initial=False)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     class Meta:
-        model   = Version
-        fields  = ('title01', 'details', 'verifiable', 'delete',)
+        model = Version
+        fields = ('title01', 'details', 'verifiable', 'delete',)
 
-    #******************************
+    # ******************************
     #
-    #******************************
+    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
 
@@ -781,18 +787,15 @@ class EvidenceRevisionForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
 
         # populate data
-        self.fields['title01'].initial    = self.instance.field_dict['title01']
-        self.fields['details'].initial    = self.instance.field_dict['details']
+        self.fields['title01'].initial = self.instance.field_dict['title01']
+        self.fields['details'].initial = self.instance.field_dict['details']
         self.fields['verifiable'].initial = self.instance.field_dict['node_type'] == TheoryNode.TYPE.FACT
 
         # config
-        self.fields['delete'].required  = False
+        self.fields['delete'].required = False
         self.fields['title01'].required = False
         self.fields['details'].required = False
         self.fields['verifiable'].required = False
-        self.fields['title01'].widget.attrs['readonly']    = True
-        self.fields['details'].widget.attrs['readonly']    = True
+        self.fields['title01'].widget.attrs['readonly'] = True
+        self.fields['details'].widget.attrs['readonly'] = True
         self.fields['verifiable'].widget.attrs['readonly'] = True
-
-
-

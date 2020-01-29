@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.db import models

@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
-#*******************************************************************************
+# *******************************************************************************
 # imports
-#*******************************************************************************
+# *******************************************************************************
 import re
 import random
 import logging
@@ -32,24 +32,24 @@ from django.contrib import auth
 from theories.models import Category, TheoryNode
 
 
-#*******************************************************************************
+# *******************************************************************************
 # defines
-#*******************************************************************************
-User   = auth.get_user_model()
+# *******************************************************************************
+User = auth.get_user_model()
 logger = logging.getLogger(__name__)
 
 CATEGORY_TITLES = [
-  'All',
-  'Science',
-  'Politics',
-  'Legal',
-  'Health',
-  'Pop Culture',
-  'Conspiracy',
+    'All',
+    'Science',
+    'Politics',
+    'Legal',
+    'Health',
+    'Pop Culture',
+    'Conspiracy',
 ]
 
 
-#*******************************************************************************
+# *******************************************************************************
 # methods
 #
 #
@@ -61,11 +61,11 @@ CATEGORY_TITLES = [
 #
 #
 #
-#*******************************************************************************
+# *******************************************************************************
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 def get_or_none(objects, **kwargs):
     try:
         return objects.get(**kwargs)
@@ -73,10 +73,7 @@ def get_or_none(objects, **kwargs):
         return None
 
 
-
-
-
-#*******************************************************************************
+# *******************************************************************************
 # setup methods
 #
 #
@@ -88,12 +85,12 @@ def get_or_none(objects, **kwargs):
 #
 #
 #
-#*******************************************************************************
+# *******************************************************************************
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_categories():
     for title in CATEGORY_TITLES:
         category, created = Category.objects.get_or_create(title=title)
@@ -101,27 +98,25 @@ def create_categories():
             logger.info('Created category: %s.' % category)
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_reserved_nodes(extra=False):
     intuition_node, created = TheoryNode.objects.get_or_create(
-        title01     = 'Intuition.', 
-        node_type   = TheoryNode.TYPE.EVIDENCE,
+        title01='Intuition.',
+        node_type=TheoryNode.TYPE.EVIDENCE,
     )
     if created:
         logger.info('Created intuition theory node.')
     if extra:
-        for i in range(1,100):
+        for i in range(1, 100):
             new_node, created = TheoryNode.objects.get_or_create(
-                title01   = 'R%d' % i,            
-                node_type = TheoryNode.TYPE.EVIDENCE,
+                title01='R%d' % i,
+                node_type=TheoryNode.TYPE.EVIDENCE,
             )
 
 
-
-
-#*******************************************************************************
+# *******************************************************************************
 # testing methods
 #
 #
@@ -133,25 +128,25 @@ def create_reserved_nodes(extra=False):
 #
 #
 #
-#*******************************************************************************
+# *******************************************************************************
 
 
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 def get_form_data(response, verbose_level=0):
 
     # balh
     if response.context is None or not hasattr(response.context, 'keys'):
-        return None    
-    
+        return None
+
     # setup
     data = {}
     for content_name in response.context.keys():
         # formsets
         if re.search(r'formset', content_name):
             formset = response.context[content_name]
-            
+
             # formset managmenet data
             form = formset.management_form
             for field in form.fields.keys():
@@ -163,7 +158,8 @@ def get_form_data(response, verbose_level=0):
                     if form[field].value() is None:
                         data['%s-%s' % (form.prefix, field)] = ''
                     else:
-                        data['%s-%s' % (form.prefix, field)] = form[field].value()
+                        data['%s-%s' % (form.prefix, field)
+                             ] = form[field].value()
 
         # forms
         elif re.search(r'form', content_name):
@@ -173,7 +169,8 @@ def get_form_data(response, verbose_level=0):
                     if form.prefix is None:
                         data['%s' % (field)] = form[field].value()
                     else:
-                        data['%s-%s' % (form.prefix, field)] = form[field].value()
+                        data['%s-%s' % (form.prefix, field)
+                             ] = form[field].value()
 
     if verbose_level >= 10:
         for x in data:
@@ -183,55 +180,55 @@ def get_form_data(response, verbose_level=0):
     return data
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_test_theory(title='Theory', created_by=None, backup=False):
     theory = TheoryNode.get_or_create_theory(
-      true_title    = title,
-      created_by    = created_by,
+        true_title=title,
+        created_by=created_by,
     )
     if backup:
         theory.save_snapshot(user=created_by)
     return theory
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_test_subtheory(parent_theory, title='Sub-Theory', created_by=None, backup=False):
     subtheory = parent_theory.get_or_create_subtheory(
-      true_title    = title,
-      created_by    = created_by,
+        true_title=title,
+        created_by=created_by,
     )
     if backup:
         subtheory.save_snapshot(user=created_by)
     return subtheory
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_test_evidence(parent_theory, title='Evidence', fact=False, created_by=None, backup=False):
     evidence = parent_theory.get_or_create_evidence(
-      title         = title,
-      fact          = fact,
-      created_by    = created_by,
+        title=title,
+        fact=fact,
+        created_by=created_by,
     )
     if backup:
         evidence.save_snapshot(user=created_by)
     return evidence
 
 
-#******************************
-# 
-#******************************
+# ******************************
+#
+# ******************************
 def create_test_opinion(theory, user, true_input=None, false_input=None, force=False, nodes=False):
     opinion = theory.opinions.create(
-      user  = user,
+        user=user,
     )
     if true_input is not None:
-        opinion.true_input  = true_input
+        opinion.true_input = true_input
     if false_input is not None:
         opinion.false_input = false_input
     if force:
@@ -241,16 +238,12 @@ def create_test_opinion(theory, user, true_input=None, false_input=None, force=F
         random.seed(0)
         for theory_node in theory.get_nodes():
             opinion_node = opinion.nodes.create(
-                theory_node  = theory_node,
-                tt_input     = random.randint(0,100),
-                tf_input     = random.randint(0,100),
-                ft_input     = random.randint(0,100),
-                ff_input     = random.randint(0,100),
+                theory_node=theory_node,
+                tt_input=random.randint(0, 100),
+                tf_input=random.randint(0, 100),
+                ft_input=random.randint(0, 100),
+                ff_input=random.randint(0, 100),
             )
     opinion.update_points()
     theory.add_to_stats(opinion)
     return opinion
-
-
-
-

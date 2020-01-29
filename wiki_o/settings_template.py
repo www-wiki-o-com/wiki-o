@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 """
 Django settings for wiki_o project.
@@ -78,20 +78,20 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-#    'allauth.socialaccount.providers.facebook',
-#    'allauth.socialaccount.providers.google',
+    #    'allauth.socialaccount.providers.facebook',
+    #    'allauth.socialaccount.providers.google',
     'invitations',
 
     # forum
     'mptt',
     'haystack',
     'widget_tweaks',
-    
+
     # activity stream
     'notifications',
     'actstream',
     'hitcount',
-    
+
     # toolbar
     'debug_toolbar',
 ] + get_machina_apps()
@@ -112,8 +112,8 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-          os.path.join(BASE_DIR, 'forum/templates'),
-          MACHINA_MAIN_TEMPLATE_DIR,
+            os.path.join(BASE_DIR, 'forum/templates'),
+            MACHINA_MAIN_TEMPLATE_DIR,
         ],
         'APP_DIRS': True,
         'OPTIONS': {
@@ -125,13 +125,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'machina.core.context_processors.metadata',
             ],
-#            'loaders': [
-#                ('django.template.loaders.cached.Loader', [
-#                    'django.template.loaders.filesystem.Loader',
-#                    'django.template.loaders.app_directories.Loader',
-#                    'amp_tools.loader.Loader',
-#                ]),
-#            ],
+            #            'loaders': [
+            #                ('django.template.loaders.cached.Loader', [
+            #                    'django.template.loaders.filesystem.Loader',
+            #                    'django.template.loaders.app_directories.Loader',
+            #                    'amp_tools.loader.Loader',
+            #                ]),
+            #            ],
         },
     },
 ]
@@ -145,34 +145,34 @@ AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
-AUTH_USER_MODEL   = 'users.User'
-SITE_ID           = 1 # used by allauth and activity stream
+AUTH_USER_MODEL = 'users.User'
+SITE_ID = 1  # used by allauth and activity stream
 
-ROOT_URLCONF      = 'wiki_o.urls'
-WSGI_APPLICATION  = 'wiki_o.wsgi.application'
+ROOT_URLCONF = 'wiki_o.urls'
+WSGI_APPLICATION = 'wiki_o.wsgi.application'
 
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 DATABASES = {
-  'default': {
-    'ENGINE':   'django.db.backends.postgresql',
-    'NAME':     'wiki_o',
-    'USER':     'django',
-    'PASSWORD': 'password',
-    'HOST':     'localhost',
-    'PORT':     '',
-  }
+    'default': {
+        'ENGINE':   'django.db.backends.postgresql',
+        'NAME':     'wiki_o',
+        'USER':     'django',
+        'PASSWORD': 'password',
+        'HOST':     'localhost',
+        'PORT':     '',
+    }
 }
 
 
 # Password validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',},
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
+    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
 ]
 ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'
 
@@ -218,43 +218,43 @@ ACTSTREAM_SETTINGS = {
 
 
 # AllAuth Config
-ACCOUNT_USERNAME_MIN_LENGTH             = 3
-ACCOUNT_AUTHENTICATION_METHOD           = "username_email"
-ACCOUNT_CONFIRM_EMAIL_ON_GET            = False
-ACCOUNT_EMAIL_REQUIRED                  = False
-ACCOUNT_EMAIL_VERIFICATION              = "none"
-ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION     = False
+ACCOUNT_USERNAME_MIN_LENGTH = 3
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_CONFIRM_EMAIL_ON_GET = False
+ACCOUNT_EMAIL_REQUIRED = False
+ACCOUNT_EMAIL_VERIFICATION = "none"
+ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
 
 
 # Email setup (postfix)
-EMAIL_BACKEND         = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST            = 'localhost'
-EMAIL_PORT            = 25
-EMAIL_HOST_USER       = ''
-EMAIL_HOST_PASSWORD   = ''
-DEFAULT_FROM_EMAIL    = 'accounts@wiki-o.com'
-EMAIL_USE_TLS         = False
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'localhost'
+EMAIL_PORT = 25
+EMAIL_HOST_USER = ''
+EMAIL_HOST_PASSWORD = ''
+DEFAULT_FROM_EMAIL = 'accounts@wiki-o.com'
+EMAIL_USE_TLS = False
 
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
-LANGUAGE_CODE   = 'en-us'
-TIME_ZONE       = 'UTC'
-USE_I18N        = True
-USE_L10N        = True
-USE_TZ          = True
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'UTC'
+USE_I18N = True
+USE_L10N = True
+USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
-STATIC_URL    = '/static/'
-STATIC_ROOT   = os.path.join(BASE_DIR, 'static/')
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-PROJECT_ROOT  = os.path.dirname(os.path.realpath(__file__))
-FIXTURE_DIRS  = (os.path.join(PROJECT_ROOT, 'fixtures'),)
+PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
+FIXTURE_DIRS = (os.path.join(PROJECT_ROOT, 'fixtures'),)
 
 # backup config
-DBBACKUP_STORAGE         = 'django.core.files.storage.FileSystemStorage'
+DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
 DBBACKUP_STORAGE_OPTIONS = {'location': '/home/wiki-o/backups'}
 
 DBBACKUP_CONNECTORS = {
@@ -265,7 +265,7 @@ DBBACKUP_CONNECTORS = {
 }
 
 # Logging config
-#LOGGING = {
+# LOGGING = {
 #    'version': 1,
 #    'disable_existing_loggers': False,
 #    'handlers': {
@@ -282,23 +282,20 @@ DBBACKUP_CONNECTORS = {
 #            'propagate':  True,
 #        },
 #    },
-#}
+# }
 
 # Special setup for testing
 # Ran 90 tests in 41.304s -> Ran 90 tests in 17.146s
 if 'test' in sys.argv:
     PASSWORD_HASHERS = (
-      'django.contrib.auth.hashers.MD5PasswordHasher',
+        'django.contrib.auth.hashers.MD5PasswordHasher',
     )
     DATABASES = {
-      'default': {
-        'ENGINE':     'django.db.backends.sqlite3',
-        'NAME':       'test_database',            
-        'TEST_NAME':  'test_database',            
-      }
+        'default': {
+            'ENGINE':     'django.db.backends.sqlite3',
+            'NAME':       'test_database',
+            'TEST_NAME':  'test_database',
+        }
     }
     DEBUG = False
     TEMPLATE_DEBUG = False
-
-
-

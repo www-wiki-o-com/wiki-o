@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.conf.urls import url
@@ -23,11 +23,11 @@ from home.views import *
 
 app_name = 'home'
 urlpatterns = [
-    path('',                                  IndexView.as_view(),          name='index'),
-    path('alpha',                             AlphaView.as_view(),          name='alpha'),
-    path('about',                             AboutView.as_view(),          name='about'),
-    path('help',                              HelpView.as_view(),           name='help'),
-    path('contact',                           ContactView,                  name='contact'),
-    path('terms_and_conditions',              TermsView.as_view(),          name='terms'),
-    path('privacy_policy',                    PolicyView.as_view(),         name='policy'),
+    path('', IndexView.as_view(), name='index'),
+    path('alpha', AlphaView.as_view(), name='alpha'),
+    path('about', AboutView.as_view(), name='about'),
+    path('help', HelpView.as_view(), name='help'),
+    path('contact', ContactView, name='contact'),
+    path('terms_and_conditions', TermsView.as_view(), name='terms'),
+    path('privacy_policy', PolicyView.as_view(), name='policy'),
 ]

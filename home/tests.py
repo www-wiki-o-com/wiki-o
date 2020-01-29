@@ -1,4 +1,4 @@
-#*******************************************************************************
+# *******************************************************************************
 # Wiki-O: A web service for sharing opinions and avoiding arguments.
 # Copyright (C) 2018 Frank Imeson
 #
@@ -14,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#*******************************************************************************
+# *******************************************************************************
 
 
 from django.test import TestCase
@@ -22,15 +22,14 @@ from django.urls import reverse
 from django.core import mail
 
 
-
-#************************************************************
-# 
-#************************************************************
+# ************************************************************
+#
+# ************************************************************
 class SimpleTest(TestCase):
 
-    #******************************
-    # 
-    #******************************
+    # ******************************
+    #
+    # ******************************
     def test_send_email(self):
         # Send message.
         mail.send_mail(
@@ -41,27 +40,23 @@ class SimpleTest(TestCase):
         # Test that one message has been sent.
         self.assertEqual(len(mail.outbox), 1)
 
-    #******************************
-    # 
-    #******************************
+    # ******************************
+    #
+    # ******************************
     def test_alpha_url(self):
         response = self.client.get(reverse('home:alpha'))
         self.assertEqual(response.status_code, 200)
 
-    #******************************
-    # 
-    #******************************
+    # ******************************
+    #
+    # ******************************
     def test_about_url(self):
         response = self.client.get(reverse('home:about'))
         self.assertEqual(response.status_code, 200)
 
-    #******************************
-    # 
-    #******************************
+    # ******************************
+    #
+    # ******************************
     def test_help_url(self):
         response = self.client.get(reverse('home:help'))
         self.assertEqual(response.status_code, 200)
-
-
-
-
