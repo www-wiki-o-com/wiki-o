@@ -17,7 +17,6 @@ A web service for sharing opinions and avoiding arguments
 # imports
 # *******************************************************************************
 import re
-import math
 import datetime
 
 from django import template
@@ -31,15 +30,22 @@ from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 from notifications.models import Notification
 
+
 # *******************************************************************************
 # defs
 # *******************************************************************************
 register = template.Library()
-RE_HASHTAG = r'#\w+'
+
 RE_STATS = r'(opinion_all|opinion_supporters|opinion_moderates|opinion_opposers)'
-RE_WIKI_O_URL = r'(https?://)?(www\.)?(m\.)?wiki-o\.com/(theory/\d+|evidence/\d+|opinion/\d+|opinion/\d+/vs/\d+|opinion/\d+/vs/%s|theory/\d+/%s|theory/%s/vs/\d+|theory/\d+/%s/vs/%s)/' % (
-    RE_STATS, RE_STATS, RE_STATS, RE_STATS, RE_STATS)
-re_wiki_o = re.compile(RE_WIKI_O_URL)
+RE_WIKI_O_URL = r'(https?://)?(www\.)?(m\.)?wiki-o\.com/'
+RE_WIKI_O_URL += r'(theory/\d+|evidence/\d+|opinion/\d+|opinion/\d+/vs/\d+'
+RE_WIKI_O_URL += r'|opinion/\d+/vs/%s' % RE_STATS
+RE_WIKI_O_URL += r'|theory/\d+/%s' % RE_STATS
+RE_WIKI_O_URL += r'|theory/%s/vs/\d+' % RE_STATS
+RE_WIKI_O_URL += r'|theory/\d+/%s/vs/%s)/' % (RE_STATS, RE_STATS)
+RE_WIKI_O = re.compile(RE_WIKI_O_URL)
+
+RE_HASHTAG = r'#\w+'
 
 
 # *******************************************************************************
@@ -52,9 +58,6 @@ re_wiki_o = re.compile(RE_WIKI_O_URL)
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 def get_brace_indices(string):
     """Parenthesized contents in string as pairs (level, contents)."""
     stack = []
@@ -77,43 +80,39 @@ def get_brace_indices(string):
     return result
 
 
-# ************************************************************
-#
-# ************************************************************
-def parse_log(log, value, extra):
+def interpret_log_text(log, log_text, extra):
+    """Interpret the variables and links encoded in the log text."""
 
-    # setup
-    value = value.replace('{{', '{').replace('}}', '}')
-    value = value.replace('<#', '«').replace('#>', '»')
+    # Interpret brackets
+    log_text = log_text.replace('{{', '{').replace('}}', '}')
+    log_text = log_text.replace('<#', '«').replace('#>', '»')
 
-    # variables
-    s = ''
-    h = 0
-    for i, j, d in get_brace_indices(value):
-        if value[i] == '{' and value[j] == '}':
-            s += value[h:i]
-            name = value[i+1:j].strip()
+    # Interpret variables
+    result = ''
+    prev_index = 0
+    for start_index, end_index, nested_depth in get_brace_indices(log_text):
+        if log_text[start_index] == '{' and log_text[end_index] == '}':
+            result += log_text[prev_index:start_index]
+            name = log_text[start_index+1:end_index].strip()
             if name == 'object' and log.action_object is not None:
                 name = log.action_object.__str__()
             elif name == 'target' and log.target is not None:
                 name = log.target.__str__()
             elif name == 'target.get_owner' and log.target is not None:
                 name = log.target.get_owner()
-            s += name
-            h = j+1
-    s += value[h:]
+            result += name
+            prev_index = end_index+1
+    result += log_text[prev_index:]
 
-    # links
-    value = s
-    s = ''
-    h = 0
-    for i, j, d in get_brace_indices(value):
-        if value[i] == '«' and value[j] == '»':
-            s += value[h:i]
-            x = value[i+1:j].strip()
-            k = x.find(' ')
-            url = x[:k].strip()
-            name = x[k+1:].strip()
+    # Interpret links
+    log_text = result
+    result = ''
+    prev_index = 0
+    for start_index, end_index, nested_depth in get_brace_indices(log_text):
+        if log_text[start_index] == '«' and log_text[end_index] == '»':
+            result += log_text[prev_index:start_index]
+            url, name = log_text[start_index+1:end_index].strip().split(' ', 1)
+            name = name.strip()
 
             # url
             add_date = False
@@ -145,19 +144,17 @@ def parse_log(log, value, extra):
                 url = mark_as_read_url + '?next=' + url
 
             # link
-            s += '<a class="plain" href="%s">%s</a>' % (url, name)
-            h = j+1
-    s += value[h:]
-    return s
+            result += '<a class="plain" href="%s">%s</a>' % (url, name)
+            prev_index = end_index + 1
+    result += log_text[prev_index:]
+    return result
 
 
-# ************************************************************
-#
-# ************************************************************
-def make_safe(string):
-    s = string.replace('{', '[[').replace('}', ']]')
-    s = s.replace('<', '&lt;').replace('>', '&gt;')
-    return s
+def make_safe(text):
+    """Remove all unsafe http characters from the text."""
+    result = text.replace('{', '[[').replace('}', ']]')
+    result = result.replace('<', '&lt;').replace('>', '&gt;')
+    return result
 
 
 # *******************************************************************************
@@ -170,73 +167,64 @@ def make_safe(string):
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def possessive(value):
-    if value[-1] == 's':
-        return value + "'"
+def possessive(text):
+    """Add the possesive 's or ' to the end of the text."""
+    if text[-1] == 's':
+        return text + "'"
     else:
-        return value + "'s"
+        return text + "'s"
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def get_class(value):
-    return value.__class__.__name__
+def get_class(obj):
+    """Return the object's name."""
+    return obj.__class__.__name__
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
 def follow_url(obj):
+    """Retrive the url for subcribing to the object."""
     content_type = ContentType.objects.get_for_model(obj)
-    return reverse('activity:follow', kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
+    return reverse('activity:follow',
+                   kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
 def unfollow_url(obj):
+    """Retrive the url for unsubcribing from the object."""
     content_type = ContentType.objects.get_for_model(obj)
-    return reverse('activity:unfollow', kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
+    return reverse('activity:unfollow',
+                   kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def bibliography(value, inc_links=True, autoescape=True):
+def bibliography(detail_text, inc_links=True, autoescape=True):
     """Formats the detail text to include a linked bibliograpy."""
-    autoescape = autoescape and not isinstance(value, SafeData)
-    value = normalize_newlines(value)
+    autoescape = autoescape and not isinstance(detail_text, SafeData)
+    detail_text = normalize_newlines(detail_text)
     if autoescape:
-        value = escape(value)
+        detail_text = escape(detail_text)
 
     # create bib and external links
-    h = 0
-    s = ''
+    prev_index = 0
     bib = []
+    result = ''
     # make unsafe by replacing brackets
-    value = re.sub(r'&lt;!--', '«', value)
-    value = re.sub(r'--&gt;\s*', '»', value)
-    value = value.replace('[[', '{').replace(']]', '}')
-    value = value.replace('&lt;', '<').replace('&gt;', '>')
-    for i, j, d in get_brace_indices(value):
-        s += make_safe(value[h:i])
-        h = j+1
-        INLINE = value[i] == '<' and value[j] == '>'
-        BIB00 = value[i] == '[' and value[j] == ']'
-        BIB01 = value[i] == '{' and value[j] == '}'
-        COMMENT = value[i] == '«' and value[j] == '»'
-        if COMMENT:
+    detail_text = re.sub(r'&lt;!--', '«', detail_text)
+    detail_text = re.sub(r'--&gt;\s*', '»', detail_text)
+    detail_text = detail_text.replace('[[', '{').replace(']]', '}')
+    detail_text = detail_text.replace('&lt;', '<').replace('&gt;', '>')
+    for start_index, end_index, nested_depth in get_brace_indices(detail_text):
+        result += make_safe(detail_text[prev_index:start_index])
+        prev_index = end_index + 1
+        inline = detail_text[start_index] == '<' and detail_text[end_index] == '>'
+        bib00 = detail_text[start_index] == '[' and detail_text[end_index] == ']'
+        bib01 = detail_text[start_index] == '{' and detail_text[end_index] == '}'
+        comment = detail_text[start_index] == '«' and detail_text[end_index] == '»'
+        if comment:
             continue
-        url = make_safe(value[i+1:j].strip())
+        url = make_safe(detail_text[start_index+1:end_index].strip())
         name = url
         k = url.find(' ')
         if k > 0:
@@ -245,136 +233,130 @@ def bibliography(value, inc_links=True, autoescape=True):
         if URLValidator.regex.search(url):
             # scrub wiki-o links
             if re.search('wiki-o', url):
-                x = re_wiki_o.match(url)
+                x = RE_WIKI_O.match(url)
                 if x:
                     url = x.group()
                 else:
                     url = ''
             # regular citation
-            if BIB00:
+            if bib00:
                 # don't add duplicates to bib
-                if (url, name) not in bib:
-                    bib.append((url, name))
-                    n = len(bib)
-                else:
-                    for n, x in enumerate(bib):
+                if (url, name) in bib:
+                    for bib_index, x in enumerate(bib):
                         if x == (url, name):
                             break
-                    n += 1
-                if s[-1] == ' ':
-                    s = s.strip()
-                    s += '&nbsp;'
-                s += '[%d]' % n
+                else:
+                    bib.append((url, name))
+                    bib_index = len(bib) - 1
+                if result[-1] == ' ':
+                    result = result.strip()
+                    result += '&nbsp;'
+                result += '[%d]' % bib_index + 1
             # add to bib but not inline
-            elif BIB01:
+            elif bib01:
                 if (url, name) not in bib:
                     bib.append((url, name))
             # inline url, done with () brackets
-            elif INLINE:
+            elif inline:
                 if inc_links:
-                    s += '<a href="%s" target="_blank">%s</a>' % (url, name)
+                    result += '<a href="%s" target="_blank">%s</a>' % (url, name)
                 else:
-                    s += '%s' % (name)
+                    result += '%s' % (name)
             else:
                 assert False
         else:
-            s0 = make_safe(value[i+1:j])
-            if INLINE:
-                s += '&lt;%s&gt;' % s0
-            elif BIB00:
-                s += '[%s]' % s0
-            elif BIB01:
-                s += '[[%s]]' % s0
-    s += make_safe(value[h:])
-    value = s
+            s = make_safe(detail_text[start_index+1:end_index])
+            if inline:
+                result += '&lt;%s&gt;' % s
+            elif bib00:
+                result += '[%s]' % s
+            elif bib01:
+                result += '[[%s]]' % s
+    result += make_safe(detail_text[prev_index:])
+    detail_text = result
 
     # create lists
-    s = ''
-    UL = 0
-    OL = 0
-    for line in value.split('\n'):
+    result = ''
+    ul_depth = 0
+    ol_depth = 0
+    for line in detail_text.split('\n'):
         if re.match(r'\s*\*+\s+.+$', line):
             bullets = re.findall(r'\*+', line)[0]
-            while len(bullets) > UL:
-                if UL == 0 and OL == 0:
-                    s += '<ul style="width:95%">'
+            while len(bullets) > ul_depth:
+                if ul_depth == 0 and ol_depth == 0:
+                    result += '<ul style="width:95%">'
                 else:
-                    s += '<ul>'
-                UL += 1
-            while len(bullets) < UL:
-                s += '</ul>'
-                UL -= 1
-            s += '<li> %s </li>' % line.strip().strip('*').strip()
+                    result += '<ul>'
+                ul_depth += 1
+            while len(bullets) < ul_depth:
+                result += '</ul>'
+                ul_depth -= 1
+            result += '<li> %s </li>' % line.strip().strip('*').strip()
         elif re.match(r'\s*#+\s+.+$', line):
             bullets = re.findall(r'#+', line)[0]
-            while len(bullets) > OL:
-                if UL == 0 and OL == 0:
-                    s += '<ol style="width:95%">'
+            while len(bullets) > ol_depth:
+                if ul_depth == 0 and ol_depth == 0:
+                    result += '<ol style="width:95%">'
                 else:
-                    s += '<ol>'
-                OL += 1
-            while len(bullets) < OL:
-                s += '</ol>'
-                OL -= 1
-            s += '<li> %s </li>' % line.strip().strip('#').strip()
+                    result += '<ol>'
+                ol_depth += 1
+            while len(bullets) < ol_depth:
+                result += '</ol>'
+                ol_depth -= 1
+            result += '<li> %s </li>' % line.strip().strip('#').strip()
         else:
-            while UL > 0:
-                s += '</ul>'
-                UL -= 1
-            while OL > 0:
-                s += '</ol>'
-                OL -= 1
-            s += line + '\n'
-    while UL > 0:
-        s += '</ul>'
-        UL -= 1
-    while OL > 0:
-        s += '</ol>'
-        OL -= 1
-    value = s
+            while ul_depth > 0:
+                result += '</ul>'
+                ul_depth -= 1
+            while ol_depth > 0:
+                result += '</ol>'
+                ol_depth -= 1
+            result += line + '\n'
+    while ul_depth > 0:
+        result += '</ul>'
+        ul_depth -= 1
+    while ol_depth > 0:
+        result += '</ol>'
+        ol_depth -= 1
+    detail_text = s
 
     # bib
     if len(bib) > 0:
-        s = s.strip()
-        s += '<ol class="bib">'
+        result = result.strip()
+        result += '<ol class="bib">'
         for i, (url, name) in enumerate(bib):
             if inc_links:
-                s += '<li> <a href="%s" target="_blank">%s</a> </li>\n' % (
+                result += '<li> <a href="%s" target="_blank">%s</a> </li>\n' % (
                     url, name)
             else:
-                s += '<li> %s </li>\n' % (name)
-        s += '</ol>'
-    s = s.replace('][', ',')
-    s = s.replace(']&nbsp;[', ',')
-    value = s.strip()
+                result += '<li> %s </li>\n' % (name)
+        result += '</ol>'
+    result = result.replace('][', ',')
+    result = result.replace(']&nbsp;[', ',')
+    detail_text = result.strip()
 
     # ship it
-    value = value.replace('\n', '<br/>')
-    value = value.replace('  ', '&nbsp&nbsp')
-    return mark_safe(value)
+    detail_text = detail_text.replace('\n', '<br/>')
+    detail_text = detail_text.replace('  ', '&nbsp&nbsp')
+    return mark_safe(detail_text)
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def short_bib(value, length=500, autoescape=True):
+def short_bib(detail_text, length=500, autoescape=True):
     """Formats the detail text to include a non-linked bibliograpy."""
-    value = bibliography(value, inc_links=False, autoescape=autoescape)
-    if len(value) > length:
-        value = value[:length]
-        i = value.rfind(' ')
-        value = value[:i] + '...'
-    return mark_safe(value)
+    detail_text = bibliography(detail_text, inc_links=False, autoescape=autoescape)
+    if len(detail_text) > length:
+        detail_text = detail_text[:length]
+        i = detail_text.rfind(' ')
+        detail_text = detail_text[:i] + '...'
+    return mark_safe(detail_text)
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def get_verb(log, extra='', autoescape=True):
+def get_verb(log, extra=''):
+    """"Retrieves and formats the log's verb text."""
     extra = str(extra)
-    verb = parse_log(log, log.verb, extra)
+    verb = interpret_log_text(log, log.verb, extra)
     if isinstance(log, Notification):
         if log.unread:
             verb = '<strong>' + verb + '</strong>'
@@ -383,121 +365,24 @@ def get_verb(log, extra='', autoescape=True):
     return mark_safe(verb)
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def get_description(log, extra='', autoescape=True):
+def get_description(log, extra=''):
+    """Retrieves and formats the log's description text."""
     extra = str(extra)
-    description = parse_log(log, log.description, extra)
+    description = interpret_log_text(log, log.description, extra)
     return mark_safe(description)
 
 
-# ************************************************************
-#
-# ************************************************************
-@register.simple_tag
-def url_action(action, *args, extra='', **kwargs):
-    resolved_url = action.action_object.activity_url()
-    parms = {'date': action.timestamp - datetime.timedelta(seconds=1)}
-    extra = str(extra)
-    if len(extra) > 0:
-        extra += '&' + urlencode(parms)
-    else:
-        extra += '?%s' % urlencode(parms)
-    return resolved_url + extra
-
-    h = 0
-    s = ''
-    verb = log.verb
-    for i, j, d in get_brace_indices(verb):
-        s += verb[h:i]
-        h = j+1
-        url = verb[i+1:j].strip()
-        name = url
-        k = url.find(' ')
-        if k > 0:
-            name = url[k:].strip()
-            url = url[:k].strip()
-        if URLValidator.regex.search(url):
-            # regular citation
-            if BIB00:
-                # don't add duplicates to bib
-                if (url, name) not in bib:
-                    bib.append((url, name))
-                    n = len(bib)
-                else:
-                    for n, x in enumerate(bib):
-                        if x == (url, name):
-                            break
-                    n += 1
-                if s[-1] == ' ':
-                    s = s.strip()
-                    s += '&nbsp;'
-                s += '[%d]' % n
-            # add to bib but not inline
-            elif BIB01:
-                if (url, name) not in bib:
-                    bib.append((url, name))
-            # inline url, done with () brackets
-            elif INLINE:
-                if inc_links:
-                    s += '<a href="%s" target="_blank">%s</a>' % (url, name)
-                else:
-                    s += '%s' % (name)
-            else:
-                assert False
-        else:
-            s0 = make_safe(value[i+1:j])
-            if INLINE:
-                s += '&lt;%s&gt;' % s0
-            elif BIB00:
-                s += '[%s]' % s0
-            elif BIB01:
-                s += '[[%s]]' % s0
-    s += make_safe(value[h:])
-    # bib
-    if len(bib) > 0:
-        s = s.strip()
-        s += '<ol class="bib">'
-        for i, (url, name) in enumerate(bib):
-            if inc_links:
-                s += '<li> <a href="%s" target="_blank">%s</a> </li>\n' % (
-                    url, name)
-            else:
-                s += '<li> %s </li>\n' % (name)
-        s += '</ol>'
-    s = s.replace('][', ',')
-    s = s.replace(']&nbsp;[', ',')
-    value = s.strip()
-
-    value = value.replace('\n', '<br/>')
-    value = value.replace('  ', '&nbsp&nbsp')
-    return mark_safe(value)
-
-
-# ************************************************************
-#
-# ************************************************************
-@register.filter
-def get_desc(log, autoescape=True):
-    pass
-
-
-# ************************************************************
-#
-# ************************************************************
 @register.simple_tag
 def url_extra(url, *args, extra='', **kwargs):
+    """Add extra parameters to the url."""
     resolved_url = reverse(url, None, args, kwargs)
     return resolved_url + extra
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.simple_tag
-def url_action(action, *args, extra='', **kwargs):
+def url_action(action, extra=''):
+    """Retrive the url for the action object's stream."""
     resolved_url = action.action_object.activity_url()
     parms = {'date': action.timestamp - datetime.timedelta(seconds=1)}
     extra = str(extra)
@@ -508,12 +393,10 @@ def url_action(action, *args, extra='', **kwargs):
     return resolved_url + extra
 
 
-# ************************************************************
-#
-# ************************************************************
 @register.filter
-def timepassed(value, autoescape=True):
-    delta = timezone.now() - value
+def timepassed(time_then):
+    """Construct a human readable string for the """
+    delta = timezone.now() - time_then
     # seconds
     seconds = delta.total_seconds()
     if seconds <= 90:
@@ -565,6 +448,5 @@ def timepassed(value, autoescape=True):
 #
 # *******************************************************************************
 if __name__ == "__main__":
-    s = 'Yo, [(https://en.wikipedia.org/wiki/Steven_Avery Wikipedia what)] is [up[?]'
-    print(s)
-    print(bibliography(s))
+    test = 'Yo, [(https://en.wikipedia.org/wiki/Steven_Avery Wikipedia what)] is [up[?]'
+    print(bibliography(test))
