@@ -1,0 +1,112 @@
+/*!  __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
+
+A web service for sharing opinions and avoiding arguments
+
+@file       core/tests.py
+@brief      A collection of app specific unit tests
+@copyright  GNU Public License, 2018
+@authors    Frank Imeson
+*/
+
+
+/* link setup */
+a:link {
+    color: blue;
+    text-decoration: none;
+}
+a:visited {
+    color: blue;
+    text-decoration: none;
+}
+a.plain:visited, a.plain:link {
+  color: black;
+  text-decoration: none; 
+}
+input.plain {
+     background:none!important;
+     color:blue;
+     border:none; 
+     padding:0!important;
+     font: inherit;
+     cursor: pointer;
+}
+
+/* bibliography setup */
+.bib {
+  list-style:   none;
+  line-height:  0.1;
+  margin-top:   1em;
+}
+.bib li {
+  counter-increment: step-counter;
+  line-height:  1.25;
+  margin-left:  1em;
+}
+.bib li:before {
+  content:      "[" counter(step-counter) "]";
+  display:      inline-block; 
+  width:        3.3ex;
+  margin-left:  -2em;
+}
+
+
+/* about popup setup */
+.about {
+    position: relative;
+    display:  inline;
+}
+.about span {
+    position:       absolute;
+    width:          70vw;
+    min-height:     60px;
+    color:          #000000;
+    background:     #F0E68C;
+    text-align:     justify;
+    visibility:     hidden;
+    border-radius:  6px;
+    padding:        8px 8px;
+    
+}
+:hover.about span {
+    visibility:     visible;
+    opacity:        1;
+    left:           100%;
+    top:            0%;
+    margin-top:     -50px;
+    margin-left:    15px;
+    z-index:        999;
+}
+@media only screen and (min-width: 768px) {
+  .about span {
+      position:     absolute;
+      width:        600px;
+  }
+}
+
+
+/* Used for help page */
+tbody.responsive {
+    display:        block;
+    max-height:     5000px;
+    overflow-y:     auto; 
+    overflow-x:     hidden;
+}
+
+/* Used for help page */
+ul.actions {
+    padding-left:      +2ex;
+}
+
+
+/* Used for help page */
+ul.offences {
+    margin-left:      -10px;
+    margin-top:        0px;
+    margin-bottom:     0px;
+    padding-top:       0px;
+    padding-bottom:    0px;
+}

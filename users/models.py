@@ -174,6 +174,12 @@ class User(AbstractUser):
                          for x in self.groups.values('name')])
         return levels[-1]
 
+    #******************************
+    # 
+    #******************************
+    def get_levels(self):
+        return sorted([int(x['name'].split(' ')[-1]) for x in self.groups.values('name')])
+
     # ******************************
     # User
     # ******************************
@@ -251,13 +257,13 @@ class User(AbstractUser):
     # ******************************
     def is_using(self, theory_node, recalculate=False):
         if recalculate:
-            if user.opinions.filter(theory=self, deleted=False).exists() or user.opinions.filter(nodes__theory_node=self).exists():
+            if self.opinions.filter(theory=self, deleted=False).exists() or self.opinions.filter(nodes__theory_node=self).exists():
                 self.utilized.add(theory_node)
                 return True
             else:
                 self.utilized.remove(theory_node)
                 return False
-        return self.utilized.filter(theory_node=theory_node).exists()
+        return self.utilized.filter(id=theory_node.pk).exists()
 
     # ******************************
     # User

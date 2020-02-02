@@ -135,11 +135,11 @@ def NotificationsView(request):
     theories = following(user, TheoryNode)
     categories = following(user, Category)
     notifications = user.notifications.all()
-    user_violoations = user.violatoins.all()
+    user_violations = user.violations.all()
     NotificationFormset = modelformset_factory(
         Notification, form=SelectNotificationForm, extra=0)
     ViolationFormset = modelformset_factory(
-        Violoation, form=SelectVioloationForm, extra=0)
+        Violation, form=SelectViolationForm, extra=0)
 
     # Pagination01
     page01 = request.GET.get('page01')
@@ -148,9 +148,9 @@ def NotificationsView(request):
     notifications.page_list = get_page_list(paginator01.num_pages, page01)
     # Pagination02
     page02 = request.GET.get('page02')
-    paginator02 = Paginator(user_feedback, NUM_ITEMS_PER_PAGE)
-    user_feedback = paginator02.get_page(page02)
-    user_feedback.page_list = get_page_list(paginator02.num_pages, page02)
+    paginator02 = Paginator(user_violations, NUM_ITEMS_PER_PAGE)
+    user_violations = paginator02.get_page(page02)
+    user_violations.page_list = get_page_list(paginator02.num_pages, page02)
 
     # Navigation
     prev = request.META.get('HTTP_REFERER', '/')
@@ -162,7 +162,7 @@ def NotificationsView(request):
         formset01 = NotificationFormset(
             request.POST, queryset=notifications.object_list, prefix='notifications')
         formset02 = ViolationFormset(
-            request.POST, queryset=user_feedback.object_list, prefix='feedback')
+            request.POST, queryset=user_violations.object_list, prefix='feedback')
         if formset01.is_valid() and formset02.is_valid():
             if action == 'Mark as Read':
                 for form in formset01:
@@ -192,12 +192,12 @@ def NotificationsView(request):
         formset01 = NotificationFormset(
             queryset=notifications.object_list, prefix='notifications')
         formset02 = ViolationFormset(
-            queryset=user_feedback.object_list, prefix='feedback')
+            queryset=user_violations.object_list, prefix='feedback')
 
     # RENDER
     context = {
         'notifications':            notifications,
-        'user_feedback':            user_feedback,
+        'user_violations':          user_violations,
         'opinions':                 opinions,
         'theories':                 theories,
         'categories':               categories,

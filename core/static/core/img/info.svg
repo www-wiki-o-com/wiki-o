@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   xml:space="preserve"
+   sodipodi:docname="info.svg"
+   viewBox="-10 -10 20 20" width="60" height="60">
+
+  <circle cx="0" cy="0" r="10" fill="blue" stroke="none"/>
+  <text text-anchor="middle" x="0" y="7.2" font-size="22" font-family="FreeSerif" font-weight="bold" fill="white"> i </text>
+
+</svg>
+
+

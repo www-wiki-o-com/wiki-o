@@ -1720,6 +1720,7 @@ def TheorySwapTitles(request, pk):
 # ************************************************************
 #
 # ************************************************************
+@login_required
 @permission_required('theories.change_theorynode', fn=get_object(TheoryNode, 'pk'), raise_exception=True)
 def TheoryAddToHome(request, pk):
     """A redirect for adding the theory to the 'All' category, which in turn
@@ -1750,6 +1751,7 @@ def TheoryAddToHome(request, pk):
 # ************************************************************
 #
 # ************************************************************
+@login_required
 @permission_required('theories.change_theorynode', fn=get_object(TheoryNode, 'pk'), raise_exception=True)
 def TheoryRemoveFromHome(request, pk):
     """A redirect for removing the theory form the 'All' category, which in turn
@@ -2300,7 +2302,7 @@ def OpinionEditView(request, pk, wizard=False):
 
             # update utilization
             for theory_node in utilization_before.keys():
-                utilization_after = theory_node.calc_utilization(user)
+                utilization_after = theory_node.get_utilization(user)
                 if utilization_after and not utilization_before[theory_node]:
                     theory_node.utilization += 1
                 elif utilization_before[theory_node] and not utilization_after:

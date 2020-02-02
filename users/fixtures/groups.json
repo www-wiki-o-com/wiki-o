@@ -252,11 +252,6 @@
         "opinion"
       ],
       [
-        "add_edge",
-        "theories",
-        "theorynode"
-      ],
-      [
         "add_theorynode",
         "theories",
         "theorynode"
@@ -283,11 +278,6 @@
       ],
       [
         "convert_theorynode",
-        "theories",
-        "theorynode"
-      ],
-      [
-        "delete_edge",
         "theories",
         "theorynode"
       ],
