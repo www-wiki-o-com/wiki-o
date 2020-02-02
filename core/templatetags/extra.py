@@ -318,7 +318,7 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
     while ol_depth > 0:
         result += '</ol>'
         ol_depth -= 1
-    detail_text = s
+    detail_text = result
 
     # bib
     if len(bib) > 0:
@@ -354,7 +354,7 @@ def short_bib(detail_text, length=500, autoescape=True):
 
 @register.filter
 def get_verb(log, extra=''):
-    """"Retrieves and formats the log's verb text."""
+    """Retrieves and formats the log's verb text."""
     extra = str(extra)
     verb = interpret_log_text(log, log.verb, extra)
     if isinstance(log, Notification):
@@ -448,5 +448,5 @@ def timepassed(time_then):
 #
 # *******************************************************************************
 if __name__ == "__main__":
-    test = 'Yo, [(https://en.wikipedia.org/wiki/Steven_Avery Wikipedia what)] is [up[?]'
-    print(bibliography(test))
+    TEST = 'Yo, [(https://en.wikipedia.org/wiki/Steven_Avery Wikipedia what)] is [up[?]'
+    print(bibliography(TEST))

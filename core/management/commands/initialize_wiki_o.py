@@ -16,11 +16,10 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # imports
 # *******************************************************************************
-import logging
 from django.core.management.base import BaseCommand
 from django.contrib.sites.models import Site
 from users.utils import create_groups_and_permissions
-from theories.utils import create_categories, create_reserved_nodes
+from theories.utils import create_categories
 
 
 # *******************************************************************************
@@ -33,16 +32,12 @@ from theories.utils import create_categories, create_reserved_nodes
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 class Command(BaseCommand):
-    help = 'Updates permissions, categories, and site.'
+    """Updates permissions, categories, and site."""
+    help = __doc__
 
-    # ******************************
-    #
-    # ******************************
     def handle(self, *args, **options):
+        """The method that is run when the commandline is invoked."""
         create_groups_and_permissions()
         create_categories()
         site = Site.objects.first()
