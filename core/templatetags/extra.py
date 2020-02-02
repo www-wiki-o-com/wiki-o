@@ -251,7 +251,7 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
                 if result[-1] == ' ':
                     result = result.strip()
                     result += '&nbsp;'
-                result += '[%d]' % bib_index + 1
+                result += '[%d]' % (bib_index + 1)
             # add to bib but not inline
             elif bib01:
                 if (url, name) not in bib:
