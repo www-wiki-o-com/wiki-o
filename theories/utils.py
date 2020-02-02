@@ -16,13 +16,8 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # imports
 # *******************************************************************************
-import re
 import random
 import logging
-import reversion
-
-from django.shortcuts import get_object_or_404, render, redirect
-from django.utils import timezone
 from django.contrib import auth
 
 from theories.models import Category, TheoryNode
@@ -31,8 +26,7 @@ from theories.models import Category, TheoryNode
 # *******************************************************************************
 # defines
 # *******************************************************************************
-User = auth.get_user_model()
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 CATEGORY_TITLES = [
     'All',
@@ -43,30 +37,6 @@ CATEGORY_TITLES = [
     'Pop Culture',
     'Conspiracy',
 ]
-
-
-# *******************************************************************************
-# methods
-#
-#
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
-
-# ************************************************************
-#
-# ************************************************************
-def get_or_none(objects, **kwargs):
-    try:
-        return objects.get(**kwargs)
-    except:
-        return None
 
 
 # *******************************************************************************
@@ -91,7 +61,7 @@ def create_categories():
     for title in CATEGORY_TITLES:
         category, created = Category.objects.get_or_create(title=title)
         if created:
-            logger.info('Created category: %s.' % category)
+            LOGGER.info('Created category: %s.' % category)
 
 
 # ******************************
@@ -103,7 +73,7 @@ def create_reserved_nodes(extra=False):
         node_type=TheoryNode.TYPE.EVIDENCE,
     )
     if created:
-        logger.info('Created intuition theory node.')
+        LOGGER.info('Created intuition theory node.')
     if extra:
         for i in range(1, 100):
             new_node, created = TheoryNode.objects.get_or_create(
@@ -126,54 +96,6 @@ def create_reserved_nodes(extra=False):
 #
 # *******************************************************************************
 
-
-# ************************************************************
-#
-# ************************************************************
-def get_form_data(response, verbose_level=0):
-
-    # balh
-    if response.context is None or not hasattr(response.context, 'keys'):
-        return None
-
-    # setup
-    data = {}
-    for content_name in response.context.keys():
-        # formsets
-        if re.search(r'formset', content_name):
-            formset = response.context[content_name]
-
-            # formset managmenet data
-            form = formset.management_form
-            for field in form.fields.keys():
-                data['%s-%s' % (form.prefix, field)] = form[field].value()
-
-            # form data
-            for form in formset.forms:
-                for field in form.fields.keys():
-                    if form[field].value() is None:
-                        data['%s-%s' % (form.prefix, field)] = ''
-                    else:
-                        data['%s-%s' % (form.prefix, field)
-                             ] = form[field].value()
-
-        # forms
-        elif re.search(r'form', content_name):
-            form = response.context[content_name]
-            if not isinstance(form, bool):
-                for field in form.fields.keys():
-                    if form.prefix is None:
-                        data['%s' % (field)] = form[field].value()
-                    else:
-                        data['%s-%s' % (form.prefix, field)
-                             ] = form[field].value()
-
-    if verbose_level >= 10:
-        for x in data:
-            print(160, x, data[x])
-
-    # blah
-    return data
 
 
 # ******************************

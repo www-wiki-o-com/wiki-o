@@ -20,7 +20,7 @@ from django.db.models import Q
 from notifications.models import Notification
 
 from .models import *
-from theories.models import get_or_none, get_first_or_none
+from core.utils import get_first_or_none
 
 
 # ************************************************************

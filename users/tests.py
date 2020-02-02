@@ -23,6 +23,7 @@ from notifications.signals import notify
 
 from theories.utils import *
 from users.utils import *
+from core.utils import get_form_data
 
 import datetime
 
