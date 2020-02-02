@@ -16,11 +16,10 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # imports
 # *******************************************************************************
-import random
-
 from django.test import TestCase
 from django.urls import reverse
 from users.utils import *
+from core.utils import *
 
 
 # ************************************************************

@@ -26,7 +26,7 @@ from users.models import User
 # *******************************************************************************
 # defines
 # *******************************************************************************
-logger = logging.getLogger(__name__)
+LOGGER = logging.getLogger(__name__)
 
 
 # *******************************************************************************
@@ -47,7 +47,7 @@ def create_groups_and_permissions():
                 content_type=ct, codename=name)
             group.permissions.add(perm)
             if created:
-                logger.info('Created %s permissions.' % perm)
+                LOGGER.info('Created %s permissions.' % perm)
     for level in range(1, 5):
         group, created = Group.objects.get_or_create(
             name='user level: %d' % level)
@@ -59,8 +59,8 @@ def create_groups_and_permissions():
                     content_type=ct, codename=name)
                 group.permissions.add(perm)
                 if created:
-                    logger.info('Created %s permissions.' % perm)
-    logger.info('Created default group and permissions.')
+                    LOGGER.info('Created %s permissions.' % perm)
+    LOGGER.info('Created default group and permissions.')
 
 
 # *******************************************************************************

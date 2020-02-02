@@ -28,6 +28,7 @@ from theories.forms import *
 from theories.views import *
 from theories.utils import *
 from users.utils import *
+from core.utils import get_form_data
 
 
 # *******************************************************************************

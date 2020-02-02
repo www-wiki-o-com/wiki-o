@@ -1277,7 +1277,7 @@ class OpinionTests(TestCase):
     # ******************************
     def test_compare_url(self):
         opinion = self.theory.opinions.create(user=self.user)
-        stats = self.theory.get_stats('all')
+        stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.assertIsNotNone(opinion.compare_url())
         self.assertIsNotNone(opinion.compare_url(opinion))
         self.assertIsNotNone(opinion.compare_url(stats))

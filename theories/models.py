@@ -45,6 +45,7 @@ from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
 
 from users.models import User, Violation
+from core.utils import *
 
 
 # *******************************************************************************
@@ -52,45 +53,6 @@ from users.models import User, Violation
 # *******************************************************************************
 DEBUG = False
 logger = logging.getLogger('django')
-
-
-# *******************************************************************************
-# methods
-# *******************************************************************************
-
-
-# ************************************************************
-# ToDo: Move somewhere more useful
-# ************************************************************
-def get_or_none(objects, **kwargs):
-    try:
-        return objects.get(**kwargs)
-    except:
-        return None
-
-
-# ************************************************************
-# ToDo: Move somewhere more useful
-# ************************************************************
-def get_first_or_none(objects, **kwargs):
-    try:
-        return objects.filter(**kwargs).first()
-    except:
-        return None
-
-
-# ******************************
-# ToDo: take in logs instead of last log
-# ToDo: Notifications should only update if last was already read
-# ******************************
-def log_is_diff(log, actor=None, verb=None, action_object=None, target=None, mute_time=21600):
-    if log is None or actor != log.actor or verb != log.verb or log.action_object != action_object or log.target != target:
-        return True
-    else:
-        elapsed_time = timezone.now() - log.timestamp
-        if elapsed_time.total_seconds() >= mute_time:
-            return True
-    return False
 
 
 # *******************************************************************************
@@ -274,24 +236,14 @@ class Category(models.Model):
         """Update activity log."""
 
         # this activity log
-        last_action = self.target_actions.first()
-        if log_is_diff(last_action, user, verb, action_object, self):
-            action.send(user, verb=verb,
-                        action_object=action_object, target=self)
+        log = {'sender':user, 'verb':verb, 'action_object':action_object, 'target':self}
+        stream_if_unique(self.target_actions, log)
 
         # subscribers
         for follower in followers(self):
             if follower != user:
-                verb = '<# target.a_url New activity in category {{ target }} #>.'
-                last_notification = follower.notifications.first()
-                if log_is_diff(last_notification, user, verb, action_object, self):
-                    notify.send(
-                        sender=user,
-                        recipient=follower,
-                        verb=verb,
-                        action_object=action_object,
-                        target=self,
-                    )
+                log['recipient'] = follower
+                notify_if_unique(follower, log)
 
 
 # ************************************************************
@@ -787,19 +739,15 @@ class TheoryNode(models.Model):
                     self.add_to_stats(opinion02, cache=True, save=False)
                 else:
                     # notifications
-                    verb = '<# target.url "{{ target }}" has merged with "{{ object }}" and is now deleted. #>'
-                    desc = 'Please adjust your <# object.url opinion #> to reflect this change.'
-                    last_notification = opinion02.user.notifications.first()
-                    if log_is_diff(last_notification, user, verb, self, opinion02):
-                        notify.send(
-                            sender=user,
-                            recipient=opinion01.user,
-                            verb=verb,
-                            description=desc,
-                            action_object=opinion01,
-                            target=opinion02,
-                            level='warning',
-                        )
+                    log = {}
+                    log['sender'] = user
+                    log['recipient'] = opinion01.user  # TODO: might be a bug, should it be opinion02.user?
+                    log['verb'] = '<# target.url "{{ target }}" has merged with "{{ object }}" and is now deleted. #>'
+                    log['description'] = 'Please adjust your <# object.url opinion #> to reflect this change.'
+                    log['action_object'] = opinion01
+                    log['target'] = opinion02
+                    log['level'] = 'warning'
+                    notify_if_unique(opinion02.user, log) # TODO: might be a bug, should it be opinion01.user?
             # stats
             theory_node.save_stats()
             self.save_stats()
@@ -820,19 +768,15 @@ class TheoryNode(models.Model):
                 changed_theories.append(theory)
             else:
                 # notifications
-                verb = '<# object.url "{{ object }}" has gone through a merge that affects your opinion. #>'
-                desc = 'We apologize for the inconvenience. Please review your <# target.url opinion #> and adjust as necessary.'
-                last_notification = opinion.user.notifications.first()
-                if log_is_diff(last_notification, user, verb, self, opinion):
-                    notify.send(
-                        sender=user,
-                        recipient=opinion.user,
-                        verb=verb,
-                        description=desc,
-                        action_object=self,
-                        target=opinion,
-                        level='warning',
-                    )
+                log = {}
+                log['sender'] = user
+                log['recipient'] = opinion.user
+                log['verb'] = '<# object.url "{{ object }}" has gone through a merge that affects your opinion. #>'
+                log['description'] = 'We apologize for the inconvenience. Please review your <# target.url opinion #> and adjust as necessary.'
+                log['action_object'] = self
+                log['target'] = opinion
+                log['level'] = 'warning'
+                notify_if_unique(opinion.user, log)
         # save changes
         for theory in changed_theories:
             theory.save_stats()
@@ -1367,11 +1311,8 @@ class TheoryNode(models.Model):
             nested_verb = '<strike>' + nested_verb + '</strike>'
 
         # this activity log
-        last_action = self.target_actions.first()
-        if log_is_diff(last_action, user, verb, action_object, self):
-            action.send(user, verb=verb,
-                        action_object=action_object, target=self)
-
+        log = {'sender':user, 'verb':verb, 'action_object':action_object, 'target':self}
+        if stream_if_unique(self.target_actions, log):
             # parent node
             for parent_node in self.get_parent_nodes():
                 if parent_node.pk not in path:
@@ -1384,18 +1325,11 @@ class TheoryNode(models.Model):
                     user, nested_verb, action_object=self)
 
             # subscribers
+            log['verb'] = '<# target.a_url New activity in "{{ target }}" #>.'
             for follower in followers(self):
                 if follower != user:
-                    verb = '<# target.a_url New activity in "{{ target }}" #>.'
-                    last_notification = follower.notifications.first()
-                    if log_is_diff(last_notification, user, verb, action_object, self):
-                        notify.send(
-                            sender=user,
-                            recipient=follower,
-                            verb=verb,
-                            action_object=action_object,
-                            target=self,
-                        )
+                    log['recipient'] = follower
+                    notify_if_unique(follower, log)
 
     # ******************************
     # TheoryNode
@@ -2346,23 +2280,15 @@ class Opinion(TheoryPointerBase, models.Model):
         system_user = User.get_system_user()
 
         # this activity log
-        last_action = self.target_actions.first()
-        if log_is_diff(last_action, system_user, verb, self, self):
-            action.send(system_user, verb=verb,
-                        action_object=action_object, target=self)
+        log = {'sender':system_user, 'verb':verb, 'action_object':action_object, 'target':self} # TODO: might be a bug but the prev diff had action_object = self
+        stream_if_unique(self.target_actions, log)
 
         # subscribed users
+        log['verb'] = '<# target.url {{ target.get_owner }} has modified their opinion of "{{ target }}". #>',
         for follower in followers(self):
             if follower != user:
-                last_notification = follower.notifications.first()
-                if log_is_diff(last_notification, system_user, verb, self, self):
-                    notify.send(
-                        sender=system_user,
-                        recipient=follower,
-                        verb='<# target.url {{ target.get_owner }} has modified their opinion of "{{ target }}". #>',
-                        action_object=action_object,
-                        target=self,
-                    )
+                log['recipient'] = follower
+                notify_if_unique(follower, log)
 
     # ******************************
     # Opinion
