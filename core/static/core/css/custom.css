@@ -1,0 +1,113 @@
+/*!
+ * Start Bootstrap - Modern Business (https://startbootstrap.com/template-overviews/modern-business)
+ * Copyright 2013-2017 Start Bootstrap
+ * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap-logomodern-business-nav/blob/master/LICENSE)
+ 
+ * https://developer.mozilla.org/en-US/docs/Web/CSS/Media_Queries/Using_media_queries
+ */
+
+
+/* Text size */
+html {
+/*    font-size: 14px;*/
+    font-size: 2.5vm;
+}
+
+
+/* Navbar */
+.navbar {
+   height:        50px;
+}
+.navbar-brand, .navbar-header {
+   height:        40px;
+}
+a.anchor 
+{
+    display:      block;
+    position:     relative;
+    top:          -50px;
+    visibility:   hidden;
+}
+body {
+  padding-top:    50px;
+}
+@media only screen and (min-width: 768px) {
+  .navbar {
+     height:      100px;
+  }
+  .navbar-brand, .navbar-header {
+     height:      80px;
+  }
+  a.anchor 
+  {
+      top:        -100px;
+  }
+  body {
+    padding-top:  100px;
+  }
+}
+
+
+
+/* Customize Carousel */
+.carousel-item {
+  height:                   24vh;
+  background-repeat:        no-repeat;
+  background-size:          120% auto;
+  background-position:      center;
+/*  background-color:         lightblue;*/
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+  position:         absolute;
+  top:              0;
+  bottom:           0;
+  width:            15%;
+  color:            #000;
+  opacity:          0.5;
+}
+
+.carousel-control-prev:hover, .carousel-control-prev:focus,
+.carousel-control-next:hover,
+.carousel-control-next:focus {
+  color: #000;
+  text-decoration: none;
+  outline: 0;
+  opacity: .9;
+}
+
+.carousel-control-prev-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 8 8'%3E%3Cpath d='M5.25 0l-4 4 4 4 1.5-1.5-2.5-2.5 2.5-2.5-1.5-1.5z'/%3E%3C/svg%3E");
+}
+
+.carousel-control-next-icon {
+  background-image: url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23000' viewBox='0 0 8 8'%3E%3Cpath d='M2.75 0l-1.5 1.5 2.5 2.5-2.5 2.5 1.5 1.5 4-4-4-4z'/%3E%3C/svg%3E");
+}
+
+.carousel-caption {
+  position:                 relative;
+  top:                      50%; 
+  left:                     50%;
+  width:                    75%;
+  padding:                  0;
+  transform:                translate(-50%,-50%); 
+  color:                    #000;
+/*  background-color:         lightgray;*/
+}
+
+.carousel-indicators li { display: none; }
+
+
+@media only screen and (min-width: 768px) {
+  .carousel-item {
+    height:                   30vh;
+  }
+}
+
+
+
+/* Customize Portfolio (for about page) */
+.portfolio-item {
+  margin-bottom: 30px;
+}

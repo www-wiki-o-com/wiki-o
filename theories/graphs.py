@@ -869,7 +869,6 @@ class PieChart():
         offset = {'x': 0, 'y': 0}
         width = (2.0*R + BOARDER['left'] + BOARDER['right'])
         height = (2.0*R + BOARDER['top'] + BOARDER['bottom'])
-        print(850, width, height)
         svg = """<center><svg baseProfile="full" version="1.1" viewBox="%d %d %d %d">
                """ % (-width/2 + offset['x'], -height/2 + offset['y'], width, height)
 
@@ -1284,7 +1283,6 @@ class BarGraph():
         offset = {'x': 0, 'y': -BOARDER['top']}
         width = W + BOARDER['left'] + BOARDER['right']
         height = H + BOARDER['top'] + BOARDER['bottom']
-        print(1220, width, height)
         svg = """<center><svg baseProfile="full" version="1.1" viewBox="%d %d %d %d">
                """ % (-width/2 + offset['x'], offset['y'], width, height)
         svg += """<defs>
@@ -1559,7 +1557,6 @@ class OpinionVennDiagram():
         width = 1200
         offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
                   'y': BOARDER['top'] + R - self.true_ring.y}
-        print(1500, width, height)
         svg = """<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">
                   <defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]></style></defs>
                """ % (width, height)
