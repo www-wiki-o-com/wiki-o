@@ -1,33 +1,39 @@
-# *******************************************************************************
-# Wiki-O: A web service for sharing opinions and avoiding arguments.
-# Copyright (C) 2018 Frank Imeson
-#
-# This program is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-# *******************************************************************************
+"""  __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
+
+A web service for sharing opinions and avoiding arguments
+
+@file       users/notification_urls.py
+@brief      A collection of urls for the notification system
+@copyright  GNU Public License, 2018
+@authors    Frank Imeson
+"""
 
 
-''' Django notification urls file '''
-# -*- coding: utf-8 -*-
+# *******************************************************************************
+# imports
+# *******************************************************************************
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
 from django import get_version
 from notifications import views
 
+
+# *******************************************************************************
+# defs
+# *******************************************************************************
+# -*- coding: utf-8 -*-
 if StrictVersion(get_version()) >= StrictVersion('2.0'):
     from django.urls import re_path as pattern
 else:
     from django.conf.urls import url as pattern
 
+
+# *******************************************************************************
+# urls
+# *******************************************************************************
 urlpatterns = [
     pattern(r'^mark-all-as-read/$', views.mark_all_as_read,
             name='mark_all_as_read'),
