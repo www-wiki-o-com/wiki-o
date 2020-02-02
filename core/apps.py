@@ -6,12 +6,14 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/models.py
-@brief      A collection of models for the app
+@file       core/apps.py
+@brief      A collection of app specific configurations
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 """
 
-from django.db import models
+from django.apps import AppConfig
 
-# Create your models here.
+
+class HomeConfig(AppConfig):
+    name = 'core'

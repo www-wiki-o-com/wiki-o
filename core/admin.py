@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/admin.py
+@file       core/admin.py
 @brief      The set of models that appear on the admin page
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson

@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/management/hack.py
+@file       core/management/hack.py
 @brief      A debug script for updating the database
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson

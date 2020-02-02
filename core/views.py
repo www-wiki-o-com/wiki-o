@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/views.py
+@file       core/views.py
 @brief      A collection of app specific views
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
@@ -28,7 +28,7 @@ class IndexView(RedirectView):
 #
 # ************************************************************
 class AlphaView(generic.ListView):
-    template_name = 'home/alpha.html'
+    template_name = 'core/alpha.html'
     context_object_name = 'alpha'
 
     def get_queryset(self):
@@ -41,7 +41,7 @@ class AlphaView(generic.ListView):
 
 
 class HelpView(generic.ListView):
-    template_name = 'home/help.html'
+    template_name = 'core/help.html'
     context_object_name = 'help'
 
     def get_queryset(self):
@@ -54,7 +54,7 @@ class HelpView(generic.ListView):
 
 
 class PolicyView(generic.ListView):
-    template_name = 'home/policy01.html'
+    template_name = 'core/policy01.html'
     context_object_name = 'policy'
 
     def get_queryset(self):
@@ -67,7 +67,7 @@ class PolicyView(generic.ListView):
 
 
 class TermsView(generic.ListView):
-    template_name = 'home/terms01.html'
+    template_name = 'core/terms01.html'
     context_object_name = 'terms'
 
     def get_queryset(self):
@@ -80,7 +80,7 @@ class TermsView(generic.ListView):
 
 
 class AboutView(generic.ListView):
-    template_name = 'home/about.html'
+    template_name = 'core/about.html'
     context_object_name = 'about'
 
     def get_queryset(self):
@@ -101,6 +101,6 @@ def ContactView(request):
     }
     return render(
         request,
-        'home/contact.html',
+        'core/contact.html',
         context,
     )

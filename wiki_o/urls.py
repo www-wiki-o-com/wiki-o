@@ -39,7 +39,7 @@ from machina.app import board
 # urls
 # *******************************************************************************
 urlpatterns = [
-    path('', include('home.urls')),
+    path('', include('core.urls')),
     path('', include('theories.urls')),
     path('admin/', admin.site.urls),
     path('feedback/', include(board.urls)),

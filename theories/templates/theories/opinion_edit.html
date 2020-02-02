@@ -64,12 +64,12 @@ A web service for sharing opinions and avoiding arguments
                 <!-- Swap Expand/Cycle -->
                 <th width="20" id=TF_SWAP style="display:table-cell; text-align:center;">
                   <a onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
-                    <img src="{% static 'home/img/expand.svg' %}" height='12'>
+                    <img src="{% static 'core/img/expand.svg' %}" height='12'>
                   </a>
                 </th>
                 <th width="20" id=TF_EXP style="display:none; text-align:center;">
                   <a onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
-                    <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                    <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                   </a>
                 </th>
                 
@@ -145,7 +145,7 @@ A web service for sharing opinions and avoiding arguments
                         <td id={{ theory_node.tag_id }}TS style="display:table-cell; text-align:center;">
                           {% if theory_node.is_subtheory %}
                             <a onclick="TFSwap('{{ theory_node.tag_id }}')">
-                              <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                              <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                             </a>
                           {% endif %}
                         </td>
@@ -153,7 +153,7 @@ A web service for sharing opinions and avoiding arguments
                         <td id={{ theory_node.tag_id }}TC style="display:none; text-align:center;">
                           {% if theory_node.is_subtheory %}
                             <a onclick="TFExpand('{{ theory_node.tag_id }}')">
-                              <img src="{% static 'home/img/collapse.svg' %}" height='12'>
+                              <img src="{% static 'core/img/collapse.svg' %}" height='12'>
                             </a>
                           {% endif %}
                         </td>
@@ -161,7 +161,7 @@ A web service for sharing opinions and avoiding arguments
                         <td id={{ theory_node.tag_id }}TX style="display:none; text-align:center;">
                           {% if theory_node.is_subtheory %}
                             <a onclick="TFExpand('{{ theory_node.tag_id }}')">
-                              <img src="{% static 'home/img/expand.svg' %}" height='12'>
+                              <img src="{% static 'core/img/expand.svg' %}" height='12'>
                             </a>
                           {% endif %}
                         </td>
@@ -210,7 +210,7 @@ A web service for sharing opinions and avoiding arguments
                         <td id={{ theory_node.tag_id }}FS style="display:table-cell; text-align:center;">
                           {% if theory_node.is_subtheory %}
                             <a onclick="TFSwap('{{ theory_node.tag_id }}')">
-                              <img src="{% static 'home/img/cycle.svg' %}" height='12'>
+                              <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                             </a>
                           {% endif %}
                         </td>

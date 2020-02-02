@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/templatetags/extra.py
+@file       core/templatetags/extra.py
 @brief      A collection of template tags
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson

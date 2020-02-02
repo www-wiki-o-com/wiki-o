@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/tests.py
+@file       core/tests.py
 @brief      A collection of app specific unit tests
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
@@ -39,19 +39,19 @@ class SimpleTest(TestCase):
     #
     # ******************************
     def test_alpha_url(self):
-        response = self.client.get(reverse('home:alpha'))
+        response = self.client.get(reverse('core:alpha'))
         self.assertEqual(response.status_code, 200)
 
     # ******************************
     #
     # ******************************
     def test_about_url(self):
-        response = self.client.get(reverse('home:about'))
+        response = self.client.get(reverse('core:about'))
         self.assertEqual(response.status_code, 200)
 
     # ******************************
     #
     # ******************************
     def test_help_url(self):
-        response = self.client.get(reverse('home:help'))
+        response = self.client.get(reverse('core:help'))
         self.assertEqual(response.status_code, 200)
