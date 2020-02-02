@@ -46,12 +46,12 @@ A web service for sharing opinions and avoiding arguments
                   <td style="width:25px">
                     <span id="CHECK_ALL" style="display:inline">
                       <a onclick="CheckAll(); {% for form in formset01 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'home/img/check_all.svg' %}" height='12'>
+                        <img src="{% static 'core/img/check_all.svg' %}" height='12'>
                       </a>
                     </span>
                     <span id="CHECK_NONE" style="display:none">
                       <a onclick="CheckNone(); {% for form in formset01 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'home/img/check_none.svg' %}" height='12'>
+                        <img src="{% static 'core/img/check_none.svg' %}" height='12'>
                       </a>
                     </span>
                   </td>
@@ -122,12 +122,12 @@ A web service for sharing opinions and avoiding arguments
                   <td style="width:25px">
                     <span id="CHECK_ALL" style="display:inline">
                       <a onclick="CheckAll(); {% for form in formset02 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'home/img/check_all.svg' %}" height='12'>
+                        <img src="{% static 'core/img/check_all.svg' %}" height='12'>
                       </a>
                     </span>
                     <span id="CHECK_NONE" style="display:none">
                       <a onclick="CheckNone(); {% for form in formset02 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'home/img/check_none.svg' %}" height='12'>
+                        <img src="{% static 'core/img/check_none.svg' %}" height='12'>
                       </a>
                     </span>
                   </td>

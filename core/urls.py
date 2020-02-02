@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/urls.py
+@file       core/urls.py
 @brief      A collection of app specific urls
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
@@ -18,13 +18,13 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 from django.conf.urls import url
 from django.urls import path
-from home.views import *
+from core.views import *
 
 
 # *******************************************************************************
 # urls
 # *******************************************************************************
-app_name = 'home'
+app_name = 'core'
 urlpatterns = [
     path('', IndexView.as_view(), name='index'),
     path('alpha', AlphaView.as_view(), name='alpha'),

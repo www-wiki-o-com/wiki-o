@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       home/management/resolve_violations.py
+@file       core/management/resolve_violations.py
 @brief      A debug script for updating the database
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
