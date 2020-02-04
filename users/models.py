@@ -127,7 +127,7 @@ class User(AbstractUser):
     def __str__(self, print_fullname=False):
         """Output username if not hidden."""
         if print_fullname and self.get_fullname() != 'N/A':
-            return "%s (%s)" % (self.get_fullname(), self.get_username())
+            return self.get_fullname()
         else:
             return self.get_username()
 

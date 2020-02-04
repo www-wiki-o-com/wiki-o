@@ -1161,7 +1161,10 @@ class OpinionTests(TestCase):
     # ******************************
     def test_str(self):
         opinion = self.theory.opinions.create(user=self.user)
-        self.assertEqual(opinion.__str__(), self.theory.__str__())
+        if opinion.is_true():
+            self.assertEqual(opinion.__str__(), self.theory.get_true_statement())
+        else:
+            self.assertEqual(opinion.__str__(), self.theory.get_false_statement())
 
     # ******************************
     # OpinionTests
