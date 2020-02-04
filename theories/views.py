@@ -1919,18 +1919,39 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
         parms00.flags.append('flat')
     swap_flat_url = opinion.url() + parms00 + '#VennDiagram'
 
+    # Stats
+    stats = 'stats' in parms.flags
+    parms00 = parms.get_copy()
+    if stats:
+        parms00.flags.remove('stats')
+    else:
+        parms00.flags.append('stats')
+    swap_stats_url = opinion.url() + parms00
+
     # Diagrams
     theory.cache()
     opinion.cache()
-    points_diagram = OpinionPieChart(opinion)
-    evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
-    population_diagram = OpinionBarGraph(opinion)
-    evidence = {
-        'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True)[:6],
-        'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True)[:6],
-        'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True)[:6],
-        'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True)[:6],
-    }
+    if stats:
+        points_diagram = OpinionPieChart(opinion)
+        population_diagram = OpinionBarGraph(opinion)
+        evidence_diagram = None
+        evidence = None
+    else: 
+        points_diagram = None
+        population_diagram = None
+        evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
+        evidence = {
+            'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True),
+            'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True),
+            'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True),
+            'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
+        }
+        for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
+            if node not in evidence['collaborative'] and \
+               node not in evidence['controversial'] and \
+               node not in evidence['contradicting'] and \
+               node not in evidence['unaccounted']:
+                evidence['unaccounted'].append(node)
 
     # Render
     context = {
@@ -1939,19 +1960,25 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
         'subscribed':           subscribed,
         'opinion_list':         opinion_list,
         'parent_opinions':      parent_opinions,
-        'points_diagram':       points_diagram.output_svg(),
-        'evidence_diagram':     evidence_diagram.output_svg(),
-        'population_diagram':   population_diagram.output_svg(),
-        'points_text':          points_diagram.output_text(),
-        'evidence_text':        evidence_diagram.output_text(),
-        'population_text':      population_diagram.output_text(),
         'evidence':             evidence,
         'prev':                 prev,
         'parms':                parms,
         'flat':                 flat,
+        'stats':                stats,
         'swap_flat_url':        swap_flat_url,
+        'swap_stats_url':       swap_stats_url,
         'compare_url':          compare_url,
     }
+    if evidence_diagram is not None:
+        context['evidence_diagram'] = evidence_diagram.output_svg()
+        context['evidence_text'] = evidence_diagram.output_text()
+    if points_diagram is not None:
+        context['points_diagram'] =  points_diagram.output_svg()
+        context['points_text'] = points_diagram.output_text()
+    if population_diagram is not None:
+        context['population_diagram'] = population_diagram.output_svg()
+        context['population_text'] =population_diagram.output_text()
+
     return render(
         request,
         'theories/opinion_detail.html',

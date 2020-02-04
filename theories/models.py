@@ -1781,8 +1781,15 @@ class Opinion(TheoryPointerBase, models.Model):
     # Opinion
     # ******************************
     def __str__(self):
-        """Pass-through for theory."""
-        return self.theory.__str__()
+        """String method for OpinionNode."""
+        if self.is_true():
+            return self.theory.get_true_statement()
+        else:
+            return self.theory.get_false_statement()
+
+    def get_str(self):
+        """Pass-through for __str__."""
+        return self.__str__()
 
     # ******************************
     # Opinion
@@ -1804,6 +1811,12 @@ class Opinion(TheoryPointerBase, models.Model):
     # ******************************
     def is_anonymous(self):
         return self.anonymous or self.user.is_hidden()
+    
+    def is_true(self):
+        return self.true_points() > self.false_points()
+
+    def is_false(self):
+        return not is_true()
 
     # ******************************
     # Opinion

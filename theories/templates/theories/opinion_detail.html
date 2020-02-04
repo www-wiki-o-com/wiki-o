@@ -7,7 +7,7 @@
 A web service for sharing opinions and avoiding arguments
 
 @file       theories/templates/theories/opinion_detail.html
-@brief      The page for displaying all the stats on an opinion
+@brief      The page for displaying an opinion's dependancies
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 -->
@@ -22,81 +22,77 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
   <!-- Title -->
-  <h3 style="padding-top:1ex">
+  <h3 style="padding-top:1ex; margin-bottom:-0.25ex">
     
     <!-- username -->
     {% if opinion|get_class == 'Opinion' and not opinion.is_anonymous %}
-      <a href="{{ opinion.user.url }}">
+      <a class="plain" href="{{ opinion.user.url }}">
         {{ opinion.get_owner_long }}
       </a>
     {% else %}
       {{ opinion.get_owner_long }}
     {% endif %}
-    
-    <!-- show/hide -->
-    {% if user.is_visible %}
-      {% has_perm 'theories.change_opinion' user opinion as can_change %}
-      {% if can_change %}
-        <small><small><small>
-        <a data-target="#anonymous_modal" data-toggle="modal" href="#anonymous_modal">
-          {% if opinion.anonymous %}
-            (reveal)
-          {% else %}
-            (hide)
-          {% endif %}
-        </a>
-        </small></small></small>
-      {% endif %}
-    {% endif %}
-
+    believes 
+    <a href={{ theory.url|add:parms }} class="plain">
+      <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}> &ldquo;{{ opinion.get_str|remove_punctuation }}&rdquo; </font>
+    </a>
   </h3>
-  <h3> Opinion for &ldquo;{{ theory }}&rdquo; </h3>
+  <small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they belong to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %} side)</small>  
   
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
+
+      <!-- Details -->
+      <!-- <div style="text-align: justify">{{  theory.details|bibliography }}</div> -->
       
-      <!-- PieChart -->
-      <div class="card my-3">
-        <h5 class="card-header"> Point Distribution </h5>
-        <div class="card-body text-justify">
-          {{ points_diagram|safe }}
-          {{ points_text|safe }}
-        </div>
-      </div>
+      {% if stats %}
 
-      <!-- BarGraph -->
-      <div class="card my-3">
-        <h5 class="card-header"> Population Histogram </h5>
-        <div class="card-body text-justify">
-          {{ population_diagram|safe }}
-          {{ population_text|safe }}
+        <!-- PieChart -->
+        <div class="card my-3">
+          <h5 class="card-header"> Point Distribution </h5>
+          <div class="card-body text-justify">
+            {{ points_diagram|safe }}
+            {{ points_text|safe }}
+          </div>
         </div>
-      </div>
 
-      <!-- VennDiagram -->
-      <a id="VennDiagram" class="anchor" ></a>
-      <div class="card my-3">
-        <h5 class="card-header">
-          Evidence Dependencies 
-          <small><small>
-            <a href={{ swap_flat_url }}>
-              {% if flat %}
-                  (unflatten)
-              {% else %}
-                  (flatten)
-              {% endif %}
-            </a>
-          </small></small>
-        </h5>
-        <div class="card-body text-justify">
-          {{ evidence_diagram|safe }}
-          {{ evidence_text|safe }}
-          {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.collaborative  title="Collaborative evidence" %}
-          {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.controversial  title="Controversial evidence" %}
-          {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.contradicting  title="Contradicting evidence" %}
-          {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.unaccounted    title="Insignificant evidence" %}
+        <!-- BarGraph -->
+        <div class="card my-3">
+          <h5 class="card-header"> Population Histogram </h5>
+          <div class="card-body text-justify">
+            {{ population_diagram|safe }}
+            {{ population_text|safe }}
+          </div>
         </div>
-      </div>
+
+      {% else %}
+
+        <!-- VennDiagram -->
+        <a id="VennDiagram" class="anchor" ></a>
+        <div class="card my-3">
+          <h5 class="card-header">
+            Evidence Dependencies 
+            <small><small>
+              <a href={{ swap_flat_url }}>
+                {% if flat %}
+                    (unflatten)
+                {% else %}
+                    (flatten)
+                {% endif %}
+              </a>
+            </small></small>
+          </h5>
+          <div class="card-body text-justify">
+            {{ evidence_diagram|safe }}
+            {{ evidence_text|safe }}
+            {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.collaborative  title="Collaborative evidence" %}
+            {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.controversial  title="Controversial evidence" %}
+            {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.contradicting  title="Contradicting evidence" %}
+            {% include "theories/opinion_detail_table.html" with opinion_nodes=evidence.unaccounted    title="Insignificant / unaccounted for evidence" %}
+          </div>
+        </div>
+
+      {% endif %}
 
       <p>
         {% if prev %}
@@ -129,6 +125,21 @@ A web service for sharing opinions and avoiding arguments
                 <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete Opinion </a></li>
               {% endif %}
 
+              <!-- Show/Hide -->
+              {% if user.is_visible %}
+                {% has_perm 'theories.change_opinion' user opinion as can_change %}
+                {% if can_change %}
+                  <li><a data-target="#anonymous_modal" data-toggle="modal" href="#anonymous_modal">
+                    {% if opinion.anonymous %}
+                      Reveal Username
+                    {% else %}
+                      Hide Username
+                    {% endif %}
+                  </a></li>
+                {% endif %}
+              {% endif %}
+
+
               {% if opinion.user != user %}
 
                 <!-- Copy -->
@@ -147,8 +158,10 @@ A web service for sharing opinions and avoiding arguments
             {% endif %}
             
             <!-- Compare -->
-            <li><a href="{{ compare_url }}"> Compare </a></li>            
-            
+            <li><a href="{{ compare_url }}"> Compare </a></li>
+
+            <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a></li>
+
             <!-- Share -->
             <li> Share </li>
           
