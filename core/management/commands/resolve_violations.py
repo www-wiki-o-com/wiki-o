@@ -16,11 +16,7 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # imports
 # *******************************************************************************
-import logging
 from django.core.management.base import BaseCommand
-from django.contrib.sites.models import Site
-from users.utils import create_groups_and_permissions
-from theories.utils import create_categories, create_reserved_nodes
 from users.models import Violation
 
 
@@ -34,16 +30,12 @@ from users.models import Violation
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 class Command(BaseCommand):
-    help = 'Tallies and closes open polls for violations.'
+    """Tallies and closes open polls for violations."""
+    help = __doc__
 
-    # ******************************
-    #
-    # ******************************
     def handle(self, *args, **options):
+        """The method that is run when the commandline is invoked."""
         for violation in Violation.get_violations(opened=True, closed=False):
             if violation.poll_is_done():
                 violation.close_poll()

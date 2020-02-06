@@ -12,6 +12,4 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-from django.contrib import admin
-
 # Register your models here.
