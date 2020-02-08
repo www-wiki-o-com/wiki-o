@@ -172,8 +172,15 @@ def possessive(text):
     """Add the possesive 's or ' to the end of the text."""
     if text[-1] == 's':
         return text + "'"
-    else:
-        return text + "'s"
+    return text + "'s"
+
+
+@register.filter
+def remove_punctuation(string):
+    """Removes the punctuation."""
+    if re.match(r'.*[.!]', string):
+        return string[:-1]
+    return string
 
 
 @register.filter
