@@ -18,6 +18,7 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 import sys
 import math
+import enum
 import numpy
 import random
 
@@ -27,6 +28,29 @@ from django.contrib.staticfiles.templatetags.staticfiles import static
 
 from .models import TheoryNode, NodePointerBase
 from . import models
+
+
+# *******************************************************************************
+# defines
+# *******************************************************************************
+class Direction(enum.Enum):
+    """Enum for direction to shapes."""
+    IN = 1
+    OUT = 2
+
+class Colour():
+    """A class for colour constants."""
+    RED = '#FF0000'
+    BLACK = '#000000'
+    PINK = '#FF8080'
+    GREY = '#808080'
+
+    def get_transparent_colour(self, colour):
+        if colour == self.RED:
+            return self.PINK
+        if colour == self.BLACK:
+            return self.GREY
+        assert False
 
 
 # *******************************************************************************
@@ -40,6 +64,22 @@ from . import models
 # *******************************************************************************
 
 
+def offset_xy(x, y, offset):
+    """Offset x,y with offset
+
+    @param[in]  x: The x coordiante to offset.
+    @param[in]  y: The y coordiante to offset.
+    @param[in]  offset: The x,y offset dictionary.
+    @return     A tuple of x,y offset if offset was not None.
+    """
+    if isinstance(offset, dict):
+        if 'x' in offset:
+            x += offset['x']
+        if 'y' in offset:
+            y += offset['y']
+    return x, y
+
+
 # *******************************************************************************
 # Self organizing shapes
 #
@@ -51,332 +91,319 @@ from . import models
 # *******************************************************************************
 
 
-# ************************************************************
-# Class constants:
-# B: boundary or length of spring
-# K: spring force constant. A value of one indicates a repelled shape overlapping a shape by dx, will move a distance of dx.
-# ************************************************************
-class SpringShape:
-    """A parent class for shapes used for the Venn-diagram. All shapes are
-       treated as circles (squares will fit inside a circle). The spring aspect
-       allows the shapes to repel each other and thus avoid overlap."""
+class SpringShapeBase:
+    """
+    A parent class for shapes used for the Venn-diagram. All shapes are
+    treated as circles (squares will fit inside a circle). The spring aspect
+    allows the shapes to repel each other and thus avoid overlap.
 
-    # defines
-    B = 5.0
-    K = 1.0
+    Usage:
+      - Calculate the total force on a shape imposed from all the other spring shapes.
+      - Use the total force to move (propigate) the shape into a location with lower potential.
+    """
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, x, y, r, colour='black', stroke_colour='black', opacity=1.0):
-        """A spring shape is defined by its coordinates, encapsulating radius, colour, and opacity."""
-        self.r = r
+    # Constants
+    DEFAULT_SPRING_LENGTH = 5.0
+    DEFAULT_SPRING_CONSTANT = 1.0
+
+    def __init__(self, x, y, r, colour=Colour.BLACK, stroke_colour=Colour.BLACK):
+        """
+        A spring shape is defined by its coordinates, encapsulating radius, and colour.
+        
+        @param[in]  x,y: The initial x,y coordinates.
+        @param[in]  r: The bounding radius (w.r.t the spring force all shapes are treated
+                    as circles).
+        @param[in]  colour: The shape's colour.
+        @param[in]  stroke_colour: The shape's line colour.
+        """
         self.x = x
         self.y = y
-        self.k = self.K
+        self.r = r
         self.colour = colour
-        self.opacity = opacity
         self.stroke_colour = stroke_colour
+        self.spring_length = self.DEFAULT_SPRING_LENGTH
+        self.spring_constant = self.DEFAULT_SPRING_CONSTANT
 
-    # ******************************
-    #
-    # ******************************
     def __str__(self):
         """Output coordinates for debug information."""
         return "(%0.3f, %0.3f, %0.3f)" % (self.x, self.y, self.r)
 
-    # ******************************
-    #
-    # ******************************
-    def out_dist(self, object02):
-        """Calculate distance to object02 assuming the spring is on the outside of the shape."""
-        dx = self.x - object02.x
-        dy = self.y - object02.y
-        d = math.sqrt(dx**2 + dy**2)
-        ud = d - self.r - object02.r
-        ux = 1.0*dx/d
-        uy = 1.0*dy/d
-        return ux, uy, ud
+    def get_separation_vector(self, shape02, direction=Direction.OUT):
+        """
+        Calculate the separation vector from self to shape02.
 
-    # ******************************
-    #
-    # ******************************
-    def in_dist(self, object02):
-        """Calculate distance to object02 assuming the spring is on the inside of the shape."""
-        dx = object02.x - self.x
-        dy = object02.y - self.y
+        @param[in]  shape02: The other shape.
+        @param[in]  direction: Two solid objects will force other shapes "outwards", while hollow
+                    objects, such as rings, will push them "inwards".
+        @return     The direction vector (x, y, magnitude) relative to self. Negative magnitude
+                    indicates that the shapes are in collision.
+        """
+        dx = shape02.x - self.x
+        dy = shape02.y - self.y
         d = math.sqrt(dx**2 + dy**2)
-        if isinstance(self, Ring):
-            ud = self.r - (d + object02.r)
+        unit_x = 1.0 * dx/d
+        unit_y = 1.0 * dy/d
+        if direction == Direction.OUT:
+            separation = d - self.r - shape02.r
+            return unit_x, unit_y, separation
         else:
-            ud = object02.r - (d + self.r)
-            assert isinstance(object02, Ring)
-        ux = 1.0*dx/d
-        uy = 1.0*dy/d
-        return ux, uy, ud
+            assert isinstance(self, Ring) or isinstance(shape02, Ring)
+            if isinstance(self, Ring):
+                separation = self.r - (d + shape02.r)
+            else:
+                separation = shape02.r - (d + self.r)
+            return -unit_x, -unit_y, separation
 
-    # ******************************
-    # try k = 0.1
-    # ******************************
-    def inverse_force(self, object02):
-        """A force method based on inverse distance (not used)."""
-        k = object02.k
-        B = object02.B
-        if direction == 'out':
-            ux, uy, ud = object02.out_dist(self)
-        elif direction == 'in':
-            ux, uy, ud = object02.in_dist(self)
-        d = max(0.01, ud)
-        f = -min(0.1, 1.0 * k * (max(0.3, object02.r)/d)**10)
-        return f*ux, f*uy
+    def get_spring_force(self, shape02, direction=Direction.OUT):
+        """
+        Calculates the force imposed on shape02 by self.
 
-    # ******************************
-    #
-    # ******************************
-    def spring_force(self, object02, direction='out'):
-        """A force method based linear distance with option to flip direction."""
-        k = object02.k
-        B = object02.B
-        if direction == 'out':
-            ux, uy, ud = object02.out_dist(self)
-        elif direction == 'in':
-            ux, uy, ud = object02.in_dist(self)
-        f = -1.0 * k * max(0, B - ud)
-        return f*ux, f*uy
+        @param[in]  shape02: The other shape.
+        @param[in]  direction: The direction to shape02 (IN or OUT).
+        @return     The force vector (x,y) relative to .
+        """
+        unit_x, unit_y, separation = self.get_separation_vector(shape02, direction)
+        compression = max(0, self.spring_length - separation)
+        force = 1.0 * self.spring_constant * compression
+        return force * unit_x, force * unit_y
 
-    # ******************************
-    #
-    # ******************************
-    def reset_k(self):
-        """The spring force degrades over each iteration, this method resets the
-           spring force constant."""
-        self.k = self.K
+    def reset_spring_constant(self):
+        """
+        The spring force constant degrades over each iteration, this method resets the
+        spring force constant.
+        """
+        self.spring_constant = self.DEFAULT_SPRING_CONSTANT
 
-    # ******************************
-    #
-    # ******************************
-    def get_force(self, object02, direction='out'):
-        """A pass-through method for calculating the repel force."""
-        return self.spring_force(object02, direction=direction)
-
-    # ******************************
-    #
-    # ******************************
     def propigate(self, dx, dy):
-        """A method for calculating the step distance based on the repel force."""
+        """
+        A method for calculating the step distance based on the repel force.
+
+        @param[in]  dx: The x distance to propigate the shape.
+        @param[in]  dy: The y distance to propigate the shape.
+        """
         self.x += dx
         self.y += dy
 
 
-# ************************************************************
-#
-# ************************************************************
-class EvidenceShape(SpringShape):
+class EvidenceShape(SpringShapeBase):
     """A sub-class of spring shape for square objects (evidence)."""
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, node, x, y, area, colour='black', opacity=1.0):
-        """Setup the repel radius for avoiding overlap."""
-        self.node = node
-        self.l = math.sqrt(area)           # a = l x w
-        # special relation for 45deg triangles
-        r = (self.l/2) * math.sqrt(2)
-        super().__init__(x, y, r, colour, opacity)
+    def __init__(self, node, x, y, area):
+        """
+        Constructor for an evidence node/shape.
 
-    # ******************************
-    # <g transform="rotate(0,%d,%d)"></g>
-    # ******************************
-    def svg_hidden(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for the hidden-highlight shape."""
-        l = self.l + 15
-        x = self.x - l/2
-        y = self.y - l/2
-        svg = """<rect id="%s" visibility="hidden" x="%d" y="%d" width="%d" height="%d" fill="none" stroke="lime" stroke-width="10"/>
-              """ % (
-            self.node.tag_id(),
-            offset['x'] + x,
-            offset['y'] + y,
-            l,
-            l,
-        )
+        @details    The bounding radius is setup to encompase the square and is used for the
+                    spring force logic.
+        @param[in]  node: The evidence node (used for colour and captions).
+        @param[in]  x,y: The initial x,y coordinates.
+        @param[in]  area: The area of the square.
+        """
+        self.node = node
+        self.length = math.sqrt(area)
+        bounding_radius = (self.length/2) * math.sqrt(2)
+        super().__init__(x, y, bounding_radius)
+
+    def get_highlight_svg(self, offset=None):
+        """
+        Output the svg code for the hidden-highlight shape.
+        @details    This graphic is hidden by default but is revealed to highlight the shape.
+        @param[in]  offset: The x,y offset to be used stored in a dict {'x':offset_x, 'y':offset_y}.
+        @return     The svg text for displaying the shape.
+        """
+        length = self.length + 15
+        x = self.x - length/2
+        y = self.y - length/2
+        x, y = offset_xy(x, y, offset)
+        svg = '<rect id="%s" visibility="hidden"' % self.node.tag_id()
+        svg += ' x="%d" y="%d" ' % (x, y)
+        svg += ' width="%d" height="%d" ' % (length, length)
+        svg += ' fill="none" stroke="lime" stroke-width="10"/>'
         return svg
 
-    # ******************************
-    # <g transform="rotate(45,%d,%d)"></g>
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for the shape (opacity is a function of fact/intuition)."""
+    def get_svg(self, offset=None):
+        """
+        Output the svg code for the shape (shade is a function of fact/intuition).
+        @details    The colour and shade are calculated based on:
+                      - How the node is being used in the theory, red for false, black for true,
+                      - The colour is transparent if the evidence is non-factual.
+        @param[in]  offset: The x,y offset to be used stored in a dict {'x':offset_x, 'y':offset_y}.
+        @return     The svg text for displaying the shape.
+        """
         if self.node.true_points() >= self.node.false_points():
-            colour = 'black'
+            if self.node.is_verifiable():
+                colour = Colour.BLACK
+            else:
+                colour = Colour.GREY
         else:
-            colour = 'red'
-        if self.node.is_verifiable():
-            opacity = 1.0
-        else:
-            opacity = 0.5
-        l = self.l
-        x = self.x - l/2
-        y = self.y - l/2
+            if self.node.is_verifiable():
+                colour = Colour.RED
+            else:
+                colour = Colour.PINK
+        length = self.length
+        x = self.x - length/2
+        y = self.y - length/2
+        x, y = offset_xy(x, y, offset)
         svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
-        svg += '<rect x="%d" y="%d" width="%d" height="%d" fill="%s" fill-opacity="%0.2f" stroke-width="0">' % \
-            (offset['x'] + x, offset['y'] + y, l, l, colour, opacity)
+        svg += '<rect x="%d" y="%d"' % (x, y)
+        svg += ' width="%d" height="%d"' % (length, length)
+        svg += ' fill="%s" stroke-width="0">' % colour
         svg += '<title>%s</title>' % str(self.node)
         svg += '</rect></a>'
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
-class SubtheoryShape(SpringShape):
+class SubtheoryShape(SpringShapeBase):
     """A sub-class of spring shape for circle objects (sub-theories)."""
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, node, x, y, area, colour='black', opacity=1.0):
-        """Setup the repel radius for avoiding overlap."""
+    def __init__(self, node, x, y, area):
+        """
+        The constructor for a sub-theory node/shape.
+        @param[in]  node: The sub-theory node (used for colour and captions).
+        @param[in]  x,y: The initial x,y coordinates.
+        @param[in]  area: the area of the circle.
+        """
         self.node = node
-        r = math.sqrt(area/PI)
-        super().__init__(x, y, r, colour, opacity)
+        bounding_radius = math.sqrt(area/PI)
+        super().__init__(x, y, bounding_radius)
 
-    # ******************************
-    #
-    # ******************************
-    def svg_hidden(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for the hidden-highlight shape."""
+    def get_highlight_svg(self, offset=None):
+        """
+        Output the svg code for the hidden-highlight shape.
+        @details    This graphic is hidden by default but is revealed to highlight the shape.
+        @param[in]  offset: the x,y offset to be used.
+        @return     The svg text for displaying the shape.
+        """
+        x = self.x
+        y = self.y
+        x, y = offset_xy(x, y, offset)
         r = self.r + 7.5
-        svg = """<circle id="%s" visibility="hidden" cx="%d" cy="%d" r="%d" fill="none" stroke="lime" stroke-width="10"/>
-              """ % (
-            self.node.tag_id(),
-            offset['x'] + self.x,
-            offset['y'] + self.y,
-            r,
-        )
+        svg = '<circle id="%s" visibility="hidden"' % self.node.tag_id()
+        svg += ' cx="%d" cy="%d" r="%d"' % (x, y, r)
+        svg += ' fill="none" stroke="lime" stroke-width="10"/>'
         return svg
 
-    # ******************************
-    #
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for the shape (opacity is a function of fact/intuition)."""
+    def get_svg(self, offset=None):
+        """
+        Output the svg code for the shape (opacity is a function of fact/intuition).
+        @details    The colour and opacity are calculated based on:
+                      - how the node is being used in the theory, red for false, black for true,
+                      - currently the colour is never transparent.
+        @param[in]  offset: the x,y offset to be used.
+        @return     The svg text for displaying the shape.
+        """
+        x = self.x
+        y = self.y
+        x, y = offset_xy(x, y, offset)
+        r = self.r
         if self.node.true_points() >= self.node.false_points():
-            colour = 'black'
+            colour = Colour.BLACK
         else:
-            colour = 'red'
+            colour = Colour.RED
         svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
-        svg += '<circle cx="%d" cy="%d" r="%d" fill="%s" stroke-width="0">' % \
-            (offset['x'] + self.x, offset['y'] + self.y, self.r, colour)
+        svg += '<circle'
+        svg += ' cx="%d" cy="%d" r="%d"' % (x, y, r)
+        svg += ' fill="%s" stroke-width="0">' % colour
         svg += '<title>%s</title>' % str(self.node)
         svg += '</circle></a>'
         return svg
 
 
-# ************************************************************
-# Class constants:
-  # B: boundary or length of spring
-  # K: spring force constant (see parent class for more details).
-# ************************************************************
-class Ring(SpringShape):
+class Ring(SpringShapeBase):
     """A sub-class of spring shape for ring objects (the true and false sets)."""
 
-    # defines
-    B = 5.0     # length of spring
-    k = 1.0     # spring force constant
+    DEFAULT_SPRING_LENGTH = 10
+    DEFAULT_SPRING_CONSTANT = 1.0
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, x, y, r, colour='none', stroke_colour='black', opacity=0.25):
-        """Setup the repel radius for avoiding overlap."""
-        super().__init__(x, y, r, colour=colour, stroke_colour=stroke_colour, opacity=opacity)
-        self.x_max = None
-        self.x_min = None
+    def __init__(self, x, y, r, colour='none', stroke_colour=Colour.BLACK, x_min=None, x_max=None):
+        """
+        The constructor for the ring shape.
+        @details    Rings will not propigate in the y direction or outside their x boundaries.
+        @param[in]  x,y: The initial x,y coordinates
+        @param[in]  r: The radius of the ring.
+        @param[in]  colour: The fill colour.
+        @param[in]  stroke_colour: The colour of the ring.
+        @param[in]  x_min: The minimum x possition the ring may obtain.
+        @param[in]  x_max: The maximum x possition the ring may obtain.
+        """
+        self.x_min = x_min
+        self.x_max = x_max
+        super().__init__(x, y, r, colour=colour, stroke_colour=stroke_colour)
 
-    # ******************************
-    #
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for the shape."""
-        svg = """<circle cx="%d" cy="%d" r="%d" fill="%s" stroke="%s" fill-opacity="%0.2f" stroke-width="4"/>
-              """ % (offset['x'] + self.x, offset['y'] + self.y, self.r, self.colour, self.stroke_colour, self.opacity)
-        return svg
-
-    # ******************************
-    #
-    # ******************************
-    def spring_force(self, object02, direction='in'):
-        """Rings can only move horizontally, thus this method nullifies any vertical forces."""
-        fx, fy = super().spring_force(object02, direction)
-        return fx, 0
-
-    # ******************************
-    #
-    # ******************************
     def propigate(self, dx, dy):
-        """Rings cannot move outside of a boundary."""
+        """
+        Move the ring by dx,dy.
+        @param[in]  dx,dy: The x,y distance to move the ring.
+        """
         self.x += dx
-        if self.x_max is not None:
-            self.x = min(self.x, self.x_max)
         if self.x_min is not None:
             self.x = max(self.x, self.x_min)
+        if self.x_max is not None:
+            self.x = min(self.x, self.x_max)
+
+    def get_svg(self, offset=None):
+        """
+        Output the svg code for the shape.
+        @param[in]  offset: the x,y offset to be used.
+        """
+        x = self.x
+        y = self.y
+        x, y = offset_xy(x, y, offset)
+        r = self.r
+        svg = """<circle cx="%d" cy="%d" r="%d" fill="%s" stroke="%s" stroke-width="4"/>
+              """ % (x, y, r, self.colour, self.stroke_colour)
+        return svg
 
 
-# ************************************************************
-#
-# ************************************************************
-class Wall(SpringShape):
+class Wall(SpringShapeBase):
     """A sub-class of spring shape for boundaries (no svg display)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, x, y):
-        """Setup the repel boundary for avoiding shapes leave frame of view."""
-        self.x = x
-        self.y = y
-        self.k = self.K
-        assert x == None or y == None
+        """
+        Setup the repel boundary for avoiding shapes leave frame of view.
+        @details    Walls only have one coordinate, x or y, if x, then the wall extends
+                    the entire y axis.
+        @param[in]  x,y: The coordinates of the wall.
+        """
+        assert x is None or y is None
+        super().__init__(x, y, 0)
 
-    # ******************************
-    #
-    # ******************************
-    def in_dist(self, object02):
-        """Calculate distance to boundary."""
+    def get_separation_vector(self, shape02, direction=Direction.IN):
+        """Calculate distance to boundary.
+
+        @details    Walls are a special SpringShape that repel only in one direction (x or y).
+                    If the direction is x and the possition of the wall below the axis (negative),
+                    then the wall's force is always upwards.
+        @param[in]  shape02: The other shape.
+        @param[in]  direction: Two solid objects will force other shapes "outwards", while hollow
+                    objects, such as rings, will push them "inwards".
+        @return     The direction vector (x, y, magnitude) relative to self. Negative magnitude
+                    indicates that the shapes are in collision.
+        """
+        assert direction == Direction.IN
+        assert self.x is not None or self.y is not None
+        unit_x = unit_y = 0.0
         if self.x is not None:
-            dx = object02.x + object02.r - self.x
-            dy = 0
-        elif self.y is not None:
-            dx = 0
-            dy = object02.y - self.y
-            if self.y <= 0:
-                dy -= object02.r
-                ud = dy
+            if self.x < 0:
+                unit_x = 1.0
+                separation = shape02.x - shape02.r - self.x
             else:
-                dy += object02.r
-                ud = -dy
-        else:
-            assert False
+                unit_x = -1.0
+                separation = self.x - shape02.x - shape02.r
+        elif self.y is not None:
+            if self.y < 0:
+                unit_y = 1.0
+                separation = shape02.y - shape02.r - self.y
+            else:
+                unit_y = -1.0
+                separation = self.y - shape02.y - shape02.r
+        return unit_x, unit_y, separation
 
-        d = abs(dx) + abs(dy)
-        ux = 1.0*dx/d
-        uy = 1.0*dy/d
-        return ux, uy, ud
-
-    # ******************************
-    #
-    # ******************************
-    def svg(self):
-        """This shape has nothing to display."""
+    def propigate(self, dx, dy):
+        """Dummy method, walls don't move."""
         assert False
 
-    # ******************************
-    #
-    # ******************************
-    def out_dist(self, object02):
-        """This shape only has an in force."""
+    def get_svg(self):
+        """Dummy method, this shape has nothing to display."""
         assert False
 
 
@@ -391,15 +418,9 @@ class Wall(SpringShape):
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 class Text():
     """A class for drawing text."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, text, x, y, size=30, align='middle', bold=False, colour=None):
         """Create text."""
         self.text = text
@@ -410,13 +431,11 @@ class Text():
         self.align = align
         self.colour = colour
 
-    # ******************************
-    #
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
+    def get_svg(self, offset=None):
         """Output the svg code for text."""
+        x, y = offset_xy(self.x, self.y, offset)
         svg = """<text text-anchor="%s" x="%d" y="%d" font-size="%d" """ % \
-            (self.align, offset['x'] + self.x, offset['y'] + self.y, self.size)
+            (self.align, x, y, self.size)
         svg += """font-family="FreeSerif" """
         if self.bold:
             svg += """font-weight="bold" """
@@ -426,44 +445,29 @@ class Text():
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Circle():
     """A class for drawing circles."""
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, x, y, r, colour='black', opacity=1.0):
+    def __init__(self, x, y, r, colour=Colour.BLACK):
         """Create a circle."""
         self.x = x
         self.y = y
         self.r = r
         self.colour = colour
-        self.opacity = opacity
 
-    # ******************************
-    #
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
+    def get_svg(self, offset=None):
         """Output the svg code for shape."""
-        svg = '<circle cx="%d" cy="%d" r="%d" fill="%s" fill-opacity="%0.2f" stroke="black" stroke-width="2.0"/>' % \
-            (offset['x'] + self.x, offset['y'] +
-             self.y, self.r, self.colour, self.opacity)
+        x, y = offset_xy(self.x, self.y, offset)
+        r = self.r
+        svg = '<circle cx="%d" cy="%d" r="%d" fill="%s" stroke="black" stroke-width="2.0"/>' % \
+            (x, y, r, self.colour)
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Rectangle():
     """A class for drawing rectangles."""
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, x01, y01, x02, y02, colour='none', stroke_colour='black', stroke_width=2.0, opacity=1.0, hatch=False):
+    def __init__(self, x01, y01, x02, y02, colour='none', stroke_colour=Colour.BLACK, stroke_width=2.0, hatch=False):
         """Create a rectangle."""
         if x02 > x01:
             self.x01 = x01
@@ -478,41 +482,35 @@ class Rectangle():
             self.y01 = y02
             self.y02 = y01
         self.colour = colour
-        self.opacity = opacity
         self.hatch = hatch
         self.stroke_width = stroke_width
         self.stroke_colour = stroke_colour
 
-    # ******************************
-    # <g transform="rotate(0,%d,%d)"></g>
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
+    def get_svg(self, offset=None):
         """Output the svg code for shape."""
+        x01, y01 = offset_xy(self.x01, self.y01, offset)
+        x02, y02 = offset_xy(self.x02, self.y02, offset)
         svg = '<rect x="%d" y="%d" width="%d" height="%d"' % (
-            self.x01, self.y01, self.x02-self.x01, self.y02-self.y01)
+            x01, y01, x02-x01, y02-y01)
         if self.hatch:
             svg += ' style="fill: url(#hatch)"'
         else:
             svg += ' fill="%s"' % self.colour
-        svg += ' stroke="%s" fill-opacity="%0.2f" stroke-width="%0.2f"/>' % (
-            self.stroke_colour, self.opacity, self.stroke_width)
+        svg += ' stroke="%s" stroke-width="%0.2f"/>' % (
+            self.stroke_colour, self.stroke_width)
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Wedge():
     """A class for drawing wedges (used for the pie-charts)."""
 
-    # ******************************
-    # Input arguments:
-    # theta (deg):  theta01 < theta02 (arc of the wedge)
-    # c_offset:     offset wedge point from center
-    # explode:      offset entire wedge from center
-    # ******************************
-    def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0, colour='black', opacity=1.0):
-        """Create a wedge."""
+    def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0, colour=Colour.BLACK):
+        """Create a wedge.
+            Input arguments:
+            theta (deg):  theta01 < theta02 (arc of the wedge)
+            c_offset:     offset wedge point from center
+            explode:      offset entire wedge from center        
+        """
         self.x = x
         self.y = y
         self.theta01 = theta01
@@ -521,46 +519,42 @@ class Wedge():
         self.c_offset = c_offset
         self.explode = explode
         self.colour = colour
-        self.opacity = opacity
 
-    # ******************************
-    # https://bocoup.com/blog/using-svg-patterns-as-fills
-    # https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-    #  if self.hatch:
-    #      fill = 'style="fill: url(#%sHatch)"' % self.colour
-    #  else:
-    #      fill = 'fill="%s"' % self.colour
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for shape."""
+    def get_svg(self, offset=None):
+        """Output the svg code for shape.
+        
+            https://bocoup.com/blog/using-svg-patterns-as-fills
+            https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
+            if self.hatch:
+                fill = 'style="fill: url(#%sHatch)"' % self.colour
+            else:
+                fill = 'fill="%s"' % self.colour
+
+        """
         r = self.radius
         theta01 = math.radians(self.theta01)
         theta02 = math.radians(self.theta02)
+        dt = (theta02 + theta01)/2
         LARGE_ARC = int(self.theta02-self.theta01 > 180)
 
-        dx00 = self.x + offset['x']
-        dy00 = self.y + offset['y']
+        dx00, dy00 = offset_xy(self.x, self.y, offset)
 
         x01 = 1.0 * r * math.cos(theta01)
         y01 = 1.0 * r * math.sin(theta01)
         x02 = 1.0 * r * math.cos(theta02)
         y02 = 1.0 * r * math.sin(theta02)
 
-        dt = (theta02 + theta01)/2
         dr01 = self.explode
-        dx01 = 1.0 * dr01 * math.cos(dt) + offset['x']
-        dy01 = 1.0 * dr01 * math.sin(dt) + offset['y']
+        dx01, dy01 = offset_xy(1.0 * dr01 * math.cos(dt), 1.0 * dr01 * math.sin(dt), offset)
 
         dr02 = self.c_offset
-        dx02 = 1.0 * dr02 * math.cos(dt) + offset['x']
-        dy02 = 1.0 * dr02 * math.sin(dt) + offset['y']
+        dx02, dy02 = offset_xy(1.0 * dr02 * math.cos(dt), 1.0 * dr02 * math.sin(dt), offset)
 
         svg = """<path
-                    fill="%s" fill-opacity="%0.2f" stroke="black" stroke-width="2.0"
+                    fill="%s" stroke="black" stroke-width="2.0"
                     d="M %0.2f,%0.2f L %0.2f,%0.2f A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f L %0.2f,%0.2f Z"
                />""" % (
             self.colour,
-            self.opacity,
             dx00+dx01+dx02, dy00+dy01+dy02,
             x01+dx00+dx01, y01+dy00+dy01,
             r, r, LARGE_ARC,
@@ -570,54 +564,49 @@ class Wedge():
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Polygon():
     """A class for drawing polygons."""
 
-    # ******************************
-    # theta is in degrees
-    # ******************************
-    def __init__(self, path, colour='black', opacity=1.0):
-        """Create a polygon with the given path."""
+    def __init__(self, path, colour=Colour.BLACK):
+        """Create a polygon with the given path.
+        
+        theta is in degrees
+        """
         self.path = path
         self.colour = colour
-        self.opacity = opacity
 
-    # ******************************
-    # https://bocoup.com/blog/using-svg-patterns-as-fills
-    # https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-    #  if self.hatch:
-    #      svg += ' style="fill: url(#%sHatch)"' % self.colour
-    #  else:
-    #      svg += ' fill="%s"' % self.colour
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for shape."""
-        svg = '<path fill="%s" fill-opacity="%0.2f" stroke="black" stroke-width="1.0"' % (
-            self.colour, self.opacity)
+    def get_svg(self, offset=None):
+        """Output the svg code for shape.
+        
+     ******************************
+     https://bocoup.com/blog/using-svg-patterns-as-fills
+     https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
+      if self.hatch:
+          svg += ' style="fill: url(#%sHatch)"' % self.colour
+      else:
+          svg += ' fill="%s"' % self.colour
+     ******************************
+
+        
+        """
+        svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % (
+            self.colour)
         svg += ' d="'
         for i, (x, y) in enumerate(self.path):
             if i == 0:
                 svg += 'M '
             else:
                 svg += ' L '
+            x, y = offset_xy(x, y, offset)
             svg += '%0.2f,%0.2f' % (x, y)
         svg += ' Z"/>'
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Arrow():
     """A class for drawing arrows (currently only horizontal)."""
 
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, x01, y01, x02, y02, width=2.5, colour='black'):
+    def __init__(self, x01, y01, x02, y02, width=2.5, colour=Colour.BLACK):
         """Create arrow with <x01,y01> as the start."""
         self.x01 = x01
         self.x02 = x02
@@ -626,15 +615,10 @@ class Arrow():
         self.width = width
         self.colour = colour
 
-    # ******************************
-    # ToDo: this only works for horizontal arrows
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0}):
+    def get_svg(self, offset={'x': 0, 'y': 0}):
         """Output the svg code for shape."""
-        x01 = self.x01
-        x02 = self.x02
-        y01 = self.y01
-        y02 = self.y02
+        x01, y01 = offset_xy(self.x01, self.y01, offset)
+        x02, y02 = offset_xy(self.x02, self.y02, offset)
         h = self.width*3
 
         svg = '<path fill="none" stroke="%s" stroke-width="%0.2f"' % (
@@ -662,39 +646,27 @@ class Arrow():
         return svg
 
 
-# ************************************************************
-#
-# ************************************************************
 class Group():
     """A class for grouping svg objects."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, tag_id='', hidden=False):
         """Create group with tag_id (optionally, hide group)."""
         self.tag_id = tag_id
         self.hidden = hidden
         self.shapes = []
 
-    # ******************************
-    #
-    # ******************************
     def add(self, shape):
         """Add shape to group."""
         self.shapes.append(shape)
 
-    # ******************************
-    #
-    # ******************************
-    def svg(self, offset={'x': 0, 'y': 0, 'theta': 0.0}):
+    def get_svg(self):
         """Output the svg code for the group."""
         if self.hidden:
             svg = '<g id="%s" visibility="hidden">' % self.tag_id
         else:
             svg = '<g id="%s">' % self.tag_id
         for shape in self.shapes:
-            svg += shape.svg()
+            svg += shape.get_svg()
         svg += '</g>'
         return svg
 
@@ -710,9 +682,6 @@ class Group():
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 class PieChart():
     """A class for drawing pie-charts."""
 
@@ -723,9 +692,6 @@ class PieChart():
     OPACITY = 0.5
     BOARDER = {'top': 30, 'bottom': 30, 'left': 400, 'right': 400}
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, data):
         """Create a pie-chart."""
         self.data = data
@@ -739,14 +705,13 @@ class PieChart():
         false_text = '%d' % int(
             round(100 * (self.data['false_facts'] + self.data['false_other'])))
         false_text += '% False Points'
-        self.create_ledgend(-3*R, 0, true_text, 'black')
-        self.create_ledgend(3*R, 0, false_text, 'red')
+        self.create_ledgend(-3*R, 0, true_text, Colour.BLACK)
+        self.create_ledgend(3*R, 0, false_text, Colour.RED)
 
-    # ******************************
-    # ToDo: review GAP logic
-    # ******************************
     def create_graph(self, data=None, offset={'x': 0, 'y': 0}):
-        """Create the actual pie-chart using wedges."""
+        """Create the actual pie-chart using wedges.
+        ToDo: review GAP logic
+        """
 
         # setup
         R = self.RADIUS
@@ -780,11 +745,11 @@ class PieChart():
         theta01 = theta00 + nDegs * data['true_other']
         if data['true_other'] > 0.001:
             if data['true_other'] > 0.999:
-                c = Circle(x, y, R, colour='black', opacity=OPACITY)
+                c = Circle(x, y, R, colour=Colour.BLACK)
                 self.shapes.append(c)
             else:
                 w = Wedge(x, y, theta00, theta01, R, c_offset=C_OFFSET,
-                          colour='black', opacity=OPACITY)
+                          colour=Colour.GREY)
                 self.shapes.append(w)
 
         # true facts
@@ -794,11 +759,11 @@ class PieChart():
             theta01 += GAP
             theta02 += GAP
             if data['true_facts'] > 0.999:
-                c = Circle(x, y, R, colour='black')
+                c = Circle(x, y, R, colour=Colour.BLACK)
                 self.shapes.append(c)
             else:
                 w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour='black')
+                          c_offset=C_OFFSET, colour=Colour.BLACK)
                 self.shapes.append(w)
 
         # false facts
@@ -808,11 +773,11 @@ class PieChart():
             theta01 += GAP
             theta02 += GAP
             if data['false_facts'] > 0.999:
-                c = Circle(x, y, R, colour='red')
+                c = Circle(x, y, R, colour=Colour.RED)
                 self.shapes.append(c)
             else:
                 w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour='red')
+                          c_offset=C_OFFSET, colour=Colour.RED)
                 self.shapes.append(w)
 
         # false other
@@ -822,18 +787,15 @@ class PieChart():
             theta01 += GAP
             theta02 += GAP
             if data['false_other'] > 0.999:
-                c = Circle(x, y, R, colour='red', opacity=OPACITY)
+                c = Circle(x, y, R, colour=Colour.PINK)
                 self.shapes.append(c)
             else:
                 w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour='red', opacity=OPACITY)
+                          c_offset=C_OFFSET, colour=Colour.PINK)
                 self.shapes.append(w)
-#        assert abs(theta02 - 360 - theta00) < 0.1
+        # assert abs(theta02 - 360 - theta00) < 0.1
 
-    # ******************************
-    #
-    # ******************************
-    def create_ledgend(self, x=0, y=0, text=None, colour='black'):
+    def create_ledgend(self, x=0, y=0, text=None, colour=Colour.BLACK):
         L = 20
         R = self.RADIUS
         OPACITY = self.OPACITY
@@ -844,7 +806,7 @@ class PieChart():
         self.shapes.append(
             Text('Facts', x=x01, y=y01-2*L, colour=colour, bold=True))
         self.shapes.append(Rectangle(x01-L, y01-L, x01+L,
-                                     y01+L, colour=colour, opacity=1.0))
+                                     y01+L, colour=colour))
 
         # facts
         x01 = x+60
@@ -852,17 +814,14 @@ class PieChart():
         self.shapes.append(
             Text('Other', x=x01, y=y01-2*L, colour=colour, bold=True))
         self.shapes.append(Rectangle(x01-L, y01-L, x01+L,
-                                     y01+L, colour=colour, opacity=OPACITY))
+                                     y01+L, colour=Colour.get_transparent_colour(Colour, colour)))
 
         # points
         if text is not None:
             self.shapes.append(
                 Text(text, x=x, y=y+R, size=40, colour=colour, bold=True))
 
-    # ******************************
-    #
-    # ******************************
-    def output_svg(self):
+    def get_svg(self):
         """Output the svg code for diagram."""
         R = self.RADIUS
         BOARDER = self.BOARDER
@@ -873,37 +832,25 @@ class PieChart():
                """ % (-width/2 + offset['x'], -height/2 + offset['y'], width, height)
 
         for shape in self.shapes:
-            svg += shape.svg()
+            svg += shape.get_svg()
         svg += """</svg></center>"""
         return svg
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         return ''
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionPieChart(PieChart):
     """A sub-class for opinion pie-charts."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion):
         """Create a pie chart visualizing the point distribution for the opinion."""
         self.opinion = opinion
         data = opinion.get_point_distribution()
         super().__init__(data)
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         data = self.data
         text = """The above pie chart shows the point distribution of <b>%s's</b>
@@ -953,15 +900,9 @@ class OpinionPieChart(PieChart):
         return text
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionComparisionPieChart(OpinionPieChart):
     """A sub-class for side-by-side pie-charts (comparisons)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion01, opinion02):
         """Create a side by side pie-chart for two opinions."""
         self.opinion01 = opinion01
@@ -976,14 +917,10 @@ class OpinionComparisionPieChart(OpinionPieChart):
         R = self.RADIUS
         true_text = 'True Points'
         false_text = 'False Points'
-        self.create_ledgend(-4*R, 0, true_text, 'black')
-        self.create_ledgend(4*R, 0, false_text, 'red')
+        self.create_ledgend(-4*R, 0, true_text, Colour.BLACK)
+        self.create_ledgend(4*R, 0, false_text, Colour.RED)
 
-    # ******************************
-    #
-    # ******************************
-
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         data01 = self.opinion01.get_point_distribution()
         data02 = self.opinion02.get_point_distribution()
@@ -1001,87 +938,11 @@ class OpinionComparisionPieChart(OpinionPieChart):
         text += '<div class="col-7">'
         text += '<table class="table-condensed table-borderless text-center" cellspacing="40">'
         text += '  <thead>'
-#        text += """ <tr>
-#                      <th/>
-#                      <th/>
-#                      <th style="width:60ex" colspan="2"> %s </th>
-#                      <th/>
-#                      <th style="width:60ex" colspan="2"> %s </th>
-#                      <th/>
-#                    </tr>""" % (
-#                      self.opinion01.get_owner(),
-#                      self.opinion02.get_owner(),
-#                    )
-        text += """ <tr>
-                      <th style="width:20ex"/>
-                      <th style="border-right:2px solid #000;"/>
-                      <th style="width:15ex"> True </th>
-                      <th style="width:15ex"> False </th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th style="width:15ex"> True </th>
-                      <th style="width:15ex"> False </th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th style="width:10ex"/>
-                      <th style="width:20ex"/>
-                    </tr>"""
-        text += """ <tr style="border-top:2px solid #000;">
-                      <td/>
-                      <th style="border-right:2px solid #000;"/>
-                      <td/>
-                      <td/>
-                      <th style="border-right:2px solid #000;"/>
-                      <td/>
-                      <td/>
-                      <th style="border-right:2px solid #000;"/>
-                      <td/>
-                    </tr>"""
-        text += '  </thead>'
-        text += """<tr>
-                      <th>Facts</th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th> %d&#37; </th>
-                      <th> %d&#37; </th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th> %d&#37; </th>
-                      <th> %d&#37; </th>
-                      <th style="border-right:2px solid #000;"/>
-                   </tr>""" % (
-            round(100*data01['true_facts']),
-            round(100*data01['false_facts']),
-            round(100*data02['true_facts']),
-            round(100*data02['false_facts']),
-        )
-        text += """<tr>
-                      <th>Other</th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th> %d&#37; </th>
-                      <th> %d&#37; </th>
-                      <th style="border-right:2px solid #000;"/>
-                      <th> %d&#37; </th>
-                      <th> %d&#37; </th>
-                      <th style="border-right:2px solid #000;"/>
-                   </tr>""" % (
-            round(100*data01['true_other']),
-            round(100*data01['false_other']),
-            round(100*data02['true_other']),
-            round(100*data02['false_other']),
-        )
-        text += '</table>'
-        text += '</div>'  # /col
-        text += '</center>'
-        text += '</div>'  # /row
-        return text
 
 
-# ************************************************************
-#
-# ************************************************************
 class DemoPieChart(PieChart):
     """A sub-class for demo pie-charts (fake data)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self):
         """Create a demo pie-chart with fake data."""
         R = [random.random() for i in range(4)]
@@ -1096,9 +957,6 @@ class DemoPieChart(PieChart):
         super().__init__(data)
 
 
-# ************************************************************
-#
-# ************************************************************
 class BarGraph():
     """A class for drawing bar graphs."""
     GAP = 2.0
@@ -1107,18 +965,12 @@ class BarGraph():
     BOARDER = {'top': 60, 'bottom': 75, 'left': 200, 'right': 200}
     OPACITY = 1.0
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, data):
         """Create a bar graph."""
         self.data = data
         self.create_graph()
         self.create_ledgend()
 
-    # ******************************
-    #
-    # ******************************
     def create_graph(self, data=None):
         """Create the actual bars for the graph."""
         W = self.WIDTH
@@ -1133,15 +985,12 @@ class BarGraph():
                 x00 = self.data[1][i]
                 x01 = self.data[1][i+1]
                 if x01 <= 0:
-                    colour = 'black'
+                    colour = Colour.BLACK
                 else:
-                    colour = 'red'
+                    colour = Colour.RED
                 self.shapes.append(Rectangle(
                     x00*W+GAP, y00, x01*W-GAP, y00-h/max_h*H, colour=colour, stroke_colour='none'))
 
-    # ******************************
-    #
-    # ******************************
     def create_ledgend(self):
         """Create the ledge for the graph."""
 
@@ -1154,7 +1003,7 @@ class BarGraph():
 
         # bottom boarder
         self.shapes.append(Rectangle(-W/2-20, y00, W/2+20,
-                                     y00+3, opacity=1.0, colour='black'))
+                                     y00+3, colour=Colour.BLACK))
         # Tics
         x00 = -W/2
         y01 = y00+10
@@ -1178,9 +1027,6 @@ class BarGraph():
         self.shapes.append(
             Text('Opposers', x=x01, y=y01, size=30, bold=True))
 
-    # ******************************
-    #
-    # ******************************
     def create_ledgend02(self):
         """Create the ledge for the graph."""
         W = self.WIDTH
@@ -1189,43 +1035,41 @@ class BarGraph():
         y00 = H
 
         # bottom boarder
-        self.shapes.append(Rectangle(-W/2-40, y00, W/2+40,
-                                     y00+3, opacity=1.0, colour='black'))
+        self.shapes.append(Rectangle(-W/2-40, y00, W/2+40, y00+3, colour=Colour.BLACK))
         # true tic
         x00 = -W/2
         self.shapes.append(
-            Text('100', x=x00, y=y00+50, colour='black', bold=True))
+            Text('100', x=x00, y=y00+50, colour=Colour.BLACK, bold=True))
         self.shapes.append(Text('%', x=x00+22, y=y00+50,
-                                colour='black', bold=True, align='start'))
+                                colour=Colour.BLACK, bold=True, align='start'))
         self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, opacity=1.0, colour='black'))
+                                     GAP/2, y00+15, colour=Colour.BLACK))
         # mid tic
         x00 = 0
-        self.shapes.append(Text('50', x=x00-10, y=y00+50,
-                                colour='black', bold=True, align='end'))
+        self.shapes.append(Text('50', x=x00-10, y=y00+50, colour=Colour.BLACK, bold=True, align='end'))
         self.shapes.append(
-            Text('/', x=x00, y=y00+50, colour='black', bold=True, align='middle'))
+            Text('/', x=x00, y=y00+50, colour=Colour.BLACK, bold=True, align='middle'))
         self.shapes.append(Text('50', x=x00+10, y=y00+50,
-                                colour='red', bold=True, align='start'))
+                                colour=Colour.RED, bold=True, align='start'))
         self.shapes.append(Text('%', x=x00+40, y=y00+50,
-                                colour='red', bold=True, align='start'))
+                                colour=Colour.RED, bold=True, align='start'))
         self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, opacity=1.0, colour='black'))
+                                     GAP/2, y00+15, colour=Colour.BLACK))
         # false tic
         x00 = W/2
         self.shapes.append(
-            Text('100', x=x00, y=y00+50, colour='red', bold=True))
+            Text('100', x=x00, y=y00+50, colour=Colour.RED, bold=True))
         self.shapes.append(Text('%', x=x00+22, y=y00+50,
-                                colour='red', bold=True, align='start'))
+                                colour=Colour.RED, bold=True, align='start'))
         self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, opacity=1.0, colour='black'))
+                                     GAP/2, y00+15, colour=Colour.BLACK))
         # True/False
         x01 = -W/2 - 100
         y01 = H
         self.shapes.append(
-            Text('True', x=x01, y=y01, size=40, colour='black', bold=True))
+            Text('True', x=x01, y=y01, size=40, colour=Colour.BLACK, bold=True))
         self.shapes.append(Text('False', x=-x01, y=y01,
-                                size=40, colour='red', bold=True))
+                                size=40, colour=Colour.RED, bold=True))
         # Supporters - Moderates - Opposers
         x01 = -W/6-W/6
         y01 = y00+90
@@ -1240,42 +1084,15 @@ class BarGraph():
         # Tics
         x01 = -W/2
         self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 +
-                                     GAP/4, y01, opacity=1.0, colour='black'))
-#        self.shapes.append(Arrow(x01+25, y01-7.5, x01+GAP, y01-7.5))
+                                     GAP/4, y01, colour=Colour.BLACK))
         x01 = -W/6
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 +
-                                     GAP/4, y01, opacity=1.0, colour='black'))
-#        self.shapes.append(Arrow(x01+25, y01-7.5, x01+GAP, y01-7.5))
-#        self.shapes.append(Arrow(x01-25, y01-7.5, x01-GAP, y01-7.5))
+        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
         x01 = W/6
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 +
-                                     GAP/4, y01, opacity=1.0, colour='black'))
-#        self.shapes.append(Arrow(x01+25, y01-7.5, x01+GAP, y01-7.5))
-#        self.shapes.append(Arrow(x01-25, y01-7.5, x01-GAP, y01-7.5))
+        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
         x01 = W/2
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 +
-                                     GAP/4, y01, opacity=1.0, colour='black'))
-#        self.shapes.append(Arrow(x01-25, y01-7.5, x01-GAP, y01-7.5))
+        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
 
-        # True/False Users
-#        x01 = -W/2-125; y01 = H-25
-#        self.shapes.append(Text('True Users', x=x01, y=y01, size=30, colour='black', bold=True))
-#        self.shapes.append(Text('False Users', x=-x01, y=y01, size=30, colour='red', bold=True))
-
-        # facts
-#        x01 = -W/2-125; y01 = 2/3*H
-#        self.shapes.append(Text('True Users', x=x01, y=y01-2*L, colour="black", bold=True))
-##        self.shapes.append(Rectangle(x01-L, y01-L, x01+L, y01+L, colour="black"))
-
-#        # facts
-#        x01 =  W/2+125; y01 = 2/3*H
-#        self.shapes.append(Text('False Users', x=x01, y=y01-2*L, colour="red", bold=True))
-##        self.shapes.append(Rectangle(x01-L, y01-L, x01+L, y01+L, colour="red"))
-
-    # ******************************
-    #
-    # ******************************
-    def output_svg(self):
+    def get_svg(self):
         """Output the svg code for diagram."""
         W = self.WIDTH
         H = self.HEIGHT
@@ -1292,27 +1109,18 @@ class BarGraph():
                   </defs>
                """
         for shape in self.shapes:
-            svg += shape.svg()
+            svg += shape.get_svg()
         svg += """</svg></center>"""
         return svg
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         return ''
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionBarGraph(BarGraph):
     """A class for drawing opinion bar graphs."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion):
         """Create a bar graph for visualizing the point distribution awarded to a theory."""
         self.opinion = opinion
@@ -1327,9 +1135,6 @@ class OpinionBarGraph(BarGraph):
         self.create_hidden()
         self.create_ledgend()
 
-    # ******************************
-    #
-    # ******************************
     def create_hidden(self, opinion=None, tag_id='user01'):
         """Create the hidden shapes that highlight opinion."""
         W = self.WIDTH
@@ -1364,10 +1169,7 @@ class OpinionBarGraph(BarGraph):
                     )
         self.shapes.append(hidden_group01)
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         stats = self.theory.get_stats(stats_type=models.Stats.TYPE.ALL)
         opinions = self.opinions
@@ -1388,15 +1190,9 @@ class OpinionBarGraph(BarGraph):
         return text
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionNodeBarGraph(BarGraph):
     """A class for drawing opinion-node bar graphs."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion_node):
         """Create a bar graph for visualizing the point distribution awarded to an opinion_node."""
         self.opinion_node = opinion_node
@@ -1409,19 +1205,12 @@ class OpinionNodeBarGraph(BarGraph):
         self.data = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
 
         self.create_graph()
-#        self.create_hidden()
         self.create_ledgend()
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionComparisionBarGraph(OpinionBarGraph):
     """A class for drawing comparison bar graphs (two highlight opinions)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion01, opinion02):
         """Create a bar graph for comparing two opinions."""
         self.theory = opinion01.theory
@@ -1438,10 +1227,7 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
         self.create_hidden(opinion02, tag_id='user02')
         self.create_ledgend()
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         stats = self.theory.get_stats(stats_type=models.Stats.TYPE.ALL)
         opinions = self.opinions
@@ -1451,10 +1237,8 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
                    opinions that allocated 100&#37; of their points to the truth
                    of the theory). Hover the mouse below to highlight the bin
                    that the opinions falls into.
-                """ % (
-            opinions.count(),
-            'opinion' if opinions.count() <= 1 else 'different opinions',
-        )
+                """ % (opinions.count(),
+                       'opinion' if opinions.count() <= 1 else 'different opinions',)
         text += '<br></br>'
         text += '<div class="row">'
         text += '<div class="col-6 text-center">'
@@ -1467,15 +1251,9 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
         return text
 
 
-# ************************************************************
-#
-# ************************************************************
 class DemoBarGraph(BarGraph):
     """A class for drawing demo bar graphs (fake data)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self):
         """Create a demo bar graph with fake data."""
         T = 0.0
@@ -1492,10 +1270,6 @@ class DemoBarGraph(BarGraph):
         super().__init__(data)
 
 
-# ************************************************************
-# ToDo: add opacity for sub-theories
-# ToDo: add height and width
-# ************************************************************
 class OpinionVennDiagram():
     """A class for drawing Venn-diagrams."""
 
@@ -1504,9 +1278,6 @@ class OpinionVennDiagram():
     SHAPE_AREA = 0.6 * RADIUS**2
     BOARDER = {'top': 60, 'bottom': 30, 'left': 100, 'right': 100}
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion, flat=False, bottom_text=None):
         """Create a Venn-diagram that visualizes the opinion's nodes."""
         self.opinion = opinion
@@ -1523,57 +1294,10 @@ class OpinionVennDiagram():
         self.create_boundary_shapes()
         self.fix_overlap02()
 
-    # ******************************
-    #
-    # ******************************
     def __str__(self):
         """Output debug text for diagram (not yet implemented)."""
         return ''
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
-        """Output caption text for diagram."""
-        TRUE = self.opinion.is_true()
-        text = """The above Venn-Diagram captures the evidence/sub-theories
-                   that <b>%s</b> used as shapes. Squares represent evidence and
-                   circles represent sub-theories, the size reflects the number
-                   of points awarded, and the opacity reflects how factual the
-                   evidence/sub-theory is.
-                """ % (
-            self.opinion.get_owner(),
-        )
-        return text
-
-    # ******************************
-    #
-    # ******************************
-    def output_svg(self):
-        """Output the svg code for diagram."""
-        R = self.RADIUS
-        BOARDER = self.BOARDER
-        height = (2.0*R + BOARDER['top'] + BOARDER['bottom'])
-        width = 1200
-        offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
-                  'y': BOARDER['top'] + R - self.true_ring.y}
-        svg = """<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">
-                  <defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]></style></defs>
-               """ % (width, height)
-        # draw hidden elements first to appear below the rest
-        for shape in self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
-            svg += shape.svg_hidden(offset=offset)
-        # draw the rest
-        for shape in [self.true_ring, self.false_ring] + self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
-            svg += shape.svg(offset=offset)
-        for text in self.text:
-            svg += text.svg(offset=offset)
-        svg += """</svg></center>"""
-        return svg
-
-    # ******************************
-    #
-    # ******************************
     def calc_membership(self):
         """Group opinion nodes into the following sets: true, false, true &
            false, neither."""
@@ -1600,26 +1324,31 @@ class OpinionVennDiagram():
             else:
                 self.int_set.append(node)
 
-    # ******************************
-    #
-    # ******************************
     def create_rings(self):
         """Create true and false rings."""
         R = self.RADIUS
         # fix rings
         if len(self.int_set) == 0:
-            self.true_ring = Ring(-0.85*R, 0.0, R)
-            self.false_ring = Ring(0.85*R, 0.0, R)
+            self.true_ring = Ring(-0.85*R, 0.0, R, x_max=-0.35*R)
+            self.false_ring = Ring(0.85*R, 0.0, R, x_min=0.35*R)
         # overlap rings
         else:
-            self.true_ring = Ring(-0.75*R, 0.0, R)
-            self.false_ring = Ring(0.75*R, 0.0, R)
-        self.true_ring.x_max = -0.35*R
-        self.false_ring.x_min = 0.35*R
+            self.true_ring = Ring(-0.75*R, 0.0, R, x_max=-0.35*R)
+            self.false_ring = Ring(0.75*R, 0.0, R, x_min=0.35*R)
 
-    # ******************************
-    #
-    # ******************************
+    def create_ledgend(self):
+        """Create legend text."""
+        self.text = []
+        R = self.RADIUS
+        BOARDER = self.BOARDER
+        self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y -
+                              1.0*13/12*R, size=40, colour=Colour.BLACK, bold=True))
+        self.text.append(Text('False', x=self.false_ring.x,
+                              y=self.true_ring.y - 1.0*13/12*R, size=40, colour=Colour.RED, bold=True))
+        if self.bottom_text is not None:
+            self.text.append(Text(self.bottom_text, x=(
+                self.true_ring.x + self.false_ring.x)/2, y=0.95*R + BOARDER['bottom']))
+
     def create_shapes(self):
         """Create evidence and sub-theory shapes (within the true and false sets)."""
         R = self.RADIUS
@@ -1667,9 +1396,6 @@ class OpinionVennDiagram():
             elif node.is_evidence():
                 self.false_shapes.append(EvidenceShape(node, x, y, area))
 
-    # ******************************
-    #
-    # ******************************
     def create_out_shapes(self):
         """Create evidence and sub-theory shapes that falls outside of the true and false sets."""
         R = self.RADIUS
@@ -1694,9 +1420,6 @@ class OpinionVennDiagram():
             elif node.is_evidence():
                 self.out_shapes.append(EvidenceShape(node, x, y, area))
 
-    # ******************************
-    #
-    # ******************************
     def create_boundary_shapes(self):
         """Create boundary shapes to confine the shapes to the view port."""
         BOARDER = self.BOARDER
@@ -1721,9 +1444,6 @@ class OpinionVennDiagram():
         R = (self.false_ring.x - self.true_ring.x)/2 + 1*R
         self.out_boundry_shapes = [Ring(x, y, R)]
 
-    # ******************************
-    #
-    # ******************************
     def fix_overlap01(self):
         """Move the inside shapes around to avoid overlap."""
         # setup
@@ -1747,22 +1467,16 @@ class OpinionVennDiagram():
         # propagate
         self.propagate(shapes)
 
-    # ******************************
-    #
-    # ******************************
     def fix_overlap02(self):
         """Move the outside shapes around to avoid overlap."""
         # setup
         shapes = [{'prop': self.out_shapes, 'in': self.in_boundry_shapes,
                    'out': self.out_boundry_shapes + self.out_shapes}]
         for shape in [self.true_ring, self.false_ring]:
-            shape.reset_k()
+            shape.reset_spring_constant()
         # propagate
         self.propagate(shapes)
 
-    # ******************************
-    #
-    # ******************************
     def propagate(self, shapes):
         """Incrementally propagate the spring-class shapes to avoid overlap."""
         for step in range(100):
@@ -1773,39 +1487,18 @@ class OpinionVennDiagram():
                     total_y_force = 0.0
                     for shape02 in shape_set['out']:
                         if shape02 != shape01:
-                            fx, fy = shape01.get_force(
-                                shape02, direction='out')
+                            fx, fy = shape02.get_spring_force(shape01, direction=Direction.OUT)
                             total_x_force += fx
                             total_y_force += fy
                     for shape02 in shape_set['in']:
-                        fx, fy = shape01.get_force(shape02, direction='in')
+                        fx, fy = shape02.get_spring_force(shape01, direction=Direction.IN)
                         total_x_force += fx
                         total_y_force += fy
-                    max_step = max(
-                        [max_step, abs(total_x_force), abs(total_y_force)])
+                    max_step = max([max_step, abs(total_x_force), abs(total_y_force)])
                     shape01.propigate(total_x_force, total_y_force)
             if max_step < 0.01:
                 break
 
-    # ******************************
-    #
-    # ******************************
-    def create_ledgend(self):
-        """Create legend text."""
-        self.text = []
-        R = self.RADIUS
-        BOARDER = self.BOARDER
-        self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y -
-                              1.0*13/12*R, size=40, colour='black', bold=True))
-        self.text.append(Text('False', x=self.false_ring.x,
-                              y=self.true_ring.y - 1.0*13/12*R, size=40, colour='red', bold=True))
-        if self.bottom_text is not None:
-            self.text.append(Text(self.bottom_text, x=(
-                self.true_ring.x + self.false_ring.x)/2, y=0.95*R + BOARDER['bottom']))
-
-    # ******************************
-    #
-    # ******************************
     def get_collaborative_evidence(self, sort_list=False):
         """Return a list of evidence/sub-theories that support the opinion."""
         if self.opinion.is_true():
@@ -1813,17 +1506,13 @@ class OpinionVennDiagram():
         else:
             evidence = self.false_set
         if sort_list:
-            output_set = sorted(
-                evidence, key=lambda x: x.total_points(), reverse=True)
+            output_set = sorted(evidence, key=lambda x: x.total_points(), reverse=True)
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
         else:
             return evidence
 
-    # ******************************
-    #
-    # ******************************
     def get_contradicting_evidence(self, sort_list=False):
         """Return a list of evidence/sub-theories that contradicts the opinion."""
         if self.opinion.is_true():
@@ -1831,52 +1520,70 @@ class OpinionVennDiagram():
         else:
             evidence = self.true_set
         if sort_list:
-            output_set = sorted(
-                evidence, key=lambda x: x.total_points(), reverse=True)
+            output_set = sorted(evidence, key=lambda x: x.total_points(), reverse=True)
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
         else:
             return evidence
 
-    # ******************************
-    #
-    # ******************************
     def get_controversial_evidence(self, sort_list=False):
         """Return a list of evidence/sub-theories that is used to both support and contradict the opinion."""
         if sort_list:
-            output_set = sorted(
-                self.int_set, key=lambda x: x.total_points(), reverse=True)
+            output_set = sorted(self.int_set, key=lambda x: x.total_points(), reverse=True)
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
         else:
             return self.int_set
 
-    # ******************************
-    #
-    # ******************************
     def get_unaccounted_evidence(self, sort_list=False):
         """Return a list of evidence/sub-theories that is insignificant to the opinion."""
         if sort_list:
-            output_set = sorted(
-                self.out_set, key=lambda x: x.total_points(), reverse=True)
-            while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
-                output_set.pop()
+            output_set = sorted(self.out_set, key=lambda x: x.total_points(), reverse=True)
+            while len(output_set) > 0 and output_set[0].total_points() >= 0.01:
+                output_set.pop(0)
             return output_set
         else:
             return self.out_set
 
+    def get_svg(self):
+        """Output the svg code for diagram."""
+        R = self.RADIUS
+        BOARDER = self.BOARDER
+        height = (2.0*R + BOARDER['top'] + BOARDER['bottom'])
+        width = 1200
+        offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
+                    'y': BOARDER['top'] + R - self.true_ring.y}
+        svg = """<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">
+                    <defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]></style></defs>
+                """ % (width, height)
+        # draw hidden elements first to appear below the rest
+        for shape in self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
+            svg += shape.get_highlight_svg(offset=offset)
+        # draw the rest
+        for shape in [self.true_ring, self.false_ring] + self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
+            svg += shape.get_svg(offset=offset)
+        for text in self.text:
+            svg += text.get_svg(offset=offset)
+        svg += """</svg></center>"""
+        return svg
 
-# ************************************************************
-#
-# ************************************************************
+    def get_caption(self):
+        """Output caption text for diagram."""
+        TRUE = self.opinion.is_true()
+        text = """The above Venn-Diagram captures the evidence/sub-theories
+                   that <b>%s</b> used as shapes. Squares represent evidence and
+                   circles represent sub-theories, the size reflects the number
+                   of points awarded, and the opacity reflects how factual the
+                   evidence/sub-theory is.
+                """ % self.opinion.get_owner()
+        return text
+
+
 class OpinionComparisionVennDiagram(OpinionVennDiagram):
     """A class for drawing relative Venn-diagrams (used for comparisons)."""
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, opinion01, opinion02, flat=False, bottom_text=None):
         """Create a Venn-diagram comparing the two opinions."""
         self.opinion01 = opinion01
@@ -1895,9 +1602,6 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         self.create_boundary_shapes()
         self.fix_overlap02()
 
-    # ******************************
-    #
-    # ******************************
     def calc_membership(self):
         """Group opinion nodes into the following sets: true, false, true &
            false, neither. The size, colour, and opacity of the nodes is
@@ -1956,10 +1660,7 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
                 if points_node02.total_points() > 0:
                     self.int_set.append(points_node02)
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         TRUE = self.opinion01.true_points() >= self.opinion01.false_points()
         text = """The above Venn-Diagram captures the evidence/sub-theories
@@ -1972,20 +1673,13 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         return text
 
 
-# *******************************************************************************
-#
-# *******************************************************************************
 class DemoVennDiagram(OpinionVennDiagram):
     """A class for drawing demo Venn-diagrams (fake data)."""
 
-    # ******************************
-    # Remove normalization?
-    # ******************************
     def __init__(self, true_set_size=10, int_set_size=10, false_set_size=10, out_set_size=10):
         """Create a demo Venn-diagram with fake data."""
         random.seed()
         seed = random.randint(0, 100)
-#        seed = 72
         random.seed(seed)
 
         opinion = models.Opinion.get_demo()
@@ -2058,16 +1752,13 @@ class DemoVennDiagram(OpinionVennDiagram):
 
         super().__init__(opinion, bottom_text=str(seed))
 
-    # ******************************
-    #
-    # ******************************
-    def output_text(self):
+    def get_caption(self):
         """Output caption text for diagram."""
         return ''
 
 
 # *******************************************************************************
-#
+# main (used for testing)
 # *******************************************************************************
 if __name__ == "__main__":
     c = VennDiagram(10, 0, 10)
