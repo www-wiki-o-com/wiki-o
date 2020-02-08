@@ -1947,11 +1947,10 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
             'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
         }
         for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
-            if node not in evidence['collaborative'] and \
-               node not in evidence['controversial'] and \
-               node not in evidence['contradicting'] and \
-               node not in evidence['unaccounted']:
-                evidence['unaccounted'].append(node)
+            if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
+               node not in evidence['contradicting'] and node not in evidence['unaccounted']:
+                pass
+                # evidence['unaccounted'].append(node)
 
     # Render
     context = {
@@ -1970,14 +1969,14 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
         'compare_url':          compare_url,
     }
     if evidence_diagram is not None:
-        context['evidence_diagram'] = evidence_diagram.output_svg()
-        context['evidence_text'] = evidence_diagram.output_text()
+        context['evidence_diagram'] = evidence_diagram.get_svg()
+        context['evidence_text'] = evidence_diagram.get_caption()
     if points_diagram is not None:
-        context['points_diagram'] =  points_diagram.output_svg()
-        context['points_text'] = points_diagram.output_text()
+        context['points_diagram'] =  points_diagram.get_svg()
+        context['points_text'] = points_diagram.get_caption()
     if population_diagram is not None:
-        context['population_diagram'] = population_diagram.output_svg()
-        context['population_text'] =population_diagram.output_text()
+        context['population_diagram'] = population_diagram.get_svg()
+        context['population_text'] =population_diagram.get_caption()
 
     return render(
         request,
@@ -2012,12 +2011,12 @@ def OpinionDemoView(request):
         'opinion':              opinion,
         'theory':               theory,
         'opinion_list':         opinion_list,
-        'points_diagram':       points_diagram.output_svg(),
-        'evidence_diagram':     evidence_diagram.output_svg(),
-        'population_diagram':   population_diagram.output_svg(),
-        'points_text':          points_diagram.output_text(),
-        'evidence_text':        evidence_diagram.output_text(),
-        'population_text':      population_diagram.output_text(),
+        'points_diagram':       points_diagram.get_svg(),
+        'evidence_diagram':     evidence_diagram.get_svg(),
+        'population_diagram':   population_diagram.get_svg(),
+        'points_text':          points_diagram.get_caption(),
+        'evidence_text':        evidence_diagram.get_caption(),
+        'population_text':      population_diagram.get_caption(),
         'prev':                 prev,
         'parms':                parms,
     }
@@ -2212,12 +2211,12 @@ def OpinionCompareView(request, opinion01, opinion02, theory, compare_list):
         'opinion01':            opinion01,
         'opinion02':            opinion02,
         'compare_list':         compare_list,
-        'points_diagram':       points_diagram.output_svg(),
-        'evidence_diagram':     evidence_diagram.output_svg(),
-        'population_diagram':   population_diagram.output_svg(),
-        'points_text':          points_diagram.output_text(),
-        'evidence_text':        evidence_diagram.output_text(),
-        'population_text':      population_diagram.output_text(),
+        'points_diagram':       points_diagram.get_svg(),
+        'evidence_diagram':     evidence_diagram.get_svg(),
+        'population_diagram':   population_diagram.get_svg(),
+        'points_text':          points_diagram.get_caption(),
+        'evidence_text':        evidence_diagram.get_caption(),
+        'population_text':      population_diagram.get_caption(),
         'evidence':             evidence,
         'flat':                 flat,
         'swap_compare_url':     swap_compare_url,
