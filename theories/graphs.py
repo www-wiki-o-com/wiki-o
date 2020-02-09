@@ -47,6 +47,14 @@ class Colour():
     NONE = 'none'
 
     def get_transparent_colour(self, colour):
+        """Converts a dark colour to a light colour.
+
+        Args:
+            colour (Colour): The input colour.
+
+        Returns:
+            Colour: The lighter version of the input colour.
+        """
         if colour == self.RED:
             return self.PINK
         if colour == self.BLACK:
@@ -66,11 +74,15 @@ class Colour():
 
 
 def offset_xy(x, y, offset):
-    """Offset x,y with offset
-    @param[in]  x: The x coordiante to offset.
-    @param[in]  y: The y coordiante to offset.
-    @param[in]  offset: The x,y offset dictionary.
-    @return     A tuple of x,y offset if offset was not None.
+    """Helper method for offseting x and y using a dictionary.
+
+    Args:
+        x (float): The x coordiante to offset.
+        y (float): The y coordiante to offset.
+        offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+
+    Returns:
+        tuple(float, float): A tuple of the offset x,y.
     """
     if isinstance(offset, dict):
         if 'x' in offset:
@@ -92,28 +104,42 @@ def offset_xy(x, y, offset):
 
 
 class SpringShapeBase:
-    """
-    A parent class for shapes used for the Venn-diagram. All shapes are
-    treated as circles (squares will fit inside a circle). The spring aspect
-    allows the shapes to repel each other and thus avoid overlap.
+    """The parent class for self organizaing shapes (SpringShapeBase).
+
+    These shapes are mainly used in Venn-diagrams. All shapes are treated as circles (squares
+    will fit inside a circle). The spring aspect allows the shapes to repel each other and thus
+    avoid overlap.
 
     Usage:
       - Calculate the total force on a shape imposed from all the other spring shapes.
       - Use the total force to move (propigate) the shape into a location with lower potential.
-    """
 
+    Attributes:
+        x (float): The initial x coordinate.
+        y (float): The initial y coordinate.
+        r (float): The bounding radius (w.r.t the spring force all shapes are treated
+            as circles).
+        colour (Colour, optional): The shape's fill colour. Defaults to Colour.BLACK.
+        stroke_colour (Colour, optional): The shape's line colour. Defaults to Colour.BLACK.
+        spring_length (float): The length of the virtual spring.
+        spring_constant (float): The spring constant for the virtual spring.
+        DEFAULT_SPRING_LENGTH (float): The default value of spring_length.
+        DEFAULT_SPRING_CONSTANT (float): The default value of spring_constant.
+    """
     # Constants
     DEFAULT_SPRING_LENGTH = 5.0
     DEFAULT_SPRING_CONSTANT = 1.0
 
     def __init__(self, x, y, r, colour=Colour.BLACK, stroke_colour=Colour.BLACK):
-        """
-        The constructor for the SpringShapeBase class.
-        @param[in]  x,y: The initial x,y coordinates.
-        @param[in]  r: The bounding radius (w.r.t the spring force all shapes are treated
-                    as circles).
-        @param[in]  colour (optional, default black): The shape's colour.
-        @param[in]  stroke_colour (optional, default black): The shape's line colour.
+        """The constructor for the SpringShapeBase class.
+
+        Args:
+            x (float): The initial x coordinate.
+            y (float): The initial y coordinate.
+            r (float): The bounding radius (w.r.t the spring force all shapes are treated
+                as circles).
+            colour (Colour, optional): The shape's fill colour. Defaults to Colour.BLACK.
+            stroke_colour (Colour, optional): The shape's line colour. Defaults to Colour.BLACK.
         """
         self.x = x
         self.y = y
@@ -128,13 +154,17 @@ class SpringShapeBase:
         return "(%0.3f, %0.3f, %0.3f)" % (self.x, self.y, self.r)
 
     def get_separation_vector(self, shape02, direction=Direction.OUT):
-        """
-        Calculate the separation vector from self to shape02.
-        @param[in]  shape02: The other shape.
-        @param[in]  direction (optional, default out): Two solid objects will force other shapes
-                    "outwards", while hollow objects, such as rings, will push them "inwards".
-        @return     The direction vector (x, y, magnitude) relative to self. Negative magnitude
-                    indicates that the shapes are in collision.
+        """Calculate the separation vector from self to shape02.
+
+        Args:
+            shape02 (SpringShapeBase): The other shape.
+            direction (Direction, optional): Two solid objects will force other shapes "outwards",
+                while hollow objects, such as rings, will push them "inwards". Defaults to
+                Direction.OUT.
+
+        Returns:
+            tuple(float, float, float): The direction vector (x, y, magnitude) relative to self.
+                Negative magnitude indicates that the shapes are in collision.
         """
         dx = shape02.x - self.x
         dy = shape02.y - self.y
@@ -153,11 +183,15 @@ class SpringShapeBase:
             return -unit_x, -unit_y, separation
 
     def get_spring_force(self, shape02, direction=Direction.OUT):
-        """
-        Calculates the force imposed on shape02 by self.
-        @param[in]  shape02: The other shape.
-        @param[in]  direction (optional, default out): The direction of the force (IN or OUT).
-        @return     The force vector (x,y) relative to self.
+        """Calculates the force imposed on shape02 by self.
+
+        Args:
+            shape02 (SpringShapeBase): The other shape.
+            direction (Direction, optional): The direction of the force (IN or OUT). Defaults
+                to Direction.OUT.
+
+        Returns:
+            tuple(float, float): The force vector (x,y) relative to self.
         """
         unit_x, unit_y, separation = self.get_separation_vector(shape02, direction)
         compression = max(0, self.spring_length - separation)
@@ -165,17 +199,19 @@ class SpringShapeBase:
         return force * unit_x, force * unit_y
 
     def reset_spring_constant(self):
-        """
-        The spring force constant degrades over each iteration, this method resets the
-        spring force constant.
+        """Resets the spring constant.
+        
+        The spring force constant degrades over each iteration, this method resets the spring
+        force constant.
         """
         self.spring_constant = self.DEFAULT_SPRING_CONSTANT
 
     def propigate(self, dx, dy):
-        """
-        A method for calculating the step distance based on the repel force.
-        @param[in]  dx: The x distance to propigate the shape.
-        @param[in]  dy: The y distance to propigate the shape.
+        """A method for calculating the step distance based on the repel force.
+        
+        Args:
+            dx (float): The x distance to propigate the shape.
+            dy (float): The y distance to propigate the shape.
         """
         self.x += dx
         self.y += dy
@@ -185,26 +221,33 @@ class EvidenceShape(SpringShapeBase):
     """A sub-class of spring shape for square objects (evidence)."""
 
     def __init__(self, node, x, y, area):
-        """
-        Constructor for the EvidenceShape.
-        @details    The bounding radius is setup to encompase the square and is used for the
-                    spring force logic.
-        @param[in]  node: The evidence node (used for colour and captions).
-        @param[in]  x,y: The initial x,y coordinates.
-        @param[in]  area: The area of the square.
-        """
+        """Constructor for the EvidenceShape.
+
+        The bounding radius is setup to encompase the square and is used for the spring force logic.
+
+        Args:
+            node (OpinionNode): [description]
+            x (float): The initial x coordinate.
+            y (float): The initial y coordinate.
+            area (float): The area of the square.
+        """        
         self.node = node
         self.length = math.sqrt(area)
         bounding_radius = (self.length/2) * math.sqrt(2)
         super().__init__(x, y, bounding_radius)
 
     def get_highlight_svg(self, offset=None):
-        """
-        Output the svg code for the hidden-highlight shape.
-        @details    This graphic is hidden by default but is revealed to highlight the shape.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        @return     The svg text for displaying the shape.
-        """
+        """Output the svg code for the hidden-highlight shape.
+
+        This graphic is hidden by default but is revealed to highlight the shape.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the shape.
+        """        
         length = self.length + 15
         x = self.x - length/2
         y = self.y - length/2
@@ -216,13 +259,18 @@ class EvidenceShape(SpringShapeBase):
         return svg
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the shape (shade is a function of fact/intuition).
-        @details    The colour and shade are calculated based on:
-                      - How the node is being used in the theory, red for false, black for true,
-                      - The colour is transparent if the evidence is non-factual.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        @return     The svg text for displaying the shape.
+        """Output the svg code for the shape (shade is a function of fact/intuition).
+
+        The colour and shade are calculated based on:
+            - How the node is being used in the theory, red for false, black for true,
+            - The colour is transparent if the evidence is non-factual.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the shape.
         """
         if self.node.true_points() >= self.node.false_points():
             if self.node.is_verifiable():
@@ -251,22 +299,29 @@ class SubtheoryShape(SpringShapeBase):
     """A sub-class of spring shape for circle objects (sub-theories)."""
 
     def __init__(self, node, x, y, area):
-        """
-        The constructor for the SubTheoryShape class.
-        @param[in]  node: The sub-theory node (used for colour and captions).
-        @param[in]  x,y: The initial x,y coordinates.
-        @param[in]  area: the area of the circle.
+        """The constructor for the SubTheoryShape class.
+
+        Args:
+            node (OpinionNode): The sub-theory node (used for colour and captions).
+            x (float): The initial x coordinate.
+            y (float): The initial y coordinate.
+            area (float): The area of the circle.
         """
         self.node = node
         bounding_radius = math.sqrt(area/PI)
         super().__init__(x, y, bounding_radius)
 
     def get_highlight_svg(self, offset=None):
-        """
-        Output the svg code for the hidden-highlight shape.
-        @details    This graphic is hidden by default but is revealed to highlight the shape.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        @return     The svg text for displaying the shape.
+        """Output the svg code for the hidden-highlight shape.
+
+        This graphic is hidden by default but is revealed to highlight the shape.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -278,13 +333,18 @@ class SubtheoryShape(SpringShapeBase):
         return svg
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the shape (opacity is a function of fact/intuition).
-        @details    The colour and opacity are calculated based on:
-                      - how the node is being used in the theory, red for false, black for true,
-                      - currently the colour is never transparent.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        @return     The svg text for displaying the shape.
+        """Output the svg code for the shape (opacity is a function of fact/intuition).
+
+        The colour and opacity are calculated based on:
+            - how the node is being used in the theory, red for false, black for true,
+            - currently the colour is never transparent.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -306,28 +366,35 @@ class SubtheoryShape(SpringShapeBase):
 class Ring(SpringShapeBase):
     """A ring shape, mainly used for the true and false sets in the Venn diagram."""
 
+    # Constants
     DEFAULT_SPRING_LENGTH = 10
     DEFAULT_SPRING_CONSTANT = 1.0
 
-    def __init__(self, x, y, r, colour=Colour.NONE, stroke_colour=Colour.BLACK, x_min=None, x_max=None):
-        """
-        The constructor for the Ring class.
-        @details    Rings will not propigate in the y direction or outside their x boundaries.
-        @param[in]  x,y: The initial x,y coordinates
-        @param[in]  r: The radius of the ring.
-        @param[in]  colour: The fill colour.
-        @param[in]  stroke_colour: The colour of the ring.
-        @param[in]  x_min: The minimum x possition the ring may obtain.
-        @param[in]  x_max: The maximum x possition the ring may obtain.
+    def __init__(self, x, y, r, colour=Colour.NONE, stroke_colour=Colour.BLACK,
+                 x_min=None, x_max=None):
+        """The constructor for the Ring class.
+
+        Rings will not propigate in the y direction or outside their x boundaries.
+
+        Args:
+            x (float): The initial x coordinate.
+            y (float): The initial y coordinate.
+            r (float): The radius of the ring.
+            colour (Colour, optional): The fill colour. Defaults to Colour.NONE.
+            stroke_colour (Colour, optional): The stroke colour. Defaults to Colour.BLACK.
+            x_min (float, optional): The minimum x possition the ring may obtain. Defaults to None.
+            x_max (float, optional): The maximum x possition the ring may obtain. Defaults to None.
         """
         self.x_min = x_min
         self.x_max = x_max
         super().__init__(x, y, r, colour=colour, stroke_colour=stroke_colour)
 
     def propigate(self, dx, dy):
-        """
-        Move the ring by dx,dy.
-        @param[in]  dx,dy: The x,y distance to move the ring.
+        """Move the ring by dx,dy.
+
+        Args:
+            dx (float): The x distance to move the ring.
+            dy (float): The x distance to move the ring.
         """
         self.x += dx
         if self.x_min is not None:
@@ -336,9 +403,14 @@ class Ring(SpringShapeBase):
             self.x = min(self.x, self.x_max)
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the shape.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the shape.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -353,25 +425,33 @@ class Wall(SpringShapeBase):
     """A boundary that repels shapes to prevent them from leaving the frame of view."""
 
     def __init__(self, x, y):
-        """
-        Constructor for the Wall class.
-        @details    Walls only have one coordinate, x or y, if x, then the wall extends
-                    the entire y axis.
-        @param[in]  x,y: The coordinates of the wall.
+        """Constructor for the Wall class.
+
+        Walls only have one coordinate, x or y, if x, then the wall extends the entire y axis.
+
+        Args:
+            x (float or None): The x coordinate of the wall (must be float if y is None).
+            y (float or None): The x coordinate of the wall (must be float if x is None).
         """
         assert x is None or y is None
         super().__init__(x, y, 0)
 
     def get_separation_vector(self, shape02, direction=Direction.IN):
         """Calculate distance to boundary.
-        @details    Walls are a special SpringShape that repel only in one direction (x or y).
-                    If the direction is x and the possition of the wall below the axis (negative),
-                    then the wall's force is always upwards.
-        @param[in]  shape02: The other shape.
-        @param[in]  direction: Two solid objects will force other shapes "outwards", while hollow
-                    objects, such as rings, will push them "inwards".
-        @return     The direction vector (x, y, magnitude) relative to self. Negative magnitude
-                    indicates that the shapes are in collision.
+
+        Walls are a special SpringShape that repel only in one direction (x or y). If the direction
+            is x and the possition of the wall below the axis (negative), then the wall's force is
+            always upwards.
+
+        Args:
+            shape02 (SpringShapeBase): The other shape.
+            direction (Direction, optional): Two solid objects will force other shapes "outwards",
+                while hollow objects, such as rings, will push them "inwards". Defaults to
+                Direction.IN.
+
+        Returns:
+            tuple(float, float, float): The direction vector (x, y, magnitude) relative to self.
+                Negative magnitude indicates that the shapes are in collision.
         """
         assert direction == Direction.IN
         assert self.x is not None or self.y is not None
@@ -416,14 +496,17 @@ class Text():
     """A class for drawing text."""
 
     def __init__(self, text, x, y, size=30, align='middle', bold=False, colour=None):
-        """
-        The constructor for the Text class.
-        @param[in]  text: The text to display.
-        @param[in]  x,y: The coordinates of the text.
-        @param[in]  size (optional, default 30): The font size.
-        @param[in]  align (optional, default 'middle'): How to align the text (to be parsed by svg).
-        @param[in]  bold (optional, default False): If true, the text will be dispalyed as bold.
-        @param[in]  colour (optional, default None): The fill colour for the text.
+        """The constructor for the Text class.
+
+        Args:
+            text (str): The text to display.
+            x (float): The x coordinate of the text.
+            y (float): The y coordinate of the text.
+            size (int, optional): The font size. Defaults to 30.
+            align (str, optional): How to align the text (to be parsed by svg).Defaults to
+                'middle'.
+            bold (bool, optional): If true, the text will be dispalyed as bold. Defaults to False.
+            colour (Colour, optional): The fill colour for the text. Defaults to None.
         """
         self.text = text
         self.x = x
@@ -434,9 +517,14 @@ class Text():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the text object.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the text object.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the text.
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<text text-anchor="%s" x="%d" y="%d"' % (self.align, x, y)
@@ -453,11 +541,13 @@ class Circle():
     """A class for drawing circles."""
 
     def __init__(self, x, y, r, colour=Colour.BLACK):
-        """
-        The constructor for the Circle class.
-        @param[in]  x,y: The coordinates of the circle.
-        @param[in]  r: The radius of the circle.
-        @param[in]  colour (optional, default black): The fill colour for the circle.
+        """The constructor for the Circle class.
+        
+        Args:
+            x (float): The x coordinate of the circle.
+            y (float): The y coordinate of the circle.
+            r (float): The radius of the circle.
+            colour (Colour, optional): The fill colour for the circle. Defaults to Colour.BLACK.
         """
         self.x = x
         self.y = y
@@ -465,9 +555,14 @@ class Circle():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the circle object.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the circle object.
+        
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the circle.
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<circle cx="%d" cy="%d" r="%d" fill="%s"' % (x, y, self.r, self.colour)
@@ -480,14 +575,18 @@ class Rectangle():
 
     def __init__(self, x01, y01, x02, y02, colour=Colour.NONE, stroke_colour=Colour.BLACK,
                  stroke_width=2.0, hatch=False):
-        """
-        The constructor for the Rectangle class.
-        @param[in]  x01,y01: The bottom left coordinates of the rectangle.
-        @param[in]  x02,y02: The top right coordinates of the rectangle.
-        @param[in]  colour (optional, default none): The fill colour for the rectangle.
-        @param[in]  stroke_colour (optional, default black): The stroke colour for the rectangle.
-        @param[in]  stroke_width (optional, default 2.0): The stroke width for the rectangle.
-        @param[in]  hatch (optional, default False): If true, the fill will be hatched.
+        """The constructor for the Rectangle class.
+
+        Args:
+            x01 (float): The bottom left x coordinate of the rectangle.
+            y01 (float): The bottom left y coordinate of the rectangle.
+            x02 (float): The top right x coordinate of the rectangle.
+            y02 (float): The top right y coordinate of the rectangle.
+            colour (Colour, optional): The fill colour for the rectangle. Defaults to Colour.NONE.
+            stroke_colour (Colour, optional): The stroke colour for the rectangle. Defaults to
+                Colour.BLACK.
+            stroke_width (float, optional): The stroke width for the rectangle. Defaults to 2.0.
+            hatch (bool, optional): If true, the fill will be hatched. Defaults to False.
         """
         if x02 > x01:
             self.x01 = x01
@@ -507,9 +606,14 @@ class Rectangle():
         self.stroke_colour = stroke_colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the rectangle object.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the rectangle object.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the rectangle.
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
@@ -527,15 +631,19 @@ class Wedge():
 
     def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0,
                  colour=Colour.BLACK):
-        """
-        The constructor for the Wedge class.
-        @param[in]  x,y: The coordinates of the wedge (arc center).
-        @param[in]  theta01 (deg): One of the angles for the wedge (theta01 < theta02).
-        @param[in]  theta02 (deg): One of the angles for the wedge (theta01 < theta02).
-        @param[in]  radius (optional, default 100): The arc radius for the wedge.
-        @param[in]  c_offset (optional, default 0): The distance to offset wedge center (point).
-        @param[in]  explode (optional, default 0): The distance to push the wedge away from center.
-        @param[in]  colour (optional, default black): The fill colour for the wedge.
+        """The constructor for the Wedge class.
+
+        Args:
+            x (float): The x coordinate of the wedge (arc center).
+            y (float): The y coordinate of the wedge (arc center).
+            theta01 (float, deg): One of the angles for the wedge (theta01 < theta02).
+            theta02 (float, deg): One of the angles for the wedge (theta01 < theta02).
+            radius (int, optional): The arc radius for the wedge. Defaults to 100.
+            c_offset (float, optional): The distance to offset wedge center (point).
+                Defaults to 0.0.
+            explode (float, optional): The distance to push the wedge away from center.
+                Defaults to 0.0.
+            colour (Colour, optional): The fill colour for the wedge. Defaults to Colour.BLACK.
         """
         self.x = x
         self.y = y
@@ -547,12 +655,15 @@ class Wedge():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the wedge object.
-        @details    https://bocoup.com/blog/using-svg-patterns-as-fills
-                    https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        """
+        """Output the svg code for the wedge object.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the wedge.
+        """        
         r = self.radius
         theta01 = math.radians(self.theta01)
         theta02 = math.radians(self.theta02)
@@ -585,21 +696,29 @@ class Polygon():
     """A class for drawing polygons."""
 
     def __init__(self, path, colour=Colour.BLACK):
-        """
-        The constructor for the Polygon class.
-        @param[in]  path: A list of x,y tuples.
-        @param[in]  colour (optional, default black): The fill colour for the polygon.
+        """The constructor for the Polygon class.
+        
+        Args:
+            path (list(tuple(float,float))): A list of x,y points.
+            colour ([type], optional): The fill colour for the polygon. Defaults to Colour.BLACK.
         """
         self.path = path
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the polygon object.
-        @details    https://bocoup.com/blog/using-svg-patterns-as-fills
-                    https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
-        """
+        """Output the svg code for the polygon object.
+
+        Useful references:
+            https://bocoup.com/blog/using-svg-patterns-as-fills
+            https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the polygon.
+        """        
         svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % self.colour
         svg += ' d="'
         for i, (x, y) in enumerate(self.path):
@@ -617,13 +736,16 @@ class Arrow():
     """A class for drawing arrows (currently only horizontal)."""
 
     def __init__(self, x01, y01, x02, y02, stroke_width=2.5, colour=Colour.BLACK):
-        """
-        The constructor for the Polygon class.
-        @param[in]  x01,y01: The coordinates for the base of the arrow.
-        @param[in]  x02,y02: The coordinates for the tip of the arrow.
-        @param[in]  stroke_width (optional, default 2.5): The stroke width of the arrow (the rest of
-                    the arrow is proportionally scaled).
-        @param[in]  colour (optional, default black): The fill colour for the wedge.
+        """The constructor for the Polygon class.
+
+        Args:
+            x01 (float): The x coordinate for the base of the arrow.
+            y01 (float): The y coordinate for the base of the arrow.
+            x02 (float): The x coordinate for the tip of the arrow.
+            y02 (float): The y coordinate for the tip of the arrow.
+            stroke_width (float, optional): The stroke width of the arrow (the rest of the arrow
+                is proportionally scaled). Defaults to 2.5.
+            colour (Colour, optional): The arrow colour. Defaults to Colour.BLACK.
         """
         self.x01 = x01
         self.x02 = x02
@@ -633,9 +755,14 @@ class Arrow():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """
-        Output the svg code for the arrow object.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the arrow object.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg text for displaying the arrow.
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
@@ -665,28 +792,31 @@ class Group():
     """A class for grouping svg objects with optional hide tag."""
 
     def __init__(self, tag_id='', hidden=False):
-        """
-        The constructor for the Group class.
-        @param[in]  tag_id (optional, default blank): Used for hidding/unhiding the
-                    objects in the group.
-        @param[in]  hidden (optional, default False): If true, the objects in the group
-                    will be hidden by default.
+        """The constructor for the Group class.
+
+        Args:
+            tag_id (str, optional): Used for hidding/unhiding the objects in the group.
+                Defaults to ''.
+            hidden (bool, optional): If true, the objects in the group will be hidden by default.
+                Defaults to False.
         """
         self.tag_id = tag_id
         self.hidden = hidden
         self.shapes = []
 
     def add(self, shape):
-        """
-        Add a shape to group.
-        @param[in]  shape: The object to add to the group.
+        """Add a shape to group.
+
+        Args:
+            shape (ShapeBase): The object to add to the group.
         """
         self.shapes.append(shape)
 
     def get_svg(self):
-        """
-        Output the svg code for the arrow object.
-        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """Output the svg code for the group object.
+
+        Returns:
+            str: The svg text for displaying the group.
         """
         if self.hidden:
             svg = '<g id="%s" visibility="hidden">' % self.tag_id
@@ -712,159 +842,189 @@ class Group():
 class PieChart():
     """A class for drawing pie-charts."""
 
-    # defines
-    RADIUS = 100
-    GAP = 4
-    C_OFFSET = 4
-    OPACITY = 0.5
-    BOARDER = {'top': 30, 'bottom': 30, 'left': 400, 'right': 400}
+    # Constants
+    DEFAULT_CONFIG = {'radius':100, 'c_offset':4, 'gap':4}
+    DEFAULT_BOARDER = {'top': 30, 'bottom': 30, 'left': 400, 'right': 400}
 
-    def __init__(self, data):
-        """Create a pie-chart."""
+    def __init__(self, data, config=None, boarder=None):
+        """Constructor for the PieChart class.
+
+        Args:
+            data (dict('true_facts':float, 'true_other':float, 'false_facts':float, 
+                'false_other':float)): The set of data to be used for the pie chart.
+            config (dict('radius':float, 'c_offset':float, 'gap':float), optional):
+                The configuration. Defaults to None.
+            boarder (dict('top':float, 'bottom':float, 'left':float', 'right':float), optional):
+                The bounding box used to size the diagram. Defaults to None.
+        """
         self.data = data
         self.shapes = []
+        if config is None:
+            self.config = self.DEFAULT_CONFIG
+        else:
+            self.config = config
+        if boarder is None:
+            self.boarder = self.DEFAULT_BOARDER
+        else:
+            self.boarder = boarder
+
+        true_points = int(round(100 * (self.data['true_facts'] + self.data['true_other'])))
+        false_points = int(round(100 * (self.data['false_facts'] + self.data['false_other'])))
+        true_text = '{}% True Points'.format(true_points)
+        false_text = '{}% False Points'.format(false_points)
+
         self.create_graph()
+        r = self.config['radius']
+        self.create_ledgend(-3*r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(3*r, 0, false_text, Colour.RED)
 
-        R = self.RADIUS
-        true_text = '%d' % int(
-            round(100 * (self.data['true_facts'] + self.data['true_other'])))
-        true_text += '% True Points'
-        false_text = '%d' % int(
-            round(100 * (self.data['false_facts'] + self.data['false_other'])))
-        false_text += '% False Points'
-        self.create_ledgend(-3*R, 0, true_text, Colour.BLACK)
-        self.create_ledgend(3*R, 0, false_text, Colour.RED)
-
-    def create_graph(self, data=None, offset={'x': 0, 'y': 0}):
+    def create_graph(self, data=None, offset=None):
         """Create the actual pie-chart using wedges.
-        ToDo: review GAP logic
-        """
 
-        # setup
-        R = self.RADIUS
-        GAP = self.GAP
-        OPACITY = self.OPACITY
-        C_OFFSET = self.C_OFFSET
-        x = offset['x']
-        y = offset['y']
+        The individual wedges are created one by one by keeping track of the previous and
+        next theta.
+
+        Args:
+            data (dict('true_facts':float, 'true_other':float, 'false_facts':float, 
+                'false_other':float)): The set of data to be used for the pie chart.
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+        """
+        # Setup
+        r = self.config['radius']
+        gap = self.config['gap']
+        c_offset = self.config['c_offset']
+        x, y = offset_xy(0, 0, offset)
         if data is None:
             data = self.data
         keys = ['true_other', 'true_facts', 'false_facts', 'false_other']
 
-        # empty
+        # Empty
         if sum(data.values()) == 0:
-            c = Circle(x, y, R, colour='none')
-            self.shapes.append(c)
+            empty_circle = Circle(x, y, r, colour=Colour.NONE)
+            self.shapes.append(empty_circle)
 
-        # count number of wedges to draw
-        nWedges = 0
+        # Count number of wedges to draw
+        num_wedges = 0
         for key in keys:
             if data[key] > 0.001:
-                nWedges += 1
-        nDegs = 360.0 - nWedges * GAP
+                num_wedges += 1
+        num_degs = 360.0 - num_wedges * gap
 
-        # true other
+        # Find the initial theta00 for the first wedge (true_other). The pie chart is constructed
+        # to have the true data at the top. To achieve this we take the average of the true points
+        # as our offset (the midpoint of the true data will be the top). Additionally, we add a gap
+        # in between the wedges for astetics.
         if data['true_facts'] + data['true_other'] > 0:
-            theta00 = 180.0 - 360.0 * \
-                (data['true_facts'] + data['true_other'])/2 + GAP/2
+            theta00 = 180.0 - 360.0*(data['true_facts'] + data['true_other'])/2 + gap/2
         else:
-            theta00 = 180.0 - GAP/2
-        theta01 = theta00 + nDegs * data['true_other']
+            theta00 = 180.0 - gap/2
+
+        # Construct the true_other wedge
+        theta01 = theta00 + num_degs * data['true_other']
         if data['true_other'] > 0.001:
             if data['true_other'] > 0.999:
-                c = Circle(x, y, R, colour=Colour.BLACK)
-                self.shapes.append(c)
+                full_circle = Circle(x, y, r, colour=Colour.BLACK)
+                self.shapes.append(full_circle)
             else:
-                w = Wedge(x, y, theta00, theta01, R, c_offset=C_OFFSET,
-                          colour=Colour.GREY)
-                self.shapes.append(w)
+                wedge = Wedge(x, y, theta00, theta01, r, c_offset=c_offset, colour=Colour.GREY)
+                self.shapes.append(wedge)
 
-        # true facts
-        theta01 = theta01
-        theta02 = theta01 + nDegs * data['true_facts']
+        # Construct the true_facts wedge
+        theta02 = theta01 + num_degs * data['true_facts']
         if data['true_facts'] > 0.001:
-            theta01 += GAP
-            theta02 += GAP
+            theta01 += gap
+            theta02 += gap
             if data['true_facts'] > 0.999:
-                c = Circle(x, y, R, colour=Colour.BLACK)
-                self.shapes.append(c)
+                full_circle = Circle(x, y, r, colour=Colour.BLACK)
+                self.shapes.append(full_circle)
             else:
-                w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour=Colour.BLACK)
-                self.shapes.append(w)
+                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.BLACK)
+                self.shapes.append(wedge)
 
-        # false facts
+        # Construct the false_facts wedge
         theta01 = theta02
-        theta02 = theta01 + nDegs * data['false_facts']
+        theta02 = theta01 + num_degs * data['false_facts']
         if data['false_facts'] > 0.001:
-            theta01 += GAP
-            theta02 += GAP
+            theta01 += gap
+            theta02 += gap
             if data['false_facts'] > 0.999:
-                c = Circle(x, y, R, colour=Colour.RED)
-                self.shapes.append(c)
+                full_circle = Circle(x, y, r, colour=Colour.RED)
+                self.shapes.append(full_circle)
             else:
-                w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour=Colour.RED)
-                self.shapes.append(w)
+                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.RED)
+                self.shapes.append(wedge)
 
-        # false other
+        # Construct the false_other wedge
         theta01 = theta02
-        theta02 = theta01 + nDegs * data['false_other']
+        theta02 = theta01 + num_degs * data['false_other']
         if data['false_other'] > 0.001:
-            theta01 += GAP
-            theta02 += GAP
+            theta01 += gap
+            theta02 += gap
             if data['false_other'] > 0.999:
-                c = Circle(x, y, R, colour=Colour.PINK)
-                self.shapes.append(c)
+                full_circle = Circle(x, y, r, colour=Colour.PINK)
+                self.shapes.append(full_circle)
             else:
-                w = Wedge(x, y, theta01, theta02, R,
-                          c_offset=C_OFFSET, colour=Colour.PINK)
-                self.shapes.append(w)
-        # assert abs(theta02 - 360 - theta00) < 0.1
+                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.PINK)
+                self.shapes.append(wedge)
+        # assert (theta02 - theta00 + 360) % 360 < 0.1
 
-    def create_ledgend(self, x=0, y=0, text=None, colour=Colour.BLACK):
-        L = 20
-        R = self.RADIUS
-        OPACITY = self.OPACITY
+    def create_ledgend(self, x=0, y=0, points_text=None, colour=Colour.BLACK):
+        """Creates a True or False ledge for the pie chart.
 
-        # facts
-        x01 = x-60
-        y01 = y
-        self.shapes.append(
-            Text('Facts', x=x01, y=y01-2*L, colour=colour, bold=True))
-        self.shapes.append(Rectangle(x01-L, y01-L, x01+L,
-                                     y01+L, colour=colour))
+        Args:
+            x (float, optional): The x coordinate. Defaults to 0.
+            y (float, optional): The y coordinate. Defaults to 0.
+            points_text (str, optional): The points text. Defaults to None.
+            colour (Colour, optional): The ledgend colour (RED or BLACK). Defaults to Colour.BLACK.
+        """
+        # Setup
+        r = self.config['radius']
+        length = 20
 
-        # facts
-        x01 = x+60
-        y01 = y
-        self.shapes.append(
-            Text('Other', x=x01, y=y01-2*L, colour=colour, bold=True))
-        self.shapes.append(Rectangle(x01-L, y01-L, x01+L,
-                                     y01+L, colour=Colour.get_transparent_colour(Colour, colour)))
+        # Construct the facts ledgend
+        x01, y01 = (x - 60, y)
+        self.shapes.append(Text('Facts', x=x01, y=y01-2*length, colour=colour, bold=True))
+        self.shapes.append(Rectangle(x01-length, y01-length, x01+length, y01+length, colour=colour))
 
-        # points
-        if text is not None:
-            self.shapes.append(
-                Text(text, x=x, y=y+R, size=40, colour=colour, bold=True))
+        # Construct the other ledgend
+        x01, y01 = (x + 60, y)
+        self.shapes.append(Text('Other', x=x01, y=y01-2*length, colour=colour, bold=True))
+        self.shapes.append(Rectangle(x01-length, y01-length, x01+length, y01+length,
+                                     colour=Colour.get_transparent_colour(Colour, colour)))
+
+        # Add the points text
+        if points_text is not None:
+            self.shapes.append(Text(points_text, x=x, y=y+r, size=40, colour=colour, bold=True))
 
     def get_svg(self):
-        """Output the svg code for diagram."""
-        R = self.RADIUS
-        BOARDER = self.BOARDER
-        offset = {'x': 0, 'y': 0}
-        width = (2.0*R + BOARDER['left'] + BOARDER['right'])
-        height = (2.0*R + BOARDER['top'] + BOARDER['bottom'])
-        svg = """<center><svg baseProfile="full" version="1.1" viewBox="%d %d %d %d">
-               """ % (-width/2 + offset['x'], -height/2 + offset['y'], width, height)
+        """Output the svg code for the diagram.
 
+        Returns:
+            str: The svg text for displaying the diagram.
+        """
+        # Setup
+        r = self.config['radius']
+        boarder = self.boarder
+        offset = {'x': 0, 'y': 0}
+        width = (2.0*r + boarder['left'] + boarder['right'])
+        height = (2.0*r + boarder['top'] + boarder['bottom'])
+
+        # SVG
+        svg = '<center><svg baseProfile="full" version="1.1"'
+        svg += ' viewBox="%d %d' % (-width/2 + offset['x'], -height/2 + offset['y'])
+        svg += ' %d %d">' % (width, height)
         for shape in self.shapes:
             svg += shape.get_svg()
         svg += """</svg></center>"""
         return svg
 
     def get_caption(self):
-        """Output caption text for diagram."""
+        """Dummy method, there is no caption text for this diagram.
+
+        Returns:
+            str: blank
+        """
         return ''
 
 
@@ -872,13 +1032,23 @@ class OpinionPieChart(PieChart):
     """A sub-class for opinion pie-charts."""
 
     def __init__(self, opinion):
-        """Create a pie chart visualizing the point distribution for the opinion."""
+        """Constructor for the OpinionPieChart class.
+
+        Used to create a pie chart visualizing the point distribution for the opinion.
+
+        Args:
+            opinion (OpinionNode): The opinion to visualize.
+        """
         self.opinion = opinion
         data = opinion.get_point_distribution()
         super().__init__(data)
 
     def get_caption(self):
-        """Output caption text for diagram."""
+        """Output caption text for diagram.
+
+        Returns:
+            str: The html text for the diagrams caption.
+        """
         data = self.data
         text = """The above pie chart shows the point distribution of <b>%s's</b>
                    into true and false categories and facts and other (other is
@@ -908,19 +1078,13 @@ class OpinionPieChart(PieChart):
                       <th style="border-right:2px solid #000;"/>
                       <th> %d </th>
                       <th> %d </th>
-                   </tr>""" % (
-            round(100*data['true_facts']),
-            round(100*data['false_facts']),
-        )
+                   </tr>""" % (round(100*data['true_facts']), round(100*data['false_facts']))
         text += """<tr>
                       <th>Other</th>
                       <th style="border-right:2px solid #000;"/>
                       <th> %d </th>
                       <th> %d </th>
-                   </tr>""" % (
-            round(100*data['true_other']),
-            round(100*data['false_other']),
-        )
+                   </tr>""" % (round(100*data['true_other']), round(100*data['false_other']))
         text += '</table>'
         text += '</div>'
         text += '</center>'
@@ -931,34 +1095,40 @@ class OpinionComparisionPieChart(OpinionPieChart):
     """A sub-class for side-by-side pie-charts (comparisons)."""
 
     def __init__(self, opinion01, opinion02):
-        """Create a side by side pie-chart for two opinions."""
+        """Create a side by side pie-chart for two opinions.
+
+        Args:
+            opinion01 (OpinionNode): The left opinion for the comparision.
+            opinion02 (OpinionNode): The right opinion for the comparision.
+        """
         self.opinion01 = opinion01
         self.opinion02 = opinion02
         self.shapes = []
+        self.config = self.DEFAULT_CONFIG
+        self.boarder = self.DEFAULT_BOARDER
 
         data01 = opinion01.get_point_distribution()
         data02 = opinion02.get_point_distribution()
         self.create_graph(data01, offset={'x': -125, 'y': 0})
         self.create_graph(data02, offset={'x': 125, 'y': 0})
 
-        R = self.RADIUS
+        r = self.config['radius']
         true_text = 'True Points'
         false_text = 'False Points'
-        self.create_ledgend(-4*R, 0, true_text, Colour.BLACK)
-        self.create_ledgend(4*R, 0, false_text, Colour.RED)
+        self.create_ledgend(-4*r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(4*r, 0, false_text, Colour.RED)
 
     def get_caption(self):
-        """Output caption text for diagram."""
-        data01 = self.opinion01.get_point_distribution()
-        data02 = self.opinion02.get_point_distribution()
+        """Output caption text for diagram.
+
+        Returns:
+            str: The html text for the diagrams caption.
+        """
         text = """The above pie charts show the point distribution of <b>%s</b>
                    and <b>%s</b>. The points are broken down into true/false and
                    facts/other categories (other is non-factual evidence). Below
                    the breakdown is shown in tables.
-                """ % (
-            self.opinion01.get_owner(),
-            self.opinion02.get_owner(),
-        )
+                """ % (self.opinion01.get_owner(), self.opinion02.get_owner())
         text += '<br></br>'
         text += '<div class="row">'
         text += '<center>'
@@ -972,25 +1142,24 @@ class DemoPieChart(PieChart):
 
     def __init__(self):
         """Create a demo pie-chart with fake data."""
-        R = [random.random() for i in range(4)]
-        T = sum(R)
-        R = [x/T for x in R]
+        points = [random.random() for i in range(4)]
+        total_points = sum(points)
+        points = [x/total_points for x in points]
         data = {
-            'true_facts': R[0],
-            'true_other': R[1],
-            'false_facts': R[2],
-            'false_other': R[3],
+            'true_facts': points[0],
+            'true_other': points[1],
+            'false_facts': points[2],
+            'false_other': points[3],
         }
         super().__init__(data)
 
 
 class BarGraph():
     """A class for drawing bar graphs."""
-    GAP = 2.0
+    gap = 2.0
     WIDTH = 600
     HEIGHT = 200
     BOARDER = {'top': 60, 'bottom': 75, 'left': 200, 'right': 200}
-    OPACITY = 1.0
 
     def __init__(self, data):
         """Create a bar graph."""
@@ -1003,9 +1172,8 @@ class BarGraph():
         W = self.WIDTH
         H = self.HEIGHT
         y00 = self.HEIGHT
-        GAP = self.GAP
+        gap = self.gap
         max_h = max([x for x in self.data[0]])
-        OPACITY = self.OPACITY
         self.shapes = []
         for i, h in enumerate(self.data[0]):
             if h > 0:
@@ -1016,7 +1184,7 @@ class BarGraph():
                 else:
                     colour = Colour.RED
                 self.shapes.append(Rectangle(
-                    x00*W+GAP, y00, x01*W-GAP, y00-h/max_h*H, colour=colour, stroke_colour='none'))
+                    x00*W+gap, y00, x01*W-gap, y00-h/max_h*H, colour=colour, stroke_colour=Colour.NONE))
 
     def create_ledgend(self):
         """Create the ledge for the graph."""
@@ -1024,7 +1192,7 @@ class BarGraph():
         # setup
         W = self.WIDTH
         H = self.HEIGHT
-        GAP = self.GAP
+        gap = self.gap
         L = 20
         y00 = H
 
@@ -1035,13 +1203,13 @@ class BarGraph():
         x00 = -W/2
         y01 = y00+10
         dy = 30
-        self.shapes.append(Rectangle(x00-GAP/4, y01, x00+GAP/4, y01+dy))
+        self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
         x00 = -W/6
-        self.shapes.append(Rectangle(x00-GAP/4, y01, x00+GAP/4, y01+dy))
+        self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
         x00 = W/6
-        self.shapes.append(Rectangle(x00-GAP/4, y01, x00+GAP/4, y01+dy))
+        self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
         x00 = W/2
-        self.shapes.append(Rectangle(x00-GAP/4, y01, x00+GAP/4, y01+dy))
+        self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
         # Supporters - Moderates - Opposers
         x01 = -W/6-W/6
         y01 = y00+35
@@ -1058,7 +1226,7 @@ class BarGraph():
         """Create the ledge for the graph."""
         W = self.WIDTH
         H = self.HEIGHT
-        GAP = self.GAP
+        gap = self.gap
         y00 = H
 
         # bottom boarder
@@ -1069,8 +1237,8 @@ class BarGraph():
             Text('100', x=x00, y=y00+50, colour=Colour.BLACK, bold=True))
         self.shapes.append(Text('%', x=x00+22, y=y00+50,
                                 colour=Colour.BLACK, bold=True, align='start'))
-        self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
+                                     gap/2, y00+15, colour=Colour.BLACK))
         # mid tic
         x00 = 0
         self.shapes.append(Text('50', x=x00-10, y=y00+50, colour=Colour.BLACK, bold=True, align='end'))
@@ -1080,16 +1248,16 @@ class BarGraph():
                                 colour=Colour.RED, bold=True, align='start'))
         self.shapes.append(Text('%', x=x00+40, y=y00+50,
                                 colour=Colour.RED, bold=True, align='start'))
-        self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
+                                     gap/2, y00+15, colour=Colour.BLACK))
         # false tic
         x00 = W/2
         self.shapes.append(
             Text('100', x=x00, y=y00+50, colour=Colour.RED, bold=True))
         self.shapes.append(Text('%', x=x00+22, y=y00+50,
                                 colour=Colour.RED, bold=True, align='start'))
-        self.shapes.append(Rectangle(x00-GAP/2, y00+7, x00 +
-                                     GAP/2, y00+15, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
+                                     gap/2, y00+15, colour=Colour.BLACK))
         # True/False
         x01 = -W/2 - 100
         y01 = H
@@ -1110,14 +1278,14 @@ class BarGraph():
             Text('Opposers', x=x01, y=y01, size=30, bold=True))
         # Tics
         x01 = -W/2
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 +
-                                     GAP/4, y01, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 +
+                                     gap/4, y01, colour=Colour.BLACK))
         x01 = -W/6
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
         x01 = W/6
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
         x01 = W/2
-        self.shapes.append(Rectangle(x01-GAP/4, y01-15, x01 + GAP/4, y01, colour=Colour.BLACK))
+        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
 
     def get_svg(self):
         """Output the svg code for diagram."""
@@ -1167,7 +1335,7 @@ class OpinionBarGraph(BarGraph):
         W = self.WIDTH
         H = self.HEIGHT
         y00 = self.HEIGHT
-        GAP = self.GAP
+        gap = self.gap
         max_h = max([x for x in self.data[0]])
 
         if opinion is None:
@@ -1185,13 +1353,13 @@ class OpinionBarGraph(BarGraph):
                 if (x00 <= x00_true and x01_true <= x01) or (x00_true <= x00 and x01 <= x01_true):
                     hidden_group01.add(
                         Rectangle(
-                            x00*W+GAP,
+                            x00*W+gap,
                             y00,
-                            x01*W-GAP,
+                            x01*W-gap,
                             y00-h/max_h*H,
                             hatch=True,
                             stroke_width=2.0,
-                            stroke_colour='none',
+                            stroke_colour=Colour.NONE,
                         )
                     )
         self.shapes.append(hidden_group01)
@@ -1300,7 +1468,7 @@ class DemoBarGraph(BarGraph):
 class OpinionVennDiagram():
     """A class for drawing Venn-diagrams."""
 
-    # defines
+    # Defines
     RADIUS = 150
     SHAPE_AREA = 0.6 * RADIUS**2
     BOARDER = {'top': 60, 'bottom': 30, 'left': 100, 'right': 100}
@@ -1353,38 +1521,38 @@ class OpinionVennDiagram():
 
     def create_rings(self):
         """Create true and false rings."""
-        R = self.RADIUS
+        r = self.RADIUS
         # fix rings
         if len(self.int_set) == 0:
-            self.true_ring = Ring(-0.85*R, 0.0, R, x_max=-0.35*R)
-            self.false_ring = Ring(0.85*R, 0.0, R, x_min=0.35*R)
+            self.true_ring = Ring(-0.85*r, 0.0, r, x_max=-0.35*r)
+            self.false_ring = Ring(0.85*r, 0.0, r, x_min=0.35*r)
         # overlap rings
         else:
-            self.true_ring = Ring(-0.75*R, 0.0, R, x_max=-0.35*R)
-            self.false_ring = Ring(0.75*R, 0.0, R, x_min=0.35*R)
+            self.true_ring = Ring(-0.75*r, 0.0, r, x_max=-0.35*r)
+            self.false_ring = Ring(0.75*r, 0.0, r, x_min=0.35*r)
 
     def create_ledgend(self):
         """Create legend text."""
         self.text = []
-        R = self.RADIUS
+        r = self.RADIUS
         BOARDER = self.BOARDER
         self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y -
-                              1.0*13/12*R, size=40, colour=Colour.BLACK, bold=True))
+                              1.0*13/12*r, size=40, colour=Colour.BLACK, bold=True))
         self.text.append(Text('False', x=self.false_ring.x,
-                              y=self.true_ring.y - 1.0*13/12*R, size=40, colour=Colour.RED, bold=True))
+                              y=self.true_ring.y - 1.0*13/12*r, size=40, colour=Colour.RED, bold=True))
         if self.bottom_text is not None:
             self.text.append(Text(self.bottom_text, x=(
-                self.true_ring.x + self.false_ring.x)/2, y=0.95*R + BOARDER['bottom']))
+                self.true_ring.x + self.false_ring.x)/2, y=0.95*r + BOARDER['bottom']))
 
     def create_shapes(self):
         """Create evidence and sub-theory shapes (within the true and false sets)."""
-        R = self.RADIUS
+        r = self.RADIUS
         random.seed(0)
 
         self.true_shapes = []
         for node in self.true_set:
             # randomly place the shape inside the positive ring
-            r = math.sqrt(random.random()) * R
+            r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.true_ring.x + r * math.cos(theta)
             y = self.true_ring.y + r * math.sin(theta)
@@ -1398,7 +1566,7 @@ class OpinionVennDiagram():
         self.int_shapes = []
         for node in self.int_set:
             # randomly place the shape inside the positive ring
-            r = math.sqrt(random.random()) * R
+            r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = (self.true_ring.x + self.false_ring.x)/2 + r * math.cos(theta)
             y = (self.true_ring.y + self.false_ring.y)/2 + r * math.sin(theta)
@@ -1412,7 +1580,7 @@ class OpinionVennDiagram():
         self.false_shapes = []
         for node in self.false_set:
             # randomly place the shape inside the positive ring
-            r = math.sqrt(random.random()) * R
+            r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.false_ring.x + r * math.cos(theta)
             y = self.false_ring.y + r * math.sin(theta)
@@ -1425,13 +1593,13 @@ class OpinionVennDiagram():
 
     def create_out_shapes(self):
         """Create evidence and sub-theory shapes that falls outside of the true and false sets."""
-        R = self.RADIUS
+        r = self.RADIUS
         BOARDER = self.BOARDER
-        X_NEG = self.true_ring.x - R - BOARDER['left']
-        X_POS = self.false_ring.x + R + BOARDER['right']
+        X_NEG = self.true_ring.x - r - BOARDER['left']
+        X_POS = self.false_ring.x + r + BOARDER['right']
         X_WID = X_POS - X_NEG
-        Y_NEG = self.true_ring.y + R + BOARDER['top']
-        Y_POS = self.true_ring.y - R - BOARDER['bottom']
+        Y_NEG = self.true_ring.y + r + BOARDER['top']
+        Y_POS = self.true_ring.y - r - BOARDER['bottom']
         Y_WID = Y_POS - Y_NEG
 
         random.seed(0)
@@ -1450,12 +1618,12 @@ class OpinionVennDiagram():
     def create_boundary_shapes(self):
         """Create boundary shapes to confine the shapes to the view port."""
         BOARDER = self.BOARDER
-        R = self.RADIUS
-        X_NEG = self.true_ring.x - R - BOARDER['left']
-        X_POS = self.false_ring.x + R + BOARDER['right']
+        r = self.RADIUS
+        X_NEG = self.true_ring.x - r - BOARDER['left']
+        X_POS = self.false_ring.x + r + BOARDER['right']
         X_WID = X_POS - X_NEG
-        Y_POS = self.true_ring.y - R - BOARDER['top']
-        Y_NEG = self.true_ring.y + R + BOARDER['bottom']
+        Y_POS = self.true_ring.y - r - BOARDER['top']
+        Y_NEG = self.true_ring.y + r + BOARDER['bottom']
         Y_WID = Y_POS - Y_NEG
 
         # image frame
@@ -1468,7 +1636,7 @@ class OpinionVennDiagram():
         # create a circle to avoid the text and middle of the figure
         x = (self.true_ring.x + self.false_ring.x)/2
         y = self.true_ring.y
-        R = (self.false_ring.x - self.true_ring.x)/2 + 1*R
+        R = (self.false_ring.x - self.true_ring.x)/2 + 1*r
         self.out_boundry_shapes = [Ring(x, y, R)]
 
     def fix_overlap01(self):
@@ -1576,12 +1744,12 @@ class OpinionVennDiagram():
 
     def get_svg(self):
         """Output the svg code for diagram."""
-        R = self.RADIUS
+        r = self.RADIUS
         BOARDER = self.BOARDER
-        height = (2.0*R + BOARDER['top'] + BOARDER['bottom'])
+        height = (2.0*r + BOARDER['top'] + BOARDER['bottom'])
         width = 1200
         offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
-                    'y': BOARDER['top'] + R - self.true_ring.y}
+                    'y': BOARDER['top'] + r - self.true_ring.y}
         svg = """<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">
                     <defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]></style></defs>
                 """ % (width, height)
@@ -1704,7 +1872,15 @@ class DemoVennDiagram(OpinionVennDiagram):
     """A class for drawing demo Venn-diagrams (fake data)."""
 
     def __init__(self, true_set_size=10, int_set_size=10, false_set_size=10, out_set_size=10):
-        """Create a demo Venn-diagram with fake data."""
+        """The constructor for the DemoVennDiagram class.
+        
+        Args:
+            true_set_size (int, optional): The number of random true OpinionNodes to be generated.
+                Defaults to 10.
+            int_set_size (int, optional): [description]. Defaults to 10.
+            false_set_size (int, optional): [description]. Defaults to 10.
+            out_set_size (int, optional): [description]. Defaults to 10.
+        """
         random.seed()
         seed = random.randint(0, 100)
         random.seed(seed)
