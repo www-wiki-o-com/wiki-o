@@ -200,7 +200,7 @@ class SpringShapeBase:
 
     def reset_spring_constant(self):
         """Resets the spring constant.
-        
+
         The spring force constant degrades over each iteration, this method resets the spring
         force constant.
         """
@@ -208,7 +208,7 @@ class SpringShapeBase:
 
     def propigate(self, dx, dy):
         """A method for calculating the step distance based on the repel force.
-        
+
         Args:
             dx (float): The x distance to propigate the shape.
             dy (float): The y distance to propigate the shape.
@@ -246,8 +246,8 @@ class EvidenceShape(SpringShapeBase):
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the shape.
-        """        
+            str: The svg code for displaying the shape.
+        """
         length = self.length + 15
         x = self.x - length/2
         y = self.y - length/2
@@ -270,7 +270,7 @@ class EvidenceShape(SpringShapeBase):
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the shape.
+            str: The svg code for displaying the shape.
         """
         if self.node.true_points() >= self.node.false_points():
             if self.node.is_verifiable():
@@ -321,7 +321,7 @@ class SubtheoryShape(SpringShapeBase):
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the shape.
+            str: The svg code for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -344,7 +344,7 @@ class SubtheoryShape(SpringShapeBase):
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the shape.
+            str: The svg code for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -410,7 +410,7 @@ class Ring(SpringShapeBase):
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the shape.
+            str: The svg code for displaying the shape.
         """
         x = self.x
         y = self.y
@@ -524,7 +524,7 @@ class Text():
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the text.
+            str: The svg code for displaying the text.
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<text text-anchor="%s" x="%d" y="%d"' % (self.align, x, y)
@@ -542,7 +542,7 @@ class Circle():
 
     def __init__(self, x, y, r, colour=Colour.BLACK):
         """The constructor for the Circle class.
-        
+
         Args:
             x (float): The x coordinate of the circle.
             y (float): The y coordinate of the circle.
@@ -556,13 +556,13 @@ class Circle():
 
     def get_svg(self, offset=None):
         """Output the svg code for the circle object.
-        
+
         Args:
             offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the circle.
+            str: The svg code for displaying the circle.
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<circle cx="%d" cy="%d" r="%d" fill="%s"' % (x, y, self.r, self.colour)
@@ -613,7 +613,7 @@ class Rectangle():
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the rectangle.
+            str: The svg code for displaying the rectangle.
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
@@ -662,7 +662,7 @@ class Wedge():
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the wedge.
+            str: The svg code for displaying the wedge.
         """        
         r = self.radius
         theta01 = math.radians(self.theta01)
@@ -717,7 +717,7 @@ class Polygon():
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the polygon.
+            str: The svg code for displaying the polygon.
         """        
         svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % self.colour
         svg += ' d="'
@@ -762,7 +762,7 @@ class Arrow():
                 Defaults to None.
 
         Returns:
-            str: The svg text for displaying the arrow.
+            str: The svg code for displaying the arrow.
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
@@ -816,7 +816,7 @@ class Group():
         """Output the svg code for the group object.
 
         Returns:
-            str: The svg text for displaying the group.
+            str: The svg code for displaying the group.
         """
         if self.hidden:
             svg = '<g id="%s" visibility="hidden">' % self.tag_id
@@ -850,7 +850,7 @@ class PieChart():
         """Constructor for the PieChart class.
 
         Args:
-            data (dict('true_facts':float, 'true_other':float, 'false_facts':float, 
+            data (dict('true_facts':float, 'true_other':float, 'false_facts':float,
                 'false_other':float)): The set of data to be used for the pie chart.
             config (dict('radius':float, 'c_offset':float, 'gap':float), optional):
                 The configuration. Defaults to None.
@@ -867,14 +867,19 @@ class PieChart():
             self.boarder = self.DEFAULT_BOARDER
         else:
             self.boarder = boarder
+        self.construct()
 
+    def construct(self):
+        """Construct the graph."""
+        # Setup
+        r = self.config['radius']
         true_points = int(round(100 * (self.data['true_facts'] + self.data['true_other'])))
         false_points = int(round(100 * (self.data['false_facts'] + self.data['false_other'])))
         true_text = '{}% True Points'.format(true_points)
         false_text = '{}% False Points'.format(false_points)
 
+        # Construct
         self.create_graph()
-        r = self.config['radius']
         self.create_ledgend(-3*r, 0, true_text, Colour.BLACK)
         self.create_ledgend(3*r, 0, false_text, Colour.RED)
 
@@ -912,7 +917,7 @@ class PieChart():
         num_degs = 360.0 - num_wedges * gap
 
         # Find the initial theta00 for the first wedge (true_other). The pie chart is constructed
-        # to have the true data at the top. To achieve this we take the average of the true points
+        # to have the true data at the left. To achieve this we take the average of the true points
         # as our offset (the midpoint of the true data will be the top). Additionally, we add a gap
         # in between the wedges for astetics.
         if data['true_facts'] + data['true_other'] > 0:
@@ -1001,7 +1006,7 @@ class PieChart():
         """Output the svg code for the diagram.
 
         Returns:
-            str: The svg text for displaying the diagram.
+            str: The svg code for displaying the diagram.
         """
         # Setup
         r = self.config['radius']
@@ -1031,16 +1036,19 @@ class PieChart():
 class OpinionPieChart(PieChart):
     """A sub-class for opinion pie-charts."""
 
-    def __init__(self, opinion):
+    def __init__(self, opinion=None):
         """Constructor for the OpinionPieChart class.
 
         Used to create a pie chart visualizing the point distribution for the opinion.
 
         Args:
-            opinion (OpinionNode): The opinion to visualize.
+            opinion (OpinionNode, optional): The opinion to visualize. Defaults to None.
         """
         self.opinion = opinion
-        data = opinion.get_point_distribution()
+        if opinion is None:
+            data = None
+        else:
+            data = opinion.get_point_distribution()
         super().__init__(data)
 
     def get_caption(self):
@@ -1104,19 +1112,22 @@ class OpinionComparisionPieChart(OpinionPieChart):
         self.opinion01 = opinion01
         self.opinion02 = opinion02
         self.shapes = []
-        self.config = self.DEFAULT_CONFIG
-        self.boarder = self.DEFAULT_BOARDER
+        super().__init__(None)
 
-        data01 = opinion01.get_point_distribution()
-        data02 = opinion02.get_point_distribution()
-        self.create_graph(data01, offset={'x': -125, 'y': 0})
-        self.create_graph(data02, offset={'x': 125, 'y': 0})
-
+    def construct(self):
+        """Construct the graph."""
+        # Setup
         r = self.config['radius']
         true_text = 'True Points'
         false_text = 'False Points'
-        self.create_ledgend(-4*r, 0, true_text, Colour.BLACK)
-        self.create_ledgend(4*r, 0, false_text, Colour.RED)
+
+        # Construct
+        data01 = self.opinion01.get_point_distribution()
+        data02 = self.opinion02.get_point_distribution()
+        self.create_graph(data01, offset={'x': -125, 'y': 0})
+        self.create_graph(data02, offset={'x': 125, 'y': 0})
+        self.create_ledgend(-3*r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(3*r, 0, false_text, Colour.RED)
 
     def get_caption(self):
         """Output caption text for diagram.
@@ -1156,24 +1167,46 @@ class DemoPieChart(PieChart):
 
 class BarGraph():
     """A class for drawing bar graphs."""
-    gap = 2.0
-    WIDTH = 600
-    HEIGHT = 200
-    BOARDER = {'top': 60, 'bottom': 75, 'left': 200, 'right': 200}
 
-    def __init__(self, data):
-        """Create a bar graph."""
+    # Constants
+    DEFAULT_CONFIG = {'gap':2.0, 'width':600, 'height':200}
+    DEFAULT_BOARDER = {'top': 60, 'bottom': 75, 'left': 200, 'right': 200}
+
+    def __init__(self, data, config=None, boarder=None):
+        """Create a bar graph.
+
+        Args:
+            data (list(float)): A list of bar heights.
+            config (dict, optional): A diagram configurations. Defaults to None.
+            boarder (dict, optional): The boarder configuration. Defaults to None.
+        """
+        if config is None:
+            self.config = self.DEFAULT_CONFIG
+        else:
+            self.config = config
+        if boarder is None:
+            self.boarder = self.DEFAULT_BOARDER
+        else:
+            self.boarder = boarder
         self.data = data
+        self.shapes = None
+        self.construct()
+
+    def construct(self):
+        """Construct the graph."""
         self.create_graph()
         self.create_ledgend()
 
-    def create_graph(self, data=None):
+    def create_graph(self):
         """Create the actual bars for the graph."""
-        W = self.WIDTH
-        H = self.HEIGHT
-        y00 = self.HEIGHT
-        gap = self.gap
-        max_h = max([x for x in self.data[0]])
+        # Setup
+        width = self.config['width']
+        height = self.config['height']
+        gap = self.config['gap']
+
+        y00 = height
+        max_h = max(self.data[0])
+
         self.shapes = []
         for i, h in enumerate(self.data[0]):
             if h > 0:
@@ -1183,118 +1216,111 @@ class BarGraph():
                     colour = Colour.BLACK
                 else:
                     colour = Colour.RED
-                self.shapes.append(Rectangle(
-                    x00*W+gap, y00, x01*W-gap, y00-h/max_h*H, colour=colour, stroke_colour=Colour.NONE))
+                self.shapes.append(Rectangle(x00*width+gap, y00, x01*width-gap, y00-h/max_h*height,
+                                             colour=colour, stroke_colour=Colour.NONE))
 
     def create_ledgend(self):
         """Create the ledge for the graph."""
+        # Setup
+        width = self.config['width']
+        height = self.config['height']
+        gap = self.config['gap']
 
-        # setup
-        W = self.WIDTH
-        H = self.HEIGHT
-        gap = self.gap
-        L = 20
-        y00 = H
+        # Construct the bottom boarder.
+        y00 = height
+        self.shapes.append(Rectangle(-width/2-20, y00, width/2+20, y00+3, colour=Colour.BLACK))
 
-        # bottom boarder
-        self.shapes.append(Rectangle(-W/2-20, y00, W/2+20,
-                                     y00+3, colour=Colour.BLACK))
-        # Tics
-        x00 = -W/2
-        y01 = y00+10
+        # Add the tics.
         dy = 30
+        x00, y01 = (-width/2, y00 + 10)
         self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
-        x00 = -W/6
+        x00 = -width/6
         self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
-        x00 = W/6
+        x00 = width/6
         self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
-        x00 = W/2
+        x00 = width/2
         self.shapes.append(Rectangle(x00-gap/4, y01, x00+gap/4, y01+dy))
-        # Supporters - Moderates - Opposers
-        x01 = -W/6-W/6
-        y01 = y00+35
-        self.shapes.append(
-            Text('Supporters', x=x01, y=y01, size=30, bold=True))
+
+        # Add the Supporters - Moderates - Opposers text.
+        x01, y01 = (-width/6 - width/6, y00 + 35)
+        self.shapes.append(Text('Supporters', x=x01, y=y01, size=30, bold=True))
         x01 = 0
-        self.shapes.append(
-            Text('Moderates', x=x01, y=y01, size=30, bold=True))
-        x01 = W/6+W/6
-        self.shapes.append(
-            Text('Opposers', x=x01, y=y01, size=30, bold=True))
+        self.shapes.append(Text('Moderates', x=x01, y=y01, size=30, bold=True))
+        x01 = width/6+width/6
+        self.shapes.append(Text('Opposers', x=x01, y=y01, size=30, bold=True))
 
     def create_ledgend02(self):
         """Create the ledge for the graph."""
-        W = self.WIDTH
-        H = self.HEIGHT
-        gap = self.gap
-        y00 = H
+        # Setup
+        width = self.config['width']
+        height = self.config['height']
+        gap = self.config['gap']
 
-        # bottom boarder
-        self.shapes.append(Rectangle(-W/2-40, y00, W/2+40, y00+3, colour=Colour.BLACK))
-        # true tic
-        x00 = -W/2
-        self.shapes.append(
-            Text('100', x=x00, y=y00+50, colour=Colour.BLACK, bold=True))
+        # Construct the bottom boarder.
+        y00 = height
+        self.shapes.append(Rectangle(-width/2-40, y00, width/2+40, y00+3, colour=Colour.BLACK))
+
+        # Add the true tic.
+        x00 = -width/2
+        self.shapes.append(Text('100', x=x00, y=y00+50, colour=Colour.BLACK, bold=True))
         self.shapes.append(Text('%', x=x00+22, y=y00+50,
                                 colour=Colour.BLACK, bold=True, align='start'))
         self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
                                      gap/2, y00+15, colour=Colour.BLACK))
-        # mid tic
+
+        # Add the mid tic.
         x00 = 0
-        self.shapes.append(Text('50', x=x00-10, y=y00+50, colour=Colour.BLACK, bold=True, align='end'))
-        self.shapes.append(
-            Text('/', x=x00, y=y00+50, colour=Colour.BLACK, bold=True, align='middle'))
-        self.shapes.append(Text('50', x=x00+10, y=y00+50,
-                                colour=Colour.RED, bold=True, align='start'))
-        self.shapes.append(Text('%', x=x00+40, y=y00+50,
-                                colour=Colour.RED, bold=True, align='start'))
-        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
-                                     gap/2, y00+15, colour=Colour.BLACK))
-        # false tic
-        x00 = W/2
-        self.shapes.append(
-            Text('100', x=x00, y=y00+50, colour=Colour.RED, bold=True))
-        self.shapes.append(Text('%', x=x00+22, y=y00+50,
-                                colour=Colour.RED, bold=True, align='start'))
-        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 +
-                                     gap/2, y00+15, colour=Colour.BLACK))
-        # True/False
-        x01 = -W/2 - 100
-        y01 = H
-        self.shapes.append(
-            Text('True', x=x01, y=y01, size=40, colour=Colour.BLACK, bold=True))
-        self.shapes.append(Text('False', x=-x01, y=y01,
-                                size=40, colour=Colour.RED, bold=True))
-        # Supporters - Moderates - Opposers
-        x01 = -W/6-W/6
-        y01 = y00+90
-        self.shapes.append(
-            Text('Supporters', x=x01, y=y01, size=30, bold=True))
+        self.shapes.append(Text('50', x=x00-10, y=y00+50, colour=Colour.BLACK,
+                                bold=True, align='end'))
+        self.shapes.append(Text('/', x=x00, y=y00+50, colour=Colour.BLACK,
+                                bold=True, align='middle'))
+        self.shapes.append(Text('50', x=x00+10, y=y00+50, colour=Colour.RED,
+                                bold=True, align='start'))
+        self.shapes.append(Text('%', x=x00+40, y=y00+50, colour=Colour.RED,
+                                bold=True, align='start'))
+        self.shapes.append(Rectangle(x00 - gap/2, y00 + 7, x00 + gap/2, y00 + 15,
+                                     colour=Colour.BLACK))
+
+        # Add the false tic.
+        x00 = width/2
+        self.shapes.append(Text('100', x=x00, y=y00+50, colour=Colour.RED, bold=True))
+        self.shapes.append(Text('%', x=x00+22, y=y00+50, colour=Colour.RED,
+                                bold=True, align='start'))
+        self.shapes.append(Rectangle(x00-gap/2, y00+7, x00 + gap/2, y00+15, colour=Colour.BLACK))
+
+        # Add the True and False text.
+        x01, y01 = (-width/2 - 100, height)
+        self.shapes.append(Text('True', x=x01, y=y01, size=40, colour=Colour.BLACK, bold=True))
+        self.shapes.append(Text('False', x=-x01, y=y01, size=40, colour=Colour.RED, bold=True))
+
+        # Add the Supporters - Moderates - Opposers text.
+        x01, y01 = (-width/6 - width/6, y00 + 90)
+        self.shapes.append(Text('Supporters', x=x01, y=y01, size=30, bold=True))
         x01 = 0
-        self.shapes.append(
-            Text('Moderates', x=x01, y=y01, size=30, bold=True))
-        x01 = W/6+W/6
-        self.shapes.append(
-            Text('Opposers', x=x01, y=y01, size=30, bold=True))
-        # Tics
-        x01 = -W/2
-        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 +
-                                     gap/4, y01, colour=Colour.BLACK))
-        x01 = -W/6
+        self.shapes.append(Text('Moderates', x=x01, y=y01, size=30, bold=True))
+        x01 = width/6 + width/6
+        self.shapes.append(Text('Opposers', x=x01, y=y01, size=30, bold=True))
+
+        # Add tics.
+        x01 = -width/2
         self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
-        x01 = W/6
+        x01 = -width/6
         self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
-        x01 = W/2
+        x01 = width/6
+        self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
+        x01 = width/2
         self.shapes.append(Rectangle(x01-gap/4, y01-15, x01 + gap/4, y01, colour=Colour.BLACK))
 
     def get_svg(self):
-        """Output the svg code for diagram."""
-        W = self.WIDTH
-        H = self.HEIGHT
-        BOARDER = self.BOARDER
-        offset = {'x': 0, 'y': -BOARDER['top']}
-        width = W + BOARDER['left'] + BOARDER['right']
-        height = H + BOARDER['top'] + BOARDER['bottom']
+        """Output the svg code for diagram.
+
+        Returns:
+            str: The svg code for displaying the diagram.
+        """
+        # Setup
+        offset = {'x': 0, 'y': -self.boarder['top']}
+        width = self.config['width'] + self.boarder['left'] + self.boarder['right']
+        height = self.config['height'] + self.boarder['top'] + self.boarder['bottom']
         svg = """<center><svg baseProfile="full" version="1.1" viewBox="%d %d %d %d">
                """ % (-width/2 + offset['x'], offset['y'], width, height)
         svg += """<defs>
@@ -1309,7 +1335,7 @@ class BarGraph():
         return svg
 
     def get_caption(self):
-        """Output caption text for diagram."""
+        """Dummy method, there is no caption text for the diagram."""
         return ''
 
 
@@ -1317,26 +1343,39 @@ class OpinionBarGraph(BarGraph):
     """A class for drawing opinion bar graphs."""
 
     def __init__(self, opinion):
-        """Create a bar graph for visualizing the point distribution awarded to a theory."""
+        """Create a bar graph for visualizing the point distribution awarded to a theory.
+
+        Args:
+            opinion (OpinionNode): The users opinion.
+        """
         self.opinion = opinion
         self.theory = opinion.theory
         self.opinions = self.theory.get_opinions()
 
         bins = min(24, max(6, 6*(math.floor(self.opinions.count()/18) - 1)))
         data00 = [0.5 - x.true_points() for x in self.opinions]
-        self.data = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
+        data01 = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
+        super().__init__(data01)
 
+    def construct(self):
+        """Construct the graph."""
         self.create_graph()
         self.create_hidden()
         self.create_ledgend()
 
     def create_hidden(self, opinion=None, tag_id='user01'):
-        """Create the hidden shapes that highlight opinion."""
-        W = self.WIDTH
-        H = self.HEIGHT
-        y00 = self.HEIGHT
-        gap = self.gap
-        max_h = max([x for x in self.data[0]])
+        """Create the hidden shapes that highlight opinion.
+
+        Args:
+            opinion (OpinionNode, optional): The user's opinion. Defaults to None.
+            tag_id (str, optional): The html tag to enable/disable visability (hide).
+                Defaults to 'user01'.
+        """
+        width = self.config['width']
+        height = self.config['height']
+        y00 = self.config['height']
+        gap = self.config['gap']
+        max_h = max(self.data[0])
 
         if opinion is None:
             opinion = self.opinion
@@ -1353,10 +1392,10 @@ class OpinionBarGraph(BarGraph):
                 if (x00 <= x00_true and x01_true <= x01) or (x00_true <= x00 and x01 <= x01_true):
                     hidden_group01.add(
                         Rectangle(
-                            x00*W+gap,
+                            x00 * width + gap,
                             y00,
-                            x01*W-gap,
-                            y00-h/max_h*H,
+                            x01 * width - gap,
+                            y00 - h/max_h * height,
                             hatch=True,
                             stroke_width=2.0,
                             stroke_colour=Colour.NONE,
@@ -1365,19 +1404,18 @@ class OpinionBarGraph(BarGraph):
         self.shapes.append(hidden_group01)
 
     def get_caption(self):
-        """Output caption text for diagram."""
-        stats = self.theory.get_stats(stats_type=models.Stats.TYPE.ALL)
-        opinions = self.opinions
+        """Output caption text for diagram.
 
+        Returns:
+            str: The caption text for the diagram.
+        """
         text = """The above histogram shows the true/false belief distribution
                    of the <b>%d</b> %s (the most left column captures the
                    opinions that allocated 100&#37; of their points to the truth
                    of the theory). Hover the mouse below to highlight the bin
                    that the opinion falls into.
-                """ % (
-            opinions.count(),
-            'opinion' if opinions.count() <= 1 else 'different opinions',
-        )
+                """ % (self.opinions.count(),
+                       'opinion' if self.opinions.count() <= 1 else 'different opinions')
         text += '<br></br>'
         text += '<center>'
         text += '  <a tag_id="user01" href="#"> Highlight %s </a>' % self.opinion.get_owner()
@@ -1389,7 +1427,11 @@ class OpinionNodeBarGraph(BarGraph):
     """A class for drawing opinion-node bar graphs."""
 
     def __init__(self, opinion_node):
-        """Create a bar graph for visualizing the point distribution awarded to an opinion_node."""
+        """Create a bar graph for visualizing the point distribution awarded to an opinion_node.
+
+        Args:
+            opinion_node (OpinionNode): The user's opinion.
+        """
         self.opinion_node = opinion_node
         self.theory_node = opinion_node.theory_node
         self.opinion_nodes = self.theory_node.opinion_nodes.all()
@@ -1397,8 +1439,11 @@ class OpinionNodeBarGraph(BarGraph):
         bins = min(24, max(6, 6*(math.floor(self.opinion_nodes.count()/18) - 1)))
         data00 = [0.5 - x['true_points']
                   for x in self.opinion_nodes.values('true_points')]
-        self.data = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
+        data01 = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
+        super().__init__(data01)
 
+    def construct(self):
+        """Construct the graph."""
         self.create_graph()
         self.create_ledgend()
 
@@ -1407,33 +1452,36 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
     """A class for drawing comparison bar graphs (two highlight opinions)."""
 
     def __init__(self, opinion01, opinion02):
-        """Create a bar graph for comparing two opinions."""
-        self.theory = opinion01.theory
+        """Constructor for the OpinionComparisionBarGraph class.
+
+        Args:
+            opinion01 (OpinionNode): User01's opinion.
+            opinion02 (OpinionNode): User02's opinion.
+        """
         self.opinion01 = opinion01
         self.opinion02 = opinion02
-        self.opinions = self.theory.get_opinions()
+        super().__init__(opinion01)
 
-        bins = min(24, max(6, 6*(math.floor(self.opinions.count()/18) - 1)))
-        data00 = [0.5 - x.true_points() for x in self.opinions]
-        self.data = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
+    def construct(self):
+        """Construct the graph."""
         self.create_graph()
-
-        self.create_hidden(opinion01, tag_id='user01')
-        self.create_hidden(opinion02, tag_id='user02')
+        self.create_hidden(self.opinion01, tag_id='user01')
+        self.create_hidden(self.opinion02, tag_id='user02')
         self.create_ledgend()
 
     def get_caption(self):
-        """Output caption text for diagram."""
-        stats = self.theory.get_stats(stats_type=models.Stats.TYPE.ALL)
-        opinions = self.opinions
+        """Output caption text for diagram.
 
+        Returns:
+            str: The caption text for the diagram.
+        """        
         text = """The above histogram shows the true/false belief distribution
                    of the <b>%d</b> %s (the most left column captures the
                    opinions that allocated 100&#37; of their points to the truth
                    of the theory). Hover the mouse below to highlight the bin
                    that the opinions falls into.
-                """ % (opinions.count(),
-                       'opinion' if opinions.count() <= 1 else 'different opinions',)
+                """ % (self.opinions.count(),
+                       'opinion' if self.opinions.count() <= 1 else 'different opinions',)
         text += '<br></br>'
         text += '<div class="row">'
         text += '<div class="col-6 text-center">'
@@ -1442,7 +1490,7 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
         text += '<div class="col-6 text-center">'
         text += ' <a tag_id="user02" href="#"> Highlight %s </a>' % self.opinion02.get_owner()
         text += '</div>'
-        text += '</div>'  # /row
+        text += '</div>'
         return text
 
 
@@ -1450,18 +1498,18 @@ class DemoBarGraph(BarGraph):
     """A class for drawing demo bar graphs (fake data)."""
 
     def __init__(self):
-        """Create a demo bar graph with fake data."""
-        T = 0.0
+        """Constructor for the DemoBarGraph class."""
+        total = 0.0
         data = [[], [-0.5]]
-        RES = 18
-        for i in range(RES):
-            x01 = -0.5 + 1.0*(i+1)/RES
+        resolution = 18
+        for i in range(resolution):
+            x01 = -0.5 + 1.0*(i+1)/resolution
             y00 = random.random()
             data[0].append(y00)
             data[1].append(x01)
-            T += y00
-        for i in range(RES):
-            data[0][i] = data[0][i] / T
+            total += y00
+        for i in range(resolution):
+            data[0][i] = data[0][i] / total
         super().__init__(data)
 
 
@@ -1538,8 +1586,8 @@ class OpinionVennDiagram():
         BOARDER = self.BOARDER
         self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y -
                               1.0*13/12*r, size=40, colour=Colour.BLACK, bold=True))
-        self.text.append(Text('False', x=self.false_ring.x,
-                              y=self.true_ring.y - 1.0*13/12*r, size=40, colour=Colour.RED, bold=True))
+        self.text.append(Text('False', x=self.false_ring.x, y=self.true_ring.y - 1.0*13/12*r,
+                              size=40, colour=Colour.RED, bold=True))
         if self.bottom_text is not None:
             self.text.append(Text(self.bottom_text, x=(
                 self.true_ring.x + self.false_ring.x)/2, y=0.95*r + BOARDER['bottom']))
@@ -1644,21 +1692,21 @@ class OpinionVennDiagram():
         # setup
         shapes = []
         if len(self.int_shapes) > 0:
-            shapes.append({'prop': self.true_shapes, 'in': [
-                          self.true_ring], 'out': self.true_shapes+[self.false_ring]})
-            shapes.append({'prop': self.false_shapes, 'in': [
-                          self.false_ring], 'out': self.false_shapes+[self.true_ring]})
-            shapes.append({'prop': self.int_shapes, 'in': [
-                          self.true_ring, self.false_ring], 'out': self.int_shapes})
-            shapes.append({'prop': [
-                          self.true_ring], 'in': self.true_shapes + self.int_shapes, 'out': self.false_shapes})
-            shapes.append({'prop': [
-                          self.false_ring], 'in': self.false_shapes + self.int_shapes, 'out': self.true_shapes})
+            shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
+                           'out': self.true_shapes+[self.false_ring]})
+            shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
+                           'out': self.false_shapes+[self.true_ring]})
+            shapes.append({'prop': self.int_shapes, 'in': [self.true_ring, self.false_ring],
+                           'out': self.int_shapes})
+            shapes.append({'prop': [self.true_ring], 'in': self.true_shapes + self.int_shapes,
+                           'out': self.false_shapes})
+            shapes.append({'prop': [self.false_ring], 'in': self.false_shapes + self.int_shapes,
+                           'out': self.true_shapes})
         else:
-            shapes.append({'prop': self.true_shapes, 'in': [
-                          self.true_ring], 'out': self.true_shapes+[self.false_ring]})
-            shapes.append({'prop': self.false_shapes, 'in': [
-                          self.false_ring], 'out': self.false_shapes+[self.true_ring]})
+            shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
+                           'out': self.true_shapes+[self.false_ring]})
+            shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
+                           'out': self.false_shapes+[self.true_ring]})
         # propagate
         self.propagate(shapes)
 
@@ -1743,7 +1791,11 @@ class OpinionVennDiagram():
             return self.out_set
 
     def get_svg(self):
-        """Output the svg code for diagram."""
+        """Output the svg code for diagram.
+
+        Returns:
+            str: The svg code for displaying the diagram.
+        """
         r = self.RADIUS
         BOARDER = self.BOARDER
         height = (2.0*r + BOARDER['top'] + BOARDER['bottom'])
