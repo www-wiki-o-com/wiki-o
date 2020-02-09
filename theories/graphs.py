@@ -44,6 +44,7 @@ class Colour():
     BLACK = '#000000'
     PINK = '#FF8080'
     GREY = '#808080'
+    NONE = 'none'
 
     def get_transparent_colour(self, colour):
         if colour == self.RED:
@@ -66,7 +67,6 @@ class Colour():
 
 def offset_xy(x, y, offset):
     """Offset x,y with offset
-
     @param[in]  x: The x coordiante to offset.
     @param[in]  y: The y coordiante to offset.
     @param[in]  offset: The x,y offset dictionary.
@@ -108,13 +108,12 @@ class SpringShapeBase:
 
     def __init__(self, x, y, r, colour=Colour.BLACK, stroke_colour=Colour.BLACK):
         """
-        A spring shape is defined by its coordinates, encapsulating radius, and colour.
-        
+        The constructor for the SpringShapeBase class.
         @param[in]  x,y: The initial x,y coordinates.
         @param[in]  r: The bounding radius (w.r.t the spring force all shapes are treated
                     as circles).
-        @param[in]  colour: The shape's colour.
-        @param[in]  stroke_colour: The shape's line colour.
+        @param[in]  colour (optional, default black): The shape's colour.
+        @param[in]  stroke_colour (optional, default black): The shape's line colour.
         """
         self.x = x
         self.y = y
@@ -131,10 +130,9 @@ class SpringShapeBase:
     def get_separation_vector(self, shape02, direction=Direction.OUT):
         """
         Calculate the separation vector from self to shape02.
-
         @param[in]  shape02: The other shape.
-        @param[in]  direction: Two solid objects will force other shapes "outwards", while hollow
-                    objects, such as rings, will push them "inwards".
+        @param[in]  direction (optional, default out): Two solid objects will force other shapes
+                    "outwards", while hollow objects, such as rings, will push them "inwards".
         @return     The direction vector (x, y, magnitude) relative to self. Negative magnitude
                     indicates that the shapes are in collision.
         """
@@ -157,10 +155,9 @@ class SpringShapeBase:
     def get_spring_force(self, shape02, direction=Direction.OUT):
         """
         Calculates the force imposed on shape02 by self.
-
         @param[in]  shape02: The other shape.
-        @param[in]  direction: The direction to shape02 (IN or OUT).
-        @return     The force vector (x,y) relative to .
+        @param[in]  direction (optional, default out): The direction of the force (IN or OUT).
+        @return     The force vector (x,y) relative to self.
         """
         unit_x, unit_y, separation = self.get_separation_vector(shape02, direction)
         compression = max(0, self.spring_length - separation)
@@ -177,7 +174,6 @@ class SpringShapeBase:
     def propigate(self, dx, dy):
         """
         A method for calculating the step distance based on the repel force.
-
         @param[in]  dx: The x distance to propigate the shape.
         @param[in]  dy: The y distance to propigate the shape.
         """
@@ -190,8 +186,7 @@ class EvidenceShape(SpringShapeBase):
 
     def __init__(self, node, x, y, area):
         """
-        Constructor for an evidence node/shape.
-
+        Constructor for the EvidenceShape.
         @details    The bounding radius is setup to encompase the square and is used for the
                     spring force logic.
         @param[in]  node: The evidence node (used for colour and captions).
@@ -207,7 +202,7 @@ class EvidenceShape(SpringShapeBase):
         """
         Output the svg code for the hidden-highlight shape.
         @details    This graphic is hidden by default but is revealed to highlight the shape.
-        @param[in]  offset: The x,y offset to be used stored in a dict {'x':offset_x, 'y':offset_y}.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         @return     The svg text for displaying the shape.
         """
         length = self.length + 15
@@ -226,7 +221,7 @@ class EvidenceShape(SpringShapeBase):
         @details    The colour and shade are calculated based on:
                       - How the node is being used in the theory, red for false, black for true,
                       - The colour is transparent if the evidence is non-factual.
-        @param[in]  offset: The x,y offset to be used stored in a dict {'x':offset_x, 'y':offset_y}.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         @return     The svg text for displaying the shape.
         """
         if self.node.true_points() >= self.node.false_points():
@@ -257,7 +252,7 @@ class SubtheoryShape(SpringShapeBase):
 
     def __init__(self, node, x, y, area):
         """
-        The constructor for a sub-theory node/shape.
+        The constructor for the SubTheoryShape class.
         @param[in]  node: The sub-theory node (used for colour and captions).
         @param[in]  x,y: The initial x,y coordinates.
         @param[in]  area: the area of the circle.
@@ -270,7 +265,7 @@ class SubtheoryShape(SpringShapeBase):
         """
         Output the svg code for the hidden-highlight shape.
         @details    This graphic is hidden by default but is revealed to highlight the shape.
-        @param[in]  offset: the x,y offset to be used.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         @return     The svg text for displaying the shape.
         """
         x = self.x
@@ -288,7 +283,7 @@ class SubtheoryShape(SpringShapeBase):
         @details    The colour and opacity are calculated based on:
                       - how the node is being used in the theory, red for false, black for true,
                       - currently the colour is never transparent.
-        @param[in]  offset: the x,y offset to be used.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         @return     The svg text for displaying the shape.
         """
         x = self.x
@@ -309,14 +304,14 @@ class SubtheoryShape(SpringShapeBase):
 
 
 class Ring(SpringShapeBase):
-    """A sub-class of spring shape for ring objects (the true and false sets)."""
+    """A ring shape, mainly used for the true and false sets in the Venn diagram."""
 
     DEFAULT_SPRING_LENGTH = 10
     DEFAULT_SPRING_CONSTANT = 1.0
 
-    def __init__(self, x, y, r, colour='none', stroke_colour=Colour.BLACK, x_min=None, x_max=None):
+    def __init__(self, x, y, r, colour=Colour.NONE, stroke_colour=Colour.BLACK, x_min=None, x_max=None):
         """
-        The constructor for the ring shape.
+        The constructor for the Ring class.
         @details    Rings will not propigate in the y direction or outside their x boundaries.
         @param[in]  x,y: The initial x,y coordinates
         @param[in]  r: The radius of the ring.
@@ -343,7 +338,7 @@ class Ring(SpringShapeBase):
     def get_svg(self, offset=None):
         """
         Output the svg code for the shape.
-        @param[in]  offset: the x,y offset to be used.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         """
         x = self.x
         y = self.y
@@ -355,11 +350,11 @@ class Ring(SpringShapeBase):
 
 
 class Wall(SpringShapeBase):
-    """A sub-class of spring shape for boundaries (no svg display)."""
+    """A boundary that repels shapes to prevent them from leaving the frame of view."""
 
     def __init__(self, x, y):
         """
-        Setup the repel boundary for avoiding shapes leave frame of view.
+        Constructor for the Wall class.
         @details    Walls only have one coordinate, x or y, if x, then the wall extends
                     the entire y axis.
         @param[in]  x,y: The coordinates of the wall.
@@ -369,7 +364,6 @@ class Wall(SpringShapeBase):
 
     def get_separation_vector(self, shape02, direction=Direction.IN):
         """Calculate distance to boundary.
-
         @details    Walls are a special SpringShape that repel only in one direction (x or y).
                     If the direction is x and the possition of the wall below the axis (negative),
                     then the wall's force is always upwards.
@@ -422,7 +416,15 @@ class Text():
     """A class for drawing text."""
 
     def __init__(self, text, x, y, size=30, align='middle', bold=False, colour=None):
-        """Create text."""
+        """
+        The constructor for the Text class.
+        @param[in]  text: The text to display.
+        @param[in]  x,y: The coordinates of the text.
+        @param[in]  size (optional, default 30): The font size.
+        @param[in]  align (optional, default 'middle'): How to align the text (to be parsed by svg).
+        @param[in]  bold (optional, default False): If true, the text will be dispalyed as bold.
+        @param[in]  colour (optional, default None): The fill colour for the text.
+        """
         self.text = text
         self.x = x
         self.y = y
@@ -432,16 +434,18 @@ class Text():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """Output the svg code for text."""
+        """
+        Output the svg code for the text object.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
         x, y = offset_xy(self.x, self.y, offset)
-        svg = """<text text-anchor="%s" x="%d" y="%d" font-size="%d" """ % \
-            (self.align, x, y, self.size)
-        svg += """font-family="FreeSerif" """
+        svg = '<text text-anchor="%s" x="%d" y="%d"' % (self.align, x, y)
+        svg += ' font-size="%d" font-family="FreeSerif"' % self.size
         if self.bold:
-            svg += """font-weight="bold" """
+            svg += ' font-weight="bold"'
         if self.colour is not None:
-            svg += """fill="%s" """ % self.colour
-        svg = svg.strip() + ">%s</text>" % self.text
+            svg += ' fill="%s"' % self.colour
+        svg += '>%s</text>' % self.text
         return svg
 
 
@@ -449,26 +453,42 @@ class Circle():
     """A class for drawing circles."""
 
     def __init__(self, x, y, r, colour=Colour.BLACK):
-        """Create a circle."""
+        """
+        The constructor for the Circle class.
+        @param[in]  x,y: The coordinates of the circle.
+        @param[in]  r: The radius of the circle.
+        @param[in]  colour (optional, default black): The fill colour for the circle.
+        """
         self.x = x
         self.y = y
         self.r = r
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """Output the svg code for shape."""
+        """
+        Output the svg code for the circle object.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
         x, y = offset_xy(self.x, self.y, offset)
-        r = self.r
-        svg = '<circle cx="%d" cy="%d" r="%d" fill="%s" stroke="black" stroke-width="2.0"/>' % \
-            (x, y, r, self.colour)
+        svg = '<circle cx="%d" cy="%d" r="%d" fill="%s"' % (x, y, self.r, self.colour)
+        svg += ' stroke="black" stroke-width="2.0"/>'            
         return svg
 
 
 class Rectangle():
     """A class for drawing rectangles."""
 
-    def __init__(self, x01, y01, x02, y02, colour='none', stroke_colour=Colour.BLACK, stroke_width=2.0, hatch=False):
-        """Create a rectangle."""
+    def __init__(self, x01, y01, x02, y02, colour=Colour.NONE, stroke_colour=Colour.BLACK,
+                 stroke_width=2.0, hatch=False):
+        """
+        The constructor for the Rectangle class.
+        @param[in]  x01,y01: The bottom left coordinates of the rectangle.
+        @param[in]  x02,y02: The top right coordinates of the rectangle.
+        @param[in]  colour (optional, default none): The fill colour for the rectangle.
+        @param[in]  stroke_colour (optional, default black): The stroke colour for the rectangle.
+        @param[in]  stroke_width (optional, default 2.0): The stroke width for the rectangle.
+        @param[in]  hatch (optional, default False): If true, the fill will be hatched.
+        """
         if x02 > x01:
             self.x01 = x01
             self.x02 = x02
@@ -487,29 +507,35 @@ class Rectangle():
         self.stroke_colour = stroke_colour
 
     def get_svg(self, offset=None):
-        """Output the svg code for shape."""
+        """
+        Output the svg code for the rectangle object.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
-        svg = '<rect x="%d" y="%d" width="%d" height="%d"' % (
-            x01, y01, x02-x01, y02-y01)
+        svg = '<rect x="%d" y="%d" width="%d" height="%d"' % (x01, y01, x02-x01, y02-y01)
         if self.hatch:
             svg += ' style="fill: url(#hatch)"'
         else:
             svg += ' fill="%s"' % self.colour
-        svg += ' stroke="%s" stroke-width="%0.2f"/>' % (
-            self.stroke_colour, self.stroke_width)
+        svg += ' stroke="%s" stroke-width="%0.2f"/>' % (self.stroke_colour, self.stroke_width)
         return svg
 
 
 class Wedge():
     """A class for drawing wedges (used for the pie-charts)."""
 
-    def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0, colour=Colour.BLACK):
-        """Create a wedge.
-            Input arguments:
-            theta (deg):  theta01 < theta02 (arc of the wedge)
-            c_offset:     offset wedge point from center
-            explode:      offset entire wedge from center        
+    def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0,
+                 colour=Colour.BLACK):
+        """
+        The constructor for the Wedge class.
+        @param[in]  x,y: The coordinates of the wedge (arc center).
+        @param[in]  theta01 (deg): One of the angles for the wedge (theta01 < theta02).
+        @param[in]  theta02 (deg): One of the angles for the wedge (theta01 < theta02).
+        @param[in]  radius (optional, default 100): The arc radius for the wedge.
+        @param[in]  c_offset (optional, default 0): The distance to offset wedge center (point).
+        @param[in]  explode (optional, default 0): The distance to push the wedge away from center.
+        @param[in]  colour (optional, default black): The fill colour for the wedge.
         """
         self.x = x
         self.y = y
@@ -521,21 +547,17 @@ class Wedge():
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """Output the svg code for shape.
-        
-            https://bocoup.com/blog/using-svg-patterns-as-fills
-            https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-            if self.hatch:
-                fill = 'style="fill: url(#%sHatch)"' % self.colour
-            else:
-                fill = 'fill="%s"' % self.colour
-
+        """
+        Output the svg code for the wedge object.
+        @details    https://bocoup.com/blog/using-svg-patterns-as-fills
+                    https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
         """
         r = self.radius
         theta01 = math.radians(self.theta01)
         theta02 = math.radians(self.theta02)
         dt = (theta02 + theta01)/2
-        LARGE_ARC = int(self.theta02-self.theta01 > 180)
+        large_arc_flag = int(self.theta02 - self.theta01 > 180)
 
         dx00, dy00 = offset_xy(self.x, self.y, offset)
 
@@ -550,17 +572,12 @@ class Wedge():
         dr02 = self.c_offset
         dx02, dy02 = offset_xy(1.0 * dr02 * math.cos(dt), 1.0 * dr02 * math.sin(dt), offset)
 
-        svg = """<path
-                    fill="%s" stroke="black" stroke-width="2.0"
-                    d="M %0.2f,%0.2f L %0.2f,%0.2f A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f L %0.2f,%0.2f Z"
-               />""" % (
-            self.colour,
-            dx00+dx01+dx02, dy00+dy01+dy02,
-            x01+dx00+dx01, y01+dy00+dy01,
-            r, r, LARGE_ARC,
-            x02+dx00+dx01, y02+dy00+dy01,
-            dx00+dx01+dx02, dy00+dy01+dy02
-        )
+        svg = '<path fill="%s" stroke="black" stroke-width="2.0"' % self.colour
+        svg += ' d="M %0.2f,%0.2f' % (dx00+dx01+dx02, dy00+dy01+dy02)
+        svg += ' L %0.2f,%0.2f' % (x01+dx00+dx01, y01+dy00+dy01)
+        svg += ' A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f' % (r, r, large_arc_flag, x02+dx00+dx01,
+                                                      y02+dy00+dy01)
+        svg += ' L %0.2f,%0.2f Z"/>' % (dx00+dx01+dx02, dy00+dy01+dy02)
         return svg
 
 
@@ -568,37 +585,30 @@ class Polygon():
     """A class for drawing polygons."""
 
     def __init__(self, path, colour=Colour.BLACK):
-        """Create a polygon with the given path.
-        
-        theta is in degrees
+        """
+        The constructor for the Polygon class.
+        @param[in]  path: A list of x,y tuples.
+        @param[in]  colour (optional, default black): The fill colour for the polygon.
         """
         self.path = path
         self.colour = colour
 
     def get_svg(self, offset=None):
-        """Output the svg code for shape.
-        
-     ******************************
-     https://bocoup.com/blog/using-svg-patterns-as-fills
-     https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
-      if self.hatch:
-          svg += ' style="fill: url(#%sHatch)"' % self.colour
-      else:
-          svg += ' fill="%s"' % self.colour
-     ******************************
-
-        
         """
-        svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % (
-            self.colour)
+        Output the svg code for the polygon object.
+        @details    https://bocoup.com/blog/using-svg-patterns-as-fills
+                    https://hackernoon.com/a-simple-pie-chart-in-svg-dbdd653b6936
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
+        svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % self.colour
         svg += ' d="'
         for i, (x, y) in enumerate(self.path):
             if i == 0:
-                svg += 'M '
+                svg += 'M'
             else:
-                svg += ' L '
+                svg += ' L'
             x, y = offset_xy(x, y, offset)
-            svg += '%0.2f,%0.2f' % (x, y)
+            svg += ' %0.2f,%0.2f' % (x, y)
         svg += ' Z"/>'
         return svg
 
@@ -606,40 +616,45 @@ class Polygon():
 class Arrow():
     """A class for drawing arrows (currently only horizontal)."""
 
-    def __init__(self, x01, y01, x02, y02, width=2.5, colour=Colour.BLACK):
-        """Create arrow with <x01,y01> as the start."""
+    def __init__(self, x01, y01, x02, y02, stroke_width=2.5, colour=Colour.BLACK):
+        """
+        The constructor for the Polygon class.
+        @param[in]  x01,y01: The coordinates for the base of the arrow.
+        @param[in]  x02,y02: The coordinates for the tip of the arrow.
+        @param[in]  stroke_width (optional, default 2.5): The stroke width of the arrow (the rest of
+                    the arrow is proportionally scaled).
+        @param[in]  colour (optional, default black): The fill colour for the wedge.
+        """
         self.x01 = x01
         self.x02 = x02
         self.y01 = y01
         self.y02 = y02
-        self.width = width
+        self.stroke_width = stroke_width
         self.colour = colour
 
-    def get_svg(self, offset={'x': 0, 'y': 0}):
-        """Output the svg code for shape."""
+    def get_svg(self, offset=None):
+        """
+        Output the svg code for the arrow object.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
-        h = self.width*3
+        h = self.stroke_width*3
 
-        svg = '<path fill="none" stroke="%s" stroke-width="%0.2f"' % (
-            self.colour, self.width)
-        svg += ' d="'
-        svg += ' M %0.2f,%0.2f' % (x01, y01)
+        svg = '<path fill="none" stroke="%s"' % self.colour
+        svg += ' stroke-width="%0.2f"' % self.stroke_width
+        svg += ' d="M %0.2f,%0.2f' % (x01, y01)
         svg += ' L %0.2f,%0.2f' % (x01, y01)
         if x02 > x01:
-            svg += ' L %0.2f,%0.2f' % (x02-h, y02)
-            svg += ' Z"/>'
+            svg += ' L %0.2f,%0.2f Z"/>' % (x02-h, y02)
             svg += '<path fill="%s" stroke="none"' % (self.colour)
-            svg += ' d="'
-            svg += ' M %0.2f,%0.2f' % (x02-2*h, y02-h)
+            svg += ' d=M %0.2f,%0.2f' % (x02-2*h, y02-h)
             svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02-h, y02, x02-2*h, y02+h)
             svg += ' L %0.2f,%0.2f' % (x02, y02)
         else:
-            svg += ' L %0.2f,%0.2f' % (x02+h, y02)
-            svg += ' Z"/>'
+            svg += ' L %0.2f,%0.2f Z"/>' % (x02+h, y02)
             svg += '<path fill="%s" stroke="none"' % (self.colour)
-            svg += ' d="'
-            svg += ' M %0.2f,%0.2f' % (x02+2*h, y02-h)
+            svg += ' d=M %0.2f,%0.2f' % (x02+2*h, y02-h)
             svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02+h, y02, x02+2*h, y02+h)
             svg += ' L %0.2f,%0.2f' % (x02, y02)
         svg += ' Z"/>'
@@ -647,20 +662,32 @@ class Arrow():
 
 
 class Group():
-    """A class for grouping svg objects."""
+    """A class for grouping svg objects with optional hide tag."""
 
     def __init__(self, tag_id='', hidden=False):
-        """Create group with tag_id (optionally, hide group)."""
+        """
+        The constructor for the Group class.
+        @param[in]  tag_id (optional, default blank): Used for hidding/unhiding the
+                    objects in the group.
+        @param[in]  hidden (optional, default False): If true, the objects in the group
+                    will be hidden by default.
+        """
         self.tag_id = tag_id
         self.hidden = hidden
         self.shapes = []
 
     def add(self, shape):
-        """Add shape to group."""
+        """
+        Add a shape to group.
+        @param[in]  shape: The object to add to the group.
+        """
         self.shapes.append(shape)
 
     def get_svg(self):
-        """Output the svg code for the group."""
+        """
+        Output the svg code for the arrow object.
+        @param[in]  offset (optional, default None): The x,y offset dict to be used.
+        """
         if self.hidden:
             svg = '<g id="%s" visibility="hidden">' % self.tag_id
         else:
