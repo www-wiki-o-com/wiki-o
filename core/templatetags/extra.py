@@ -58,11 +58,18 @@ RE_HASHTAG = r'#\w+'
 # *******************************************************************************
 
 
-def get_brace_indices(string):
-    """Parenthesized contents in string as pairs (level, contents)."""
+def get_brace_indices(text):
+    """Parenthesized contents in text as pairs (level, contents).
+
+    Args:
+        text (str): The text to parse.
+
+    Returns:
+        list: A higherarcle list of the text based on the parenthesis.
+    """
     stack = []
     result = []
-    for i, c in enumerate(string):
+    for i, c in enumerate(text):
         if c == '[' or c == '<' or c == '{' or c == '«':
             stack.append((i, c))
         elif c == '>' and stack[-1][-1] == '<':
@@ -80,9 +87,17 @@ def get_brace_indices(string):
     return result
 
 
-def interpret_log_text(log, log_text, extra):
-    """Interpret the variables and links encoded in the log text."""
+def interpret_log_text(log, log_text, extra=''):
+    """Interpret the variables and links encoded in the log text.
 
+    Args:
+        log (Log): The log to use to populate format strings.
+        log_text ([type]): The log text to format.
+        extra (str, optional): The extra set of params to add to url links. Defaults to ''.
+
+    Returns:
+        str: [description]
+    """
     # Interpret brackets
     log_text = log_text.replace('{{', '{').replace('}}', '}')
     log_text = log_text.replace('<#', '«').replace('#>', '»')
@@ -151,7 +166,14 @@ def interpret_log_text(log, log_text, extra):
 
 
 def make_safe(text):
-    """Remove all unsafe http characters from the text."""
+    """Remove all unsafe http characters from the text.
+
+    Args:
+        text (str): Raw text.
+
+    Returns:
+        str: Safe text.
+    """    
     result = text.replace('{', '[[').replace('}', ']]')
     result = result.replace('<', '&lt;').replace('>', '&gt;')
     return result
@@ -169,29 +191,57 @@ def make_safe(text):
 
 @register.filter
 def possessive(text):
-    """Add the possesive 's or ' to the end of the text."""
+    """Add the possesive 's or ' to the end of the text.
+
+    Args:
+        text (str): The input text to manipulate.
+
+    Returns:
+        str: The input text now with possesive qualifier.
+    """
     if text[-1] == 's':
         return text + "'"
     return text + "'s"
 
 
 @register.filter
-def remove_punctuation(string):
-    """Removes the punctuation."""
-    if re.match(r'.*[.!]', string):
-        return string[:-1]
-    return string
+def remove_punctuation(text):
+    """Removes the punctuation.
+
+    Args:
+        text (str): The input text to manipulate.
+
+    Returns:
+        str: The input text now without punctuation.
+    """
+    if re.match(r'.*[.!]', text):
+        return text[:-1]
+    return text
 
 
 @register.filter
 def get_class(obj):
-    """Return the object's name."""
+    """Retrieves the object class.
+
+    Args:
+        obj (Generic): The input object.
+
+    Returns:
+        str: The object class string.
+    """
     return obj.__class__.__name__
 
 
 @register.filter
 def follow_url(obj):
-    """Retrive the url for subcribing to the object."""
+    """Retrive the url for subcribing to the object.
+
+    Args:
+        obj (Generic): The input object.
+
+    Returns:
+        str: The url.
+    """
     content_type = ContentType.objects.get_for_model(obj)
     return reverse('activity:follow',
                    kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
@@ -199,7 +249,14 @@ def follow_url(obj):
 
 @register.filter
 def unfollow_url(obj):
-    """Retrive the url for unsubcribing from the object."""
+    """Retrive the url for unsubcribing from the object.
+
+    Args:
+        obj (Generic): The input object.
+
+    Returns:
+        str: The url.
+    """
     content_type = ContentType.objects.get_for_model(obj)
     return reverse('activity:unfollow',
                    kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
@@ -207,7 +264,16 @@ def unfollow_url(obj):
 
 @register.filter
 def bibliography(detail_text, inc_links=True, autoescape=True):
-    """Formats the detail text to include a linked bibliograpy."""
+    """Formats the detail text to include a linked bibliograpy.
+
+    Args:
+        detail_text (str): The raw input text.
+        inc_links (bool, optional): If true, replace html links with actual links. Defaults to True.
+        autoescape (bool, optional): If true, applies autoescape. Defaults to True.
+
+    Returns:
+        str: The formated output text.
+    """
     autoescape = autoescape and not isinstance(detail_text, SafeData)
     detail_text = normalize_newlines(detail_text)
     if autoescape:
@@ -350,7 +416,16 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
 
 @register.filter
 def short_bib(detail_text, length=500, autoescape=True):
-    """Formats the detail text to include a non-linked bibliograpy."""
+    """Formats the detail text to include a non-linked bibliograpy.
+
+    Args:
+        detail_text (str): The raw input text.
+        length (int, optional): The max length of the output text. Defaults to 500.
+        autoescape (bool, optional): If true, applies autoescape. Defaults to True.
+
+    Returns:
+        str: The formated output text.
+    """
     detail_text = bibliography(detail_text, inc_links=False, autoescape=autoescape)
     if len(detail_text) > length:
         detail_text = detail_text[:length]
@@ -361,7 +436,15 @@ def short_bib(detail_text, length=500, autoescape=True):
 
 @register.filter
 def get_verb(log, extra=''):
-    """Retrieves and formats the log's verb text."""
+    """Retrieves and formats the log's verb text.
+
+    Args:
+        log (Log): The log to extract the verb text from.
+        extra (str, optional): The extra set of params to add to url links. Defaults to ''.
+
+    Returns:
+        str: The formated verb output text.
+    """
     extra = str(extra)
     verb = interpret_log_text(log, log.verb, extra)
     if isinstance(log, Notification):
@@ -374,7 +457,15 @@ def get_verb(log, extra=''):
 
 @register.filter
 def get_description(log, extra=''):
-    """Retrieves and formats the log's description text."""
+    """Retrieves and formats the log's description text.
+
+    Args:
+        log (Log): The log to extract the description text from.
+        extra (str, optional): The extra set of params to add to url links. Defaults to ''.
+
+    Returns:
+        str: The formated description output text.
+    """
     extra = str(extra)
     description = interpret_log_text(log, log.description, extra)
     return mark_safe(description)
@@ -382,14 +473,30 @@ def get_description(log, extra=''):
 
 @register.simple_tag
 def url_extra(url, *args, extra='', **kwargs):
-    """Add extra parameters to the url."""
+    """Add extra parameters to the url.
+
+    Args:
+        url (str): The input url.
+        extra (str, optional): [description]. Defaults to ''.
+
+    Returns:
+        str: The url with the additional parameters.
+    """
     resolved_url = reverse(url, None, args, kwargs)
     return resolved_url + extra
 
 
 @register.simple_tag
 def url_action(action, extra=''):
-    """Retrive the url for the action object's stream."""
+    """Retrive the url for the action object's stream.
+
+    Args:
+        action (Action): The action to extract the url from.
+        extra (str, optional): The extra set of params to add to url links. Defaults to ''.
+
+    Returns:
+        str: The url.
+    """
     resolved_url = action.action_object.activity_url()
     parms = {'date': action.timestamp - datetime.timedelta(seconds=1)}
     extra = str(extra)
@@ -402,7 +509,14 @@ def url_action(action, extra=''):
 
 @register.filter
 def timepassed(time_then):
-    """Construct a human readable string for the """
+    """Construct a human readable string for time passed.
+
+    Args:
+        time_then (datetime): The time to compare against.
+
+    Returns:
+        str: The output text.
+    """
     delta = timezone.now() - time_then
     # seconds
     seconds = delta.total_seconds()

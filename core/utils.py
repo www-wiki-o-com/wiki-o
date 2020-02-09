@@ -46,14 +46,16 @@ class LogDiffResult(enum.Enum):
 
 
 def get_or_none(objects, **kwargs):
-    """
-    Queries a data model for a matching object.
+    """Queries a data model for a matching object.
 
-    @example    get_or_none(theory.opinions, user=current_user)
-    @param[in]  objects: A reference to the model's objects.
-    @param[in]  kwars: A list of keyword aruments for the query.
-    @return     the unique matching object, None otherwise
-    """
+    Example: get_or_none(theory.opinions, user=current_user)
+
+    Args:
+        objects (QuerySet): A reference to the model's objects.
+
+    Returns:
+        Object or None: The unique matching object, None otherwise.
+    """    
     try:
         return objects.get(**kwargs)
     except ObjectDoesNotExist:
@@ -61,13 +63,13 @@ def get_or_none(objects, **kwargs):
 
 
 def get_first_or_none(objects, **kwargs):
-    """
-    Queries a data model for the first matching object.
+    """Queries a data model for the first matching object.
 
-    @example    get_or_none(TheoryNode.objects, created_by=current_user)
-    @param[in]  objects: A reference to the model's objects.
-    @param[in]  kwars: A list of keyword aruments for the query.
-    @return     the first matching object, None otherwise
+    Args:
+        objects (QuerySet): A reference to the model's objects.
+
+    Returns:
+        Object or None: The unique matching object, None otherwise.
     """
     try:
         return objects.filter(**kwargs).first()
@@ -76,15 +78,18 @@ def get_first_or_none(objects, **kwargs):
 
 
 def stream_if_unique(target_actions, log, accept_time=21600):
-    """
-    Checks if the input log(s) contents are different than the input parameters.
+    """Checks if the input log(s) contents are different than the input parameters.
 
-    @example    if log_is_different(log, self.user, "Bob creates a theory", self.theory): ...
-    @param[in]  target_actions: The log to query
-    @param[in]  log: A dict with the log info ('user', 'verb', 'action_object', 'target')
-    @param[in]  update_unread: If read, update
-    @param[in]  accept_time: The age in seconds that the log must be to be valid.
-    @return     Enum result.
+    Example: stream_if_unique(self.targets, log={'sender':self.user, 'verb':'Bob creates a theory'})
+
+    Args:
+        target_actions (Actions or Steam): The set of logs to compare against.
+        log (dict): A dict with the relevent log info ('sender', 'verb', 'action_object', 'target').
+        accept_time (int, optional): The age in seconds that the log must be to be valid.
+            Defaults to 21600.
+
+    Returns:
+        bool: True if updated, false otherwise.
     """
     assert isinstance(log, dict)
     last_action = target_actions.first()
@@ -98,19 +103,20 @@ def stream_if_unique(target_actions, log, accept_time=21600):
 
 
 def notify_if_unique(follower, log, update_unread=True, accept_time=21600):
-    """
-    Checks if the input log(s) contents are different than the input parameters.
+    """Checks if the input log(s) contents are different than the input parameters.
 
-    @example    notify_if_unique(follower, log={self.user, "Bob farts", self.theory})
-    @param[in]  log: The context for the new log.
-                May contain the following keys:
-                    actor: The user/object responsible for the action.
-                    verb: The phrase that identifies the action.
-                    action_object: The object linked to the action.
-                    target: The object to which the action was performed.
-    @param[in]  update_unread: If read, update
-    @param[in]  accept_time: The age in seconds that the log must be to be valid.
-    @return     Enum result.
+    Example: notify_if_unique(follower, log={'sender':self.user, "Bob farts", self.theory})
+
+    Args:
+        follower (User): The user following the object.
+        log (dict): A dict with the relevent log info ('sender', 'verb', 'action_object', 'target').
+        update_unread (bool, optional): If enabled read messages are updated to unread.
+            Defaults to True.
+        accept_time (int, optional): The age in seconds that the log must be to be valid.
+            Defaults to 21600.
+
+    Returns:
+        bool: True if the user has ben notified, false otherwise.
     """
     assert isinstance(log, dict)
     last_notification = follower.notifications.first()
@@ -122,21 +128,24 @@ def notify_if_unique(follower, log, update_unread=True, accept_time=21600):
 
 
 def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
-    """
-    Checks if the input log's contents are different than the input parameters.
+    """Checks if the input log's contents are different than the input parameters.
 
-    @example    log_is_different(old_log, new_log={'sender':self.user, 'verb':'Bob farts'})
-    @param[in]  old_log: The old log to compare against
-    @param[in]  new_log: The new log (a dict) user for comparision
-                May contain the following keys:
-                    sender: The user/object responsible for the action.
-                    verb: The phrase that identifies the action.
-                    action_object: The object linked to the action.
-                    target: The object to which the action was performed.
-    @param[in]  update_unread: If the old log has been read and the new log is different,
-                change it to unread.
-    @param[in]  accept_time: The age in seconds that the log must be to be valid.
-    @return     Enum result.
+    Example: log_is_different(old_log, new_log={'sender':self.user, 'verb':'Bob farts'})
+
+    Args:
+        old_log (Log): The exsiting log to compare against.
+        new_log (dict): The new log.
+        update_unread (bool, optional): If the old log has been read and the new log is different,
+            change it to unread. Defaults to False. May contain the following keys:
+                sender: The user/object responsible for the action.
+                verb: The phrase that identifies the action.
+                action_object: The object linked to the action.
+                target: The object to which the action was performed.
+        accept_time (int, optional): The age in seconds that the log must be to be valid.
+            Defaults to 21600.
+
+    Returns:
+        LogDiffResult: May return DIFFERENT, MATCHED, or UPDATED.
     """
     # Preconditions
     assert isinstance(new_log, dict)
@@ -168,13 +177,15 @@ def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
 
 
 def get_form_data(response, verbose_level=0):
-    """
-    A helper method for parsing form data from a post response.
+    """A helper method for parsing form data from a post response.
 
-    @param[in]  response: The post respose.
-    @param[in]  verbose_level (optional, default 0): The verbose level used for debugging.
-    """
+    Args:
+        response (dict): The post respose.
+        verbose_level (int, optional): The verbose level used for debugging. Defaults to 0.
 
+    Returns:
+        data: A more consise set of form data.
+    """
     # Preconditions
     if response.context is None or not hasattr(response.context, 'keys'):
         return None
