@@ -16,17 +16,14 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # imports
 # *******************************************************************************
-import sys
 import math
 import enum
-import numpy
 import random
 
 from math import pi as PI
-from django.urls import reverse
-from django.contrib.staticfiles.templatetags.staticfiles import static
+import numpy
 
-from .models import TheoryNode, NodePointerBase
+from .models import NodePointerBase
 from . import models
 
 
@@ -150,7 +147,11 @@ class SpringShapeBase:
         self.spring_constant = self.DEFAULT_SPRING_CONSTANT
 
     def __str__(self):
-        """Output coordinates for debug information."""
+        """Output debug text for diagram.
+
+        Returns:
+            str: Text that captures the shape coordinates.
+        """
         return "(%0.3f, %0.3f, %0.3f)" % (self.x, self.y, self.r)
 
     def get_separation_vector(self, shape02, direction=Direction.OUT):
@@ -491,8 +492,34 @@ class Wall(SpringShapeBase):
 #
 # *******************************************************************************
 
+class ShapeBase():
+    """Base class for all shapes."""
 
-class Text():
+    def __init__(self, colour=Colour.BLACK, stroke_colour=Colour.BLACK, stroke_width=2.0):
+        """The constructor for ShapeBase class.
+
+        Args:
+            colour ([type], optional): [description]. Defaults to Colour.BLACK.
+            stroke_colour ([type], optional): [description]. Defaults to Colour.BLACK.
+            stroke_width (float, optional): The stroke width for the rectangle. Defaults to 2.0.
+        """
+        self.colour = colour
+        self.stroke_colour = stroke_colour
+        self.stroke_width = stroke_width
+
+    def get_svg(self, offset=None):
+        """Output the svg code for the shape object.
+
+        Args:
+            offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
+                Defaults to None.
+
+        Returns:
+            str: The svg code for displaying the shape.
+        """
+
+
+class Text(ShapeBase):
     """A class for drawing text."""
 
     def __init__(self, text, x, y, size=30, align='middle', bold=False, colour=None):
@@ -514,7 +541,7 @@ class Text():
         self.size = size
         self.bold = bold
         self.align = align
-        self.colour = colour
+        super().__init__(colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the text object.
@@ -537,7 +564,7 @@ class Text():
         return svg
 
 
-class Circle():
+class Circle(ShapeBase):
     """A class for drawing circles."""
 
     def __init__(self, x, y, r, colour=Colour.BLACK):
@@ -552,7 +579,7 @@ class Circle():
         self.x = x
         self.y = y
         self.r = r
-        self.colour = colour
+        super().__init__(colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the circle object.
@@ -566,11 +593,11 @@ class Circle():
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<circle cx="%d" cy="%d" r="%d" fill="%s"' % (x, y, self.r, self.colour)
-        svg += ' stroke="black" stroke-width="2.0"/>'            
+        svg += ' stroke="black" stroke-width="2.0"/>'
         return svg
 
 
-class Rectangle():
+class Rectangle(ShapeBase):
     """A class for drawing rectangles."""
 
     def __init__(self, x01, y01, x02, y02, colour=Colour.NONE, stroke_colour=Colour.BLACK,
@@ -600,10 +627,8 @@ class Rectangle():
         else:
             self.y01 = y02
             self.y02 = y01
-        self.colour = colour
         self.hatch = hatch
-        self.stroke_width = stroke_width
-        self.stroke_colour = stroke_colour
+        super().__init__(colour, stroke_colour, stroke_width)
 
     def get_svg(self, offset=None):
         """Output the svg code for the rectangle object.
@@ -626,7 +651,7 @@ class Rectangle():
         return svg
 
 
-class Wedge():
+class Wedge(ShapeBase):
     """A class for drawing wedges (used for the pie-charts)."""
 
     def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0,
@@ -652,7 +677,7 @@ class Wedge():
         self.radius = radius
         self.c_offset = c_offset
         self.explode = explode
-        self.colour = colour
+        super().__init__(colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the wedge object.
@@ -663,7 +688,7 @@ class Wedge():
 
         Returns:
             str: The svg code for displaying the wedge.
-        """        
+        """
         r = self.radius
         theta01 = math.radians(self.theta01)
         theta02 = math.radians(self.theta02)
@@ -692,18 +717,18 @@ class Wedge():
         return svg
 
 
-class Polygon():
+class Polygon(ShapeBase):
     """A class for drawing polygons."""
 
     def __init__(self, path, colour=Colour.BLACK):
         """The constructor for the Polygon class.
-        
+
         Args:
             path (list(tuple(float,float))): A list of x,y points.
             colour ([type], optional): The fill colour for the polygon. Defaults to Colour.BLACK.
         """
         self.path = path
-        self.colour = colour
+        super().__init__(colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the polygon object.
@@ -718,7 +743,7 @@ class Polygon():
 
         Returns:
             str: The svg code for displaying the polygon.
-        """        
+        """
         svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % self.colour
         svg += ' d="'
         for i, (x, y) in enumerate(self.path):
@@ -732,7 +757,7 @@ class Polygon():
         return svg
 
 
-class Arrow():
+class Arrow(ShapeBase):
     """A class for drawing arrows (currently only horizontal)."""
 
     def __init__(self, x01, y01, x02, y02, stroke_width=2.5, colour=Colour.BLACK):
@@ -751,8 +776,7 @@ class Arrow():
         self.x02 = x02
         self.y01 = y01
         self.y02 = y02
-        self.stroke_width = stroke_width
-        self.colour = colour
+        super().__init__(colour, stroke_width=stroke_width)
 
     def get_svg(self, offset=None):
         """Output the svg code for the arrow object.
@@ -788,7 +812,7 @@ class Arrow():
         return svg
 
 
-class Group():
+class Group(ShapeBase):
     """A class for grouping svg objects with optional hide tag."""
 
     def __init__(self, tag_id='', hidden=False):
@@ -803,6 +827,7 @@ class Group():
         self.tag_id = tag_id
         self.hidden = hidden
         self.shapes = []
+        super().__init__()
 
     def add(self, shape):
         """Add a shape to group.
@@ -812,7 +837,7 @@ class Group():
         """
         self.shapes.append(shape)
 
-    def get_svg(self):
+    def get_svg(self, offset=None):
         """Output the svg code for the group object.
 
         Returns:
@@ -823,7 +848,7 @@ class Group():
         else:
             svg = '<g id="%s">' % self.tag_id
         for shape in self.shapes:
-            svg += shape.get_svg()
+            svg += shape.get_svg(offset)
         svg += '</g>'
         return svg
 
@@ -870,7 +895,7 @@ class PieChart():
         self.construct()
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         # Setup
         r = self.config['radius']
         true_points = int(round(100 * (self.data['true_facts'] + self.data['true_other'])))
@@ -890,7 +915,7 @@ class PieChart():
         next theta.
 
         Args:
-            data (dict('true_facts':float, 'true_other':float, 'false_facts':float, 
+            data (dict('true_facts':float, 'true_other':float, 'false_facts':float,
                 'false_other':float)): The set of data to be used for the pie chart.
             offset (dict('x':float, 'y':float), optional): The x,y offset dict to be used.
                 Defaults to None.
@@ -1055,7 +1080,7 @@ class OpinionPieChart(PieChart):
         """Output caption text for diagram.
 
         Returns:
-            str: The html text for the diagrams caption.
+            str: The html text for the diagram's caption.
         """
         data = self.data
         text = """The above pie chart shows the point distribution of <b>%s's</b>
@@ -1115,37 +1140,32 @@ class OpinionComparisionPieChart(OpinionPieChart):
         super().__init__(None)
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         # Setup
         r = self.config['radius']
-        true_text = 'True Points'
-        false_text = 'False Points'
+        true_text = None
+        false_text = None
 
         # Construct
         data01 = self.opinion01.get_point_distribution()
         data02 = self.opinion02.get_point_distribution()
         self.create_graph(data01, offset={'x': -125, 'y': 0})
         self.create_graph(data02, offset={'x': 125, 'y': 0})
-        self.create_ledgend(-3*r, 0, true_text, Colour.BLACK)
-        self.create_ledgend(3*r, 0, false_text, Colour.RED)
+        self.create_ledgend(-4*r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(4*r, 0, false_text, Colour.RED)
 
     def get_caption(self):
         """Output caption text for diagram.
 
         Returns:
-            str: The html text for the diagrams caption.
+            str: The html text for the diagram's caption.
         """
         text = """The above pie charts show the point distribution of <b>%s</b>
                    and <b>%s</b>. The points are broken down into true/false and
                    facts/other categories (other is non-factual evidence). Below
                    the breakdown is shown in tables.
                 """ % (self.opinion01.get_owner(), self.opinion02.get_owner())
-        text += '<br></br>'
-        text += '<div class="row">'
-        text += '<center>'
-        text += '<div class="col-7">'
-        text += '<table class="table-condensed table-borderless text-center" cellspacing="40">'
-        text += '  <thead>'
+        return text
 
 
 class DemoPieChart(PieChart):
@@ -1193,7 +1213,7 @@ class BarGraph():
         self.construct()
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         self.create_graph()
         self.create_ledgend()
 
@@ -1335,7 +1355,11 @@ class BarGraph():
         return svg
 
     def get_caption(self):
-        """Dummy method, there is no caption text for the diagram."""
+        """Dummy method, there is no caption for this diagram.
+
+        Returns:
+            str: Blank.
+        """
         return ''
 
 
@@ -1358,7 +1382,7 @@ class OpinionBarGraph(BarGraph):
         super().__init__(data01)
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         self.create_graph()
         self.create_hidden()
         self.create_ledgend()
@@ -1443,7 +1467,7 @@ class OpinionNodeBarGraph(BarGraph):
         super().__init__(data01)
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         self.create_graph()
         self.create_ledgend()
 
@@ -1463,7 +1487,7 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
         super().__init__(opinion01)
 
     def construct(self):
-        """Construct the graph."""
+        """Construct the diagram."""
         self.create_graph()
         self.create_hidden(self.opinion01, tag_id='user01')
         self.create_hidden(self.opinion02, tag_id='user02')
@@ -1474,7 +1498,7 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
 
         Returns:
             str: The caption text for the diagram.
-        """        
+        """
         text = """The above histogram shows the true/false belief distribution
                    of the <b>%d</b> %s (the most left column captures the
                    opinions that allocated 100&#37; of their points to the truth
@@ -1516,65 +1540,90 @@ class DemoBarGraph(BarGraph):
 class OpinionVennDiagram():
     """A class for drawing Venn-diagrams."""
 
-    # Defines
-    RADIUS = 150
-    SHAPE_AREA = 0.6 * RADIUS**2
-    BOARDER = {'top': 60, 'bottom': 30, 'left': 100, 'right': 100}
+    # Constants
+    DEFAULT_CONFIG = {'radius': 150, 'shape_area': 0.6 * 150**2}
+    DEFAULT_BOARDER = {'top': 60, 'bottom': 30, 'left': 100, 'right': 100}
 
-    def __init__(self, opinion, flat=False, bottom_text=None):
+    def __init__(self, opinion, flat=False, bottom_text=None, config=None, boarder=None):
         """Create a Venn-diagram that visualizes the opinion's nodes."""
         self.opinion = opinion
         self.flat = flat
         self.bottom_text = bottom_text
+        if config is None:
+            self.config = self.DEFAULT_CONFIG
+        else:
+            self.config = config
+        if boarder is None:
+            self.boarder = self.DEFAULT_BOARDER
+        else:
+            self.boarder = boarder
+        self.true_set = []
+        self.false_set = []
+        self.outside_set = []
+        self.intersection_set = []
+        self.true_ring = None
+        self.false_ring = None
+        self.text = []
+        self.true_shapes = []
+        self.false_shapes = []
+        self.intersection_shapes = []
+        self.outside_shapes = []
+        self.in_boundry_shapes = []
+        self.out_boundry_shapes = []
+        self.construct()
 
+    def construct(self):
+        """Construct the diagram."""
         self.calc_membership()
         self.create_rings()
         self.create_shapes()
         self.fix_overlap01()
 
-        self.create_out_shapes()
+        self.create_outside_shapes()
         self.create_ledgend()
         self.create_boundary_shapes()
         self.fix_overlap02()
 
     def __str__(self):
-        """Output debug text for diagram (not yet implemented)."""
+        """Output debug text for diagram (not yet implemented).
+
+        Returns:
+            str: Blank
+        """
         return ''
 
     def calc_membership(self):
-        """Group opinion nodes into the following sets: true, false, true &
-           false, neither."""
-
-        # setup
+        """Group opinion nodes into: true, false, true & false, and neither."""
+        # Setup
         self.true_set = []
-        self.int_set = []
         self.false_set = []
-        self.out_set = []
+        self.outside_set = []
+        self.intersection_set = []
         if self.flat:
             nodes = self.opinion.get_flat_nodes()
         else:
             nodes = self.opinion.get_nodes()
 
-        # blah
+        # Populate membership
         for node in nodes:
             if node.total_points() < 0.01:
                 if node.total_points() > 0:
-                    self.out_set.append(node)
+                    self.outside_set.append(node)
             elif node.true_ratio() >= 0.66:
                 self.true_set.append(node)
             elif node.false_ratio() >= 0.66:
                 self.false_set.append(node)
             else:
-                self.int_set.append(node)
+                self.intersection_set.append(node)
 
     def create_rings(self):
-        """Create true and false rings."""
-        r = self.RADIUS
-        # fix rings
-        if len(self.int_set) == 0:
+        """Create the true and false rings."""
+        # If the intersection set is empty, fix the rings in place.
+        r = self.config['radius']
+        if len(self.intersection_set) == 0:
             self.true_ring = Ring(-0.85*r, 0.0, r, x_max=-0.35*r)
             self.false_ring = Ring(0.85*r, 0.0, r, x_min=0.35*r)
-        # overlap rings
+        # Otherwise, overlap the rings.
         else:
             self.true_ring = Ring(-0.75*r, 0.0, r, x_max=-0.35*r)
             self.false_ring = Ring(0.75*r, 0.0, r, x_min=0.35*r)
@@ -1582,147 +1631,154 @@ class OpinionVennDiagram():
     def create_ledgend(self):
         """Create legend text."""
         self.text = []
-        r = self.RADIUS
-        BOARDER = self.BOARDER
-        self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y -
-                              1.0*13/12*r, size=40, colour=Colour.BLACK, bold=True))
+        r = self.config['radius']
+        boarder = self.boarder
+        self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y - 1.0*13/12*r,
+                              size=40, colour=Colour.BLACK, bold=True))
         self.text.append(Text('False', x=self.false_ring.x, y=self.true_ring.y - 1.0*13/12*r,
                               size=40, colour=Colour.RED, bold=True))
         if self.bottom_text is not None:
-            self.text.append(Text(self.bottom_text, x=(
-                self.true_ring.x + self.false_ring.x)/2, y=0.95*r + BOARDER['bottom']))
+            self.text.append(Text(self.bottom_text, x=(self.true_ring.x + self.false_ring.x)/2,
+                                  y=0.95*r + boarder['bottom']))
 
     def create_shapes(self):
-        """Create evidence and sub-theory shapes (within the true and false sets)."""
-        r = self.RADIUS
+        """Create the evidence and sub-theory shapes (within the true and false sets)."""
+        # Setup
         random.seed(0)
+        r = self.config['radius']
 
+        # Create the set of true shapes (randomly place the shape inside the true ring)
         self.true_shapes = []
         for node in self.true_set:
-            # randomly place the shape inside the positive ring
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.true_ring.x + r * math.cos(theta)
             y = self.true_ring.y + r * math.sin(theta)
-            # create shapes
-            area = self.SHAPE_AREA * node.total_points()
+            area = self.config['shape_area'] * node.total_points()
             if node.is_theory():
                 self.true_shapes.append(SubtheoryShape(node, x, y, area))
             elif node.is_evidence():
                 self.true_shapes.append(EvidenceShape(node, x, y, area))
 
-        self.int_shapes = []
-        for node in self.int_set:
-            # randomly place the shape inside the positive ring
+        # Create the set of shapes in the intersection (randomly place in the intersection)
+        self.intersection_shapes = []
+        for node in self.intersection_set:
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = (self.true_ring.x + self.false_ring.x)/2 + r * math.cos(theta)
             y = (self.true_ring.y + self.false_ring.y)/2 + r * math.sin(theta)
-            # create shapes
-            area = self.SHAPE_AREA * node.total_points()
+            area = self.config['shape_area'] * node.total_points()
             if node.is_theory():
-                self.int_shapes.append(SubtheoryShape(node, x, y, area))
+                self.intersection_shapes.append(SubtheoryShape(node, x, y, area))
             elif node.is_evidence():
-                self.int_shapes.append(EvidenceShape(node, x, y, area))
+                self.intersection_shapes.append(EvidenceShape(node, x, y, area))
 
+        # Create the set of false shapes (randomly place the shape inside the false ring)
         self.false_shapes = []
         for node in self.false_set:
-            # randomly place the shape inside the positive ring
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.false_ring.x + r * math.cos(theta)
             y = self.false_ring.y + r * math.sin(theta)
-            # create shapes
-            area = self.SHAPE_AREA * node.total_points()
+            area = self.config['shape_area'] * node.total_points()
             if node.is_theory():
                 self.false_shapes.append(SubtheoryShape(node, x, y, area))
             elif node.is_evidence():
                 self.false_shapes.append(EvidenceShape(node, x, y, area))
 
-    def create_out_shapes(self):
+    def create_outside_shapes(self):
         """Create evidence and sub-theory shapes that falls outside of the true and false sets."""
-        r = self.RADIUS
-        BOARDER = self.BOARDER
-        X_NEG = self.true_ring.x - r - BOARDER['left']
-        X_POS = self.false_ring.x + r + BOARDER['right']
-        X_WID = X_POS - X_NEG
-        Y_NEG = self.true_ring.y + r + BOARDER['top']
-        Y_POS = self.true_ring.y - r - BOARDER['bottom']
-        Y_WID = Y_POS - Y_NEG
-
         random.seed(0)
-        self.out_shapes = []
-        for node in self.out_set:
-            # randomly place shapes inside frame
-            x = random.random() * X_WID + X_NEG
-            y = random.random() * Y_WID + Y_NEG
-            # create shapes
-            area = self.SHAPE_AREA * node.total_points()
+        r = self.config['radius']
+        boarder = self.boarder
+        x_min = self.true_ring.x - r - boarder['left']
+        x_max = self.false_ring.x + r + boarder['right']
+        x_width = x_max - x_min
+        y_min = self.true_ring.y + r + boarder['top']
+        y_max = self.true_ring.y - r - boarder['bottom']
+        y_width = y_max - y_min
+
+        # Create the shapes outside both the true and false rings (radomly place them inside the
+        # frame, the springs will push them outside of the rings).
+        self.outside_shapes = []
+        for node in self.outside_set:
+            x = random.random() * x_width + x_min
+            y = random.random() * y_width + y_min
+            area = self.config['shape_area'] * node.total_points()
             if node.is_theory():
-                self.out_shapes.append(SubtheoryShape(node, x, y, area))
+                self.outside_shapes.append(SubtheoryShape(node, x, y, area))
             elif node.is_evidence():
-                self.out_shapes.append(EvidenceShape(node, x, y, area))
+                self.outside_shapes.append(EvidenceShape(node, x, y, area))
 
     def create_boundary_shapes(self):
         """Create boundary shapes to confine the shapes to the view port."""
-        BOARDER = self.BOARDER
-        r = self.RADIUS
-        X_NEG = self.true_ring.x - r - BOARDER['left']
-        X_POS = self.false_ring.x + r + BOARDER['right']
-        X_WID = X_POS - X_NEG
-        Y_POS = self.true_ring.y - r - BOARDER['top']
-        Y_NEG = self.true_ring.y + r + BOARDER['bottom']
-        Y_WID = Y_POS - Y_NEG
+        # Setup
+        r = self.config['radius']
+        x_min = self.true_ring.x - r - self.boarder['left']
+        x_max = self.false_ring.x + r + self.boarder['right']
+        y_max = self.true_ring.y - r - self.boarder['top']
+        y_min = self.true_ring.y + r + self.boarder['bottom']
+        x_width = x_max - x_min
 
-        # image frame
+        # Construt walls at the top and bottom of the image frame and a circle to keep the
+        # shapes horizontally in the frame.
         self.in_boundry_shapes = []
-        self.in_boundry_shapes.append(Wall(None, Y_POS))
-        self.in_boundry_shapes.append(Wall(None, Y_NEG))
-        self.in_boundry_shapes.append(
-            Ring((X_NEG + X_POS)/2, self.true_ring.y, X_WID/2))
+        self.in_boundry_shapes.append(Wall(None, y_max))
+        self.in_boundry_shapes.append(Wall(None, y_min))
+        self.in_boundry_shapes.append(Ring((x_min + x_max)/2, self.true_ring.y, x_width/2))
 
-        # create a circle to avoid the text and middle of the figure
-        x = (self.true_ring.x + self.false_ring.x)/2
-        y = self.true_ring.y
-        R = (self.false_ring.x - self.true_ring.x)/2 + 1*r
-        self.out_boundry_shapes = [Ring(x, y, R)]
+        # Construct a circle to avoid the middle of the figure and the true and false text
+        # (only applies to shapes outside the two rings).
+        x02 = (self.true_ring.x + self.false_ring.x)/2
+        y02 = self.true_ring.y
+        r02 = (self.false_ring.x - self.true_ring.x)/2 + 1*r
+        self.out_boundry_shapes = [Ring(x02, y02, r02)]
 
     def fix_overlap01(self):
         """Move the inside shapes around to avoid overlap."""
-        # setup
+        # Setup
         shapes = []
-        if len(self.int_shapes) > 0:
+        if len(self.intersection_shapes) > 0:
             shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
                            'out': self.true_shapes+[self.false_ring]})
             shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
                            'out': self.false_shapes+[self.true_ring]})
-            shapes.append({'prop': self.int_shapes, 'in': [self.true_ring, self.false_ring],
-                           'out': self.int_shapes})
-            shapes.append({'prop': [self.true_ring], 'in': self.true_shapes + self.int_shapes,
+            shapes.append({'prop': self.intersection_shapes,
+                           'in': [self.true_ring, self.false_ring],
+                           'out': self.intersection_shapes})
+            shapes.append({'prop': [self.true_ring],
+                           'in': self.true_shapes + self.intersection_shapes,
                            'out': self.false_shapes})
-            shapes.append({'prop': [self.false_ring], 'in': self.false_shapes + self.int_shapes,
+            shapes.append({'prop': [self.false_ring],
+                           'in': self.false_shapes + self.intersection_shapes,
                            'out': self.true_shapes})
         else:
             shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
                            'out': self.true_shapes+[self.false_ring]})
             shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
                            'out': self.false_shapes+[self.true_ring]})
-        # propagate
+
+        # Propagate (self organize)
         self.propagate(shapes)
 
     def fix_overlap02(self):
         """Move the outside shapes around to avoid overlap."""
-        # setup
-        shapes = [{'prop': self.out_shapes, 'in': self.in_boundry_shapes,
-                   'out': self.out_boundry_shapes + self.out_shapes}]
+        # Setup
+        shapes = [{'prop': self.outside_shapes, 'in': self.in_boundry_shapes,
+                   'out': self.out_boundry_shapes + self.outside_shapes}]
         for shape in [self.true_ring, self.false_ring]:
             shape.reset_spring_constant()
-        # propagate
+
+        # Propagate
         self.propagate(shapes)
 
     def propagate(self, shapes):
-        """Incrementally propagate the spring-class shapes to avoid overlap."""
-        for step in range(100):
+        """Incrementally propagate the spring-class shapes to avoid overlap.
+
+        Args:
+            shapes (list(dict('prop':, 'in':, 'out'))): A list of all the shapes to propigate.
+        """
+        for i in range(100):
             max_step = 0.0
             for shape_set in shapes:
                 for shape01 in shape_set['prop']:
@@ -1730,20 +1786,29 @@ class OpinionVennDiagram():
                     total_y_force = 0.0
                     for shape02 in shape_set['out']:
                         if shape02 != shape01:
-                            fx, fy = shape02.get_spring_force(shape01, direction=Direction.OUT)
-                            total_x_force += fx
-                            total_y_force += fy
+                            f_x, f_y = shape02.get_spring_force(shape01, direction=Direction.OUT)
+                            total_x_force += f_x
+                            total_y_force += f_y
                     for shape02 in shape_set['in']:
-                        fx, fy = shape02.get_spring_force(shape01, direction=Direction.IN)
-                        total_x_force += fx
-                        total_y_force += fy
+                        f_x, f_y = shape02.get_spring_force(shape01, direction=Direction.IN)
+                        total_x_force += f_x
+                        total_y_force += f_y
                     max_step = max([max_step, abs(total_x_force), abs(total_y_force)])
                     shape01.propigate(total_x_force, total_y_force)
+            # Break the propigation loop if the organization stops changing.
             if max_step < 0.01:
                 break
 
     def get_collaborative_evidence(self, sort_list=False):
-        """Return a list of evidence/sub-theories that support the opinion."""
+        """Return a list of evidence/sub-theories that support the opinion.
+
+        Args:
+            sort_list (bool, optional): If true, the list will be sorted by points in
+                decending order. Defaults to False.
+
+        Returns:
+            list: A list of all the collaborative evidence.
+        """
         if self.opinion.is_true():
             evidence = self.true_set
         else:
@@ -1753,11 +1818,18 @@ class OpinionVennDiagram():
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
-        else:
-            return evidence
+        return evidence
 
     def get_contradicting_evidence(self, sort_list=False):
-        """Return a list of evidence/sub-theories that contradicts the opinion."""
+        """Return a list of evidence/sub-theories that contradicts the opinion.
+
+        Args:
+            sort_list (bool, optional): If true, the list will be sorted by points in
+                decending order. Defaults to False.
+
+        Returns:
+            list: A list of all the contradicting evidence.
+        """
         if self.opinion.is_true():
             evidence = self.false_set
         else:
@@ -1767,28 +1839,41 @@ class OpinionVennDiagram():
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
-        else:
-            return evidence
+        return evidence
 
     def get_controversial_evidence(self, sort_list=False):
-        """Return a list of evidence/sub-theories that is used to both support and contradict the opinion."""
+        """Return a list of evidence/sub-theories that both support and contradict the opinion.
+
+        Args:
+            sort_list (bool, optional): If true, the list will be sorted by points in
+                decending order. Defaults to False.
+
+        Returns:
+            list: A list of all the controversial evidence.
+        """
         if sort_list:
-            output_set = sorted(self.int_set, key=lambda x: x.total_points(), reverse=True)
+            output_set = sorted(self.intersection_set, key=lambda x: x.total_points(), reverse=True)
             while len(output_set) > 0 and output_set[-1].total_points() < 0.01:
                 output_set.pop()
             return output_set
-        else:
-            return self.int_set
+        return self.intersection_set
 
     def get_unaccounted_evidence(self, sort_list=False):
-        """Return a list of evidence/sub-theories that is insignificant to the opinion."""
+        """Return a list of evidence/sub-theories that is insignificant to the opinion.
+
+        Args:
+            sort_list (bool, optional): If true, the list will be sorted by points in
+                decending order. Defaults to False.
+
+        Returns:
+            list: A list of all the insignificant evidence.
+        """
         if sort_list:
-            output_set = sorted(self.out_set, key=lambda x: x.total_points(), reverse=True)
+            output_set = sorted(self.outside_set, key=lambda x: x.total_points(), reverse=True)
             while len(output_set) > 0 and output_set[0].total_points() >= 0.01:
                 output_set.pop(0)
             return output_set
-        else:
-            return self.out_set
+        return self.outside_set
 
     def get_svg(self):
         """Output the svg code for diagram.
@@ -1796,20 +1881,26 @@ class OpinionVennDiagram():
         Returns:
             str: The svg code for displaying the diagram.
         """
-        r = self.RADIUS
-        BOARDER = self.BOARDER
-        height = (2.0*r + BOARDER['top'] + BOARDER['bottom'])
+        # Setup
         width = 1200
+        r = self.config['radius']
+        height = (2.0*r + self.boarder['top'] + self.boarder['bottom'])
         offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
-                    'y': BOARDER['top'] + r - self.true_ring.y}
-        svg = """<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">
-                    <defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]></style></defs>
-                """ % (width, height)
-        # draw hidden elements first to appear below the rest
-        for shape in self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
+                  'y': self.boarder['top'] + r - self.true_ring.y}
+
+        # Construct frame.
+        svg = '<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">' % (width, height)
+        svg += '<defs><style type="text/css"><![CDATA[.text { font-family: serif; fill: black; }]]>'
+        svg += '</style></defs>'
+
+        # Draw hidden elements first to appear below the rest.
+        for shape in self.true_shapes + self.intersection_shapes + \
+                     self.false_shapes + self.outside_shapes:
             svg += shape.get_highlight_svg(offset=offset)
-        # draw the rest
-        for shape in [self.true_ring, self.false_ring] + self.true_shapes + self.int_shapes + self.false_shapes + self.out_shapes:
+
+        # Draw the remaing shapes.
+        for shape in [self.true_ring, self.false_ring] + self.true_shapes + \
+                     self.intersection_shapes + self.false_shapes + self.outside_shapes:
             svg += shape.get_svg(offset=offset)
         for text in self.text:
             svg += text.get_svg(offset=offset)
@@ -1817,8 +1908,11 @@ class OpinionVennDiagram():
         return svg
 
     def get_caption(self):
-        """Output caption text for diagram."""
-        TRUE = self.opinion.is_true()
+        """Output caption text for diagram.
+
+        Returns:
+            str: The caption text for the diagram.
+        """
         text = """The above Venn-Diagram captures the evidence/sub-theories
                    that <b>%s</b> used as shapes. Squares represent evidence and
                    circles represent sub-theories, the size reflects the number
@@ -1832,35 +1926,32 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
     """A class for drawing relative Venn-diagrams (used for comparisons)."""
 
     def __init__(self, opinion01, opinion02, flat=False, bottom_text=None):
-        """Create a Venn-diagram comparing the two opinions."""
+        """Constructor for the OpinionComparisionVennDiagram class.
+
+        Args:
+            opinion01 (OpinionNode): The base opinion, used to decide the evidence/sub-theory
+                locatoin (the true ring, the false ring, the intersection, or the outside).
+            opinion02 (OpinionNode): The comparision opinion, used to decide the size and colour
+                of each shape.
+            flat (bool, optional): If true, the sub-theories are flattend. Defaults to False.
+            bottom_text ([type], optional): Mainly used for debug statements. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
         self.opinion01 = opinion01
         self.opinion02 = opinion02
-        self.opinion = opinion01
-        self.flat = flat
-        self.bottom_text = bottom_text
-
-        self.calc_membership()
-        self.create_rings()
-        self.create_shapes()
-        self.fix_overlap01()
-
-        self.create_out_shapes()
-        self.create_ledgend()
-        self.create_boundary_shapes()
-        self.fix_overlap02()
+        super().__init__(opinion01, flat, bottom_text)
 
     def calc_membership(self):
-        """Group opinion nodes into the following sets: true, false, true &
-           false, neither. The size, colour, and opacity of the nodes is
-           determined by opinion02."""
-
-        # setup sets
+        """Group opinion nodes into: true, false, true & false, and neither."""
+        # Setup
         self.true_set = []
-        self.int_set = []
+        self.intersection_set = []
         self.false_set = []
-        self.out_set = []
+        self.outside_set = []
 
-        # setup nodes
+        # Construct a list of nodes.
         theory = self.opinion01.theory
         if self.flat:
             nodes = theory.get_flat_nodes()
@@ -1871,10 +1962,10 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
             get_node01 = self.opinion01.get_node
             get_node02 = self.opinion02.get_node
 
-        # blah
+        # Populate the sets (create dummy nodes to customize weight and colour).
         for theory_node in nodes:
 
-            # get or create node01
+            # Get or create node01
             points_node01 = get_node01(theory_node=theory_node)
             if points_node01 is None:
                 points_node01 = NodePointerBase.create(
@@ -1883,7 +1974,7 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
                     true_points=0.0,
                     false_points=0.0,
                 )
-            # get or create node02
+            # Get or create node02
             points_node02 = get_node02(theory_node=theory_node)
             if points_node02 is None:
                 points_node02 = NodePointerBase.create(
@@ -1893,10 +1984,10 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
                     false_points=0.0,
                 )
 
-            # assign nodes to sets
+            # Assign nodes to sets
             if points_node01.total_points() < 0.01:
                 if points_node02.total_points() > 0:
-                    self.out_set.append(points_node02)
+                    self.outside_set.append(points_node02)
             elif points_node01.true_ratio() >= 0.66:
                 if points_node02.total_points() > 0:
                     self.true_set.append(points_node02)
@@ -1905,33 +1996,34 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
                     self.false_set.append(points_node02)
             else:
                 if points_node02.total_points() > 0:
-                    self.int_set.append(points_node02)
+                    self.intersection_set.append(points_node02)
 
     def get_caption(self):
-        """Output caption text for diagram."""
-        TRUE = self.opinion01.true_points() >= self.opinion01.false_points()
+        """Output caption text for diagram.
+
+        Returns:
+            str: The caption text for the diagram.
+        """
         text = """The above Venn-Diagram captures the evidence/sub-theories
                    that <b>%s</b> used to construct their opinion. The size,
                    colour, and opacity reflect the belief of <b>%s's</b> opinion.
-                """ % (
-            self.opinion01.get_owner(),
-            self.opinion02.get_owner(),
-        )
+                """ % (self.opinion01.get_owner(), self.opinion02.get_owner())
         return text
 
 
 class DemoVennDiagram(OpinionVennDiagram):
     """A class for drawing demo Venn-diagrams (fake data)."""
 
-    def __init__(self, true_set_size=10, int_set_size=10, false_set_size=10, out_set_size=10):
+    def __init__(self, true_set_size=10, intersection_set_size=10, false_set_size=10,
+                 outside_set_size=10):
         """The constructor for the DemoVennDiagram class.
-        
+
         Args:
             true_set_size (int, optional): The number of random true OpinionNodes to be generated.
                 Defaults to 10.
-            int_set_size (int, optional): [description]. Defaults to 10.
+            intersection_set_size (int, optional): [description]. Defaults to 10.
             false_set_size (int, optional): [description]. Defaults to 10.
-            out_set_size (int, optional): [description]. Defaults to 10.
+            outside_set_size (int, optional): [description]. Defaults to 10.
         """
         random.seed()
         seed = random.randint(0, 100)
@@ -1959,7 +2051,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_true_points += new_node.true_points()
             total_false_points += new_node.false_points()
 
-        for i in range(random.randint(1, int_set_size)):
+        for i in range(random.randint(1, intersection_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
                 theory_node=random.choice(theory_nodes),
@@ -1981,7 +2073,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_true_points += new_node.true_points()
             total_false_points += new_node.false_points()
 
-        for i in range(random.randint(1, out_set_size)):
+        for i in range(random.randint(1, outside_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
                 theory_node=random.choice(theory_nodes),
@@ -2008,13 +2100,18 @@ class DemoVennDiagram(OpinionVennDiagram):
         super().__init__(opinion, bottom_text=str(seed))
 
     def get_caption(self):
-        """Output caption text for diagram."""
+        """Dummy method, there is no caption text for this diagram.
+
+        Returns:
+            str: Blank
+        """
         return ''
+
 
 
 # *******************************************************************************
 # main (used for testing)
 # *******************************************************************************
 if __name__ == "__main__":
-    c = VennDiagram(10, 0, 10)
-    print(c.output())
+    demo = DemoVennDiagram(10, 0, 10)
+    print(demo.get_svg())
