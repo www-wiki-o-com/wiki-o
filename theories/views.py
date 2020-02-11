@@ -61,11 +61,11 @@ from actstream.actions import is_following
 from notifications.signals import notify
 #from cairosvg import svg2png
 
-from .models import *
-from .forms import *
-from .graphs import OpinionVennDiagram, OpinionPieChart, OpinionBarGraph
-from .graphs import OpinionComparisionVennDiagram, OpinionComparisionPieChart, OpinionComparisionBarGraph, OpinionNodeBarGraph
-from .graphs import DemoVennDiagram, DemoPieChart, DemoBarGraph
+from theories.models import *
+from theories.graph_lib.pie_charts import OpinionPieChart, OpinionComparisionPieChart, DemoPieChart
+from theories.graph_lib.bar_graphs import OpinionBarGraph, OpinionComparisionBarGraph, DemoBarGraph
+from theories.graph_lib.venn_diagrams import OpinionVennDiagram, OpinionComparisionVennDiagram, DemoVennDiagram
+
 from users.forms import ReportViolationForm
 
 
