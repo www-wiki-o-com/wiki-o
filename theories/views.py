@@ -494,10 +494,14 @@ class TheoryDetail(generic.DetailView):
         user = self.request.user
         theory = self.object
         deleted = theory.is_deleted()
-        opinion_list = get_opinion_list(theory, current_user=user)
         parent_theories = theory.get_parent_nodes(deleted=deleted)
         theory_nodes = theory.get_nodes(
             deleted=deleted).exclude(pk=TheoryNode.INTUITION_PK)
+
+        supporters = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
+        moderates = get_or_none(theory.stats, stats_type=Stats.TYPE.MODERATES)
+        opposers = get_or_none(theory.stats, stats_type=Stats.TYPE.OPPOSERS)
+        everyone = get_or_none(theory.stats, stats_type=Stats.TYPE.ALL)
 
         # Pagination
         page = self.request.GET.get('page')
@@ -520,7 +524,10 @@ class TheoryDetail(generic.DetailView):
         context = {
             'theory':               theory,
             'theory_nodes':         theory_nodes,
-            'opinion_list':         opinion_list,
+            'supporters':           supporters,
+            'moderates':            moderates,
+            'opposers':             opposers,
+            'everyone':             everyone,
             'parent_theories':      parent_theories,
             'prev':                 prev,
             'parms':                parms,

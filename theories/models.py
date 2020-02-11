@@ -2810,6 +2810,14 @@ class Stats(TheoryPointerBase, models.Model):
         """Returns total opinion points awarded to this theory."""
         return self.total_true_points + self.total_false_points
 
+    def num_supporters(self):
+        """Returns the number of supporters."""
+        return round(self.true_points() * self.opinions.count())
+
+    def num_opposers(self):
+        """Returns the number of opposers."""
+        return round(self.false_points() * self.opinions.count())
+
     # ******************************
     # Stats
     # ******************************

@@ -28,10 +28,13 @@ A web service for sharing opinions and avoiding arguments
         <!-- Title -->
         <h2>
           {% if theory.is_deleted %}
-            <strike>{{ theory }}</strike>
+            <strike>{{ theory.get_title|remove_punctuation }}</strike>
           {% else %}
-            {{ theory }}
+            {{ theory.get_title|remove_punctuation }}
           {% endif %}
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="True vs. False">
+            <small>(<b>{{ everyone.num_supporters }}:<font color="red">{{ everyone.num_opposers }}</font></b>)</small>
+          </span>
         </h2>
         <!-- Details -->
         <div style="text-align: justify">{{  theory.details|bibliography }}</div>
@@ -93,49 +96,41 @@ A web service for sharing opinions and avoiding arguments
               <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=parms %}"> Edit Theory </a></li>
             {% endif %}
 
-            <!-- Add to Theory -->
-            {% has_perm 'theories.add_theorynode' user as can_add %}
-            {% if can_add %}
-              <li><a href="{% url_extra 'theories:theory-edit-evidence' theory.id extra=parms %}"> Add to Theory </a></li>
+            <!-- My Opinion -->
+            {% if user.is_authenticated %}
+              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=parms %}"> My Opinion </a></li>
             {% endif %}
 
-            <!-- Delete -->
-            {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
-            {% if can_delete %}
-              <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete Theory </a></li>
-            {% endif %}
+            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> Browse Opinions </a></li>
 
             <!-- Activity -->
-            <li><li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> View Activity Log </a></li>
+            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> View Activity Log </a></li>
 
             <!-- Report -->
-            <li><li><a href="{% url_extra 'theories:theory-report' theory.id extra=parms %}"> Report a Violation </a></li>
+            <li><a href="{% url_extra 'theories:theory-report' theory.id extra=parms %}"> Report a Violation </a></li>
 
           </ul>
         </div>
       </div>
-     
-      <!-- Opinions -->
+      
+      <!-- Stats -->
       <div class="card my-3">
-        <h5 class="card-header">Opinions</h5>
+        <h5 class="card-header">
+          Stats
+        </h5>
         <div class="card-body">
           <table>
             <tbody valign="top">
-              {% for x in opinion_list %}
-                <tr>
-                  <td style="color:black" align="center">
-                    <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
-                  </td>
-                  <td><a href="{{ x.url|add:parms }}">
-                    &nbsp; {{ x.text }} 
-                  </a></td>
-                </tr>
-              {% endfor %}
+              <tr><td><a href="{{ supporters.url|add:parms }}">Supporters</a></td> <td style="width:100%"></td> <td><a href="{{ supporters.url|add:parms }}">{{ supporters.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ moderates.url|add:parms }}">Moderates</a></td> <td></td> <td><a href="{{ moderates.url|add:parms }}">{{ moderates.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ opposers.url|add:parms }}">Opposers</a></td> <td></td> <td><a href="{{ opposers.url|add:parms }}">{{ opposers.opinions.count }}</a></td></tr>
+              <tr style="border-top:1px solid rgb(192, 192, 192);"><td/><td/><td/></tr>
+              <tr><td><a href="{{ everyone.url|add:parms }}">Everyone</a></td> <td></td> <td><a href="{{ everyone.url|add:parms }}">{{ everyone.opinions.count }}</a></td></tr>
             </tbody>
           </table>
         </div>
       </div>
-      
+
       <!-- Parent -->
       <div class="card my-3">
         <h5 class="card-header">Parent Theories</h5>
