@@ -14,7 +14,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -37,12 +37,12 @@ from theories.views import get_page_list, MAX_NUM_PAGES, NUM_ITEMS_PER_PAGE, Par
 
 
 # *******************************************************************************
-# methods
+# Methods
 # *******************************************************************************
 
 
 # *******************************************************************************
-# classes
+# Classes
 # *******************************************************************************
 
 

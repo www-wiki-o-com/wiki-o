@@ -14,7 +14,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 import re
 import datetime
@@ -49,7 +49,7 @@ RE_HASHTAG = r'#\w+'
 
 
 # *******************************************************************************
-# methods
+# Methods
 #
 #
 #
@@ -190,33 +190,35 @@ def make_safe(text):
 
 
 @register.filter
-def possessive(text):
-    """Add the possesive 's or ' to the end of the text.
+def possessive(string):
+    """Add the possesive 's or ' to the end of the string.
 
     Args:
-        text (str): The input text to manipulate.
+        string (str): The input string to manipulate.
 
     Returns:
-        str: The input text now with possesive qualifier.
+        str: The input string now with possesive qualifier.
     """
-    if text[-1] == 's':
-        return text + "'"
-    return text + "'s"
+    string = str(string)
+    if string[-1] == 's':
+        return string + "'"
+    return string + "'s"
 
 
 @register.filter
-def remove_punctuation(text):
+def remove_punctuation(string):
     """Removes the punctuation.
 
     Args:
-        text (str): The input text to manipulate.
+        string (str): The input string to manipulate.
 
     Returns:
-        str: The input text now without punctuation.
+        str: The input string now without punctuation.
     """
-    if re.match(r'.*[.!]', text):
-        return text[:-1]
-    return text
+    string = str(string)
+    if re.match(r'.*[.!]', string):
+        return string[:-1]
+    return string
 
 
 @register.filter
@@ -569,5 +571,4 @@ def timepassed(time_then):
 #
 # *******************************************************************************
 if __name__ == "__main__":
-    TEST = 'Yo, [(https://en.wikipedia.org/wiki/Steven_Avery Wikipedia what)] is [up[?]'
-    print(bibliography(TEST))
+    pass

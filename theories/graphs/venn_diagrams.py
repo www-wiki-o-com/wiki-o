@@ -14,13 +14,12 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 import math
 import random
 
-from theories.models import NodePointerBase
-from theories import models
+from theories.models import NodePointerBase, Opinion
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
 
@@ -528,7 +527,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         seed = random.randint(0, 100)
         random.seed(seed)
 
-        opinion = models.Opinion.get_demo()
+        opinion = Opinion.get_demo()
         theory = opinion.theory
         theory_nodes = list(theory.nodes.all())
 

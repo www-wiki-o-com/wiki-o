@@ -34,7 +34,7 @@ A web service for sharing opinions and avoiding arguments
     {% endif %}
     believes 
     <a href={{ theory.url|add:parms }} class="plain">
-      <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}> &ldquo;{{ opinion.get_str|remove_punctuation }}&rdquo; </font>
+      <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}> &ldquo;{{ opinion|remove_punctuation }}&rdquo; </font>
     </a>
   </h3>
   <small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they belong to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %} side)</small>  

@@ -15,7 +15,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 import re
 import enum
@@ -28,7 +28,7 @@ from notifications.signals import notify
 
 
 # *******************************************************************************
-# defines
+# Defines
 # *******************************************************************************
 DEBUG = False
 
@@ -41,7 +41,7 @@ class LogDiffResult(enum.Enum):
 
 
 # *******************************************************************************
-# methods
+# Methods
 # *******************************************************************************
 
 
@@ -227,3 +227,47 @@ def get_form_data(response, verbose_level=0):
 
     # Return result
     return data
+
+
+# *******************************************************************************
+# Classes
+# *******************************************************************************
+
+
+class QuerySetDict():
+    """A class for converting query sets into dicts."""
+
+    def __init__(self, attrib_key, queryset=None):
+        self.dict = {}
+        self.attrib_key = attrib_key
+        if queryset is not None:
+            for x in queryset:
+                self.dict[self.get_key(x)] = x
+
+    def __iter__(self):
+        self.dict_iter = self.dict.values().__iter__()
+        return self
+
+    def __next__(self):
+        return self.dict_iter.__next__()
+
+    def __str__(self):
+        return str(list(self))
+
+    def get_key(self, obj):
+        key = obj
+        for key_str in self.attrib_key.split('.'):
+            key = getattr(key, key_str)
+        return key
+
+    def add(self, x):
+        self.dict[self.get_key(x)] = x
+
+    def get(self, key):
+        if key in self.dict.keys():
+            return self.dict[key]
+        else:
+            return None
+
+    def count(self):
+        return len(self.dict)

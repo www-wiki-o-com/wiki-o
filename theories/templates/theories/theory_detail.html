@@ -1,3 +1,5 @@
+<!DOCTYPE html>
+
 <!-- __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
@@ -28,9 +30,9 @@ A web service for sharing opinions and avoiding arguments
         <!-- Title -->
         <h2>
           {% if theory.is_deleted %}
-            <strike>{{ theory.get_title|remove_punctuation }}</strike>
+            <strike>{{ theory|remove_punctuation }}</strike>
           {% else %}
-            {{ theory.get_title|remove_punctuation }}
+            {{ theory|remove_punctuation }}
           {% endif %}
           <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="True vs. False">
             <small>(<b>{{ everyone.num_supporters }}:<font color="red">{{ everyone.num_opposers }}</font></b>)</small>
@@ -46,9 +48,9 @@ A web service for sharing opinions and avoiding arguments
           <table style="margin-left: 1em">
               <thead>
                 <tr>
-                  <td width="17">
-                  <td width="17">
-                  <td>
+                  <td width="17"/>
+                  <td width="17"/>
+                  <td/>
                 </tr>
               </thead>
             <tbody align="left" valign="top">
@@ -60,7 +62,7 @@ A web service for sharing opinions and avoiding arguments
                     <td> {% include "include/info.html" with x=node %} </td>
                     <!-- Description -->
                     <td style="padding-left:5px;">
-                      <a class="plain" href={{ node.url|add:parms.get_next }}>
+                      <a class="plain" href="{{ node.url|add:parms.get_next }}">
                       {% if node.is_deleted %}
                         <strike>{{ node }}</strike>
                       {% else %}
@@ -77,7 +79,7 @@ A web service for sharing opinions and avoiding arguments
           No evidence.
         {% endif %}
         {% if prev %}
-          <a href={{ prev }}>Go to parent theory.</a>
+          <a href="{{ prev }}">Go to parent theory.</a>
         {% endif %}
 
       </div> <!-- end card -->
@@ -138,7 +140,7 @@ A web service for sharing opinions and avoiding arguments
           <div class="row">
             <ul>
               {% for x in parent_theories %}
-                <li><a href={{ x.url }}>{{ x }}</a></li>
+                <li><a href="{{ x.url }}">{{ x }}</a></li>
               {% endfor %}
             </ul>
           </div>
