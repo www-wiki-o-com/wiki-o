@@ -14,15 +14,15 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 from django.contrib import admin
 from reversion.admin import VersionAdmin
-from .models import *
-
+from theories.models import Category, TheoryNode, Opinion, OpinionNode
+from theories.models import Stats, StatsNode, StatsFlatNode
 
 # *******************************************************************************
-# classes
+# Classes
 # *******************************************************************************
 
 

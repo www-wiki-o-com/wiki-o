@@ -25,7 +25,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -71,14 +71,14 @@ from users.forms import ReportViolationForm
 
 
 # *******************************************************************************
-# defines
+# Defines
 # *******************************************************************************
 MAX_NUM_PAGES = 5
 NUM_ITEMS_PER_PAGE = 25
 
 
 # *******************************************************************************
-# methods
+# Methods
 #
 #
 #
@@ -1521,7 +1521,7 @@ def EvidenceActivityView(request, pk):
 
 
 # *******************************************************************************
-# methods
+# Methods
 #
 #
 #

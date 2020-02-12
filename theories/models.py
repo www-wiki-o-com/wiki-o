@@ -14,7 +14,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 import re
 import copy
@@ -45,92 +45,14 @@ from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
 
 from users.models import User, Violation
-from core.utils import *
+from core.utils import get_or_none, get_first_or_none, stream_if_unique, notify_if_unique, QuerySetDict
 
 
 # *******************************************************************************
-# defines
+# Defines
 # *******************************************************************************
 DEBUG = False
 logger = logging.getLogger('django')
-
-
-# *******************************************************************************
-# Helper Classes
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
-
-
-# ************************************************************
-# QuerySetDict
-# ************************************************************
-class QuerySetDict():
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def __init__(self, attrib_key, queryset=None):
-        self.dict = {}
-        self.attrib_key = attrib_key
-        if queryset is not None:
-            for x in queryset:
-                self.dict[self.get_key(x)] = x
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def __iter__(self):
-        self.dict_iter = self.dict.values().__iter__()
-        return self
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def __next__(self):
-        return self.dict_iter.__next__()
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def __str__(self):
-        return str(list(self))
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def get_key(self, obj):
-        key = obj
-        for key_str in self.attrib_key.split('.'):
-            key = getattr(key, key_str)
-        return key
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def add(self, x):
-        self.dict[self.get_key(x)] = x
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def get(self, key):
-        if key in self.dict.keys():
-            return self.dict[key]
-        else:
-            return None
-
-    # ******************************
-    # QuerySetDict
-    # ******************************
-    def count(self):
-        return len(self.dict)
 
 
 # *******************************************************************************
@@ -1786,10 +1708,6 @@ class Opinion(TheoryPointerBase, models.Model):
             return self.theory.get_true_statement()
         else:
             return self.theory.get_false_statement()
-
-    def get_str(self):
-        """Pass-through for __str__."""
-        return self.__str__()
 
     # ******************************
     # Opinion

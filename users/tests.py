@@ -14,7 +14,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 from django.test import TestCase
 from django.urls import reverse
@@ -29,7 +29,7 @@ import datetime
 
 
 # *******************************************************************************
-# defines
+# Defines
 # *******************************************************************************
 User = auth.get_user_model()
 

@@ -14,7 +14,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 # *******************************************************************************
-# imports
+# Imports
 # *******************************************************************************
 import enum
 import math
@@ -25,7 +25,7 @@ from theories.graphs.shapes import offset_xy
 
 
 # *******************************************************************************
-# defines
+# Defines
 # *******************************************************************************
 class Direction(enum.Enum):
     """Enum for direction to shapes."""
