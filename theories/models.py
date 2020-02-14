@@ -1200,6 +1200,7 @@ class TheoryNode(models.Model):
     # TheoryNode
     # ******************************
     def get_utilization(self, user=None):
+        return 0
         if user is None:
             return self.users.exclude(user=user).count()
         else:
