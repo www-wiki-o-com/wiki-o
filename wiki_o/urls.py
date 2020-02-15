@@ -31,8 +31,6 @@ A web service for sharing opinions and avoiding arguments
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-from django.conf.urls import url
-from machina.app import board
 
 
 # *******************************************************************************
@@ -42,7 +40,6 @@ urlpatterns = [
     path('', include('core.urls')),
     path('', include('theories.urls')),
     path('admin/', admin.site.urls),
-    path('feedback/', include(board.urls)),
     path('', include('users.urls')),
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
