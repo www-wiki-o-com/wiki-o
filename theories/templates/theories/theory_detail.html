@@ -28,18 +28,19 @@ A web service for sharing opinions and avoiding arguments
       <div class="my-3"> <!-- Main Card -->
 
         <!-- Title -->
-        <h6 style="font-weight:bold; margin-bottom: 0em">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="True vs. False">
-            Points: {{ everyone.num_supporters }}-<font color="red">{{ everyone.num_opposers }}</font>
-          </span>
-        </h6>
-        <h2>
+        <h2 style=" margin-bottom:-0.1ex">
           {% if theory.is_deleted %}
             <strike>{{ theory }}</strike>
           {% else %}
             {{ theory }}
           {% endif %}
         </h2>
+        <div style="font-weight:bold; margin-left: 3ex">
+          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="True vs. False">
+            Points: {{ everyone.num_supporters }}-<font color="red">{{ everyone.num_opposers }}</font>
+          </span>
+        </div>
+
         <!-- Details -->
         <div style="text-align: justify">{{  theory.details|bibliography }}</div>
         
