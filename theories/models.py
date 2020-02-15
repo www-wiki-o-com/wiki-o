@@ -287,22 +287,23 @@ class TheoryNode(models.Model):
     def get_demo(cls):
         """Generator to create a demo theory with sub-theories and evidence."""
         theory = cls.get_or_create_theory(true_title='Demo Theory')
-        subtheory = theory.get_or_create_subtheory(
-            true_title='Demo Sub-Theory')
-        fact = theory.get_or_create_evidence(title='Demo Fact', fact=True)
-        intuition = theory.get_or_create_evidence(title='Demo Intuition')
+        theory.get_or_create_subtheory(true_title='Demo Sub-Theory')
+        theory.get_or_create_evidence(title='Demo Fact', fact=True)
+        theory.get_or_create_evidence(title='Demo Intuition')
         return theory
 
     @classmethod
     def get_or_create_theory(cls, true_title, false_title=None, created_by=None, category='all'):
         """Generator to translate true_title input and etc to class variables."""
-        kwargs = {'node_type': cls.TYPE.THEORY, 'title01': true_title}
+        kwargs = {'title01': true_title}
+        defaults = {'node_type': cls.TYPE.THEORY}
         if false_title is not None:
             kwargs['title00'] = false_title
         if created_by is not None:
             kwargs['created_by'] = created_by
             kwargs['modified_by'] = created_by
-        theory, created = cls.objects.get_or_create(**kwargs)
+        theory, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert theory.is_theory()
         theory.categories.add(Category.get(category))
         return theory
 
@@ -312,13 +313,15 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         cls = self.__class__
-        kwargs = {'node_type': cls.TYPE.THEORY, 'title01': true_title}
+        kwargs = {'title01': true_title}
+        defaults = {'node_type': cls.TYPE.THEORY}
         if false_title is not None:
             kwargs['title00'] = false_title
         if created_by is not None:
             kwargs['created_by'] = created_by
             kwargs['modified_by'] = created_by
-        subtheory, created = cls.objects.get_or_create(**kwargs)
+        subtheory, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert subtheory.is_theory()
         self.add_node(subtheory)
         return subtheory
 
@@ -328,13 +331,15 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         cls = self.__class__
-        kwargs = {'node_type': cls.TYPE.EVIDENCE, 'title01': title}
+        kwargs = {'title01': title}
+        defaults = {'node_type': cls.TYPE.EVIDENCE}
         if fact:
-            kwargs['node_type'] = self.TYPE.FACT
+            defaults['node_type'] = self.TYPE.FACT
         if created_by is not None:
             kwargs['created_by'] = created_by
             kwargs['modified_by'] = created_by
-        evidence, created = cls.objects.get_or_create(**kwargs)
+        evidence, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert evidence.is_evidence()
         self.add_node(evidence)
         return evidence
 
