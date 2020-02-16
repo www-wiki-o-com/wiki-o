@@ -6,8 +6,8 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       wiki_o/models.py
-@brief      A collection of app specific urls
+@file       wiki_o/urls.py
+@brief      A collection of app specific, front end urls
 @details    The `urlpatterns` list routes URLs to views. For more information please see:
                 https://docs.djangoproject.com/en/2.1/topics/http/urls/
             Examples:
@@ -39,7 +39,6 @@ from django.urls import include, path
 urlpatterns = [
     path('', include('core.urls')),
     path('', include('theories.urls')),
-    path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
