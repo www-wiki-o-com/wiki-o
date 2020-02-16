@@ -1,8 +1,17 @@
+"""  __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
+
+A web service for sharing opinions and avoiding arguments
+
+@file       wiki-o/wsgi.py
+@brief      Exposes the WSGI callable as a module-level variable named application.
+@copyright  GNU Public License, 2018
+@authors    Frank Imeson
 """
-exposes the WSGI callable as a module-level variable named ``application``. 
-For more information on this file, see 
-https://docs.djangoproject.com/en/1.9/howto/deployment/wsgi/ 
-"""
+
 import os
 import time
 import traceback
@@ -11,13 +20,25 @@ import sys
 
 from django.core.wsgi import get_wsgi_application
 
-# adjust the Python version in the line below as needed
-sys.path.append('/home/wiki-o/code/django')
-sys.path.append('/home/wiki-o/code/venv/lib/python3.5/site-packages')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wiki_o.settings')
+# Convert Apache environement varaibles to os environement variables.
+def application_wrapper(wsgi_environ, start_response):
+    APACHE_ENV_VARS = ['DJANGO_SETTINGS_MODULE']
+    for key in APACHE_ENV_VARS:
+        try:
+            os.environ[key] = wsgi_environ[key]
+        except KeyError:
+            # The WSGI environment doesn't have the key
+            pass
+    application = get_wsgi_application()
+    return application(wsgi_environ, start_response)
+
+# Setup
+sys.path.append('/home/django/www.wiki-o.com')
+sys.path.append('/home/django/venv/lib/python3.6/site-packages')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wiki_o.settings_local')
 
 try:
-    application = get_wsgi_application()
+    application = application_wrapper
 except Exception:
     # Error loading applications
     if 'mod_wsgi' in sys.modules:
