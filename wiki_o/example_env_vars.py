@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       environment.py
+@file       example_env_vars.py
 @brief      The set of Django's private environment variables.
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
@@ -14,6 +14,6 @@ A web service for sharing opinions and avoiding arguments
 
 import os
 
+os.environ['PGUSER'] = "django"
+os.environ['PGPASSWORD'] = "password"
 os.environ['SECRET_KEY'] = "'nxz-mdsd^^w*+(yzz0o7_rw6_@5^pu()#youf$s7t(m1_o!k*0'"
-os.environ['DJANGO_PASSWORD'] = "django_password"
-
