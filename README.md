@@ -46,7 +46,7 @@ Virtual Envionment
 Step 1: Setup Environment (add config to bashrc)
 ::
 
-    $ cd /home/wiki-o/code
+    $ cd /home/django/www.wiki-o.com
     $ virtualenv venv
     $ source venv/bin/activate
 
@@ -55,7 +55,7 @@ Step 2: Install Packages
 
   To install requirments:
 
-    $ pip3 install -r /home/wiki-o/config/pip.requirements
+    $ pip3 install -r /home/django/www.wiki-o.com/requirements.freeze
 
   To show the requirments:
 
@@ -82,7 +82,7 @@ Django
 Step 1: Migrate
 ::
 
-    $ cd /home/wiki-o/code/wiki_o
+    $ cd /home/django/www.wiki-o.com
     $ link -s local.django.settings.py settings.py
     $ cd ..
     $ python3 manage.py migrate
@@ -91,7 +91,7 @@ Step 1: Migrate
 Step 2: Restore Database
 ::
 
-    $ python3 manage.py loaddata /home/wiki-o/backup.json
+    $ python3 manage.py loaddata /home/django/backup.json
 
 Step 3: Test
 ::

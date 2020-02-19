@@ -7,13 +7,19 @@
 A web service for sharing opinions and avoiding arguments
 
 @file       wiki-o/settings.py
-@brief      The template server file for Django
+@brief      The common Django settings
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 """
 
 import os
 import sys
+
+# Import project environment variables ('SECRET_KEY', 'DJANGO_PASSWORD', ...)
+try:
+    import wiki_o.env_vars
+except:
+    import wiki_o.example_env_vars
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,13 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '123'
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-ALLOWED_HOSTS = ['127.0.0.1']
-INTERNAL_IPS = ['127.0.0.1']
-
+SECRET_KEY = os.environ['SECRET_KEY']
 
 # Application definition
 INSTALLED_APPS = [
@@ -42,8 +42,6 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
 
     # helpers
-    'dbbackup',
-    'annoying',
     'reversion',
     'url_tools',
     'crispy_forms',
@@ -58,8 +56,6 @@ INSTALLED_APPS = [
     'allauth',
     'allauth.account',
     'allauth.socialaccount',
-    #    'allauth.socialaccount.providers.facebook',
-    #    'allauth.socialaccount.providers.google',
     'invitations',
 
     # activity stream
@@ -67,11 +63,12 @@ INSTALLED_APPS = [
     'actstream',
     'hitcount',
 
-    # toolbar
-    'debug_toolbar',
+    # subdomains
+    'django_hosts',
 ]
 
 MIDDLEWARE = [
+    'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -79,7 +76,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
+    'django_hosts.middleware.HostsResponseMiddleware',
 ]
 
 TEMPLATES = [
@@ -95,13 +92,6 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
                 'django.template.context_processors.request',
             ],
-            #            'loaders': [
-            #                ('django.template.loaders.cached.Loader', [
-            #                    'django.template.loaders.filesystem.Loader',
-            #                    'django.template.loaders.app_directories.Loader',
-            #                    'amp_tools.loader.Loader',
-            #                ]),
-            #            ],
         },
     },
 ]
@@ -118,7 +108,9 @@ AUTHENTICATION_BACKENDS = [
 AUTH_USER_MODEL = 'users.User'
 SITE_ID = 1  # used by allauth and activity stream
 
+DEFAULT_HOST = 'www'
 ROOT_URLCONF = 'wiki_o.urls'
+ROOT_HOSTCONF = 'wiki_o.hosts'
 WSGI_APPLICATION = 'wiki_o.wsgi.application'
 
 
@@ -129,14 +121,14 @@ DATABASES = {
         'ENGINE':   'django.db.backends.postgresql',
         'NAME':     'wiki_o',
         'USER':     'django',
-        'PASSWORD': 'password',
+        'PASSWORD':  os.environ['DJANGO_PASSWORD'],
         'HOST':     'localhost',
         'PORT':     '',
     }
 }
 
 
-# Password validation
+# Password Validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
@@ -154,6 +146,7 @@ CACHES = {
     }
 }
 
+
 # Search Engine
 HAYSTACK_CONNECTIONS = {
     'default': {
@@ -161,9 +154,11 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
+
 # Activity Stream Config
 ACTSTREAM_SETTINGS = {
 }
+
 
 # AllAuth Config
 ACCOUNT_USERNAME_MIN_LENGTH = 3
@@ -173,14 +168,6 @@ ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
 
-# Email setup (postfix)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'localhost'
-EMAIL_PORT = 25
-EMAIL_HOST_USER = ''
-EMAIL_HOST_PASSWORD = ''
-DEFAULT_FROM_EMAIL = 'accounts@wiki-o.com'
-EMAIL_USE_TLS = False
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
@@ -190,47 +177,19 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
+
+# Fixtures
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 FIXTURE_DIRS = (os.path.join(PROJECT_ROOT, 'fixtures'),)
 
-# Backup config
-DBBACKUP_STORAGE = 'django.core.files.storage.FileSystemStorage'
-DBBACKUP_STORAGE_OPTIONS = {'location': '/home/wiki-o/backups'}
 
-DBBACKUP_CONNECTORS = {
-    'default': {
-        'USER':     'user',
-        'PASSWORD': 'password',
-    }
-}
-
-# Logging config
-# LOGGING = {
-#    'version': 1,
-#    'disable_existing_loggers': False,
-#    'handlers': {
-#        'file': {
-#            'level':      'ERROR',
-#            'class':      'logging.FileHandler',
-#            'filename':   os.path.join(BASE_DIR, 'logs/errors.log'),
-#        },
-#    },
-#    'loggers': {
-#        'django': {
-#            'handlers':   ['file'],
-#            'level':      'ERROR',
-#            'propagate':  True,
-#        },
-#    },
-# }
-
-# Special setup for testing
-# Ran 90 tests in 41.304s -> Ran 90 tests in 17.146s
+# Unit Test Environment
 if 'test' in sys.argv:
     PASSWORD_HASHERS = (
         'django.contrib.auth.hashers.MD5PasswordHasher',
