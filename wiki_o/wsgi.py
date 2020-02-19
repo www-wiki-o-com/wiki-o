@@ -22,15 +22,16 @@ from django.core.wsgi import get_wsgi_application
 
 # Convert Apache environement varaibles to os environement variables.
 def application_wrapper(wsgi_environ, start_response):
-    APACHE_ENV_VARS = ['DJANGO_SETTINGS_MODULE']
-    for key in APACHE_ENV_VARS:
+    """A wrapper that loads environment varaibles passed in by Apache."""
+    apache_env_vars = ['DJANGO_SETTINGS_MODULE']
+    for key in apache_env_vars:
         try:
             os.environ[key] = wsgi_environ[key]
         except KeyError:
             # The WSGI environment doesn't have the key
             pass
-    application = get_wsgi_application()
-    return application(wsgi_environ, start_response)
+    application_ = get_wsgi_application()
+    return application_(wsgi_environ, start_response)
 
 # Setup
 sys.path.append('/home/django/www.wiki-o.com')

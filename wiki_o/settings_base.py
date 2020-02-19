@@ -15,10 +15,10 @@ A web service for sharing opinions and avoiding arguments
 import os
 import sys
 
-# Import project environment variables ('SECRET_KEY', 'DJANGO_PASSWORD', ...)
+# Import project environment variables ('PGUSER', 'PGPASSWORD', 'SECRET_KEY', ...)
 try:
     import wiki_o.env_vars
-except:
+except ImportError:
     import wiki_o.example_env_vars
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -120,8 +120,8 @@ DATABASES = {
     'default': {
         'ENGINE':   'django.db.backends.postgresql',
         'NAME':     'wiki_o',
-        'USER':     'django',
-        'PASSWORD':  os.environ['DJANGO_PASSWORD'],
+        'USER':      os.environ['PGUSER'],
+        'PASSWORD':  os.environ['PGPASSWORD'],
         'HOST':     'localhost',
         'PORT':     '',
     }
