@@ -12,8 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-import os
-import sys
 from .settings_base import *
 
 
