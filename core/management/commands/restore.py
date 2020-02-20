@@ -77,7 +77,7 @@ class Command(BaseCommand):
         archive_path = options['archive_path']
         if archive_path is None:
             latest_date = None
-            for archive in glob.glob(options['backup_dir'] + '/*%s*.sql.gz' % options['site']):
+            for archive in glob.glob(options['backup_dir'] + '/* - %s.sql.gz' % options['site']):
                 date = re.search(r'\d{4}\.\d{2}\.\d{2}', archive)
                 if date is None:
                     continue
