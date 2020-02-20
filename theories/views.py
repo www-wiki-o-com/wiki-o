@@ -421,7 +421,7 @@ def IndexView(request, cat=None):
     }
     return render(
         request,
-        'theories/index.html',
+        'theories/theory_index.html',
         context,
     )
 
