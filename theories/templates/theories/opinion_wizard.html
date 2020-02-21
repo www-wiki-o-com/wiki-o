@@ -27,14 +27,14 @@ A web service for sharing opinions and avoiding arguments
     <br> 
     Welcome to the opinion wizard. 
     <small><small><small>
-      <a href="{% url_extra 'theories:opinion-edit' theory.id extra=parms %}">
+      <a href="{% url_extra 'theories:opinion-edit' theory.id extra=params %}">
         (switch to advanced editor)
       </a>
     </small></small></small>
   </h3>
   <h5> Complete the following steps to form an opinion for &ldquo;{{ theory }}&rdquo; </h5>
   
-  <form action="{% url_extra 'theories:opinion-wizard' theory.id extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}" method="post">
     {% csrf_token %}
     {{ opinion_form.id }}
     {{ node_formset.management_form }}
@@ -161,7 +161,7 @@ A web service for sharing opinions and avoiding arguments
           
           <div class="modal-footer">
             {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
-            <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="delete" value="Yes" {% if not can_delete %} disabled {% endif %}>
             </form>

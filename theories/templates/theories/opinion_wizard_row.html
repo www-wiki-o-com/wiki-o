@@ -93,7 +93,7 @@ A web service for sharing opinions and avoiding arguments
       <!-- Description -->
       <td style="text-align:left">
         {% if form.url %}
-          <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+          <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
             {{ theory_node.get_true_statement }}
           </a>
         {% else %}
@@ -136,7 +136,7 @@ A web service for sharing opinions and avoiding arguments
       <!-- Description -->
       <td style="text-align:left">
         {% if form.url %}
-          <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+          <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
             <font color="red"> {{ theory_node.get_false_statement }} </font>
           </a>
         {% else %}

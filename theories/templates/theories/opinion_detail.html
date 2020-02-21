@@ -33,7 +33,7 @@ A web service for sharing opinions and avoiding arguments
       {{ opinion.get_owner_long }}
     {% endif %}
     believes 
-    <a href={{ theory.url|add:parms }} class="plain">
+    <a href={{ theory.url|add:params }} class="plain">
       <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}> &ldquo;{{ opinion|remove_punctuation }}&rdquo; </font>
     </a>
   </h3>
@@ -99,7 +99,7 @@ A web service for sharing opinions and avoiding arguments
           <a href={{ prev }}>Go to parent opinion.</a>
           <br>
         {% endif %}
-        <a href={{ theory.url|add:parms }}> Back to theory. </a>
+        <a href={{ theory.url|add:params }}> Back to theory. </a>
       </p>
 
     </div> <!-- end column -->
@@ -116,7 +116,7 @@ A web service for sharing opinions and avoiding arguments
               <!-- Edit -->
               {% has_perm 'theories.change_opinion' user opinion as can_change %}
               {% if can_change %}
-                <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=parms %}"> Edit Opinion </a></li>
+                <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit Opinion </a></li>
               {% endif %}
 
               <!-- Delete -->
@@ -180,7 +180,7 @@ A web service for sharing opinions and avoiding arguments
                   <td style="color:black" align="center">
                     <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
                   </td>
-                  <td><a href="{{ x.url|add:parms }}">
+                  <td><a href="{{ x.url|add:params }}">
                     &nbsp; {{ x.text }} 
                   </a></td>
                 </tr>
@@ -189,7 +189,7 @@ A web service for sharing opinions and avoiding arguments
           </table>
         </div>
       </div>
-      
+
       <!-- Parent Opinions -->
       <div class="card my-3">
         <h5 class="card-header">Parent Opinions</h5>

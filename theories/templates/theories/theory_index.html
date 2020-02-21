@@ -7,7 +7,7 @@
 A web service for sharing opinions and avoiding arguments
 
 @file       theories/templates/theories/theory_index.html
-@brief      The home page for viewing all theories
+@brief      The home page for viewing theories
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 -->
@@ -92,7 +92,7 @@ A web service for sharing opinions and avoiding arguments
                     <td> {% include "include/info.html" with x=theory %} </td>
                     <!-- Description -->
                     <td style="padding-left:5px">
-                      <a class="plain" href={{ theory.url|add:parms.get_next }}> {{ theory }} </a>
+                      <a class="plain" href={{ theory.url|add:params.get_next }}> {{ theory }} </a>
                     </td>
                   </tr>
                 {% endfor %}

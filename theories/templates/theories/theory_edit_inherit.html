@@ -32,7 +32,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:theory-inherit' theory.id root_theory.id extra=parms %}" method="post">
+      <form action="{% url_extra 'theories:theory-inherit' theory.id root_theory.id extra=params %}" method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <!-- errors -->
@@ -82,7 +82,7 @@ A web service for sharing opinions and avoiding arguments
             {% has_perm 'theories.add_theorynode' user as can_inherit %}
             {% if can_inherit %}
               {% for x in other_theories %}
-                <li> <a href="{% url_extra 'theories:theory-inherit' theory.id x.id extra=parms %}">{{ x }}</a> </li>
+                <li> <a href="{% url_extra 'theories:theory-inherit' theory.id x.id extra=params %}">{{ x }}</a> </li>
               {% endfor %}
             {% endif %}
           </ul>

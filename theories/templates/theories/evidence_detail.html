@@ -51,7 +51,7 @@ A web service for sharing opinions and avoiding arguments
             <!-- Edit -->
             {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
             {% if can_edit %}
-              <li><a href="{% url_extra 'theories:evidence-edit' evidence.id extra=parms %}"> Edit Evidence </a></li>
+              <li><a href="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}"> Edit Evidence </a></li>
             {% endif %}
 
             <!-- Delete -->
@@ -67,10 +67,10 @@ A web service for sharing opinions and avoiding arguments
             {% endif %}
 
             <!-- Activity -->
-            <li><li><a href="{% url_extra 'theories:evidence-activity' evidence.id extra=parms %}"> View Activity Log </a></li>
+            <li><li><a href="{% url_extra 'theories:evidence-activity' evidence.id extra=params %}"> View Activity Log </a></li>
 
             <!-- Report -->
-            <li><li><a href="{% url_extra 'theories:evidence-report' evidence.id extra=parms %}"> Report a Violation </a></li>
+            <li><li><a href="{% url_extra 'theories:evidence-report' evidence.id extra=params %}"> Report a Violation </a></li>
 
           </ul>
         </div>
@@ -114,7 +114,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="modal" id="backup_modal">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="{% url_extra 'theories:evidence-backup' evidence.id extra=parms %}" method="post">
+        <form action="{% url_extra 'theories:evidence-backup' evidence.id extra=params %}" method="post">
           {% csrf_token %}
 
           <!-- Header -->
@@ -162,9 +162,9 @@ A web service for sharing opinions and avoiding arguments
         <div class="modal-footer">
 
           <!-- remove edge -->
-          {% if parms.path %}
+          {% if params.path %}
             {% has_perm 'theories.delete_edge' user evidence as can_remove %}
-            <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
             </form>
@@ -172,7 +172,7 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- full delete -->
           {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
-          <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
           </form>

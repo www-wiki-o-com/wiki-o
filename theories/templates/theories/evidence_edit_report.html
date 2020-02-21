@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
     {% include "theories/evidence_edit_tabs.html" %}
   {% endwith %}
 
-  <form action="{% url_extra 'theories:evidence-report' evidence.id extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:evidence-report' evidence.id extra=params %}" method="post">
     {% csrf_token %}
     {{ formset.management_form }}
     <div class="row"> <!-- Row -->

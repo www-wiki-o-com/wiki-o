@@ -32,7 +32,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:theory-edit-subtheories' theory.id extra=parms %}" method="post">
+      <form action="{% url_extra 'theories:theory-edit-subtheories' theory.id extra=params %}" method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <!-- errors -->

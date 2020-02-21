@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
             Theory
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-edit' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-edit' theory.id extra=params %}">
             Theory
           </a>
         {% endif %}
@@ -45,7 +45,7 @@ A web service for sharing opinions and avoiding arguments
             Evidence
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-edit-evidence' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-edit-evidence' theory.id extra=params %}">
             Evidence
           </a>
         {% endif %}
@@ -60,7 +60,7 @@ A web service for sharing opinions and avoiding arguments
             Sub-Theories
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-edit-subtheories' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-edit-subtheories' theory.id extra=params %}">
             Sub-Theories
           </a>
         {% endif %}
@@ -76,7 +76,7 @@ A web service for sharing opinions and avoiding arguments
             Inherit
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-inherit' theory.id root_theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-inherit' theory.id root_theory.id extra=params %}">
             Inherit
           </a>
         {% endif %}
@@ -92,7 +92,7 @@ A web service for sharing opinions and avoiding arguments
             Merge
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-merge' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-merge' theory.id extra=params %}">
             Merge
           </a>
         {% endif %}
@@ -108,7 +108,7 @@ A web service for sharing opinions and avoiding arguments
             Restore
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-restore' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-restore' theory.id extra=params %}">
             Restore
           </a>
         {% endif %}
@@ -124,7 +124,7 @@ A web service for sharing opinions and avoiding arguments
             Backup
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:theory-backup' theory.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:theory-backup' theory.id extra=params %}">
             Backup
           </a>
         {% endif %}
@@ -138,7 +138,7 @@ A web service for sharing opinions and avoiding arguments
           Activity
         </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}">
+        <a class="nav-link" href="{% url_extra 'theories:theory-activity' theory.id extra=params %}">
           Activity
         </a>
       {% endif %}
@@ -151,7 +151,7 @@ A web service for sharing opinions and avoiding arguments
           Report
         </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:theory-report' theory.id extra=parms %}">
+        <a class="nav-link" href="{% url_extra 'theories:theory-report' theory.id extra=params %}">
           Report
         </a>
       {% endif %}

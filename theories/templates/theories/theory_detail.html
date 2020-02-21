@@ -23,27 +23,23 @@ A web service for sharing opinions and avoiding arguments
 
 {% block header %}{% endblock %}
 {% block content %}
+
+  <!-- Title -->
+  <h2 style="margin-bottom:0ex; padding-bottom:0ex">
+    {% if theory.is_deleted %}
+      <strike>{{ theory }}</strike>
+    {% else %}
+      {{ theory }}
+    {% endif %}
+  </h2>
+
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
       <div class="my-3"> <!-- Main Card -->
 
-        <!-- Title -->
-        <h2 style=" margin-bottom:-0.1ex">
-          {% if theory.is_deleted %}
-            <strike>{{ theory }}</strike>
-          {% else %}
-            {{ theory }}
-          {% endif %}
-        </h2>
-        <div style="font-weight:bold; margin-left: 3ex">
-          <span class="d-inline-block" tabindex="0" data-toggle="tooltip" title="True vs. False">
-            Points: {{ everyone.num_supporters }}-<font color="red">{{ everyone.num_opposers }}</font>
-          </span>
-        </div>
-
         <!-- Details -->
         <div style="text-align: justify">{{  theory.details|bibliography }}</div>
-        
+
         <!-- Nodes -->
         {% if theory_nodes %}
           <!-- Heading -->
@@ -65,7 +61,7 @@ A web service for sharing opinions and avoiding arguments
                     <td> {% include "include/info.html" with x=node %} </td>
                     <!-- Description -->
                     <td style="padding-left:5px;">
-                      <a class="plain" href="{{ node.url|add:parms.get_next }}">
+                      <a class="plain" href="{{ node.url|add:params.get_next }}">
                       {% if node.is_deleted %}
                         <strike>{{ node }}</strike>
                       {% else %}
@@ -98,21 +94,21 @@ A web service for sharing opinions and avoiding arguments
             <!-- Edit -->
             {% has_perm 'theories.change_theorynode' user theory as can_edit %}
             {% if can_edit %}
-              <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=parms %}"> Edit Theory </a></li>
+              <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
             {% endif %}
 
             <!-- My Opinion -->
             {% if user.is_authenticated %}
-              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=parms %}"> My Opinion </a></li>
+              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
             {% endif %}
 
-            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> Browse Opinions </a></li>
+            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> Browse Opinions </a></li>
 
             <!-- Activity -->
-            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=parms %}"> View Activity Log </a></li>
+            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> View Activity Log </a></li>
 
             <!-- Report -->
-            <li><a href="{% url_extra 'theories:theory-report' theory.id extra=parms %}"> Report a Violation </a></li>
+            <li><a href="{% url_extra 'theories:theory-report' theory.id extra=params %}"> Report a Violation </a></li>
 
           </ul>
         </div>
@@ -126,11 +122,11 @@ A web service for sharing opinions and avoiding arguments
         <div class="card-body">
           <table>
             <tbody valign="top">
-              <tr><td><a href="{{ supporters.url|add:parms }}">Supporters</a></td> <td style="width:100%"></td> <td><a href="{{ supporters.url|add:parms }}">{{ supporters.opinions.count }}</a></td></tr>
-              <tr><td><a href="{{ moderates.url|add:parms }}">Moderates</a></td> <td></td> <td><a href="{{ moderates.url|add:parms }}">{{ moderates.opinions.count }}</a></td></tr>
-              <tr><td><a href="{{ opposers.url|add:parms }}">Opposers</a></td> <td></td> <td><a href="{{ opposers.url|add:parms }}">{{ opposers.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ supporters.url|add:params }}">Supporters</a></td> <td style="width:100%"></td> <td><a href="{{ supporters.url|add:params }}">{{ supporters.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ moderates.url|add:params }}">Moderates</a></td> <td></td> <td><a href="{{ moderates.url|add:params }}">{{ moderates.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ opposers.url|add:params }}">Opposers</a></td> <td></td> <td><a href="{{ opposers.url|add:params }}">{{ opposers.opinions.count }}</a></td></tr>
               <tr style="border-top:1px solid rgb(192, 192, 192);"><td/><td/><td/></tr>
-              <tr><td><a href="{{ everyone.url|add:parms }}">Everyone</a></td> <td></td> <td><a href="{{ everyone.url|add:parms }}">{{ everyone.opinions.count }}</a></td></tr>
+              <tr><td><a href="{{ everyone.url|add:params }}">Everyone</a></td> <td></td> <td><a href="{{ everyone.url|add:params }}">{{ everyone.opinions.count }}</a></td></tr>
             </tbody>
           </table>
         </div>
@@ -186,7 +182,7 @@ A web service for sharing opinions and avoiding arguments
 
         <!-- body -->
         <div class="modal-body">
-          {% if parms.path %}
+          {% if params.path %}
             Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
             <b>remove</b> to remove from parent theory or <b>delete</b> to
             remove from all theories.
@@ -199,9 +195,9 @@ A web service for sharing opinions and avoiding arguments
         <div class="modal-footer">
         
           <!-- remove edge -->
-          {% if parms.path %}
+          {% if params.path %}
             {% has_perm 'theories.delete_edge' user theory as can_remove %}
-            <form action="{% url_extra 'theories:theory-remove' theory.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:theory-remove' theory.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
             </form>
@@ -209,7 +205,7 @@ A web service for sharing opinions and avoiding arguments
           
           <!-- full delete -->
           {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
-          <form action="{% url_extra 'theories:theory-delete' theory.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
           </form>
@@ -238,7 +234,3 @@ A web service for sharing opinions and avoiding arguments
     }
   </script>
 {% endblock extra_js %}
-
-
-
-

@@ -220,6 +220,11 @@ def remove_punctuation(string):
         return string[:-1]
     return string
 
+@register.filter
+def float_to_percent(x):
+    if not isinstance(x, float):
+        x = float(x)
+    return str(int(x * 100))
 
 @register.filter
 def get_class(obj):
@@ -500,12 +505,12 @@ def url_action(action, extra=''):
         str: The url.
     """
     resolved_url = action.action_object.activity_url()
-    parms = {'date': action.timestamp - datetime.timedelta(seconds=1)}
+    params = {'date': action.timestamp - datetime.timedelta(seconds=1)}
     extra = str(extra)
     if len(extra) > 0:
-        extra += '&' + urlencode(parms)
+        extra += '&' + urlencode(params)
     else:
-        extra += '?%s' % urlencode(parms)
+        extra += '?%s' % urlencode(params)
     return resolved_url + extra
 
 

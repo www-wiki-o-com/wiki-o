@@ -23,7 +23,7 @@ A web service for sharing opinions and avoiding arguments
 
 {% block header %}{% endblock %}
 {% block content %}
-  <form action="{% url_extra 'users:notifications' extra=parms %}" method="post">
+  <form action="{% url_extra 'users:notifications' extra=params %}" method="post">
     {% csrf_token %}
     {{ formset01.management_form }}
     {{ formset02.management_form }}

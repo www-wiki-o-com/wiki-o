@@ -28,8 +28,8 @@ app_name = 'theories'
 urlpatterns = [
     path('media/opinion<int:pk>.png', ImageView, name='media01'),
 
-    path('theories/', IndexView, name='index'),
-    path('theories/<slug:cat>/', IndexView, name='theories'),
+    path('theories/', TheoryIndexView, name='index'),
+    path('theories/<slug:cat>/', TheoryIndexView, name='theories'),
     path('theories/create/<slug:cat>/', TheoryCreateView, name='theory-create'),
     path('theories/<slug:cat>/activity/', ActivityView, name='activity'),
 

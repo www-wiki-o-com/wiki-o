@@ -73,7 +73,7 @@ A web service for sharing opinions and avoiding arguments
         </div>
       </div>
       
-      <p> <a href={{ opinion01.url|add:parms }}>Back to Opinion</a> </p>
+      <p> <a href={{ opinion01.url|add:params }}>Back to Opinion</a> </p>
     
     </div> <!-- end column -->
     <div class="col-md-4"> <!-- Sidebar Column -->
@@ -100,7 +100,7 @@ A web service for sharing opinions and avoiding arguments
                   <td style="color:black" align="center">
                     <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
                   </td>
-                  <td><a href="{{ x.url|add:parms }}">
+                  <td><a href="{{ x.url|add:params }}">
                     &nbsp; {{ x.text }} 
                   </a></td>
                 </tr>

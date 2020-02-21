@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
     {% include "theories/evidence_edit_tabs.html" %}
   {% endwith %}
 
-  <form action="{% url_extra 'theories:evidence-edit' evidence.id extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}" method="post">
     {% csrf_token %}
     <div class="row"> <!-- Row -->
       <div class="col-lg-8"> <!-- Main Column -->
@@ -111,7 +111,7 @@ A web service for sharing opinions and avoiding arguments
         <!-- footer -->
         <div class="modal-footer">
           {% has_perm 'theories.convert_theorynode' user evidence as can_convert %}
-          <form action="{% url_extra 'theories:evidence-convert' evidence.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:evidence-convert' evidence.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="convert" value="Yes" {% if not can_convert %} disabled {% endif %}>
           </form>
@@ -144,9 +144,9 @@ A web service for sharing opinions and avoiding arguments
         <div class="modal-footer">
 
           <!-- remove edge -->
-          {% if parms.path %}
+          {% if params.path %}
             {% has_perm 'theories.delete_edge' user evidence as can_remove %}
-            <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
             </form>
@@ -154,7 +154,7 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- full delete -->
           {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
-          <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
           </form>

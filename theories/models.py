@@ -2017,10 +2017,8 @@ class Stats(TheoryPointerBase, models.Model):
     )
 
     # Variables
-    theory = models.ForeignKey(
-        TheoryNode, related_name='stats', on_delete=models.CASCADE)
-    opinions = models.ManyToManyField(
-        Opinion, related_name='stats', blank=True)
+    theory = models.ForeignKey(TheoryNode, related_name='stats', on_delete=models.CASCADE)
+    opinions = models.ManyToManyField(Opinion, related_name='stats', blank=True)
     stats_type = models.SmallIntegerField(choices=TYPE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
@@ -2054,6 +2052,17 @@ class Stats(TheoryPointerBase, models.Model):
             return 'opposers'
         else:
             assert False
+
+    @classmethod
+    def slug_to_type(cls, slug):
+        """Return the type."""
+        if slug == 'supporters':
+            return cls.TYPE.SUPPORTERS
+        if slug == 'moderates':
+            return cls.TYPE.MODERATES
+        if slug == 'opposers':
+            return cls.TYPE.OPPOSERS
+        return cls.TYPE.ALL
 
     def slug(self):
         """Return the slug used for urls to reference this object."""

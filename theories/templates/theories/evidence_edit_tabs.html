@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
             Edit
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-edit' evidence.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}">
             Edit
           </a>
         {% endif %}
@@ -45,7 +45,7 @@ A web service for sharing opinions and avoiding arguments
             Merge
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-merge' evidence.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:evidence-merge' evidence.id extra=params %}">
             Merge
           </a>
         {% endif %}
@@ -61,7 +61,7 @@ A web service for sharing opinions and avoiding arguments
             Restore
           </a>
         {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-restore' evidence.id extra=parms %}">
+          <a class="nav-link" href="{% url_extra 'theories:evidence-restore' evidence.id extra=params %}">
             Restore
           </a>
         {% endif %}
@@ -75,7 +75,7 @@ A web service for sharing opinions and avoiding arguments
           Activity
         </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:evidence-activity' evidence.id extra=parms %}">
+        <a class="nav-link" href="{% url_extra 'theories:evidence-activity' evidence.id extra=params %}">
           Activity
         </a>
       {% endif %}
@@ -88,7 +88,7 @@ A web service for sharing opinions and avoiding arguments
           Report
         </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:evidence-report' evidence.id extra=parms %}">
+        <a class="nav-link" href="{% url_extra 'theories:evidence-report' evidence.id extra=params %}">
           Report
         </a>
       {% endif %}

@@ -21,7 +21,7 @@ A web service for sharing opinions and avoiding arguments
 
 {% block header %}{% endblock %}
 {% block content %}
-  <form action="{% url_extra 'theories:theory-create' category.slug extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:theory-create' category.slug extra=params %}" method="post">
     {% csrf_token %}
     {{ formset.management_form }}
     <div class="row"> <!-- Row -->

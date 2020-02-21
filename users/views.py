@@ -61,7 +61,7 @@ def PublicProfileView(request, pk):
         private_opinions = user.opinions.filter(anonymous=True)
 
     # Navigation
-    parms = Parameters(request)
+    params = Parameters(request)
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
@@ -76,7 +76,7 @@ def PublicProfileView(request, pk):
         'num_expired_strikes':  user.count_strikes(recent=False, expired=True),
         'num_total_strikes':    user.count_strikes(recent=True, expired=True),
         'prev':                 prev,
-        'parms':                parms,
+        'params':                params,
     }
     return render(
         request,
@@ -240,13 +240,13 @@ def ViolationIndexView(request):
     violations.page_list = get_page_list(paginator.num_pages, page)
 
     # Navigation
-    parms = Parameters(request)
+    params = Parameters(request)
 
     # Render
     context = {
         'violations':           violations,
         'date_filter':          date,
-        'parms':                parms,
+        'params':                params,
     }
     return render(
         request,
@@ -284,9 +284,9 @@ def ViolationResolveView(request, pk):
         revision_formset = []
 
     # Navigation
-    parms = Parameters(request)
-    prev = reverse('users:violations') + parms
-    next = reverse('users:violation-resolve', kwargs={'pk': pk}) + parms
+    params = Parameters(request)
+    prev = reverse('users:violations') + params
+    next = reverse('users:violation-resolve', kwargs={'pk': pk}) + params
 
     # POST request
     if request.method == 'POST':
@@ -363,7 +363,7 @@ def ViolationResolveView(request, pk):
         'vote_form':            vote_form,
         'theorynode_form':      theorynode_form,
         'revision_formset':     revision_formset,
-        'parms':                parms,
+        'params':                params,
         'prev':                 prev,
     }
     return render(

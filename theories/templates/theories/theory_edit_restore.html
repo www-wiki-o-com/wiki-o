@@ -32,7 +32,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:theory-restore' theory.id extra=parms %}" method="post">
+      <form action="{% url_extra 'theories:theory-restore' theory.id extra=params %}" method="post">
         {% csrf_token %}
         {{ formset.management_form }}
         <!-- errors -->
@@ -121,7 +121,7 @@ A web service for sharing opinions and avoiding arguments
     <div class="modal" id="restore_modal{{ forloop.counter }}">
       <div class="modal-dialog">
         <div class="modal-content">
-          <form action="{% url_extra 'theories:theory-revert' theory.id form.instance.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:theory-revert' theory.id form.instance.id extra=params %}" method="post">
             {% csrf_token %}
 
             <!-- Header -->

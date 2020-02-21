@@ -27,7 +27,7 @@ A web service for sharing opinions and avoiding arguments
     <br> 
     &ldquo;{{ theory }}&rdquo; 
     <small><small><small>
-      <a href="{% url_extra 'theories:opinion-wizard' theory.id extra=parms %}">
+      <a href="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}">
         (switch to wizard)
       </a>
     </small></small></small>
@@ -36,7 +36,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="row"> <!-- Row -->
     <div class="col-lg-12"> <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:opinion-edit' theory.id extra=parms %}" method="post">
+      <form action="{% url_extra 'theories:opinion-edit' theory.id extra=params %}" method="post">
         {% csrf_token %}
         {{ node_formset.management_form }}
         <!-- errors -->
@@ -169,7 +169,7 @@ A web service for sharing opinions and avoiding arguments
                         <!-- Description -->
                         <td style="text-align:left; padding-left:5px">
                           {% if form.url %}
-                            <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+                            <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
                               {{ theory_node.get_true_statement }}
                             </a>
                           {% else %}
@@ -219,7 +219,7 @@ A web service for sharing opinions and avoiding arguments
                         <!-- Description -->
                         <td style="text-align:left; padding-left:5px">
                           {% if form.url %}
-                            <a class=plain href={{ form.url|add:parms.get_next }} target="_blank">
+                            <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
                               <font color="red"> {{ theory_node.get_false_statement }} </font>
                             </a>
                           {% else %}
@@ -308,7 +308,7 @@ A web service for sharing opinions and avoiding arguments
           
           <div class="modal-footer">
             {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
-            <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="delete" value="Yes" {% if not can_delete %} disabled {% endif %}>
             </form>

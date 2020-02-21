@@ -39,7 +39,7 @@ A web service for sharing opinions and avoiding arguments
             <!-- Description -->
             <td style="padding-left:5px">
               {% if x.url %}
-                <a tag_id={{ x.tag_id }} class="plain" href={{ x.url|add:parms.get_next }}>
+                <a tag_id={{ x.tag_id }} class="plain" href={{ x.url|add:params.get_next }}>
                   {% if x.is_deleted %}
                     <strike>{{ x }}</strike>
                   {% else %}

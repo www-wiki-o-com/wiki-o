@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
     {% include "theories/theory_edit_tabs.html" %}
   {% endwith %}
 
-  <form action="{% url_extra 'theories:theory-report' theory.id extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:theory-report' theory.id extra=params %}" method="post">
     {% csrf_token %}
     <div class="row"> <!-- Row -->
       <div class="col-lg-8"> <!-- Main Column -->
@@ -73,7 +73,7 @@ A web service for sharing opinions and avoiding arguments
           <div class="card-body">
             <ul class="list mb-0">
               {% for x in open_violations %}
-                <li><a href="{{ x.url|add:parms.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+                <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
               {% endfor %}
             </ul>
           </div>
@@ -85,7 +85,7 @@ A web service for sharing opinions and avoiding arguments
           <div class="card-body">
             <ul class="list mb-0">
               {% for x in closed_violations %}
-                <li><a href="{{ x.url|add:parms.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+                <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
               {% endfor %}
             </ul>
           </div>

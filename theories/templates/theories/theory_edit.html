@@ -29,7 +29,7 @@ A web service for sharing opinions and avoiding arguments
     {% include "theories/theory_edit_tabs.html" %}
   {% endwith %}
 
-  <form action="{% url_extra 'theories:theory-edit' theory.id extra=parms %}" method="post">
+  <form action="{% url_extra 'theories:theory-edit' theory.id extra=params %}" method="post">
     {% csrf_token %}
     {{ formset.management_form }}
     <div class="row"> <!-- Row -->
@@ -156,12 +156,12 @@ A web service for sharing opinions and avoiding arguments
         <div class="modal-footer">
           {% has_perm 'theories.add_category' user as can_add %}
           {% if theory.is_root %}
-            <form action="{% url_extra 'theories:theory-remove-from-home' theory.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:theory-remove-from-home' theory.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
             </form>
           {% else %}
-            <form action="{% url_extra 'theories:theory-add-to-home' theory.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:theory-add-to-home' theory.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
             </form>
@@ -194,7 +194,7 @@ A web service for sharing opinions and avoiding arguments
         <!-- footer -->
         <div class="modal-footer">
           {% has_perm 'theories.swap_title' user theory as can_swap %}
-          <form action="{% url_extra 'theories:theory-swap-titles' theory.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:theory-swap-titles' theory.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_swap %} disabled {% endif %}>
           </form>
@@ -210,7 +210,7 @@ A web service for sharing opinions and avoiding arguments
   <div class="modal" id="convert_modal">
     <div class="modal-dialog">
       <div class="modal-content">
-        <form action="{% url_extra 'theories:theory-convert' theory.id extra=parms %}" method="post">
+        <form action="{% url_extra 'theories:theory-convert' theory.id extra=params %}" method="post">
           {% csrf_token %}
 
 
@@ -253,7 +253,7 @@ A web service for sharing opinions and avoiding arguments
 
         <!-- body -->
         <div class="modal-body">
-          {% if parms.path %}
+          {% if params.path %}
             Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
             <b>remove</b> to remove from parent theory or <b>delete</b> to
             remove from all theories.
@@ -266,9 +266,9 @@ A web service for sharing opinions and avoiding arguments
         <div class="modal-footer">
 
           <!-- remove edge -->
-          {% if parms.path %}
+          {% if params.path %}
             {% has_perm 'theories.delete_edge' user theory as can_remove %}
-            <form action="{% url_extra 'theories:theory-remove' theory.id extra=parms %}" method="post">
+            <form action="{% url_extra 'theories:theory-remove' theory.id extra=params %}" method="post">
               {% csrf_token %}
               <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
             </form>
@@ -276,7 +276,7 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- full delete -->
           {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
-          <form action="{% url_extra 'theories:theory-delete' theory.id extra=parms %}" method="post">
+          <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
           </form>
