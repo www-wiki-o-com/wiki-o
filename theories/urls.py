@@ -74,6 +74,8 @@ urlpatterns = [
     path('evidence/<int:pk>/revert/<int:vid>/',
          RevertTheoryNode, name='evidence-revert'),
 
+    path('theory/<int:pk>/opinions_<str:slug>/', OpinionIndexView, name='opinion-index'),
+
     path('opinion/demo/', OpinionDemoView, name='opinion-demo'),
     path('opinion/<int:pk>/', OpinionDetailView, name='opinion-detail'),
     path('opinion/<int:pk>/edit/', OpinionEditView, name='opinion-edit'),

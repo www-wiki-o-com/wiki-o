@@ -2063,9 +2063,18 @@ class Stats(TheoryPointerBase, models.Model):
         """Return a query set of all opinions that meet the stats category's criterion."""
         return self.opinions.filter(deleted=False)
 
+    def get_absolute_url(self):
+        return self.opinion_url()
+
     def url(self):
         """Return the url for viewing the details of this object (opinion-details)."""
+        return self.get_absolute_url()
+
+    def opinion_url(self):
         return reverse('theories:opinion-slug', kwargs={'pk': self.get_node_pk(), 'slug': self.slug()})
+
+    def opinions_url(self):
+        return reverse("theories:opinion-index", kwargs={'pk': self.theory.pk, 'slug':self.slug()})
 
     def compare_url(self, opinion02=None):
         """Return a url to compare this object with a default object (opinion-compare)."""

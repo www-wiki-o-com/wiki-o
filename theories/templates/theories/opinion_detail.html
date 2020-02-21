@@ -173,20 +173,12 @@ A web service for sharing opinions and avoiding arguments
       <div class="card my-3">
         <h5 class="card-header">Other Opinions</h5>
         <div class="card-body">
-          <table>
-            <tbody valign="top">
-              {% for x in opinion_list %}
-                <tr>
-                  <td style="color:black" align="center">
-                    <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
-                  </td>
-                  <td><a href="{{ x.url|add:params }}">
-                    &nbsp; {{ x.text }}
-                  </a></td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
+          <ul class="list-unstyled mb-0">
+            {% for x in opinions %}
+              <li><a href="{{ x.url }}" >{{ x.get_owner }} <span style="color:black">({{ x.true_points|float_to_percent }}/</span><span style="color:red">{{ x.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
+            {% endfor %}
+            <li><a href="{{ opinions_url }}">View All</a></li>
+          </ul>
         </div>
       </div>
 

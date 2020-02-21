@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<!-- __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
+
+A web service for sharing opinions and avoiding arguments
+
+@file       theories/templates/theories/opinion_index.html
+@brief      The default page for viewing opinions
+@copyright  GNU Public License, 2018
+@authors    Frank Imeson
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+
+  <!-- Title -->
+  <h2 style=" margin-bottom:-0.1ex">
+    {{ theory }}
+  </h2>
+
+  <div class="row"> <!-- Row -->
+    <div class="col-lg-8"> <!-- Main Column -->
+      <div class="card my-3">
+        <h5 class="card-header"><a href="{{ stats.url }}">{{ stats.get_owner }} <span style="color:black">({{ stats.true_points|float_to_percent }}/</span><span style="color:red">{{ stats.false_points|float_to_percent }}</span><span style="color:black">)</span></a></h5>
+        <div class="card-body">
+          <div class="row">
+            {% for opinion in opinions %}
+              <div class="col-lg-4">
+                <a style="margin-left:3ex" href="{{ opinion.url }}" >{{ opinion.get_owner }} <span style="color:black">({{ opinion.true_points|float_to_percent }}/</span><span style="color:red">{{ opinion.false_points|float_to_percent }}</span><span style="color:black">)</span></a>
+              </div>
+            {% endfor %}
+          </div> <!-- end row -->
+          {% include "include/paginator.html" with list=opinions %}
+        </div> <!-- end card body -->
+      </div> <!-- end card -->
+    </div> <!-- end column -->
+    <div class="col-lg-4"> <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <!-- My Opinion -->
+            {% if user.is_authenticated %}
+              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
+            {% endif %}
+            <li><a href="{{ theory.url }}">Back to Theory</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Opinions -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Opinion Categories
+        </h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li><a href="{{ categories.supporters.opinions_url|add:params }}">Supporters <div class="float-right">{{ categories.supporters.opinions.count }}</div></a></li>
+            <li><a href="{{ categories.moderates.opinions_url|add:params }}">Moderates <div class="float-right">{{ categories.moderates.opinions.count }}</a></li>
+            <li><a href="{{ categories.opposers.opinions_url|add:params }}">Opposers <div class="float-right">{{ categories.opposers.opinions.count }}</a></li>
+            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
+            <li><a href="{{ categories.all.opinions_url|add:params }}">Everyone <div class="float-right">{{ categories.all.opinions.count }}</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}
