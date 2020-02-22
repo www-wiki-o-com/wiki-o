@@ -24,6 +24,7 @@ from actstream import action
 from actstream.models import Action
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
+from django.utils.http import urlencode
 from notifications.signals import notify
 
 
@@ -41,9 +42,51 @@ class LogDiffResult(enum.Enum):
 
 
 # *******************************************************************************
-# Methods
+# General methods
 # *******************************************************************************
 
+def string_to_list(input_string, braces='[]'):
+    """Convert a string to a list.
+
+    Args:
+        input_string (str): The string to parse.
+        braces (str): The set of braces to interpret.
+
+    Returns:
+        list: The list.
+    """
+    left_brace = braces[0]
+    right_brace = braces[1]
+    result = []
+    for x in input_string.lstrip(left_brace).rstrip(right_brace).split(','):
+        x = x.strip("'")
+        if len(x) > 0:
+            if x[0] == left_brace and x[-1] == right_brace:
+                x = str_to_list(x, braces)
+            result.append(x)
+    return result
+
+
+def list_to_string(input_list):
+    """Convert a list to a string.
+
+    Args:
+        input_list (list:obj): The input list.
+
+    Returns:
+        str: The string.
+    """
+    result = ''
+    if len(input_list) > 0:
+        for x in input_list:
+            result += str(x) + ','
+    result = result.strip(',')
+    return result
+
+
+# *******************************************************************************
+# Model methods
+# *******************************************************************************
 
 def get_or_none(objects, **kwargs):
     """Queries a data model for a matching object.
@@ -176,6 +219,24 @@ def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
     return LogDiffResult.MATCH
 
 
+# *******************************************************************************
+# View methods
+# *******************************************************************************
+
+def get_page_list(num_pages, page, max_num_pages=5):
+    if page is None:
+        page = 1
+    page = int(page)
+    high_index = min(num_pages + 1, page + max_num_pages//2 + 1)
+    low_index = high_index - max_num_pages
+    while low_index < 1:
+        low_index += 1
+        high_index += 1
+    low_index = max(1, low_index)
+    high_index = min(high_index, num_pages + 1)
+    return range(low_index, high_index)
+
+
 def get_form_data(response, verbose_level=0):
     """A helper method for parsing form data from a post response.
 
@@ -271,3 +332,174 @@ class QuerySetDict():
 
     def count(self):
         return len(self.dict)
+
+
+
+class Parameters():
+    """A manager for url parameters.
+
+    Use this class for managing url parameters (get and set).
+
+    Attributes:
+        pk (int): The primary key for the object being viewed.
+        path (list:int): A history of primary keys that were visited before this object.
+        flags (set:str): A set of flags.
+        slug (str): The value of the slug.
+        keys (set:str): A set of keys to be used for key-value pairs.
+        params (): The set of parameters encoded in the url request.
+        request (HttpRequest): The HTTP request.
+    """
+
+    def __init__(self, request, pk=None):
+        """Constructor."""
+
+        # Setup
+        self.pk = pk
+        self.path = []
+        self.flags = []
+        self.keys = set()
+        self.request = request
+
+        self.params = dict(request.GET)
+        self.path = request.GET.get('path', '')
+        self.flags = request.GET.get('flags', '')
+        self.slug = request.GET.get('slug', '')
+
+        # Path
+        if self.path == '':
+            self.path = []
+        else:
+            self.path = [int(x) for x in re.findall(r'\d+', self.path)]
+
+        # Flags
+        self.flags = string_to_list(self.flags)
+
+    def __str__(self):
+        """Output the url parameter string.
+
+        Returns:
+            str: The parameter string (including the "?").
+        """
+        params = {}
+        if len(self.path) > 0:
+            params['path'] = list_to_string(self.path)
+        if len(self.flags) > 0:
+            params['flags'] = list_to_string(self.flags)
+        if self.slug != '':
+            params['slug'] = self.slug
+        for key in self.keys:
+            params[key] = self.params[key]
+        s = '?%s' % urlencode(params)
+        s = s.rstrip('?')
+        return s
+
+    def __add__(self, right_object):
+        """Addition operator (from the right).
+        Args:
+            right_object (obj): The other object for addition, will be treated as a string.
+
+        Returns:
+            str: The resultant expression of str(left) + str(self)
+        """
+        return str(self) + str(right_object)
+
+    def __radd__(self, left_object):
+        """Addition operator (from the left).
+
+        Args:
+            left_object (obj): The other object for addition, will be treated as a string.
+
+        Returns:
+            str: The resultant expression of str(left) + str(self)
+        """
+        return str(left_object) + str(self)
+
+    def get_path(self):
+        """A getter for the path.
+
+        Returns:
+            list:int: The path of object primary keys.
+        """
+        return self.path
+
+    def get_new(self):
+        """"Create a copy of the object.
+
+        Returns:
+            Parameters: A copy of the object.
+        """
+        cls = self.__class__
+        x = cls(self.request, self.pk)
+        return x
+
+    def get_prev(self):
+        """Generate a new object for going back to the previous object.
+
+        Returns:
+            Parameters: The new object.
+        """
+        cls = self.__class__
+        x = cls(self.request)
+        if len(x.path) > 0:
+            x.path.pop()
+        return x
+
+    def get_next(self):
+        """Generate a new object for going to the next object.
+
+        Returns:
+            Parameters: The new object.
+        """
+        cls = self.__class__
+        x = cls(self.request)
+        if self.pk is not None:
+            x.path.append(self.pk)
+        return x
+
+    def get_slug(self):
+        """A getter for the slug value.
+
+        Returns:
+            str: The value of the slug.
+        """
+        return self.slug
+
+    def set_slug(self, value):
+        """A setter for the value value.
+
+        Args:
+            value (str): The value.
+
+        Returns:
+            Parameters: A reference to this object.
+        """
+        self.slug = value
+        return self
+
+    def add_key_value(self, key, value):
+        """Add a key-value pair to the parameter list.
+
+        Args:
+            key (str): The key.
+            value (str): The value.
+
+        Returns:
+            Parameters: A reference to this object.
+        """
+        self.params[key] = value
+        self.keys.add(key)
+        return self
+
+    def get_key_value(self, key):
+        """A getter for the key-value pair.
+
+        Args:
+            key (str): The key.
+
+        Returns:
+            str: The value.
+        """
+        value = self.params.get(key, None)
+        if isinstance(value, list) and len(value) == 1:
+            value = value[0]
+        return value

@@ -79,7 +79,7 @@ class Category(models.Model):
         objects (QuerySet:Category): TODO
     """
 
-    # Django place holders (related names)
+    # Django place holders for related names
     objects = None
     theories = None
     followers = None
@@ -265,6 +265,9 @@ class TheoryNode(models.Model):
         'self', related_name='parent_flat_nodes', symmetrical=False, blank=True)
 
     violations = GenericRelation(Violation)
+
+    # Django place holders for related names
+    objects = None
 
     class Meta:
         ordering = ['-rank']
@@ -1438,6 +1441,9 @@ class Opinion(TheoryPointerBase, models.Model):
 
     rank = models.SmallIntegerField(default=0)
 
+    # Django place holders for related names
+    objects = None
+
     class Meta:
         ordering = ['-rank']
         db_table = 'theories_opinion'
@@ -1923,6 +1929,9 @@ class OpinionNode(NodePointerBase, models.Model):
     ft_input = models.SmallIntegerField(default=0)
     ff_input = models.SmallIntegerField(default=0)
 
+    # Django place holders for related names
+    objects = None
+
     class Meta:
         db_table = 'theories_opinion_node'
         verbose_name = 'Opinion Node'
@@ -2022,6 +2031,9 @@ class Stats(TheoryPointerBase, models.Model):
     stats_type = models.SmallIntegerField(choices=TYPE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
+
+    # Django place holders for related names
+    objects = None
 
     class Meta:
         db_table = 'theories_stats'
@@ -2398,6 +2410,9 @@ class StatsNode(NodePointerBase, models.Model):
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
+    # Django place holders for related names
+    objects = None
+
     class Meta:
         db_table = 'theories_stats_node'
         verbose_name = 'Stats Node'
@@ -2455,6 +2470,9 @@ class StatsFlatNode(NodePointerBase, models.Model):
         TheoryNode, related_name='stats_flat_nodes', on_delete=models.CASCADE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
+
+    # Django place holders for related names
+    objects = None
 
     class Meta:
         db_table = 'theories_stats_flat_node'

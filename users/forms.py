@@ -23,9 +23,6 @@ from .models import *
 from core.utils import get_first_or_none
 
 
-# ************************************************************
-#
-# ************************************************************
 class UserForm(forms.ModelForm):
 
     # ******************************
@@ -87,9 +84,6 @@ class UserForm(forms.ModelForm):
         self.fields['birth_date'].required = False
 
 
-# ************************************************************
-#
-# ************************************************************
 class SelectNotificationForm(forms.ModelForm):
     """A form for slecting notifications."""
 
@@ -112,9 +106,6 @@ class SelectNotificationForm(forms.ModelForm):
         self.fields['select'].required = False
 
 
-# ************************************************************
-#
-# ************************************************************
 class SelectViolationForm(forms.ModelForm):
     """A form for slecting notifications."""
 
@@ -137,9 +128,6 @@ class SelectViolationForm(forms.ModelForm):
         self.fields['select'].required = False
 
 
-# ************************************************************
-# ReportViolationForm
-# ************************************************************
 class ReportViolationForm(forms.ModelForm):
     """Report user violation form."""
 
@@ -157,9 +145,6 @@ class ReportViolationForm(forms.ModelForm):
         label='Intent (as interpreted by you)',
     )
 
-    # ******************************
-    # ReportViolationForm
-    # ******************************
     class Meta:
         model = Violation
         fields = ('offender', 'offences', 'intent', 'explanation')
@@ -167,9 +152,6 @@ class ReportViolationForm(forms.ModelForm):
             'description': forms.Textarea,
         }
 
-    # ******************************
-    # ReportViolationForm
-    # ******************************
     def __init__(self, *args, **kwargs):
         # setup
         self.user = kwargs.pop('user')
@@ -193,9 +175,6 @@ class ReportViolationForm(forms.ModelForm):
         # feedback
         self.fields['explanation'].required = False
 
-    # ******************************
-    # ReportViolationForm
-    # ******************************
     def save(self, commit=True):
 
         # violation
@@ -248,9 +227,6 @@ class ReportViolationForm(forms.ModelForm):
         return violation
 
 
-# ************************************************************
-# ResolveViolationForm
-# ************************************************************
 class ResolveViolationForm(forms.ModelForm):
 
     offences = forms.MultipleChoiceField(
@@ -353,9 +329,6 @@ class ResolveViolationForm(forms.ModelForm):
         return feedback
 
 
-# ************************************************************
-# VoteForm
-# ************************************************************
 class VoteForm(forms.ModelForm):
 
     # ******************************

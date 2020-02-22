@@ -59,9 +59,6 @@ def get_group(level):
 # *******************************************************************************
 
 
-# ************************************************************
-# User
-# ************************************************************
 class User(AbstractUser):
     """Wiki-O user model."""
 
@@ -95,9 +92,6 @@ class User(AbstractUser):
 
     SYSTEM_USER_PK = 10
 
-    # ******************************
-    # User
-    # ******************************
     @classmethod
     def get_system_user(cls, create=True):
         """Creates and returns the system user."""
@@ -121,9 +115,6 @@ class User(AbstractUser):
         # blah
         return system_user
 
-    # ******************************
-    # User
-    # ******************************
     def __str__(self, print_fullname=False):
         """Output username if not hidden."""
         if print_fullname and self.get_fullname() != 'N/A':
@@ -131,34 +122,19 @@ class User(AbstractUser):
         else:
             return self.get_username()
 
-    # ******************************
-    # User
-    # ******************************
     def is_hidden(self):
         return self.hidden
 
-    # ******************************
-    # User
-    # ******************************
     def is_visible(self):
         return not self.hidden
 
-    # ******************************
-    # User
-    # ******************************
     def get_long(self):
         return self.__str__(print_fullname=True)
 
-    # ******************************
-    # User
-    # ******************************
     def get_username(self):
         """Output username if not hidden."""
         return self.username
 
-    # ******************************
-    # User
-    # ******************************
     def get_fullname(self):
         """Output username if not hidden."""
         if len(self.fullname) > 0 and self.fullname_visible:
@@ -166,37 +142,22 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def get_level(self):
         levels = sorted([int(x['name'].split(' ')[-1])
                          for x in self.groups.values('name')])
         return levels[-1]
 
-    #******************************
-    # 
-    #******************************
     def get_levels(self):
         return sorted([int(x['name'].split(' ')[-1]) for x in self.groups.values('name')])
 
-    # ******************************
-    # User
-    # ******************************
     def get_absolute_url(self):
         """Return the url for viewing the user's profile."""
         return reverse('users:profile-detail', args=[], kwargs={'pk': self.id})
 
-    # ******************************
-    # User
-    # ******************************
     def url(self):
         """Return the url for viewing the user's profile."""
         return self.get_absolute_url()
 
-    # ******************************
-    # User
-    # ******************************
     def get_age(self):
         """Calculate age if not hidden."""
         if self.birth_date is not None and self.birth_date_visible:
@@ -206,9 +167,6 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def get_sex(self):
         """Return sex if not hidden."""
         if len(self.sex) > 0 and self.sex_visible:
@@ -216,9 +174,6 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def get_location(self):
         """Return location if not hidden."""
         if len(self.location) > 0 and self.location_visible:
@@ -226,9 +181,6 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def get_religion(self):
         """Return religion if not hidden."""
         if len(self.religion) > 0 and self.religion_visible:
@@ -236,9 +188,6 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def get_politics(self):
         """Return political alignment if not hidden."""
         if len(self.politics) > 0 and self.politics_visible:
@@ -246,15 +195,9 @@ class User(AbstractUser):
         else:
             return 'N/A'
 
-    # ******************************
-    # User
-    # ******************************
     def num_contributions(self):
         return self.contributions.count()
 
-    # ******************************
-    # User
-    # ******************************
     def is_using(self, theory_node, recalculate=False):
         if recalculate:
             if self.opinions.filter(theory=self, deleted=False).exists() or self.opinions.filter(nodes__theory_node=self).exists():
@@ -265,15 +208,9 @@ class User(AbstractUser):
                 return False
         return self.utilized.filter(id=theory_node.pk).exists()
 
-    # ******************************
-    # User
-    # ******************************
     def count_warnings(self):
         return self.violations.filter(status=Violation.STATUS.WARNING).count()
 
-    # ******************************
-    # User
-    # ******************************
     def get_violations(self, soft=True, hard=True, recent=True, expired=False):
 
         # setup
@@ -307,15 +244,9 @@ class User(AbstractUser):
         # done
         return violations
 
-    # ******************************
-    # User
-    # ******************************
     def count_strikes(self, soft=False, hard=True, recent=True, expired=False):
         return self.get_violations(soft=soft, hard=hard, recent=recent, expired=expired).count()
 
-    # ******************************
-    # User
-    # ******************************
     def is_up_for_promotion(self):
         if self.count_strikes(soft=True) > 0:
             return False
@@ -326,9 +257,6 @@ class User(AbstractUser):
         else:
             return False
 
-    # ******************************
-    # User
-    # ******************************
     def promote(self, new_level=None):
         # setup
         user_levels = self.get_levels()
@@ -337,18 +265,12 @@ class User(AbstractUser):
         group_level = get_group(new_level)
         self.groups.add(group_level)
 
-    # ******************************
-    # User
-    # ******************************
     def is_up_for_demotion(self):
         if self.count_strikes() >= 3:
             return True
         else:
             return False
 
-    # ******************************
-    # User
-    # ******************************
     def demote(self, new_level=None):
         # setup
         user_levels = self.get_levels()

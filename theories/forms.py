@@ -71,9 +71,6 @@ DETAILS_CHARFEILD = {
 #
 # *******************************************************************************
 
-# ************************************************************
-# TheoryForm
-# ************************************************************
 class TheoryForm(forms.ModelForm):
     """Theory form."""
 
@@ -375,9 +372,6 @@ class EvidenceForm(forms.ModelForm):
         return evidence
 
 
-# ************************************************************
-#
-# ************************************************************
 class CategoryForm(forms.ModelForm):
     """A form for choosing membership, not creating a category."""
 
@@ -405,9 +399,6 @@ class CategoryForm(forms.ModelForm):
         self.fields['title'].required = False
 
 
-# ************************************************************
-#
-# ************************************************************
 class SelectTheoryNodeForm(forms.ModelForm):
     """A form for slecting theory nodes."""
 
@@ -435,9 +426,6 @@ class SelectTheoryNodeForm(forms.ModelForm):
         self.fields['select'].required = False
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionForm(forms.ModelForm):
     """A form for user's opinions (the root opinion)."""
     WIZARD_RESOLUTION = 10
@@ -523,9 +511,6 @@ class OpinionForm(forms.ModelForm):
         return opinion
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionNodeForm(forms.ModelForm):
     """A form for user opinion node points."""
 
@@ -750,9 +735,6 @@ class TheoryRevisionForm(forms.ModelForm):
             self.fields['delete'].widget = forms.HiddenInput()
 
 
-# ************************************************************
-#
-# ************************************************************
 class EvidenceRevisionForm(forms.ModelForm):
     """Theory Revision form."""
 

@@ -13,17 +13,6 @@ A web service for sharing opinions and avoiding arguments
 """
 
 
-# *******************************************************************************# ToDo's:
-# Carry category in url params?
-
-# Fix IE compatibility
-# Scale for mobile
-# Add change-log
-# Add social media sharing
-# Add a "try it" for understanding points propagation
-# *******************************************************************************
-
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -44,11 +33,12 @@ from django.db.models import Count, Sum, F, Q
 from rules.contrib.views import permission_required
 from rules.contrib.views import objectgetter as get_object
 from rules.contrib.views import PermissionRequiredMixin
-from django.utils.http import urlencode, unquote
+from django.utils.http import unquote
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.contrib.auth.models import Group, Permission
 
+import re
 import copy
 import inspect
 import datetime
@@ -59,15 +49,24 @@ from actstream import action
 from actstream.models import user_stream, model_stream, target_stream, followers
 from actstream.actions import is_following
 from notifications.signals import notify
-#from cairosvg import svg2png
 
-from theories.forms import *
-from theories.models import *
-from theories.graphs.pie_charts import OpinionPieChart, OpinionComparisionPieChart, DemoPieChart
-from theories.graphs.bar_graphs import OpinionBarGraph, OpinionComparisionBarGraph, DemoBarGraph
-from theories.graphs.venn_diagrams import OpinionVennDiagram, OpinionComparisionVennDiagram, DemoVennDiagram
+from theories.models import Category, TheoryNode, Opinion, OpinionNode, Stats
+from theories.forms import TheoryForm, EvidenceForm, CategoryForm, OpinionForm
+from theories.forms import SelectTheoryNodeForm, OpinionNodeForm
+from theories.forms import TheoryRevisionForm, EvidenceRevisionForm
+from theories.graphs.pie_charts import OpinionPieChart
+from theories.graphs.pie_charts import OpinionComparisionPieChart
+from theories.graphs.pie_charts import DemoPieChart
+from theories.graphs.bar_graphs import OpinionBarGraph
+from theories.graphs.bar_graphs import OpinionComparisionBarGraph
+from theories.graphs.bar_graphs import DemoBarGraph
+from theories.graphs.venn_diagrams import OpinionVennDiagram
+from theories.graphs.venn_diagrams import OpinionComparisionVennDiagram
+from theories.graphs.venn_diagrams import DemoVennDiagram
 
+from users.models import User
 from users.forms import ReportViolationForm
+from core.utils import Parameters, get_or_none, get_page_list
 
 
 # *******************************************************************************
@@ -86,158 +85,6 @@ NUM_ITEMS_PER_PAGE = 25
 #
 #
 # *******************************************************************************
-
-
-# ************************************************************
-# ToDO: Move to core utils
-# ************************************************************
-class Parameters():
-    """A manager for url paramters."""
-
-    # ******************************
-    #
-    # ******************************
-    def __init__(self, request, pk=None):
-        """Input a request and manage the sites variables:
-             path, flat, category, ..."""
-
-        # setup
-        cls = self.__class__
-        self.pk = pk
-        self.path = []
-        self.flags = []
-        self.request = request
-
-        self.params = dict(request.GET)
-        self.path = request.GET.get('path', '')
-        self.flags = request.GET.get('flags', '')
-        self.slug = request.GET.get('slug', '')
-        self.keys = []
-
-        # path
-        if self.path == '':
-            self.path = []
-        else:
-            self.path = [int(x) for x in re.findall(r'\d+', self.path)]
-
-        # flags
-        self.flags = cls.str_to_list(self.flags)
-
-    # ******************************
-    #
-    # ******************************
-    def __str__(self):
-        """Output the url parameter string including the ?"""
-        cls = self.__class__
-        params = {}
-        if len(self.path) > 0:
-            params['path'] = cls.list_to_str(self.path)
-        if len(self.flags) > 0:
-            params['flags'] = cls.list_to_str(self.flags)
-        if self.slug != '':
-            params['slug'] = self.slug
-        for key in self.keys:
-            params[key] = self.params[key]
-        s = '?%s' % urlencode(params)
-        s = s.rstrip('?')
-        return s
-
-    # ******************************
-    #
-    # ******************************
-    def str_to_list(input_string):
-        """Static method for converting strings to lists."""
-        l = input_string.strip('[').strip(']').split("','")
-        if l[-1] == '':
-            l.pop()
-        for i, x in enumerate(l):
-            l[i] = x.strip("'")
-        return l
-
-    # ******************************
-    #
-    # ******************************
-    def list_to_str(input_list):
-        """Static method for converting lists to strings."""
-        s = ''
-        if len(input_list) > 0:
-            for x in input_list:
-                s += str(x) + ','
-        s = s.strip(',')
-        return s
-
-    # ******************************
-    #
-    # ******************************
-    def __add__(self, x):
-        """Treat objs like strings with the + operator."""
-        return str(self) + x
-
-    # ******************************
-    #
-    # ******************************
-    def __radd__(self, x):
-        """Treat objs like strings with the + operator."""
-        return x + str(self)
-
-    # ******************************
-    #
-    # ******************************
-    def get_path(self):
-        """Return theory path. This path represents the path the user took to
-           arrive at the current view."""
-        return self.path
-
-    # ******************************
-    #
-    # ******************************
-    def get_copy(self):
-        """Create a copy of object (copy.deepcopy doesn't work)."""
-        cls = self.__class__
-        x = cls(self.request, self.pk)
-        return x
-
-    # ******************************
-    #
-    # ******************************
-    def get_prev(self):
-        """Generate a new object with a path missing the last entry."""
-        cls = self.__class__
-        x = cls(self.request)
-        if len(x.path) > 0:
-            x.path.pop()
-        return x
-
-    # ******************************
-    #
-    # ******************************
-    def get_next(self):
-        """Generate a new object with the path additionally having the new entry pk."""
-        cls = self.__class__
-        x = cls(self.request)
-        if self.pk is not None:
-            x.path.append(self.pk)
-        return x
-
-    def get_slug(self):
-        return self.slug
-
-    def set_slug(self, slug):
-        self.slug = slug
-        return self
-
-    def add_key_value(self, key, value):
-        self.params[key] = value
-        self.keys.append(key)
-        return self
-
-    def get_key_value(self, key):
-        value = self.params.get(key, None)
-        if isinstance(value, list) and len(value) == 1:
-            value = value[0]
-        return value
-
-
 
 def get_opinion_list(theory, current_user, exclude_list=[]):
     """Generate a list of opinions based on the current user. The output is a
@@ -340,20 +187,6 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
     return compare_list
 
 
-def get_page_list(num_pages, page):
-    if page is None:
-        page = 1
-    page = int(page)
-    high_index = min(num_pages + 1, page + MAX_NUM_PAGES//2 + 1)
-    low_index = high_index - MAX_NUM_PAGES
-    while low_index < 1:
-        low_index += 1
-        high_index += 1
-    low_index = max(1, low_index)
-    high_index = min(high_index, num_pages + 1)
-    return range(low_index, high_index)
-
-
 # *******************************************************************************
 # Theory views
 #
@@ -417,7 +250,7 @@ def TheoryIndexView(request, cat=None):
     page = request.GET.get('page')
     paginator = Paginator(theories, NUM_ITEMS_PER_PAGE)
     theories = paginator.get_page(page)
-    theories.page_list = get_page_list(paginator.num_pages, page)
+    theories.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request)
@@ -463,7 +296,7 @@ def ActivityView(request, cat=None):
     page = request.GET.get('page')
     paginator = Paginator(actions, NUM_ITEMS_PER_PAGE)
     actions = paginator.get_page(page)
-    actions.page_list = get_page_list(paginator.num_pages, page)
+    actions.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request)
@@ -489,9 +322,6 @@ class TheoryDetail(generic.DetailView):
     model = TheoryNode
     template_name = 'theories/theory_detail.html'
 
-    # ******************************
-    #
-    # ******************************
     def get_context_data(self, **kwargs):
 
         # Setup
@@ -510,7 +340,7 @@ class TheoryDetail(generic.DetailView):
         page = self.request.GET.get('page')
         paginator = Paginator(theory_nodes, NUM_ITEMS_PER_PAGE)
         theory_nodes = paginator.get_page(page)
-        theory_nodes.page_list = get_page_list(paginator.num_pages, page)
+        theory_nodes.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
         # Navigation
         params = Parameters(self.request, pk=theory.pk)
@@ -679,7 +509,7 @@ def TheoryEditEvidenceView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(evidence_nodes, NUM_ITEMS_PER_PAGE)
     evidence_nodes = paginator.get_page(page)
-    evidence_nodes.page_list = get_page_list(paginator.num_pages, page)
+    evidence_nodes.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -746,7 +576,7 @@ def TheoryEditSubtheoriesView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(subtheory_nodes, NUM_ITEMS_PER_PAGE)
     subtheory_nodes = paginator.get_page(page)
-    subtheory_nodes.page_list = get_page_list(paginator.num_pages, page)
+    subtheory_nodes.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -829,7 +659,7 @@ def TheoryMergeView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(candidates, NUM_ITEMS_PER_PAGE*4)
     candidates = paginator.get_page(page)
-    candidates.page_list = get_page_list(paginator.num_pages, page)
+    candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # POST request
     if request.method == 'POST':
@@ -898,7 +728,7 @@ def TheoryInheritView(request, pk01, pk02):
     page = request.GET.get('page')
     paginator = Paginator(candidates, NUM_ITEMS_PER_PAGE*4)
     candidates = paginator.get_page(page)
-    candidates.page_list = get_page_list(paginator.num_pages, page)
+    candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # POST request
     if request.method == 'POST':
@@ -953,7 +783,7 @@ def TheoryRestoreView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(revisions, NUM_ITEMS_PER_PAGE)
     revisions = paginator.get_page(page)
-    revisions.page_list = get_page_list(paginator.num_pages, page)
+    revisions.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -1024,7 +854,7 @@ def TheoryBackupView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(candidates, NUM_ITEMS_PER_PAGE*4)
     candidates = paginator.get_page(page)
-    candidates.page_list = get_page_list(paginator.num_pages, page)
+    candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -1185,7 +1015,7 @@ def TheoryActivityView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(actions, NUM_ITEMS_PER_PAGE)
     actions = paginator.get_page(page)
-    actions.page_list = get_page_list(paginator.num_pages, page)
+    actions.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -1229,9 +1059,6 @@ class EvidenceDetail(generic.DetailView):
     model = TheoryNode
     template_name = 'theories/evidence_detail.html'
 
-    # ******************************
-    #
-    # ******************************
     def get_context_data(self, **kwargs):
 
         # Setup
@@ -1334,7 +1161,7 @@ def EvidenceMergeView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(candidates, NUM_ITEMS_PER_PAGE*4)
     candidates = paginator.get_page(page)
-    candidates.page_list = get_page_list(paginator.num_pages, page)
+    candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # POST request
     if request.method == 'POST':
@@ -1387,7 +1214,7 @@ def EvidenceRestoreView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(revisions, NUM_ITEMS_PER_PAGE)
     revisions = paginator.get_page(page)
-    revisions.page_list = get_page_list(paginator.num_pages, page)
+    revisions.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -1453,7 +1280,7 @@ def EvidenceActivityView(request, pk):
     page = request.GET.get('page')
     paginator = Paginator(actions, NUM_ITEMS_PER_PAGE)
     actions = paginator.get_page(page)
-    actions.page_list = get_page_list(paginator.num_pages, page)
+    actions.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=pk)
@@ -1839,7 +1666,7 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
 
     # Flatten
     flat = 'flat' in params.flags
-    params00 = params.get_copy()
+    params00 = params.get_new()
     if flat:
         params00.flags.remove('flat')
     else:
@@ -1848,7 +1675,7 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
 
     # Stats Flag
     stats = 'stats' in params.flags
-    params00 = params.get_copy()
+    params00 = params.get_new()
     if stats:
         params00.flags.remove('stats')
     else:
@@ -2095,7 +1922,7 @@ def OpinionCompareView(request, opinion01, opinion02, theory, compare_list):
 
     # Flatten
     flat = 'flat' in params.flags
-    params00 = params.get_copy()
+    params00 = params.get_new()
     if flat:
         params00.flags.remove('flat')
     else:

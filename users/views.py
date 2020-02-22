@@ -17,23 +17,26 @@ A web service for sharing opinions and avoiding arguments
 # Imports
 # *******************************************************************************
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import authenticate, login, logout
 from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse, reverse_lazy
-from django.shortcuts import render
-from django.views import generic
+from django.urls import reverse
 from django.core.paginator import Paginator
-from django.forms import Textarea, modelformset_factory
-from actstream.models import user_stream, target_stream, following, followers
+from django.forms import modelformset_factory
+from actstream.models import following
 from notifications.models import Notification
 from reversion.models import Version
 
-from .models import *
-from .forms import *
-from theories.forms import *
+from users.models import User, Violation
+from users.forms import UserForm, SelectNotificationForm
+from users.forms import SelectViolationForm, ReportViolationForm, ResolveViolationForm, VoteForm
 from theories.models import Category, TheoryNode, Opinion
-from theories.views import get_page_list, MAX_NUM_PAGES, NUM_ITEMS_PER_PAGE, Parameters
+from core.utils import Parameters, get_page_list
+
+
+# *******************************************************************************
+# Defines
+# *******************************************************************************
+MAX_NUM_PAGES = 5
+NUM_ITEMS_PER_PAGE = 25
 
 
 # *******************************************************************************
@@ -145,12 +148,12 @@ def NotificationsView(request):
     page01 = request.GET.get('page01')
     paginator01 = Paginator(notifications, NUM_ITEMS_PER_PAGE)
     notifications = paginator01.get_page(page01)
-    notifications.page_list = get_page_list(paginator01.num_pages, page01)
+    notifications.page_list = get_page_list(paginator01.num_pages, page01, MAX_NUM_PAGES)
     # Pagination02
     page02 = request.GET.get('page02')
     paginator02 = Paginator(user_violations, NUM_ITEMS_PER_PAGE)
     user_violations = paginator02.get_page(page02)
-    user_violations.page_list = get_page_list(paginator02.num_pages, page02)
+    user_violations.page_list = get_page_list(paginator02.num_pages, page02, MAX_NUM_PAGES)
 
     # Navigation
     prev = request.META.get('HTTP_REFERER', '/')
@@ -237,7 +240,7 @@ def ViolationIndexView(request):
     page = request.GET.get('page')
     paginator = Paginator(violations, NUM_ITEMS_PER_PAGE)
     violations = paginator.get_page(page)
-    violations.page_list = get_page_list(paginator.num_pages, page)
+    violations.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request)
