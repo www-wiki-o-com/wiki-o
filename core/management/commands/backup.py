@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       core/management/backup.py
+@file       core/management/command/backup.py
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 @brief      A managment script for backing up the database
@@ -84,7 +84,7 @@ class Command(BaseCommand):
 
         # Backup the database (large archives should not be loaded into python).
         user = os.environ.get('PGUSER')
-        pg_cmd = 'pg_dump -h localhost --username=%s -w wiki_o > "%s"' % (user, archive_path)
+        pg_cmd = 'pg_dump -h localhost --username=%s -w wiki_o --file="%s"' % (user, archive_path)
         print('Saving backup to: %s.gz' % archive_path)
         os.system(pg_cmd)
         os.system('gzip -9 "%s"' % archive_path)
