@@ -521,9 +521,6 @@ class Violation(models.Model):
 
     # Cache attributes
     saved_count = None
-    saved_intent = None
-    saved_comment = None
-    saved_offences = None
 
     class Meta:
         """Where the model options are defined.
@@ -866,6 +863,11 @@ class ViolationFeedback(models.Model):
     comment = models.CharField(max_length=750, blank=True)
     timestamp = models.DateTimeField()
 
+    # Cache attributes
+    saved_intent = None
+    saved_comment = None
+    saved_offences = None
+
     class Meta:
         """Where the model options are defined.
 
@@ -973,9 +975,9 @@ class ViolationFeedback(models.Model):
             for i, x in enumerate(offences):
                 try:
                     offences[i] = Violation.OFFENCES[x]
-                except:
+                except KeyError:
                     offences[i] = 'Error'
-        except:
+        except KeyError:
             offences = None
         if cache:
             self.saved_offences = offences
