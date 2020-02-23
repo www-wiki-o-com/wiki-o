@@ -15,10 +15,9 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from django.conf.urls import url
-from django.urls import include, path
-from users.views import *
-from notifications.views import mark_as_read
+from django.urls import path
+from users.views import private_profile_view, public_profile_view, notifications_view
+from users.views import violation_index_view, violation_resolve_view
 
 
 # *******************************************************************************
@@ -26,11 +25,9 @@ from notifications.views import mark_as_read
 # *******************************************************************************
 app_name = 'users'
 urlpatterns = [
-    path('accounts/profile/', PrivateProfileView, name='profile-edit'),
-    path('accounts/<int:pk>/', PublicProfileView, name='profile-detail'),
-    path('accounts/notifications/', NotificationsView, name='notifications'),
-
-    path('violations/', ViolationIndexView, name='violations'),
-    path('violation/<int:pk>/resolve/', ViolationResolveView,
-         name='violation-resolve'),
+    path('accounts/profile/', private_profile_view, name='profile-edit'),
+    path('accounts/<int:pk>/', public_profile_view, name='profile-detail'),
+    path('accounts/notifications/', notifications_view, name='notifications'),
+    path('violations/', violation_index_view, name='violations'),
+    path('violation/<int:pk>/resolve/', violation_resolve_view, name='violation-resolve'),
 ]

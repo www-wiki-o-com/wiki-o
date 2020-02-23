@@ -57,7 +57,7 @@ A web service for sharing opinions and avoiding arguments
                   <td>
                     {% if violation.is_open %}
                       <strong> {{ violation.offender }} </strong>
-                    {% else %} 
+                    {% else %}
                       {{ violation.offender }}
                     {% endif %}
                   </td>
@@ -68,7 +68,7 @@ A web service for sharing opinions and avoiding arguments
                     {% if violation.is_open %}
                     <strong>
                     {% endif %}
-                    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" 
+                    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                        href="#for{{ forloop.counter }}" aria-controls="for{{ forloop.counter }}">
 
                       <!-- theory node -->
@@ -87,22 +87,22 @@ A web service for sharing opinions and avoiding arguments
                     {% endif %}
                     <!-- content -->
                     <div id="for{{ forloop.counter }}" class="collapse" style="margin-left:10px">
-                      
+
                       <!-- status -->
                       <table>
                         <thead>
                           <tr> <td style="width:80px"/> </tr>
                         </thead>
                         <tbody>
-                          
+
                           <!-- feedback -->
                           {% for feedback in violation.get_feedback %}
                             <tr>
                               <td>
                                 <div style="margin-left:10px; text-align:justify">
-                                  <span style="margin-left:-10px;">{{ feedback.timestamp|date:"d/m/y" }}</span> - 
+                                  <span style="margin-left:-10px;">{{ feedback.timestamp|date:"d/m/y" }}</span> -
                                   {% if feedback.get_comment %}
-                                    {{ feedback.get_action }}: {{ feedback.get_comment }} 
+                                    {{ feedback.get_action }}: {{ feedback.get_comment }}
                                   {% else %}
                                     {{ feedback.get_action }}
                                   {% endif %}
@@ -123,12 +123,12 @@ A web service for sharing opinions and avoiding arguments
                           {% endfor %}
 
 <!--                          <tr><th> Status: </th><th> {{ violation.get_status_str }} </th></tr>-->
-                        
+
                         </tbody>
                       </table>
-                      
 
-                      
+
+
                       <!-- links -->
 <!--                      <a href="{{ violation.content_url }}" target="_blank"> Go to content </a>-->
 <!--                      <br>-->
@@ -154,7 +154,7 @@ A web service for sharing opinions and avoiding arguments
           {% include "include/paginator.html" with list=violations %}
         </div>
       </div>
-    
+
     </div> <!-- end column -->
     <div class="col-md-4"> <!-- Sidebar Column -->
 

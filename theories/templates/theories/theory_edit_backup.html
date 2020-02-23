@@ -55,7 +55,7 @@ A web service for sharing opinions and avoiding arguments
                       <a onclick="CheckNone(); {% for form in formset %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
                         <img src="{% static 'core/img/check_none.svg' %}" height='12'>
                       </a>
-                    </span>                   
+                    </span>
                   </td>
                   </td>
                 </tr>
@@ -65,7 +65,7 @@ A web service for sharing opinions and avoiding arguments
                     {{ form.id }}
                     <td>{{ form.select }}</td>
                     <td/>
-                    <td style="text-align:left">{{ form.instance }}</td>             
+                    <td style="text-align:left">{{ form.instance }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -78,7 +78,7 @@ A web service for sharing opinions and avoiding arguments
         <center>
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-          
+
           <!-- Backup -->
           {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
           <button>

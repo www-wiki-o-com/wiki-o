@@ -19,7 +19,7 @@ A web service for sharing opinions and avoiding arguments
 
 <div class="container">
   <ul class="nav nav-tabs">
-    
+
     <!-- Edit Evidence -->
     {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
     {% if can_edit %}
@@ -40,7 +40,7 @@ A web service for sharing opinions and avoiding arguments
     {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
     {% if can_merge %}
       <li class="nav-item">
-        {% if MergeTab %} 
+        {% if MergeTab %}
           <a class="nav-link active">
             Merge
           </a>
@@ -70,7 +70,7 @@ A web service for sharing opinions and avoiding arguments
 
     <!-- Activity -->
     <li class="nav-item">
-      {% if ActivityTab %} 
+      {% if ActivityTab %}
         <a class="nav-link active">
           Activity
         </a>
@@ -83,7 +83,7 @@ A web service for sharing opinions and avoiding arguments
 
     <!-- Report -->
     <li class="nav-item">
-      {% if ReportTab %} 
+      {% if ReportTab %}
         <a class="nav-link active">
           Report
         </a>

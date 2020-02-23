@@ -29,7 +29,7 @@ from actstream.actions import follow
 from theories.models import *
 from theories.forms import *
 from theories.utils import *
-from users.utils import *
+from users.maintence import create_groups_and_permissions, create_test_user
 from theories.views import *
 
 
@@ -512,14 +512,14 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.fiction, nodes)
         self.assertNotIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 2)
-        self.assertFalse(hasattr(self.theory, 'saved_nodes'))
+        self.assertIsNone(self.theory.saved_nodes)
 
         nodes = self.theory.get_nodes(deleted=True)
         self.assertIn(self.fact, nodes)
         self.assertIn(self.fiction, nodes)
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 3)
-        self.assertFalse(hasattr(self.theory, 'saved_nodes'))
+        self.assertIsNone(self.theory.saved_nodes)
 
     # ******************************
     # TheoryNodeTests
@@ -554,7 +554,7 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.evidence, nodes)
         self.assertIn(self.intuition, nodes)
         self.assertEqual(nodes.count(), 4)
-        self.assertFalse(hasattr(self.theory, 'saved_flat_nodes'))
+        self.assertIsNone(self.theory.saved_flat_nodes)
 
         self.subtheory.delete()
 
@@ -563,14 +563,14 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.fiction, nodes)
         self.assertIn(self.intuition, nodes)
         self.assertEqual(nodes.count(), 3)
-        self.assertFalse(hasattr(self.theory, 'saved_flat_nodes'))
+        self.assertIsNone(self.theory.saved_flat_nodes)
 
         nodes = self.theory.get_flat_nodes(cache=True)
         self.assertIn(self.fact, nodes)
         self.assertIn(self.fiction, nodes)
         self.assertIn(self.intuition, nodes)
         self.assertEqual(nodes.count(), 3)
-        self.assertTrue(hasattr(self.theory, 'saved_flat_nodes'))
+        self.assertIsNotNone(self.theory.saved_flat_nodes)
 
         nodes = self.theory.get_flat_nodes(deleted=True)
         self.assertIn(self.fact, nodes)
@@ -579,7 +579,7 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.intuition, nodes)
         self.assertEqual(nodes.count(), 4)
         self.assertNotIn(self.evidence, self.theory.nodes.all())
-        self.assertTrue(hasattr(self.theory, 'saved_flat_nodes'))
+        self.assertIsNotNone(self.theory.saved_flat_nodes)
 
     # ******************************
     # TheoryNodeTests
@@ -787,7 +787,7 @@ class TheoryNodeTests(TestCase):
 
         opinions = self.theory.get_opinions()
         self.assertEqual(opinions.count(), 1)
-        self.assertFalse(hasattr(self.theory, 'saved_opinions'))
+        self.assertIsNone(self.theory.saved_opinions)
 
         opinions = self.theory.get_opinions(cache=True)
         self.assertEqual(opinions.count(), 1)
@@ -842,30 +842,30 @@ class TheoryNodeTests(TestCase):
     # TheoryNodeTests
     # ******************************
     def test_cache(self):
-        assert not hasattr(self.theory, 'saved_nodes')
-        assert not hasattr(self.theory, 'saved_flat_nodes')
-        assert not hasattr(self.theory, 'saved_stats')
+        assert self.theory.saved_nodes is None
+        assert self.theory.saved_flat_nodes is None
+        assert self.theory.saved_stats is None
 
         result = self.evidence.cache()
         self.assertFalse(result)
 
         result = self.theory.cache(nodes=True, flat_nodes=False, stats=False)
         self.assertTrue(result)
-        self.assertTrue(hasattr(self.theory, 'saved_nodes'))
-        self.assertFalse(hasattr(self.theory, 'saved_flat_nodes'))
-        self.assertFalse(hasattr(self.theory, 'saved_stats'))
+        self.assertIsNotNone(self.theory.saved_nodes)
+        self.assertIsNone(self.theory.saved_flat_nodes)
+        self.assertIsNone(self.theory.saved_stats)
 
         result = self.theory.cache(nodes=False, flat_nodes=True, stats=False)
         self.assertTrue(result)
-        self.assertTrue(hasattr(self.theory, 'saved_nodes'))
-        self.assertTrue(hasattr(self.theory, 'saved_flat_nodes'))
-        self.assertFalse(hasattr(self.theory, 'saved_stats'))
+        self.assertIsNotNone(self.theory.saved_nodes)
+        self.assertIsNotNone(self.theory.saved_flat_nodes)
+        self.assertIsNone(self.theory.saved_stats)
 
         result = self.theory.cache(nodes=False, flat_nodes=False, stats=True)
         self.assertTrue(result)
-        self.assertTrue(hasattr(self.theory, 'saved_nodes'))
-        self.assertTrue(hasattr(self.theory, 'saved_flat_nodes'))
-        self.assertTrue(hasattr(self.theory, 'saved_stats'))
+        self.assertIsNotNone(self.theory.saved_nodes)
+        self.assertIsNotNone(self.theory.saved_flat_nodes)
+        self.assertIsNotNone(self.theory.saved_stats)
 
     # ******************************
     # TheoryNodeTests
@@ -890,15 +890,15 @@ class TheoryNodeTests(TestCase):
     # TheoryNodeTests
     # ******************************
     def test_get_all_stats(self):
-        assert not hasattr(self.theory, 'saved_stats')
+        assert self.theory.saved_stats is None
 
         stats = self.theory.get_all_stats()
         self.assertEqual(stats.count(), 4)
-        self.assertFalse(hasattr(self.theory, 'saved_stats'))
+        self.assertIsNone(self.theory.saved_stats)
 
         stats = self.theory.get_all_stats(cache=True)
         self.assertEqual(stats.count(), 4)
-        self.assertTrue(hasattr(self.theory, 'saved_stats'))
+        self.assertIsNotNone(self.theory.saved_stats)
 
         stats = self.evidence.get_all_stats()
         self.assertIsNone(stats)
@@ -1311,7 +1311,7 @@ class OpinionTests(TestCase):
             theory_node=self.fact,
             tt_input=100,
         )
-        assert not hasattr(opinion, 'saved_nodes')
+        assert opinion.saved_nodes is None
 
         # blah
         opinion_node = opinion.get_node(self.fact)
@@ -1337,7 +1337,7 @@ class OpinionTests(TestCase):
             theory_node=self.fact,
             tt_input=100,
         )
-        assert not hasattr(opinion, 'saved_nodes')
+        assert opinion.saved_nodes is None
         opinion.cache()
 
         # blah
@@ -1364,7 +1364,7 @@ class OpinionTests(TestCase):
             theory_node=self.fact,
             tt_input=100,
         )
-        assert not hasattr(opinion, 'saved_nodes')
+        assert opinion.saved_nodes is None
         opinion.cache()
 
         self.assertEqual(opinion.saved_nodes.count(), 1)
@@ -1387,7 +1387,7 @@ class OpinionTests(TestCase):
             tt_input=100,
         )
         self.fiction.delete()
-        assert not hasattr(opinion, 'saved_nodes')
+        assert opinion.saved_nodes is None
 
         # blah
         nodes = opinion.get_nodes()
@@ -1397,7 +1397,7 @@ class OpinionTests(TestCase):
 
         # blah
         nodes = opinion.get_nodes(cache=True)
-        self.assertTrue(hasattr(opinion, 'saved_nodes'))
+        self.assertIsNotNone(opinion.saved_nodes)
         self.assertEqual(nodes, opinion.saved_nodes)
         self.assertEqual(nodes.count(), 2)
         self.assertIn(opinion_node01, nodes)
@@ -1415,7 +1415,7 @@ class OpinionTests(TestCase):
             theory_node=self.fact,
             tt_input=100,
         )
-        assert not hasattr(opinion, 'saved_flat_nodes')
+        assert opinion.saved_flat_nodes is None
 
         # blah
         opinion_node = opinion.get_flat_node(self.fact)
@@ -2471,12 +2471,12 @@ class StatsTests(TestCase):
         # blah
         nodes = self.stats.get_nodes(cache=False)
         self.assertEqual(nodes.count(), 4)
-        self.assertFalse(hasattr(self.stats, 'saved_nodes'))
+        self.assertIsNone(self.stats.saved_nodes)
 
         # blah
         nodes = self.stats.get_nodes(cache=True)
         self.assertEqual(nodes.count(), 4)
-        self.assertTrue(hasattr(self.stats, 'saved_nodes'))
+        self.assertIsNotNone(self.stats.saved_nodes)
 
     # ******************************
     # StatsTests
@@ -2501,12 +2501,12 @@ class StatsTests(TestCase):
         # blah
         nodes = self.stats.get_flat_nodes(cache=False)
         self.assertEqual(nodes.count(), 3)
-        self.assertFalse(hasattr(self.stats, 'saved_flat_nodes'))
+        self.assertIsNone(self.stats.saved_flat_nodes)
 
         # blah
         nodes = self.stats.get_flat_nodes(cache=True)
         self.assertEqual(nodes.count(), 3)
-        self.assertTrue(hasattr(self.stats, 'saved_flat_nodes'))
+        self.assertIsNotNone(self.stats.saved_flat_nodes)
 
     # ******************************
     # StatsTests
@@ -2543,8 +2543,8 @@ class StatsTests(TestCase):
     # StatsTests
     # ******************************
     def test_cache(self):
-        assert not hasattr(self.stats, 'saved_nodes')
-        assert not hasattr(self.stats, 'saved_flat_nodes')
+        assert self.stats.saved_nodes is None
+        assert self.stats.saved_flat_nodes is None
 
         # blah
         self.stats.cache(lazy=True)
@@ -2552,8 +2552,8 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.saved_flat_nodes.count(), 0)
 
         # blah
-        del self.stats.saved_nodes
-        del self.stats.saved_flat_nodes
+        self.stats.saved_nodes = None
+        self.stats.saved_flat_nodes = None
         self.stats.cache(lazy=False)
         self.assertEqual(self.stats.saved_nodes.count(), 4)
         self.assertEqual(self.stats.saved_flat_nodes.count(), 3)
@@ -2959,7 +2959,7 @@ class TheoryPointerBaseTests(TestCase):
     # TheoryPointerBaseTests
     # ******************************
 
-    def test_get_node_id(self):
+    def test_get_node_pk(self):
         pass
 
     # ******************************
@@ -3092,7 +3092,7 @@ class NodePointerBaseTests(TestCase):
     # NodePointerBaseTests
     # ******************************
 
-    def test_get_node_id(self):
+    def test_get_node_pk(self):
         pass
 
     # ******************************

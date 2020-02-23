@@ -12,23 +12,38 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-from django import forms
-from django.forms import ModelForm
-from django.contrib.auth.forms import AuthenticationForm
-from django.db.models import Q
 
+# *******************************************************************************
+# Imports
+# *******************************************************************************
+from django import forms
 from notifications.models import Notification
 
-from .models import *
+from users.models import *
 from core.utils import get_first_or_none
 
 
-class UserForm(forms.ModelForm):
+# *******************************************************************************
+# Classes
+#
+#
+#
+#
+#
+#
+#
+#
+# *******************************************************************************
 
-    # ******************************
-    #
-    # ******************************
+class UserForm(forms.ModelForm):
+    """Todo
+
+    Attributes:
+        forms ([type]): [description]
+    """
+
     class Meta:
+        """Where the form options are defined."""
         model = User
         fields = (
             'username',
@@ -69,12 +84,13 @@ class UserForm(forms.ModelForm):
             'birth_date': 'YYYY-MM-DD',
         }
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         super(UserForm, self).__init__(*args, **kwargs)
-        instance = kwargs.get('instance', None)
         self.fields['email'].widget.attrs['readonly'] = True
         self.fields['sex'].required = False
         self.fields['location'].required = False
@@ -90,16 +106,11 @@ class SelectNotificationForm(forms.ModelForm):
     # non-model fields
     select = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Notification
         fields = ('select',)
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         super().__init__(*args, **kwargs)
@@ -112,16 +123,11 @@ class SelectViolationForm(forms.ModelForm):
     # non-model fields
     select = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Violation
         fields = ('select',)
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         super().__init__(*args, **kwargs)
@@ -146,6 +152,7 @@ class ReportViolationForm(forms.ModelForm):
     )
 
     class Meta:
+        """Where the form options are defined."""
         model = Violation
         fields = ('offender', 'offences', 'intent', 'explanation')
         widgets = {
@@ -157,11 +164,11 @@ class ReportViolationForm(forms.ModelForm):
         self.user = kwargs.pop('user')
         self.content = kwargs.pop('content')
         super().__init__(*args, **kwargs)
-        # populate choices
+        # Populate choices
         self.fields['offender'].choices = [('', '----')]
         if self.content.__class__.__name__ == 'TheoryNode':
-            self.fields['offender'].choices += [(x.pk, x.username)
-                                                for x in self.content.get_collaborators(exclude=self.user)]
+            self.fields['offender'].choices += \
+                [(x.pk, x.username) for x in self.content.get_collaborators(exclude=self.user)]
             if self.content.is_theory():
                 self.fields['offences'].choices = Violation.THEORY_OFFENCES
             else:
@@ -169,15 +176,22 @@ class ReportViolationForm(forms.ModelForm):
         elif self.content.__class__.__name__ == 'Violation':
             exclude = [User.get_system_user(), self.user]
             exclude = None
-            self.fields['offender'].choices += [(x.pk, x.username)
-                                                for x in self.content.get_feedback_users(exclude=exclude)]
+            self.fields['offender'].choices += \
+                [(x.pk, x.username) for x in self.content.get_feedback_users(exclude=exclude)]
             self.fields['offences'].choices = Violation.RESOLUTION_OFFENCES
-        # feedback
+        # Feedback
         self.fields['explanation'].required = False
 
     def save(self, commit=True):
+        """Todo
 
-        # violation
+        Args:
+            commit (bool, optional): [description]. Defaults to True.
+
+        Returns:
+            [type]: [description]
+        """
+        # Violation
         created = False
         violation = None
         offender = self.cleaned_data['offender']
@@ -185,7 +199,7 @@ class ReportViolationForm(forms.ModelForm):
             if x.is_open():
                 violation = x
                 break
-        # create and save (commit)
+        # Create and save (commit)
         if violation is None:
             violation = super().save(commit=False)
             violation.status = Violation.STATUS.POLLING
@@ -194,7 +208,7 @@ class ReportViolationForm(forms.ModelForm):
             if commit:
                 violation.save()
 
-        # feedback
+        # Feedback
         if violation.id is not None:
             # check for previous report
             feedback = get_first_or_none(
@@ -203,7 +217,7 @@ class ReportViolationForm(forms.ModelForm):
                 user=self.user,
                 action=ViolationFeedback.ACTIONS00.REPORTED,
             )
-            # create new report
+            # Create new report
             if feedback is None:
                 # intent/offences
                 offence_list = str([int(x)
@@ -215,7 +229,7 @@ class ReportViolationForm(forms.ModelForm):
                     action=ViolationFeedback.ACTIONS00.REPORTED,
                     comment=comment,
                 )
-            # create poll
+            # Create poll
             if created:
                 system_user = User.get_system_user()
                 violation.feedback.create(
@@ -223,12 +237,16 @@ class ReportViolationForm(forms.ModelForm):
                     action=ViolationFeedback.ACTIONS01.OPEN_POLL,
                 )
 
-        # done
+        # Done
         return violation
 
 
 class ResolveViolationForm(forms.ModelForm):
+    """Todo
 
+    Attributes:
+        forms ([type]): [description]
+    """
     offences = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         choices=Violation.THEORY_OFFENCES,
@@ -241,10 +259,8 @@ class ResolveViolationForm(forms.ModelForm):
         label='Intent (as interpreted by you)',
     )
 
-    # ******************************
-    # ResolveViolationForm
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = ViolationFeedback
         fields = ('action', 'comment')
         labels = {
@@ -255,10 +271,12 @@ class ResolveViolationForm(forms.ModelForm):
             'comment': forms.Textarea(attrs={'max_length': 700, 'rows': 4, 'style': 'width:100%;'}),
         }
 
-    # ******************************
-    # ResolveViolationForm
-    # ******************************
     def __init__(self, *args, **kwargs):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         # setup
         self.user = kwargs.pop('user')
         self.violation = kwargs.pop('violation')
@@ -286,11 +304,15 @@ class ResolveViolationForm(forms.ModelForm):
         elif content.__class__.__name__ == 'Violation':
             self.fields['offences'].choices = Violation.RESOLUTION_OFFENCES
 
-    # ******************************
-    # ResolveViolationForm
-    # ******************************
     def save(self, commit=True):
+        """Todo
 
+        Args:
+            commit (bool, optional): [description]. Defaults to True.
+
+        Returns:
+            [type]: [description]
+        """
         # setup
         feedback = super().save(commit=False)
         if not self.user.has_perm('users.can_comment_violation', self.violation) and \
@@ -330,22 +352,26 @@ class ResolveViolationForm(forms.ModelForm):
 
 
 class VoteForm(forms.ModelForm):
+    """Todo
 
-    # ******************************
-    # VoteForm
-    # ******************************
+    Attributes:
+
+    """
+
     class Meta:
+        """Where the form options are defined."""
         model = ViolationVote
         fields = ('action',)
         labels = {
             'action':   'Your Vote',
         }
 
-    # ******************************
-    # VoteForm
-    # ******************************
     def __init__(self, *args, **kwargs):
+        """Todo
 
+        Returns:
+            [type]: [description]
+        """
         # setup
         self.user = kwargs.pop('user')
         self.violation = kwargs.pop('violation')
@@ -367,14 +393,19 @@ class VoteForm(forms.ModelForm):
         # blah
         self.fields['action'].required = False
 
-    # ******************************
-    # VoteForm
-    # ******************************
     def save(self, commit=True):
-        # blah
+        """Todo
+
+        Args:
+            commit (bool, optional): [description]. Defaults to True.
+
+        Returns:
+            [type]: [description]
+        """
+        # Preconditions
         if not self.user.has_perm('users.can_vote_violation', self.violation):
             return None
-        # save
+        # Save
         vote = super().save(commit=False)
         if commit:
             vote.save()

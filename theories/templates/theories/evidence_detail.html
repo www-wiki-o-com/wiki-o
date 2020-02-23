@@ -37,7 +37,7 @@ A web service for sharing opinions and avoiding arguments
         <div style="text-align: justify">{{ evidence.details|bibliography }}</div>
         <!-- Back -->
         <a href={{ prev }}> Go to parent theory. </a>
-        
+
       </div> <!-- end card -->
     </div> <!-- end column -->
     <div class="col-md-4"> <!-- Sidebar Column -->
@@ -47,7 +47,7 @@ A web service for sharing opinions and avoiding arguments
         <h5 class="card-header">Actions</h5>
         <div class="card-body">
           <ul class="list-unstyled mb-0">
-            
+
             <!-- Edit -->
             {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
             {% if can_edit %}
@@ -89,7 +89,7 @@ A web service for sharing opinions and avoiding arguments
           </div>
         </div>
       </div>
-      
+
       <!-- Search -->
       <div class="card my-3">
         <h5 class="card-header">Search</h5>

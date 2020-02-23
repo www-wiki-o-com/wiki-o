@@ -32,7 +32,7 @@ Ubuntu Packages
     $ sudo apt install alpine
     $ sudo apt install python3
     $ sudo apt install python3-pip
-    $ sudo apt install apache2 
+    $ sudo apt install apache2
     $ sudo apt install libapache2-mod-wsgi-py3
     $ sudo apt install dnsutils
     $ sudo apt install vim

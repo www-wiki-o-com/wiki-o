@@ -24,8 +24,8 @@ A web service for sharing opinions and avoiding arguments
 {% block content %}
   <!-- Title -->
   <h3>
-    <br> 
-    Welcome to the opinion wizard. 
+    <br>
+    Welcome to the opinion wizard.
     <small><small><small>
       <a href="{% url_extra 'theories:opinion-edit' theory.id extra=params %}">
         (switch to advanced editor)
@@ -33,7 +33,7 @@ A web service for sharing opinions and avoiding arguments
     </small></small></small>
   </h3>
   <h5> Complete the following steps to form an opinion for &ldquo;{{ theory }}&rdquo; </h5>
-  
+
   <form action="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}" method="post">
     {% csrf_token %}
     {{ opinion_form.id }}
@@ -77,8 +77,8 @@ A web service for sharing opinions and avoiding arguments
             <table class="table-hover">
               <thead style="text-align:center" valign="bottom">
                 <th width="40"/>
-                <th width="30"/> 
-                <th style="text-align:left"> Evidence/Sub-Theories </th> 
+                <th width="30"/>
+                <th style="text-align:left"> Evidence/Sub-Theories </th>
               </thead>
               <tbody align="left" valign="top">
                 <tr> <td/></td><td/><td/> </tr>
@@ -105,8 +105,8 @@ A web service for sharing opinions and avoiding arguments
             <table class="table-hover">
               <thead style="text-align:center" valign="bottom">
                 <th width="40"/>
-                <th width="30"/> 
-                <th style="text-align:left"> Evidence/Sub-Theories </th> 
+                <th width="30"/>
+                <th style="text-align:left"> Evidence/Sub-Theories </th>
               </thead>
               <tbody align="left" valign="top">
                 <tr> <td/></td><td/><td/>  </tr>
@@ -124,7 +124,7 @@ A web service for sharing opinions and avoiding arguments
     <!-- Buttons -->
     <div class="row">
       <div class="col-lg-12">
-        <center>            
+        <center>
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
           <!-- Save -->
@@ -139,7 +139,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% block extra_modals %}
-  
+
   <!-- Delete -->
   {% if opinion.id %}
     <div class="modal" id="del_modal">
@@ -158,7 +158,7 @@ A web service for sharing opinions and avoiding arguments
           </div>
 
           <!-- footer -->
-          
+
           <div class="modal-footer">
             {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
             <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
@@ -178,20 +178,20 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% block extra_js %}
-  
+
   <!-- Enable tool tip for True and False titles. -->
   <script>
     $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip();   
+      $('[data-toggle="tooltip"]').tooltip();
     });
   </script>
 
-  
+
   <script>
     function TFSwap(id) {
       var true_row    = document.getElementById(id + 'T');
       var false_row   = document.getElementById(id + 'F');
-      
+
       if (true_row.style.display == 'none') {
           true_row.style.display  = 'table-row';
           false_row.style.display = 'none';
@@ -201,19 +201,19 @@ A web service for sharing opinions and avoiding arguments
       }
     }
   </script>
-  
+
   <script>
     function TFExpand(id) {
       var true_clp_col = document.getElementById(id + 'TC');
       var true_exp_col = document.getElementById(id + 'TX');
       var true_row     = document.getElementById(id + 'T');
       var false_row    = document.getElementById(id + 'F');
-      
+
       if (false_row.style.display == 'none') {
           // row
           true_row.style.display      = 'table-row';
           false_row.style.display     = 'table-row';
-          
+
           // icon
           true_clp_col.style.display  = 'table-cell';
           true_exp_col.style.display  = 'none';
@@ -228,7 +228,7 @@ A web service for sharing opinions and avoiding arguments
       }
     }
   </script>
-  
+
   <script>
     function ExpandCycleSwap(id) {
         if (id == undefined) {
@@ -243,7 +243,7 @@ A web service for sharing opinions and avoiding arguments
                 exp_col.style.display   = 'table-cell';
             }
         } else {
-          
+
             var swap_col          = document.getElementById('TF_SWAP');
             var true_row          = document.getElementById(id + 'T');
             var false_row         = document.getElementById(id + 'F');
@@ -254,10 +254,10 @@ A web service for sharing opinions and avoiding arguments
             var false_exp_col     = document.getElementById(id + 'FX');
             var false_link_col00  = document.getElementById(id + 'FL0');
             var false_link_col01  = document.getElementById(id + 'FL1');
-            
+
             if (true_swap_col.style.display == 'none') {
                 console.log(212, id);
-            
+
                 // rows
                 true_row.style.display          = 'table-row';
                 false_row.style.display         = 'none';
@@ -265,12 +265,12 @@ A web service for sharing opinions and avoiding arguments
                 // swap
                 true_swap_col.style.display     = 'table-cell';
                 false_swap_col.style.display    = 'table-cell';
-                
+
                 // expand/collapse
                 true_clp_col.style.display      = 'none';
                 true_exp_col.style.display      = 'none';
                 false_exp_col.style.display     = 'none';
-                
+
                 // link
                 false_link_col00.style.display  = 'table-cell';
                 false_link_col01.style.display  = 'none';
@@ -287,12 +287,12 @@ A web service for sharing opinions and avoiding arguments
                 // swap
                 true_swap_col.style.display     = 'none';
                 false_swap_col.style.display    = 'none';
-                
+
                 // expand/collapse
                 true_clp_col.style.display      = 'table-cell';
                 true_exp_col.style.display      = 'none';
                 false_exp_col.style.display     = 'table-cell';
-                
+
                 // link
                 false_link_col00.style.display  = 'none';
                 false_link_col01.style.display  = 'table-cell';

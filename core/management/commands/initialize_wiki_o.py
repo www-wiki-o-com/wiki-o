@@ -18,7 +18,7 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 from django.core.management.base import BaseCommand
 from django.contrib.sites.models import Site
-from users.utils import create_groups_and_permissions
+from users.maintence import create_groups_and_permissions
 from theories.utils import create_categories
 
 

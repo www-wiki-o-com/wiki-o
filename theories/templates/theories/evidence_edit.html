@@ -48,14 +48,14 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-          
+
           <!-- Delete -->
           {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
           <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_delete %} disabled {% endif %}>
             Delete
           </button>
           &nbsp
-          
+
           <!-- Save -->
           {% has_perm 'theories.change_theorynode' user evidence as can_change %}
           <input type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
@@ -64,10 +64,10 @@ A web service for sharing opinions and avoiding arguments
 
         <br>
         {% include "theories/evidence_how2.html" %}
-    
+
       </div> <!-- end column -->
       <div class="col-md-4"> <!-- Sidebar Column -->
-      
+
         <!-- Actions -->
         <div class="card my-3">
           <h5 class="card-header">Actions</h5>

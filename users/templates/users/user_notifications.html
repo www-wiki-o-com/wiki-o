@@ -27,11 +27,11 @@ A web service for sharing opinions and avoiding arguments
     {% csrf_token %}
     {{ formset01.management_form }}
     {{ formset02.management_form }}
-      
+
     <!-- Content -->
     <div class="row"> <!-- Row -->
       <div class="col-lg-8"> <!-- Main Column -->
-        
+
         <!-- Notifications -->
         <div class="card my-3">
           <h5 class="card-header"> Notifications ({{ user }}): </h5>
@@ -158,11 +158,11 @@ A web service for sharing opinions and avoiding arguments
                       </td>
                       <td>
                         <!-- verb -->
-                        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" 
+                        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                            href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
                           {% if feedback.is_unread %}
                             <strong> {{ feedback.get_type }}: {{ feedback.title }} </strong>
-                          {% else %} 
+                          {% else %}
                             {{ feedback.get_type }}: {{ feedback.title }}
                           {% endif %}
                         </a>
@@ -211,16 +211,16 @@ A web service for sharing opinions and avoiding arguments
           <h5 class="card-header"> Actions </h5>
           <div class="card-body">
             <ul class="list-unstyled mb-0">
-              
+
               <!-- Mark for delete -->
               <li><input class="plain" type="submit" name="action" value="Delete"></li>
-              
+
               <!-- Mark as read -->
               <li><input class="plain" type="submit" name="action" value="Mark as Read"></li>
-              
+
               <!-- Mark as read -->
               <li><input class="plain" type="submit" name="action" value="Mark as Un-Read"></li>
-              
+
               <!-- View All -->
               {% if request.GET.date %}
                 <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
@@ -269,7 +269,7 @@ A web service for sharing opinions and avoiding arguments
             {% endif %}
           </div>
         </div>
-       
+
       </div> <!-- end column-->
     </div> <!-- end row -->
   </form>

@@ -174,7 +174,7 @@ class EvidenceShape(SpringShapeBase):
             x (float): The initial x coordinate.
             y (float): The initial y coordinate.
             area (float): The area of the square.
-        """        
+        """
         self.node = node
         self.length = math.sqrt(area)
         bounding_radius = (self.length/2) * math.sqrt(2)

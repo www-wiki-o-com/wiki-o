@@ -21,15 +21,18 @@ from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse
 from django.core.paginator import Paginator
 from django.forms import modelformset_factory
+from django.utils.http import unquote
 from actstream.models import following
 from notifications.models import Notification
 from reversion.models import Version
 
-from users.models import User, Violation
+from users.models import User, Violation, ViolationVote
 from users.forms import UserForm, SelectNotificationForm
-from users.forms import SelectViolationForm, ReportViolationForm, ResolveViolationForm, VoteForm
+from users.forms import SelectViolationForm, ReportViolationForm
+from users.forms import ResolveViolationForm, VoteForm
 from theories.models import Category, TheoryNode, Opinion
-from core.utils import Parameters, get_page_list
+from theories.forms import TheoryForm, TheoryRevisionForm
+from core.utils import Parameters, get_page_list, get_first_or_none
 
 
 # *******************************************************************************
@@ -49,10 +52,16 @@ NUM_ITEMS_PER_PAGE = 25
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
-def PublicProfileView(request, pk):
+def public_profile_view(request, pk):
+    """The public page for a user's profile.
+
+    Args:
+        request (HttpRequest): The HTTP request.
+        pk (int): The user's primary key.
+
+    Returns:
+        HttpResponse: The HTTP response.
+    """
     # Setup
     user = get_object_or_404(User, pk=pk)
     current_user = request.user
@@ -65,21 +74,22 @@ def PublicProfileView(request, pk):
 
     # Navigation
     params = Parameters(request)
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    prev_url = request.META.get('HTTP_REFERER', '/')
 
-    # RENDER
+    # Render
     context = {
         'user':                 user,
         'current_user':         current_user,
         'public_opinions':      public_opinions,
         'private_opinions':     private_opinions,
-        'num_soft_strikes':     user.count_strikes(recent=True, expired=False, soft=True, hard=False),
-        'num_hard_strikes':     user.count_strikes(recent=True, expired=False, soft=False, hard=True),
+        'num_soft_strikes':     user.count_strikes(recent=True, expired=False, soft=True,
+                                                   hard=False),
+        'num_hard_strikes':     user.count_strikes(recent=True, expired=False, soft=False,
+                                                   hard=True),
         'num_expired_strikes':  user.count_strikes(recent=False, expired=True),
         'num_total_strikes':    user.count_strikes(recent=True, expired=True),
-        'prev':                 prev,
-        'params':                params,
+        'prev_url':             prev_url,
+        'params':               params,
     }
     return render(
         request,
@@ -88,36 +98,38 @@ def PublicProfileView(request, pk):
     )
 
 
-# ************************************************************
-#
-# ************************************************************
 @login_required
-def PrivateProfileView(request):
+def private_profile_view(request):
+    """The private page for a user's profile.
 
+    Args:
+        request (HttpRequest): The HTTP request.
+
+    Returns:
+        HttpResponse: The HTTP response.
+    """
     # Setup
     user = request.user
 
     # Navigation
-    prev = reverse('users:profile-detail', kwargs={'pk': user.id})
-    next = reverse('users:profile-detail', kwargs={'pk': user.id})
+    prev_url = reverse('users:profile-detail', kwargs={'pk': user.id})
+    next_url = reverse('users:profile-detail', kwargs={'pk': user.id})
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         form = UserForm(request.POST, instance=user)
         if form.is_valid() and form.has_changed():
             form.save()
-            return redirect(next)
-        else:
-            print(100, form.errors)
+            return redirect(next_url)
 
-    # GET request
+    # Get request
     else:
         form = UserForm(instance=user)
 
-    # RENDER
+    # Render
     context = {
-        'form':   form,
-        'prev':   prev,
+        'form':     form,
+        'prev_url': prev_url,
     }
     return render(
         request,
@@ -126,12 +138,16 @@ def PrivateProfileView(request):
     )
 
 
-# ************************************************************
-# ToDo: double pagination
-# ************************************************************
 @login_required
-def NotificationsView(request):
+def notifications_view(request):
+    """The notifications view for the user.
 
+    Args:
+        request (HttpRequest): The HTTP request.
+
+    Returns:
+        HttpResponse: The HTTP response.
+    """
     # Setup
     user = request.user
     opinions = following(user, Opinion)
@@ -139,10 +155,8 @@ def NotificationsView(request):
     categories = following(user, Category)
     notifications = user.notifications.all()
     user_violations = user.violations.all()
-    NotificationFormset = modelformset_factory(
-        Notification, form=SelectNotificationForm, extra=0)
-    ViolationFormset = modelformset_factory(
-        Violation, form=SelectViolationForm, extra=0)
+    NotificationFormset = modelformset_factory(Notification, form=SelectNotificationForm, extra=0)
+    ViolationFormset = modelformset_factory(Violation, form=SelectViolationForm, extra=0)
 
     # Pagination01
     page01 = request.GET.get('page01')
@@ -156,10 +170,9 @@ def NotificationsView(request):
     user_violations.page_list = get_page_list(paginator02.num_pages, page02, MAX_NUM_PAGES)
 
     # Navigation
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    next_url = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         action = request.POST.get('action')
         formset01 = NotificationFormset(
@@ -185,19 +198,14 @@ def NotificationsView(request):
                 for form in formset01:
                     if form.cleaned_data['select']:
                         form.instance.delete()
-            return redirect(next)
-        else:
-            print(140, formset01.errors)
-            print(142, formset02.errors)
+            return redirect(next_url)
 
-    # GET request
+    # Get request
     else:
-        formset01 = NotificationFormset(
-            queryset=notifications.object_list, prefix='notifications')
-        formset02 = ViolationFormset(
-            queryset=user_violations.object_list, prefix='feedback')
+        formset01 = NotificationFormset(queryset=notifications.object_list, prefix='notifications')
+        formset02 = ViolationFormset(queryset=user_violations.object_list, prefix='feedback')
 
-    # RENDER
+    # Render
     context = {
         'notifications':            notifications,
         'user_violations':          user_violations,
@@ -214,13 +222,16 @@ def NotificationsView(request):
     )
 
 
-# ************************************************************
-#
-# ************************************************************
-def ViolationIndexView(request):
+def violation_index_view(request):
+    """The page for viewing all violations.
 
+    Args:
+        request (HttpRequest): The HTTP request.
+
+    Returns:
+        HttpResponse: The HTTP response.
+    """
     # Setup
-    user = request.user
     date = request.GET.get('date', None)
     violations = Violation.objects.all()
 
@@ -232,9 +243,7 @@ def ViolationIndexView(request):
     # Search
     search_term = request.GET.get('search', '')
     if len(search_term) > 0:
-        print(220, search_term)
-        violations = violations.filter(
-            offender__username__icontains=search_term)
+        violations = violations.filter(offender__username__icontains=search_term)
 
     # Pagination
     page = request.GET.get('page')
@@ -258,11 +267,16 @@ def ViolationIndexView(request):
     )
 
 
-# ************************************************************
-# ToDo: add get_violations to user to filter active violations as well as warnings and accepted
-# ************************************************************
-def ViolationResolveView(request, pk):
+def violation_resolve_view(request, pk):
+    """The public view for the violation.
 
+    Args:
+        request (HttpRequest): The HTTP request.
+        pk (int): The primary key for the violation.
+
+    Returns:
+        HttpResponse: The HTTP response.
+    """
     # Setup
     user = request.user
     violation = get_object_or_404(Violation, pk=pk)
@@ -272,87 +286,72 @@ def ViolationResolveView(request, pk):
     if vote is None:
         vote = ViolationVote(violation=violation, user=user)
 
-    # content - theory_node
+    # Content - theory_node
     content_type = violation.content_type.model
     if content_type == 'theorynode':
         theory_node = violation.content
         revisions = theory_node.get_revisions().filter(
             revision__date_created__date__lte=violation.pub_date)
-        RevisionFormSet = modelformset_factory(
-            Version, form=TheoryRevisionForm, extra=0)
-        revision_formset = RevisionFormSet(queryset=revisions, form_kwargs={
-                                           'user': user, 'hide_delete': True})
+        RevisionFormSet = modelformset_factory(Version, form=TheoryRevisionForm, extra=0)
+        revision_formset = RevisionFormSet(
+            queryset=revisions, form_kwargs={'user': user, 'hide_delete': True})
     else:
         theory_node = None
         revision_formset = []
 
     # Navigation
     params = Parameters(request)
-    prev = reverse('users:violations') + params
-    next = reverse('users:violation-resolve', kwargs={'pk': pk}) + params
+    prev_url = reverse('users:violations') + params
+    next_url = reverse('users:violation-resolve', kwargs={'pk': pk}) + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
 
-        # debug
-        print('\n\n\n')
-        print(request.POST)
-        print('\n\n\n')
-
-        # vote
-        vote_form = VoteForm(request.POST, instance=vote,
-                             violation=violation, user=user, prefix='vote')
-        if 'save_vote' in request.POST.keys() and user.has_perm('users.can_vote_violation', violation):
+        # Vote
+        vote_form = VoteForm(
+            request.POST, instance=vote, violation=violation, user=user, prefix='vote')
+        if 'save_vote' in request.POST.keys() and \
+                user.has_perm('users.can_vote_violation', violation):
             if vote_form.is_valid():
                 vote_form.save()
-            else:
-                print(252, vote_form.errors)
-            return redirect(next)
+            return redirect(next_url)
 
-        # report
+        # Report
         report_form = ReportViolationForm(
             request.POST, content=violation, user=user, prefix='report')
-        if 'save_report' in request.POST.keys() and user.has_perm('users.can_report_violation', violation):
+        if 'save_report' in request.POST.keys() and \
+                user.has_perm('users.can_report_violation', violation):
             if report_form.is_valid():
                 report_form.save()
-            else:
-                print(253, report_form.errors)
-            return redirect(next)
+            return redirect(next_url)
 
-        # comment and override
+        # Comment and override
         feedback_form = ResolveViolationForm(
             request.POST, violation=violation, user=user, prefix='feedback')
-        if 'save_feedback' in request.POST.keys() and user.has_perm('users.can_comment_violation', violation):
+        if 'save_feedback' in request.POST.keys() and \
+                user.has_perm('users.can_comment_violation', violation):
             if feedback_form.is_valid():
                 feedback_form.save()
-            else:
-                print(251, feedback_form.errors)
-            return redirect(next)
+            return redirect(next_url)
 
-        # theory_node
+        # Display the theory node in contention.
         if theory_node is not None:
             theorynode_form = TheoryForm(
                 request.POST, instance=theory_node, user=user, prefix='theorynode')
-            if 'save_theorynode' in request.POST.keys() and user.has_perm('theories.change_theorynode', theory_node):
+            if 'save_theorynode' in request.POST.keys() and \
+                    user.has_perm('theories.change_theorynode', theory_node):
                 if theorynode_form.is_valid():
                     theory_node = theorynode_form.save()
-                    theory_node.update_activity_logs(
-                        user, verb=theorynode_form.get_verb())
-                else:
-                    print(250, theorynode_form.errors)
-                return redirect(next)
+                    theory_node.update_activity_logs(user, verb=theorynode_form.get_verb())
+                return redirect(next_url)
 
-    # GET request
+    # Get request
     else:
-        vote_form = VoteForm(
-            instance=vote, violation=violation, user=user, prefix='vote')
-        report_form = ReportViolationForm(
-            content=violation, user=user, prefix='report')
-        feedback_form = ResolveViolationForm(
-            violation=violation, user=user, prefix='feedback')
+        vote_form = VoteForm(instance=vote, violation=violation, user=user, prefix='vote')
+        report_form = ReportViolationForm(content=violation, user=user, prefix='report')
+        feedback_form = ResolveViolationForm(violation=violation, user=user, prefix='feedback')
         if theory_node is not None:
-            theorynode_form = TheoryForm(
-                instance=theory_node, user=user, prefix='theorynode')
+            theorynode_form = TheoryForm(instance=theory_node, user=user, prefix='theorynode')
         else:
             theorynode_form = None
 
@@ -366,8 +365,8 @@ def ViolationResolveView(request, pk):
         'vote_form':            vote_form,
         'theorynode_form':      theorynode_form,
         'revision_formset':     revision_formset,
-        'params':                params,
-        'prev':                 prev,
+        'params':               params,
+        'prev_url':             prev_url,
     }
     return render(
         request,

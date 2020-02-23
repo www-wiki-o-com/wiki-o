@@ -54,7 +54,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         self.assertFalse(user.has_perm('theories.delete_theorynode'))
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_index(self):
         super().test_get_index(
@@ -62,7 +62,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_index_category(self):
         super().test_get_index_category(
@@ -71,7 +71,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_activity(self):
         super().test_get_activity(
@@ -79,7 +79,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_create(self):
         super().test_get_theory_create(
@@ -88,7 +88,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_detail(self):
         super().test_get_theory_detail(
@@ -96,7 +96,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_edit(self):
         super().test_get_theory_edit(
@@ -105,7 +105,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_merge(self):
         super().test_get_theory_merge(
@@ -114,7 +114,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_backup(self):
         super().test_get_theory_backup(
@@ -123,7 +123,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_restore(self):
         super().test_get_theory_restore(
@@ -132,7 +132,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_activity(self):
         super().test_get_theory_activity(
@@ -140,7 +140,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_edit_evidence(self):
         super().test_get_theory_edit_evidence(
@@ -149,7 +149,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_edit_subtheories(self):
         super().test_get_theory_edit_subtheories(
@@ -158,7 +158,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_theory_inherit(self):
         pass # TODO
@@ -168,7 +168,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         # )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_evidence_detail(self):
         super().test_get_evidence_detail(
@@ -176,7 +176,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_evidence_edit(self):
         super().test_get_evidence_edit(
@@ -185,7 +185,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_evidence_merge(self):
         super().test_get_evidence_merge(
@@ -194,7 +194,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_evidence_restore(self):
         super().test_get_evidence_restore(
@@ -203,7 +203,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_evidence_activity(self):
         super().test_get_evidence_activity(
@@ -211,7 +211,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_opinion_demo(self):
         super().test_get_opinion_demo(
@@ -219,7 +219,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_opinion_detail(self):
         super().test_get_opinion_detail(
@@ -227,7 +227,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_my_opinion(self):
         super().test_get_my_opinion(
@@ -235,7 +235,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_opinion_edit(self):
         super().test_get_opinion_edit(
@@ -243,7 +243,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_opinion_slug(self):
         super().test_get_opinion_slug(
@@ -251,7 +251,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_user_vs_user(self):
         super().test_get_user_vs_user(
@@ -259,7 +259,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_user_vs_slug(self):
         super().test_get_user_vs_slug(
@@ -267,7 +267,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_slug_vs_user(self):
         super().test_get_slug_vs_user(
@@ -275,7 +275,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # GET - Level00User
+    # Get - Level00User
     # ******************************
     def test_get_slug_vs_slug(self):
         super().test_get_slug_vs_slug(
@@ -283,7 +283,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_create(self):
         super().test_post_theory_create(
@@ -293,7 +293,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_edit(self):
         super().test_post_theory_edit(
@@ -303,7 +303,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_merge(self):
         super().test_post_theory_merge(
@@ -313,7 +313,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_backup(self):
         super().test_post_theory_backup(
@@ -323,7 +323,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_delete_backup(self):
         super().test_post_theory_delete_backup(
@@ -333,7 +333,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_edit_evidence(self):
         super().test_post_theory_edit_evidence(
@@ -343,7 +343,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_edit_subtheories(self):
         super().test_post_theory_edit_subtheories(
@@ -353,7 +353,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_new_evidence(self):
         super().test_post_theory_new_evidence(
@@ -363,7 +363,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_new_subtheories(self):
         super().test_post_theory_new_subtheories(
@@ -373,7 +373,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_inherit(self):
         pass # TODO
@@ -384,7 +384,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         # )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_delete(self):
         super().test_post_theory_delete(
@@ -394,7 +394,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_convert01(self):
         super().test_post_theory_convert01(
@@ -404,7 +404,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_convert02(self):
         super().test_post_theory_convert02(
@@ -414,7 +414,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_revert(self):
         super().test_post_theory_revert(
@@ -424,7 +424,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_add_to_home(self):
         super().test_post_theory_add_to_home(
@@ -434,7 +434,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_theory_remove_from_home(self):
         super().test_post_theory_remove_from_home(
@@ -444,7 +444,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_edit(self):
         super().test_post_evidence_edit(
@@ -454,7 +454,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_merge(self):
         super().test_post_evidence_merge(
@@ -464,7 +464,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_delete_backup(self):
         super().test_post_evidence_delete_backup(
@@ -474,7 +474,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_delete(self):
         super().test_post_evidence_delete(
@@ -484,7 +484,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_backup(self):
         super().test_post_evidence_backup(
@@ -494,7 +494,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_convert(self):
         super().test_post_evidence_convert(
@@ -504,7 +504,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_evidence_revert(self):
         super().test_post_evidence_revert(
@@ -514,7 +514,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_opinion_new(self):
         super().test_post_opinion_new(
@@ -522,7 +522,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_opinion_edit(self):
         super().test_post_opinion_edit(
@@ -530,7 +530,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_delete_my_opinion(self):
         super().test_post_delete_my_opinion(
@@ -538,7 +538,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_delete_bobs_opinion(self):
         super().test_post_delete_bobs_opinion(
@@ -546,7 +546,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_opinion_copy(self):
         super().test_post_opinion_copy(
@@ -554,7 +554,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_hide_my_opinion(self):
         super().test_post_hide_my_opinion(
@@ -562,7 +562,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_hide_bobs_opinion(self):
         super().test_post_hide_bobs_opinion(
@@ -570,7 +570,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_reveal_my_opinion(self):
         super().test_post_reveal_my_opinion(
@@ -578,7 +578,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
         )
 
     # ******************************
-    # POST - Level00User
+    # Post - Level00User
     # ******************************
     def test_post_reveal_bobs_opinion(self):
         super().test_post_reveal_bobs_opinion(

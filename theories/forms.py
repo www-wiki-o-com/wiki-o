@@ -19,17 +19,12 @@ A web service for sharing opinions and avoiding arguments
 import copy
 
 from django import forms
-from django.forms import BaseFormSet, BaseModelFormSet
-from django.forms import Textarea, NumberInput, TextInput
-from django.utils.translation import gettext_lazy as _
+from django.forms import TextInput
 from django.contrib.auth.models import AnonymousUser
-from django.utils import timezone
-
-import reversion
-from actstream import action
 from reversion.models import Version
 
 from .models import *
+
 
 # *******************************************************************************
 # Defines
@@ -60,24 +55,14 @@ DETAILS_CHARFEILD = {
 
 
 # *******************************************************************************
-# forms
-#
-#
-#
-#
-#
-#
-#
-#
+# Forms
 # *******************************************************************************
 
 class TheoryForm(forms.ModelForm):
     """Theory form."""
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         placeholder_text = 'Use this area to provide details of the theory.\n\n'
         placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
         placeholder_text += '  - Evidence or theories that go towards proving or disproving the theory should\n'
@@ -101,9 +86,6 @@ class TheoryForm(forms.ModelForm):
             }),
         }
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly."""
@@ -138,9 +120,6 @@ class TheoryForm(forms.ModelForm):
                 if self.user.has_perm('theories.change_details', self.instance):
                     self.fields['details'].widget.attrs['readonly'] = False
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def clean_title01(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -150,9 +129,6 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.title01
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def clean_title00(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -162,9 +138,6 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.title00
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -174,18 +147,12 @@ class TheoryForm(forms.ModelForm):
         else:
             return self.instance.details
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def get_verb(self):
         if hasattr(self, 'action_verb'):
             return self.action_verb
         else:
             return None
 
-    # ******************************
-    # TheoryForm
-    # ******************************
     def save(self, commit=True):
         """Sets node_type to THEORY."""
         created = self.instance.pk is None
@@ -215,18 +182,11 @@ class TheoryForm(forms.ModelForm):
         return theory
 
 
-# ************************************************************
-# EvidenceForm
-#   pop('user') needs to come before super
-#   super (needs to come before self.fields)
-# ************************************************************
 class EvidenceForm(forms.ModelForm):
     verifiable = forms.BooleanField(initial=False)
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         placeholder_text = 'Use this area to provide details of the evidence.\n\n'
         placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
         placeholder_text += '  - Evidence that could be interpreted as incorrect should either be:\n'
@@ -251,9 +211,6 @@ class EvidenceForm(forms.ModelForm):
             }),
         }
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly. Additionally, evidence
@@ -261,8 +218,10 @@ class EvidenceForm(forms.ModelForm):
 
         # setup
         if 'user' in kwargs.keys():
+            # Needs to come before the call to super.
             self.user = kwargs.pop('user')
         else:
+            # Needs to come before self.fields.
             self.user = AnonymousUser
         super().__init__(*args, **kwargs)
 
@@ -291,9 +250,6 @@ class EvidenceForm(forms.ModelForm):
                 if self.user.has_perm('theories.change_details', self.instance):
                     self.fields['details'].widget.attrs['readonly'] = False
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def clean_title01(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -303,9 +259,6 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.title01
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -315,9 +268,6 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.details
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def clean_verifiable(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
@@ -327,18 +277,12 @@ class EvidenceForm(forms.ModelForm):
         else:
             return self.instance.node_type == TheoryNode.TYPE.FACT
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def get_verb(self):
         if hasattr(self, 'action_verb'):
             return self.action_verb
         else:
             return None
 
-    # ******************************
-    # EvidenceForm
-    # ******************************
     def save(self, commit=True):
         """Sets node_type to EVIDENCE (optinally, verifiable)."""
         # setup
@@ -378,10 +322,8 @@ class CategoryForm(forms.ModelForm):
     # non-model fields
     member = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Category
         fields = ('member', 'title')
         labels = {
@@ -389,9 +331,6 @@ class CategoryForm(forms.ModelForm):
             'member':   '',
         }
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         super().__init__(*args, **kwargs)
@@ -405,16 +344,11 @@ class SelectTheoryNodeForm(forms.ModelForm):
     # non-model fields
     select = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = TheoryNode
         fields = ('select',)
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         # setup
         if 'user' in kwargs.keys():
@@ -438,10 +372,8 @@ class OpinionForm(forms.ModelForm):
     wizard_points = forms.ChoiceField(
         choices=WIZARD_POINTS, widget=forms.RadioSelect)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Opinion
         fields = ('true_input', 'false_input', 'force')
         labels = {
@@ -453,9 +385,6 @@ class OpinionForm(forms.ModelForm):
             'false_input':  TRUE_INPUT_WIDGET,
         }
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
         # setup
@@ -489,9 +418,6 @@ class OpinionForm(forms.ModelForm):
             self.fields['wizard_points'].required = False
             self.fields['wizard_points'].widget = forms.HiddenInput()
 
-    # ******************************
-    # OpinionForm
-    # ******************************
     def save(self, commit=True):
         # setup
         opinion = super().save(commit=False)
@@ -524,10 +450,8 @@ class OpinionNodeForm(forms.ModelForm):
     select_contradict = forms.ChoiceField(
         choices=CHOICES, widget=forms.RadioSelect())
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = OpinionNode
         fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input',
                   'select_collaborate', 'select_contradict')
@@ -544,9 +468,6 @@ class OpinionNodeForm(forms.ModelForm):
             'ff_input':     FALSE_INPUT_WIDGET,
         }
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
 
@@ -634,9 +555,6 @@ class OpinionNodeForm(forms.ModelForm):
                 else:
                     self.dispaly_true = False
 
-    # ******************************
-    # OpinionNodeForm
-    # ******************************
     def save(self, commit=True):
         # setup
         opinion_node = super().save(commit=False)
@@ -680,11 +598,12 @@ class OpinionNodeForm(forms.ModelForm):
         return opinion_node
 
 
-# ************************************************************
-# ToDo: merge with Evidence revision form
-# ************************************************************
 class TheoryRevisionForm(forms.ModelForm):
-    """Theory Revision form."""
+    """Theory Revision form.
+    
+    Todo:
+        * Merge with Evidence revision form.
+    """
 
     # non-model fields
     title01 = forms.CharField(label='True Statement')
@@ -692,16 +611,11 @@ class TheoryRevisionForm(forms.ModelForm):
     details = forms.CharField(**DETAILS_CHARFEILD)
     delete = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Version
         fields = ('title01', 'title00', 'details', 'delete')
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
 
@@ -744,16 +658,11 @@ class EvidenceRevisionForm(forms.ModelForm):
     verifiable = forms.BooleanField(label='Is this verifiable?')
     delete = forms.BooleanField(initial=False)
 
-    # ******************************
-    #
-    # ******************************
     class Meta:
+        """Where the form options are defined."""
         model = Version
         fields = ('title01', 'details', 'verifiable', 'delete',)
 
-    # ******************************
-    #
-    # ******************************
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
 

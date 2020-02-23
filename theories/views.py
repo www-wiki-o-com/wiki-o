@@ -384,7 +384,7 @@ def TheoryCreateView(request, cat):
     params = Parameters(request)
     prev = reverse('theories:index') + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         form = TheoryForm(request.POST, user=user)
         formset = CategoryFormSet(request.POST, queryset=categories)
@@ -403,7 +403,7 @@ def TheoryCreateView(request, cat):
             return redirect(theory.url() + params)
         else:
             print(70, form.errors)
-    # GET request
+    # Get request
     else:
         form = TheoryForm(user=user)
         formset = CategoryFormSet(queryset=categories)
@@ -449,7 +449,7 @@ def TheoryEditView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         form = TheoryForm(request.POST, instance=theory, user=user)
         formset = CategoryFormSet(request.POST, queryset=categories)
@@ -470,7 +470,7 @@ def TheoryEditView(request, pk):
         else:
             print(226, form.errors)
 
-    # GET request
+    # Get request
     else:
         form = TheoryForm(instance=theory, user=user)
         formset = CategoryFormSet(queryset=categories)
@@ -522,7 +522,7 @@ def TheoryEditEvidenceView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = EvidenceFormSet(
             request.POST, queryset=evidence_nodes.object_list, form_kwargs={'user': user})
@@ -539,7 +539,7 @@ def TheoryEditEvidenceView(request, pk):
         else:
             print(238, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = EvidenceFormSet(
             queryset=evidence_nodes.object_list, form_kwargs={'user': user})
@@ -589,7 +589,7 @@ def TheoryEditSubtheoriesView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = SubTheoryFormSet(
             request.POST, queryset=subtheory_nodes.object_list, form_kwargs={'user': user})
@@ -606,7 +606,7 @@ def TheoryEditSubtheoriesView(request, pk):
         else:
             print(220, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = SubTheoryFormSet(
             queryset=subtheory_nodes.object_list, form_kwargs={'user': user})
@@ -661,7 +661,7 @@ def TheoryMergeView(request, pk):
     candidates = paginator.get_page(page)
     candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = MergeFormSet(request.POST, queryset=candidates.object_list)
         if formset.is_valid():
@@ -677,7 +677,7 @@ def TheoryMergeView(request, pk):
         else:
             print(200, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = MergeFormSet(queryset=candidates.object_list)
 
@@ -730,7 +730,7 @@ def TheoryInheritView(request, pk01, pk02):
     candidates = paginator.get_page(page)
     candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = InheritFormSet(request.POST, queryset=candidates.object_list)
         if formset.is_valid():
@@ -746,7 +746,7 @@ def TheoryInheritView(request, pk01, pk02):
         else:
             print(200, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = InheritFormSet(queryset=candidates.object_list)
 
@@ -796,7 +796,7 @@ def TheoryRestoreView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = RevisionFormSet(
             request.POST, queryset=revisions.object_list, form_kwargs={'user': user})
@@ -815,7 +815,7 @@ def TheoryRestoreView(request, pk):
             print(200, formset.errors)
             print(201, request.POST)
 
-    # GET request
+    # Get request
     else:
         formset = RevisionFormSet(
             queryset=revisions.object_list, form_kwargs={'user': user})
@@ -867,7 +867,7 @@ def TheoryBackupView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = BackupFormSet(request.POST, queryset=candidates.object_list)
         if formset.is_valid():
@@ -879,7 +879,7 @@ def TheoryBackupView(request, pk):
         else:
             print(200, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = BackupFormSet(queryset=candidates.object_list)
 
@@ -918,7 +918,7 @@ def TheoryReportView(request, pk):
     else:
         root_theory = theory
 
-    # POST request
+    # Post request
     if request.method == 'POST':
 
         # debug
@@ -935,7 +935,7 @@ def TheoryReportView(request, pk):
         else:
             print(1000, form.errors)
 
-    # GET request
+    # Get request
     else:
         form = ReportViolationForm(user=user, content=theory)
 
@@ -967,7 +967,7 @@ def EvidenceReportView(request, pk):
     prev = evidence.url() + params
     next = evidence.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         form = ReportViolationForm(request.POST, user=user, content=evidence)
         if form.is_valid():
@@ -976,7 +976,7 @@ def EvidenceReportView(request, pk):
         else:
             print(1000, form.errors)
 
-    # GET request
+    # Get request
     else:
         form = ReportViolationForm(user=user, content=evidence)
 
@@ -1100,7 +1100,7 @@ def EvidenceEditView(request, pk):
     prev = evidence.url() + params
     next = evidence.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         form = EvidenceForm(request.POST, instance=evidence, user=user)
         if form.is_valid():
@@ -1112,7 +1112,7 @@ def EvidenceEditView(request, pk):
             return redirect(next)
         else:
             print(226, form.errors)
-    # GET request
+    # Get request
     else:
         form = EvidenceForm(instance=evidence, user=user)
 
@@ -1163,7 +1163,7 @@ def EvidenceMergeView(request, pk):
     candidates = paginator.get_page(page)
     candidates.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = MergeFormSet(request.POST, queryset=candidates.object_list)
         if formset.is_valid():
@@ -1179,7 +1179,7 @@ def EvidenceMergeView(request, pk):
         else:
             print(200, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = MergeFormSet(queryset=candidates.object_list)
 
@@ -1221,7 +1221,7 @@ def EvidenceRestoreView(request, pk):
     prev = evidence.url() + params
     next = evidence.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         formset = RevisionFormSet(
             request.POST, queryset=revisions.object_list, form_kwargs={'user': user})
@@ -1239,7 +1239,7 @@ def EvidenceRestoreView(request, pk):
         else:
             print(200, formset.errors)
 
-    # GET request
+    # Get request
     else:
         formset = RevisionFormSet(
             queryset=revisions.object_list, form_kwargs={'user': user})
@@ -1329,7 +1329,7 @@ def TheoryNodeRemove(request, pk):
     else:
         return reverse('theories:index')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         parent_theory.remove_node(theory_node, user)
         parent_theory.update_activity_logs(
@@ -1340,7 +1340,7 @@ def TheoryNodeRemove(request, pk):
             theory_node.update_activity_logs(user, verb='Deleted.')
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1363,13 +1363,13 @@ def TheoryNodeDelete(request, pk):
         parent_theory = None
         next = reverse('theories:index') + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         theory_node.delete(user)
         theory_node.update_activity_logs(user, verb='Deleted')
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1388,12 +1388,12 @@ def BackupTheoryNode(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         theory_node.save_snapshot(user)
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1412,7 +1412,7 @@ def RevertTheoryNode(request, pk, vid):
     prev = request.META.get('HTTP_REFERER', '/')
     next = theory_node.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         with reversion.create_revision():
             theory_node.save()
@@ -1423,7 +1423,7 @@ def RevertTheoryNode(request, pk, vid):
         theory_node.save()
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1446,7 +1446,7 @@ def TheoryNodeConvert(request, pk):
     else:
         parent_theory = get_object_or_404(TheoryNode, pk=params.path[-1])
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         # convert
         theory_node.convert(user, verifiable=verifiable)
@@ -1460,7 +1460,7 @@ def TheoryNodeConvert(request, pk):
         next = theory_node.url() + params
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1478,13 +1478,13 @@ def TheorySwapTitles(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         theory.swap_titles(user=user)
         theory.update_activity_logs(user, verb='Swapped T/F Titles')
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1504,7 +1504,7 @@ def TheoryAddToHome(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         category_all = get_object_or_404(Category, slug='all')
         theory.categories.add(category_all)
@@ -1512,7 +1512,7 @@ def TheoryAddToHome(request, pk):
                     target=category_all)
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1532,7 +1532,7 @@ def TheoryRemoveFromHome(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         for category in theory.categories.all():
             action.send(user, verb='Removed',
@@ -1540,7 +1540,7 @@ def TheoryRemoveFromHome(request, pk):
         theory.categories.clear()
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -1690,7 +1690,7 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
         population_diagram = OpinionBarGraph(opinion)
         evidence_diagram = None
         evidence = None
-    else: 
+    else:
         points_diagram = None
         population_diagram = None
         evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
@@ -2017,7 +2017,7 @@ def OpinionEditView(request, pk, wizard=False):
     OpinionNodeFormSet = modelformset_factory(
         OpinionNode, form=OpinionNodeForm, extra=theory_nodes.count())
 
-    # POST request
+    # Post request
     if request.method == 'POST':
 
         # setup
@@ -2067,7 +2067,7 @@ def OpinionEditView(request, pk, wizard=False):
             print(2200, opinion_form.errors)
             print(2201, node_formset.errors)
 
-    # GET request
+    # Get request
     else:
         opinion_form = OpinionForm(instance=opinion, wizard=wizard)
         node_formset = OpinionNodeFormSet(queryset=opinion_nodes, initial=initial, form_kwargs={
@@ -2107,7 +2107,7 @@ def OpinionCopy(request, pk):
     params = Parameters(request, pk=pk)
     prev = opinion.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         user_opinion = opinion.copy(user, recursive=recursive)
         user_opinion.update_activity_logs(
@@ -2115,7 +2115,7 @@ def OpinionCopy(request, pk):
         next = user_opinion.url() + params
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -2134,13 +2134,13 @@ def OpinionDelete(request, pk):
     prev = opinion.url() + params
     next = theory.url() + params
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         theory = opinion.theory
         opinion.delete()
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -2158,14 +2158,14 @@ def OpinionHideUser(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         if not opinion.anonymous:
             opinion.anonymous = True
             opinion.save()
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)
 
@@ -2183,13 +2183,13 @@ def OpinionRevealUser(request, pk):
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
-    # POST request
+    # Post request
     if request.method == 'POST':
         if opinion.anonymous:
             opinion.anonymous = False
             opinion.save()
         return redirect(next)
 
-    # GET request
+    # Get request
     else:
         return redirect(prev)

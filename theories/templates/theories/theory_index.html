@@ -111,8 +111,8 @@ A web service for sharing opinions and avoiding arguments
         <h5 class="card-header">Actions</h5>
         <div class="card-body">
           <ul class="list-unstyled mb-0">
-            <!-- Demo -->                
-            <li><a href="{% url 'theories:opinion-demo' %}"> View Demo </a></li>              
+            <!-- Demo -->
+            <li><a href="{% url 'theories:opinion-demo' %}"> View Demo </a></li>
             <!-- Create Theory -->
             {% has_perm 'theories.add_theorynode' user as can_add %}
             {% if can_add %}

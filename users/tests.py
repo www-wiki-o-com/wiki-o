@@ -16,16 +16,16 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import datetime
+
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib import auth
 from notifications.signals import notify
 
 from theories.utils import *
-from users.utils import *
+from users.maintence import create_test_user
 from core.utils import get_form_data
-
-import datetime
 
 
 # *******************************************************************************

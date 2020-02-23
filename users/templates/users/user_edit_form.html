@@ -21,7 +21,7 @@ A web service for sharing opinions and avoiding arguments
 {% block content %}
   <!-- Title -->
   <h3><br>
-    {{ user.get_long }}
+    {{ user.get_fullname }}
   </h3>
 
 
@@ -41,7 +41,7 @@ A web service for sharing opinions and avoiding arguments
                 {{ form.email|as_crispy_field }}
             </div>
           </div>
-          
+
 
           <div class="card my-3">
             <h5 class="card-header">
@@ -56,18 +56,18 @@ A web service for sharing opinions and avoiding arguments
                 {{ form.politics|as_crispy_field }}
             </div>
           </div>
-          
-          
-          
+
+
+
           <center>
             <button><a class="plain" href={{ prev }}>Back</a></button>
             &nbsp
             <input type="submit" name="save" value="Save">
           </center>
-   
+
       </div> <!-- end column -->
       <div class="col-md-4"> <!-- Sidebar Column -->
-      
+
         <!-- Private -->
         <div class="card my-3">
           <h5 class="card-header">Privacy Settings</h5>
@@ -85,10 +85,10 @@ A web service for sharing opinions and avoiding arguments
               <tr><td> {{ form.location_visible.label }}    </td><td class="text-right"> {{ form.location_visible }}    </td></tr>
               <tr><td> {{ form.religion_visible.label }}    </td><td class="text-right"> {{ form.religion_visible }}    </td></tr>
               <tr><td> {{ form.politics_visible.label }}    </td><td class="text-right"> {{ form.politics_visible }}    </td></tr>
-            </table>            
+            </table>
           </div>
         </div>
-      
+
         <!-- Behaviour -->
         <div class="card my-3">
           <h5 class="card-header">Opinion Behaviour</h5>
@@ -102,7 +102,7 @@ A web service for sharing opinions and avoiding arguments
               </thead>
               <tr><td> {{ form.hidden.label }}              </td><td class="text-right"> {{ form.hidden }}              </td></tr>
               <tr><td> {{ form.use_wizard.label }}          </td><td class="text-right"> {{ form.use_wizard }}          </td></tr>
-            </table>            
+            </table>
           </div>
         </div>
 

@@ -49,7 +49,7 @@ A web service for sharing opinions and avoiding arguments
                     {{ form.id }}
                     <td style="text-align:center">{{ form.select }}</td>
                     <td/>
-                    <td>{{ form.instance }}</td>             
+                    <td>{{ form.instance }}</td>
                   </tr>
                 {% endfor %}
               </tbody>
@@ -63,11 +63,11 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-          
+
           <!-- Inherit -->
           {% has_perm 'theories.add_theorynode' user as can_inherit %}
           <input type="submit" name="inherit" value="Inherit" {% if not can_inherit %} disabled {% endif %}>
-          
+
         </center>
       </form>
 
@@ -88,7 +88,7 @@ A web service for sharing opinions and avoiding arguments
           </ul>
         </div>
       </div>
-      
+
       <!-- Search -->
       <div class="card my-3">
         <h5 class="card-header">Search</h5>

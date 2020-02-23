@@ -96,7 +96,7 @@ def ContactView(request):
     # Setup
     user = request.user
 
-    # RENDER
+    # Render
     context = {
     }
     return render(

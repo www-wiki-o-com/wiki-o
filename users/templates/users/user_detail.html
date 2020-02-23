@@ -20,13 +20,13 @@ A web service for sharing opinions and avoiding arguments
 {% block content %}
   <!-- Title -->
   <h3><br>
-    {{ user.get_long }}
+    {{ user.get_fullname }}
   </h3>
 
   <!-- Content -->
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
-      
+
       <!-- Public Opinions -->
       <div class="card my-3">
         {% if current_user == user %}
@@ -133,7 +133,7 @@ A web service for sharing opinions and avoiding arguments
             <!-- Social Links -->
 <!--            <tr><th> Social Links: </th><td class="text-right">  </td></tr>-->
 
-          </table> 
+          </table>
         </div>
       </div>
 
@@ -149,10 +149,10 @@ A web service for sharing opinions and avoiding arguments
             <tr><th style="padding-left:3ex"> Expired     </th><td class="text-left"> {{ num_expired_strikes }} </td></tr>
             <tr style="border-top:2px solid #000; padding-top:0; padding-bottom:0; padding-left:3ex; padding-right:3ex"> <td/><td/> </tr>
             <tr><th style="padding-left:3ex"> Total       </th><td class="text-left"> {{ num_total_strikes }} </td></tr>
-          </table> 
+          </table>
         </div>
       </div>
-     
+
     </div> <!-- end column-->
   </div> <!-- end row -->
 {% endblock %}

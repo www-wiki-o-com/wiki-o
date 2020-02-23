@@ -43,7 +43,9 @@ from hitcount.views import HitCountMixin
 
 from users.models import User, Violation
 from core.utils import QuerySetDict
-from core.utils import get_or_none, get_first_or_none, stream_if_unique, notify_if_unique
+from core.utils import get_or_none, get_first_or_none
+from core.utils import stream_if_unique, notify_if_unique
+from theories.abstract_models import TheoryPointerBase, NodePointerBase
 
 
 # *******************************************************************************
@@ -54,46 +56,45 @@ logger = logging.getLogger('django')
 
 
 # *******************************************************************************
-# Category Model
-#
-#
-#
-#
-#
-#
-#
-#
+# Models
 # *******************************************************************************
 
 class Category(models.Model):
     """A container for categories.
 
-    Attributes:
-        slug (str): The slugified title.
-        title (str): The title of the category.
-        target_actions (Actions): The category's activity stream.
+    A category is a collection of theories that tracks (through an activity stream) all changes
+    to its theory set and any changes to its theories.
+
+    Typical Usuage:
+        * theory.categories.add(category)
+        * theory.categories.remove(category)
+        * category.get_all_theories()
+        * category.update_activity_logs(user, verb, action_object)
+
+    Model Attributes:
+        slug (SlugField): The sluggified title (used for the url).
+        title (CharField): The title of the category.
+
+    Model Relations:
+        objects (QuerySet:Category): The set of categories.
         theories (QuerySet:TheoryNode): The set of theories that belong to the category.
-        deleted_theories (QuerySet:TheoryNode): The set of deleted theories that belonged
-            to the category.
-        followers (QuerySet:Users): TODO
-        objects (QuerySet:Category): TODO
+        target_actions (QuerySet:Actions): The category's activity stream, where the category
+            was the target action.
+        followers (QuerySet:Users): The set of user's following the category.
     """
-
-    # Django place holders for related names
-    objects = None
-    theories = None
-    followers = None
-    target_actions = None
-    deleted_theories = None
-
-    # Django variables
-    title = models.CharField(max_length=50)
     slug = models.SlugField()
-    deleted_theories = models.ManyToManyField(
-        'TheoryNode', related_name='old_categories', symmetrical=False, blank=True)
+    title = models.CharField(max_length=50)
 
     class Meta:
-        """Django's model meta data."""
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         db_table = 'theories_category'
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
@@ -107,7 +108,7 @@ class Category(models.Model):
         return self.title
 
     def save(self, *args, **kwargs):
-        """Save and automatically add the slug."""
+        """Save and automatically update the slug."""
         self.slug = slugify(self.title)
         super().save(*args, **kwargs)
 
@@ -116,16 +117,16 @@ class Category(models.Model):
         """Return the category model with the matching title
 
         Args:
-            title (str): The title of the category.
-            create (bool, optional): If true, the category is created if it doesn't exist.
-            Defaults to False.
+            title (str): The title of the category (full or sluged).
+            create (bool, optional): If true, and the category doesn't exist, then it is created.
+                Defaults to False.
 
         Returns:
             Category: The category matching the title.
         """
         slug = slugify(title)
         if create:
-            category, created = cls.objects.get_or_create(slug=slug) # pylint: disable=W0612
+            category, created = cls.objects.get_or_create(slug=slug)
         else:
             category = get_or_none(cls.objects, slug=slug)
         return category
@@ -198,28 +199,15 @@ class Category(models.Model):
                     notify_if_unique(follower, log)
 
 
-# *******************************************************************************
-# Theory Models
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
-
-
 @reversion.register(fields=['node_type', 'title00', 'title01', 'details'])
 class TheoryNode(models.Model):
     """A container for theory, evidence, and sub-theory data.
 
     Attributes:
-        title00 (str): 
-        title01 (str): 
-        details (str): 
-        node_type (TYPE): 
+        title00 (str):
+        title01 (str):
+        details (str):
+        node_type (TYPE):
         categories (QuerySet:Category):
         pub_date (DateField):
         created_by (User):
@@ -228,7 +216,7 @@ class TheoryNode(models.Model):
         utilization (int):
         rank (int):
         nodes (QuerySet:TheoryNode):
-        flat_nodes (QuerySet:TheoryNode): 
+        flat_nodes (QuerySet:TheoryNode):
         violations (Violation):
     """
 
@@ -266,10 +254,23 @@ class TheoryNode(models.Model):
 
     violations = GenericRelation(Violation)
 
-    # Django place holders for related names
-    objects = None
+    # Cache attributes
+    saved_stats = None
+    saved_nodes = None
+    saved_flat_nodes = None
+    saved_parent_nodes = None
+    saved_opinions = None
 
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         ordering = ['-rank']
         db_table = 'theories_theory_node'
         verbose_name = 'Theory Node'
@@ -487,8 +488,19 @@ class TheoryNode(models.Model):
             self.flat_nodes.add(self.get_intuition_node())
         return self
 
-    # Todo: do not save if datetime matches
     def autosave(self, user, force=False, *args, **kwargs):
+        """Todo
+
+        Args:
+            user ([type]): [description]
+            force (bool, optional): [description]. Defaults to False.
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Do not save if datetime matches.
+        """
         rev_user = None
         save_rev = False
         if self.modified_by is not None and self.modified_by != user:
@@ -514,10 +526,19 @@ class TheoryNode(models.Model):
             reversion.set_user(user)
             reversion.set_comment('Snapshot')
 
-    # ToDo: improve stats calculation
-    # ToDo: add assert
     def swap_titles(self, user=None):
-        """Swap true false titles of theory and permeate the changes to opinions and stats."""
+        """Swap true false titles of theory and permeate the changes to opinions and stats.
+
+        Args:
+            user ([type], optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Improve stats calculation.
+            * Add assert.
+        """
         # error checking
         if not self.assert_theory():
             return False
@@ -544,9 +565,20 @@ class TheoryNode(models.Model):
             stats.swap_true_false()
         return True
 
-    # Todo: allow evidence to have user opinions but not editable ones
-    # ToDo: go over notification logic
     def convert(self, user=None, verifiable=False):
+        """Todo
+
+        Args:
+            user ([type], optional): [description]. Defaults to None.
+            verifiable (bool, optional): [description]. Defaults to False.
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Allow evidence to have user opinions but not editable ones.
+            * Go over notification logic.
+        """
         # setup
         if user is None:
             user = User.get_system_user()
@@ -602,9 +634,19 @@ class TheoryNode(models.Model):
             )
         return True
 
-    # ToDo: delete stats
     def merge(self, theory_node, user=None):
-        """Merge this theory node with another, by absorbing the other node."""
+        """Merge this theory node with another, by absorbing the other node.
+
+        Args:
+            theory_node ([type]): [description]
+            user ([type], optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Delete stats.
+        """
         # error checking
         if self.node_type != theory_node.node_type:
             logger.error('496: Cannot merge theory nodes of different type (pk01=%d, pk02=%d).' % (
@@ -677,9 +719,19 @@ class TheoryNode(models.Model):
         theory_node.delete(user)
         return True
 
-    # ToDo: reset cache
     def delete(self, user=None, soft=True):
-        """Recursively deletes abandoned nodes."""
+        """Recursively deletes abandoned nodes.
+
+        Args:
+            user ([type], optional): [description]. Defaults to None.
+            soft (bool, optional): [description]. Defaults to True.
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Reset cache.
+        """
         # error checking
         if self.pk == self.INTUITION_PK:
             logger.error(
@@ -850,7 +902,7 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         # get non-deleted nodes
-        if hasattr(self, 'saved_nodes'):
+        if self.saved_nodes is not None:
             nodes = self.saved_nodes
         elif cache:
             self.saved_nodes = self.nodes.filter(node_type__gt=0)
@@ -869,7 +921,7 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         # non-deleted nodes
-        if hasattr(self, 'saved_flat_nodes'):
+        if self.saved_flat_nodes is not None:
             flat_nodes = self.saved_flat_nodes
         elif cache:
             self.saved_flat_nodes = self.flat_nodes.filter(
@@ -960,7 +1012,7 @@ class TheoryNode(models.Model):
     def get_parent_nodes(self, deleted=False, cache=False):
         """Returns a list of theories that are parents to this node (does not use cache)."""
         # get non-deleted nodes
-        if hasattr(self, 'saved_parent_nodes'):
+        if self.saved_parent_nodes is not None:
             parent_nodes = self.saved_parent_nodes
         elif cache:
             self.saved_parent_nodes = self.parent_nodes.filter(node_type__gt=0)
@@ -991,7 +1043,7 @@ class TheoryNode(models.Model):
         self.assert_theory()
         # queryset
         opinions = self.opinions.filter(deleted=False)
-        if hasattr(self, 'saved_opinions'):
+        if self.saved_opinions is not None:
             opinions = self.saved_opinions
         elif cache:
             self.saved_opinions = opinions
@@ -1003,7 +1055,7 @@ class TheoryNode(models.Model):
     def get_opinion_nodes(self, cache=False, exclude=None):
         """Return a list opinions pertaining to theory."""
         opinion_nodes = self.opinion_nodes.filter(parent__deleted=False)
-        if hasattr(self, 'saved_opinion_nodes'):
+        if self.saved_opinion_nodes is not None:
             opinions = self.saved_opinion_nodes
         elif cache:
             self.saved_opinion_nodes = opinion_nodes
@@ -1039,7 +1091,7 @@ class TheoryNode(models.Model):
         # error checking
         if not self.assert_theory():
             return None
-        if hasattr(self, 'saved_stats'):
+        if self.saved_stats is not None:
             return self.saved_stats.get(stats_type)
         else:
             return get_or_none(self.stats.all(), stats_type=stats_type)
@@ -1049,7 +1101,7 @@ class TheoryNode(models.Model):
         # error checking
         if not self.assert_theory():
             return None
-        if hasattr(self, 'saved_stats'):
+        if self.saved_stats is not None:
             return self.saved_stats
         elif cache:
             self.saved_stats = QuerySetDict('stats_type', self.stats.all())
@@ -1128,8 +1180,7 @@ class TheoryNode(models.Model):
 
             # categories
             for category in self.categories.all():
-                category.update_activity_logs(
-                    user, nested_verb, action_object=self)
+                category.update_activity_logs(user, nested_verb, action_object=self)
 
             # subscribers
             log['verb'] = '<# target.a_url New activity in "{{ target }}" #>.'
@@ -1171,258 +1222,13 @@ class TheoryNode(models.Model):
         return violations
 
 
-# *******************************************************************************
-# Abstract Classes
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
 
-
-class TheoryPointerBase():
-    """Abstract manager for passing through methods to linked theory."""
-
-    @classmethod
-    def create(cls, theory=None, true_points=0.0, false_points=0.0):
-        """Generator for constructing instances (theory attribute cannot be passed to create in abstract class)."""
-        node = cls()
-        node.theory = theory
-        node.saved_true_points = true_points
-        node.saved_false_points = false_points
-        return node
-
-    def check_data(self):
-        if self.theory.is_evidence():
-            curframe = inspect.currentframe()
-            calframe = inspect.getouterframes(curframe, 2)
-            logger.error(
-                '1006: TheoryPointerBase is pointing at evidence (%d). Problem method: TheoryPointerBase.%s' %
-                (self.theory.pk, calframe[1][3])
-            )
-
-    def __str__(self):
-        """Pass-through for theory."""
-        return self.theory.__str__()
-
-    def url(self):
-        """Return none. Abstract objects have no data in the db."""
-        return None
-
-    def compare_url(self, opinion02=None):
-        """Return none. Abstract objects have no data in the db."""
-        logger.error(
-            '1035: There is no url for an abstract object (%s).' % str(self))
-        return None
-
-    def get_node_id(self):
-        """Returns theory.pk."""
-        return self.theory.pk
-
-    def get_nodes(self):
-        """Return a set of saved nodes."""
-        # error checking
-        self.check_data()
-        # saved nodes
-        if hasattr(self, 'saved_nodes'):
-            return self.saved_nodes
-        else:
-            return []
-
-    def get_flat_nodes(self):
-        """Return a set of saved nodes."""
-        # error checking
-        self.check_data()
-        # saved flat nodes
-        if hasattr(self, 'saved_flat_nodes'):
-            return self.saved_flat_nodes
-        else:
-            return []
-
-    # ToDo: Depreciate?
-    def get_opinions(self):
-        """Return a set of saved opinions or pass-through to theory."""
-        # error checking
-        self.check_data()
-        # saved opinions
-        if hasattr(self, 'saved_opinions'):
-            return self.saved_opinions
-        else:
-            return self.theory.get_opinions()
-
-    def get_point_distribution(self):
-        """Calculate true/false and facts/other point distribution (use cache if available)."""
-        # error checking
-        self.check_data()
-        # point distribution
-        if hasattr(self, 'point_distribution'):
-            return self.point_distribution
-        else:
-            total_points = 0.0
-            distribution = {'true_facts': 0.0, 'true_other': 0.0,
-                            'false_facts': 0.0, 'false_other': 0.0}
-            for evidence_node in self.get_flat_nodes():
-                if evidence_node.is_verifiable():
-                    distribution['true_facts'] += evidence_node.true_points()
-                    distribution['false_facts'] += evidence_node.false_points()
-                else:
-                    distribution['true_other'] += evidence_node.true_points()
-                    distribution['false_other'] += evidence_node.false_points()
-                total_points += evidence_node.total_points()
-            if total_points > 0:
-                distribution['true_facts'] = distribution['true_facts'] / total_points
-                distribution['true_other'] = distribution['true_other'] / total_points
-                distribution['false_facts'] = distribution['false_facts'] / total_points
-                distribution['false_other'] = distribution['false_other'] / total_points
-            self.point_distribution = distribution
-            return distribution
-
-    def true_points(self):
-        """Returns true points."""
-        return self.saved_true_points
-
-    def false_points(self):
-        """Returns false points."""
-        return self.saved_false_points
-
-    def is_true(self):
-        """Returns true if more points are awarded to true."""
-        self.check_data()
-        return self.true_points() >= self.false_points()
-
-    def is_false(self):
-        """Returns true if more points are awarded to false."""
-        self.check_data()
-        return self.false_points() > self.true_points()
-
-    def get_point_range(self):
-        """Return the range of true points this object possesses."""
-        self.check_data()
-        return self.true_points(), self.true_points()
-
-
-class NodePointerBase():
-    """Abstract manager for passing through methods to linked theory_nodes."""
-
-    @classmethod
-    def create(cls, parent=None, theory_node=None, true_points=0.0, false_points=0.0):
-        """Generator for constructing instances (theory attributes cannot be passed to create in abstract class)."""
-        node = cls()
-        node.parent = parent
-        node.theory_node = theory_node
-        node.saved_true_points = true_points
-        node.saved_false_points = false_points
-        return node
-
-    def __str__(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.__str__()
-
-    def get_true_statement(self):
-        """Pass-through method."""
-        return self.theory_node.get_true_statement()
-
-    def get_false_statement(self):
-        """Pass-through method."""
-        return self.theory_node.get_false_statement()
-
-    def get_node_id(self):
-        """Returns theory_node.pk."""
-        return self.theory_node.pk
-
-    def tag_id(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.tag_id()
-
-    def about(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.about()
-
-    def url(self):
-        """Return a url pointing to theory_node's root (not node)."""
-        return None
-
-    def is_theory(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_theory()
-
-    def is_subtheory(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_theory()
-
-    def is_evidence(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_evidence()
-
-    def is_fact(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_fact()
-
-    def is_verifiable(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_verifiable()
-
-    def true_points(self):
-        """Returns true points."""
-        return self.saved_true_points
-
-    def false_points(self):
-        """Returns false points."""
-        return self.saved_false_points
-
-    def total_points(self):
-        """Returns total points."""
-        return self.true_points() + self.false_points()
-
-    def true_percent(self):
-        """Calculate the percentage awarded to true for this node with respect all the parent's nodes."""
-        if self.parent.true_points() > 0:
-            return self.true_points() / self.parent.true_points()
-        else:
-            return 0.0
-
-    def false_percent(self):
-        """Calculate the percentage awarded to false for this node with respect all the parent's nodes (flip true/false if necessary)."""
-        if self.parent.false_points() > 0:
-            return self.false_points() / self.parent.false_points()
-        else:
-            return 0.0
-
-    def true_ratio(self):
-        """Calculate the ratio of true points with respect to the total points."""
-        if self.total_points() > 0:
-            return self.true_points() / self.total_points()
-        else:
-            return 0.0
-
-    def false_ratio(self):
-        """Calculate the ratio of false points with respect to the total points."""
-        if self.total_points() > 0:
-            return self.false_points() / self.total_points()
-        else:
-            return 0.0
-
-
-# *******************************************************************************
-# Opinion Classes
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
-
-
-# ToDo: remove all auto_now and auto_now_add
 class Opinion(TheoryPointerBase, models.Model):
-    """A container for user opinion data."""
+    """A container for user opinion data.
+
+    Todo:
+        * Remove all auto_now and auto_now_add.
+    """
 
     user = models.ForeignKey(
         User, related_name='opinions', on_delete=models.CASCADE)
@@ -1441,10 +1247,16 @@ class Opinion(TheoryPointerBase, models.Model):
 
     rank = models.SmallIntegerField(default=0)
 
-    # Django place holders for related names
-    objects = None
-
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         ordering = ['-rank']
         db_table = 'theories_opinion'
         verbose_name = 'Opinion'
@@ -1486,7 +1298,7 @@ class Opinion(TheoryPointerBase, models.Model):
 
     def is_anonymous(self):
         return self.anonymous or self.user.is_hidden()
-    
+
     def is_true(self):
         return self.true_points() > self.false_points()
 
@@ -1539,7 +1351,7 @@ class Opinion(TheoryPointerBase, models.Model):
 
         # check saved nodes first
         opinion_node = None
-        if hasattr(self, 'saved_nodes'):
+        if self.saved_nodes is not None:
             opinion_node = get_or_none(
                 self.saved_nodes, theory_node=theory_node)
 
@@ -1563,7 +1375,7 @@ class Opinion(TheoryPointerBase, models.Model):
         if verbose_level > 0:
             print("get_nodes()")
         # get nodes
-        if hasattr(self, 'saved_nodes'):
+        if self.saved_nodes is not None:
             nodes = self.saved_nodes
         elif cache:
             self.saved_nodes = self.nodes.all()
@@ -1582,7 +1394,7 @@ class Opinion(TheoryPointerBase, models.Model):
            This action also populates saved_flat_nodes, which is a dictionary of
            non-db objects."""
         # setup
-        if not hasattr(self, 'saved_flat_nodes'):
+        if self.saved_flat_nodes is None:
             self.get_flat_nodes()
         # blah
         node = self.saved_flat_nodes.get(theory_node.pk)
@@ -1603,7 +1415,7 @@ class Opinion(TheoryPointerBase, models.Model):
             print("get_flat_nodes()")
 
         # populate flat nodes
-        if not hasattr(self, 'saved_flat_nodes'):
+        if self.saved_flat_nodes is None:
             # initialize a set of flattened opinion_nodes
             self.saved_flat_nodes = QuerySetDict('theory_node.pk')
 
@@ -1831,7 +1643,7 @@ class Opinion(TheoryPointerBase, models.Model):
         if recursive:
             for subtheory in self.get_subtheory_nodes():
                 root_opinion = subtheory.get_root()
-                if root_opinion is not None and root_opinion.get_node_id() not in path:
+                if root_opinion is not None and root_opinion.get_node_pk() not in path:
                     root_opinion.copy(user, recursive=True)
 
         # stats
@@ -1929,10 +1741,19 @@ class OpinionNode(NodePointerBase, models.Model):
     ft_input = models.SmallIntegerField(default=0)
     ff_input = models.SmallIntegerField(default=0)
 
-    # Django place holders for related names
-    objects = None
+    # Cache attributes
+    saved_root_opinion = None
 
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         db_table = 'theories_opinion_node'
         verbose_name = 'Opinion Node'
         verbose_name_plural = 'Opinion Nodes'
@@ -1952,7 +1773,7 @@ class OpinionNode(NodePointerBase, models.Model):
 
     def get_root(self):
         """Get the user opinion pointing to theory_node."""
-        if hasattr(self, 'saved_root_opinion'):
+        if self.saved_root_opinion is not None:
             root_opinion = self.saved_root_opinion
         else:
             if self.is_subtheory():
@@ -2001,19 +1822,6 @@ class OpinionNode(NodePointerBase, models.Model):
         return not self.parent.theory.get_nodes().filter(pk=self.theory_node.pk).exists()
 
 
-# *******************************************************************************
-# Statistic Classes
-#
-#
-#
-#
-#
-#
-#
-#
-# *******************************************************************************
-
-
 class Stats(TheoryPointerBase, models.Model):
     """A container for theory statistical data."""
 
@@ -2032,10 +1840,16 @@ class Stats(TheoryPointerBase, models.Model):
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
-    # Django place holders for related names
-    objects = None
-
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         db_table = 'theories_stats'
         verbose_name = 'Stats'
         verbose_name_plural = 'Stats'
@@ -2123,12 +1937,12 @@ class Stats(TheoryPointerBase, models.Model):
     def get_node(self, theory_node, create=True):
         """Return the stats node for the corresponding theory_node (optionally, create the stats node)."""
         # check saved nodes first
-        if hasattr(self, 'saved_nodes') and theory_node.pk in self.saved_nodes:
+        if self.saved_nodes is not None and theory_node.pk in self.saved_nodes:
             return self.saved_nodes.get(theory_node.pk)
         # make db query
         elif create:
             node, created = self.nodes.get_or_create(theory_node=theory_node)
-            if hasattr(self, 'saved_nodes'):
+            if self.saved_nodes is not None:
                 self.saved_nodes.add(node)
             return node
         else:
@@ -2136,7 +1950,7 @@ class Stats(TheoryPointerBase, models.Model):
 
     def get_nodes(self, cache=False):
         """Return the stats node for the theory (use cache if available)."""
-        if hasattr(self, 'saved_nodes'):
+        if self.saved_nodes is not None:
             return self.saved_nodes
         elif cache:
             self.saved_nodes = QuerySetDict('theory_node.pk')
@@ -2149,13 +1963,13 @@ class Stats(TheoryPointerBase, models.Model):
     def get_flat_node(self, theory_node, create=True):
         """Return the flat stats node for the input theory_node (optionally, create the node)."""
         # check saved nodes first
-        if hasattr(self, 'saved_flat_nodes') and theory_node.pk in self.saved_flat_nodes:
+        if self.saved_flat_nodes is not None and theory_node.pk in self.saved_flat_nodes:
             return self.saved_flat_nodes.get(theory_node.pk)
         # make db query
         elif create:
             node, created = self.flat_nodes.get_or_create(
                 theory_node=theory_node)
-            if hasattr(self, 'saved_flat_nodes'):
+            if self.saved_flat_nodes is not None:
                 self.saved_flat_nodes.add(node)
             return node
         else:
@@ -2163,7 +1977,7 @@ class Stats(TheoryPointerBase, models.Model):
 
     def get_flat_nodes(self, cache=False):
         """Return a query set of the flat nodes/nested evidence (use cache if available)."""
-        if hasattr(self, 'saved_flat_nodes'):
+        if self.saved_flat_nodes is not None:
             return self.saved_flat_nodes
         elif cache:
             self.saved_flat_nodes = QuerySetDict('theory_node.pk')
@@ -2251,7 +2065,7 @@ class Stats(TheoryPointerBase, models.Model):
 
     def url(self):
         """Return the url for viewing the details of this object (opinion-details)."""
-        return reverse('theories:opinion-slug', kwargs={'pk': self.get_node_id(), 'slug': self.slug()})
+        return reverse('theories:opinion-slug', kwargs={'pk': self.get_node_pk(), 'slug': self.slug()})
 
     def compare_url(self, opinion02=None):
         """Return a url to compare this object with a default object (opinion-compare)."""
@@ -2355,21 +2169,21 @@ class Stats(TheoryPointerBase, models.Model):
     def save_changes(self):
         """Save changes to all nodes."""
         # self
-        if hasattr(self, 'altered') and self.altered:
+        if self.altered:
             self.altered = False
             self.save()
 
         # nodes
-        if hasattr(self, 'saved_nodes'):
+        if self.saved_nodes is not None:
             for node in self.get_nodes():
-                if hasattr(node, 'altered') and node.altered:
+                if node.altered:
                     node.altered = False
                     node.save()
 
         # flat_nodes
-        if hasattr(self, 'saved_flat_nodes'):
+        if self.saved_flat_nodes is not None:
             for flat_node in self.get_flat_nodes():
-                if hasattr(flat_node, 'altered') and flat_node.altered:
+                if flat_node.altered:
                     flat_node.altered = False
                     flat_node.save()
 
@@ -2410,10 +2224,16 @@ class StatsNode(NodePointerBase, models.Model):
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
-    # Django place holders for related names
-    objects = None
-
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         db_table = 'theories_stats_node'
         verbose_name = 'Stats Node'
         verbose_name_plural = 'Stats Node'
@@ -2471,10 +2291,16 @@ class StatsFlatNode(NodePointerBase, models.Model):
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
-    # Django place holders for related names
-    objects = None
-
     class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
         db_table = 'theories_stats_flat_node'
         verbose_name = 'Stats Flat Node'
         verbose_name_plural = 'Stats Flat Nodes'
@@ -2497,26 +2323,26 @@ class StatsFlatNode(NodePointerBase, models.Model):
 
         Returns:
             [type]: [description]
-        """        
+        """
         return get_or_none(self.theory_node.stats, stats_type=self.parent.stats_type)
 
     def true_points(self):
-        """[summary]
+        """Todo
 
         Returns:
             [type]: [description]
-        """        
+        """
         if self.parent.total_points() > 0:
             return self.total_true_points / self.parent.total_points()
         else:
             return 0.0
 
     def false_points(self):
-        """[summary]
-        
+        """Todo
+
         Returns:
             [type]: [description]
-        """        
+        """
         if self.parent.total_points() > 0:
             return self.total_false_points / self.parent.total_points()
         else:
@@ -2524,7 +2350,7 @@ class StatsFlatNode(NodePointerBase, models.Model):
 
     def total_points(self):
         """Returns the total points awarded to this node (a percentage of total).
-        
+
         Returns:
             float: The points.
         """

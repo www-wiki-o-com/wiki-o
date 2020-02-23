@@ -23,7 +23,7 @@ A web service for sharing opinions and avoiding arguments
 {% block content %}
   <!-- Title -->
   <h3 style="padding-top:1ex; margin-bottom:-0.25ex">
-    
+
     <!-- username -->
     {% if opinion|get_class == 'Opinion' and not opinion.is_anonymous %}
       <a class="plain" href="{{ opinion.user.url }}">
@@ -32,19 +32,19 @@ A web service for sharing opinions and avoiding arguments
     {% else %}
       {{ opinion.get_owner_long }}
     {% endif %}
-    believes 
+    believes
     <a href={{ theory.url|add:params }} class="plain">
       <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}> &ldquo;{{ opinion|remove_punctuation }}&rdquo; </font>
     </a>
   </h3>
-  <small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they belong to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %} side)</small>  
-  
+  <small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they belong to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %} side)</small>
+
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
 
       <!-- Details -->
       <!-- <div style="text-align: justify">{{  theory.details|bibliography }}</div> -->
-      
+
       {% if stats %}
 
         <!-- PieChart -->
@@ -71,7 +71,7 @@ A web service for sharing opinions and avoiding arguments
         <a id="VennDiagram" class="anchor" ></a>
         <div class="card my-3">
           <h5 class="card-header">
-            Evidence Dependencies 
+            Evidence Dependencies
             <small><small>
               <a href={{ swap_flat_url }}>
                 {% if flat %}
@@ -110,9 +110,9 @@ A web service for sharing opinions and avoiding arguments
         <h5 class="card-header">Actions</h5>
         <div class="card-body">
           <ul class="list-unstyled mb-0">
-            
+
             {% if opinion|get_class == 'Opinion' %}
-              
+
               <!-- Edit -->
               {% has_perm 'theories.change_opinion' user opinion as can_change %}
               {% if can_change %}
@@ -143,8 +143,8 @@ A web service for sharing opinions and avoiding arguments
               {% if opinion.user != user %}
 
                 <!-- Copy -->
-                <li><a data-target="#copy_modal" data-toggle="modal" href="#copy_modal"> Copy Opinion </a></li>  
-              
+                <li><a data-target="#copy_modal" data-toggle="modal" href="#copy_modal"> Copy Opinion </a></li>
+
                 <!-- Follow/Un-Follow -->
                 {% if user.is_authenticated %}
                   {% if subscribed %}
@@ -153,10 +153,10 @@ A web service for sharing opinions and avoiding arguments
                     <li><a href="{{ opinion|follow_url }}?next={{ request.get_full_path }}"> Follow </a></li>
                   {% endif %}
                 {% endif %}
-              
+
               {% endif %}
             {% endif %}
-            
+
             <!-- Compare -->
             <li><a href="{{ compare_url }}"> Compare </a></li>
 
@@ -164,11 +164,11 @@ A web service for sharing opinions and avoiding arguments
 
             <!-- Share -->
             <li> Share </li>
-          
+
           </ul>
         </div>
       </div>
-      
+
       <!-- Opinions -->
       <div class="card my-3">
         <h5 class="card-header">Other Opinions</h5>
@@ -181,7 +181,7 @@ A web service for sharing opinions and avoiding arguments
                     <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
                   </td>
                   <td><a href="{{ x.url|add:params }}">
-                    &nbsp; {{ x.text }} 
+                    &nbsp; {{ x.text }}
                   </a></td>
                 </tr>
               {% endfor %}

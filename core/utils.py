@@ -62,7 +62,7 @@ def string_to_list(input_string, braces='[]'):
         x = x.strip("'")
         if len(x) > 0:
             if x[0] == left_brace and x[-1] == right_brace:
-                x = str_to_list(x, braces)
+                x = string_to_list(x, braces)
             result.append(x)
     return result
 
@@ -98,7 +98,7 @@ def get_or_none(objects, **kwargs):
 
     Returns:
         Object or None: The unique matching object, None otherwise.
-    """    
+    """
     try:
         return objects.get(**kwargs)
     except ObjectDoesNotExist:
@@ -224,6 +224,16 @@ def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
 # *******************************************************************************
 
 def get_page_list(num_pages, page, max_num_pages=5):
+    """A helper method for constructing Paginator page links.
+
+    Args:
+        num_pages (int): [description]
+        page (int): [description]
+        max_num_pages (int, optional): [description]. Defaults to 5.
+
+    Returns:
+        list[int]: A list of page numbers to display.
+    """
     if page is None:
         page = 1
     page = int(page)
@@ -296,41 +306,99 @@ def get_form_data(response, verbose_level=0):
 
 
 class QuerySetDict():
-    """A class for converting query sets into dicts."""
+    """A class for converting query sets into dicts.
+
+    Attributes:
+        dict (dict):
+    """
 
     def __init__(self, attrib_key, queryset=None):
+        """Todo
+
+        Args:
+            attrib_key ([type]): [description]
+            queryset ([type], optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
         self.dict = {}
+        self.dict_iter = None
         self.attrib_key = attrib_key
         if queryset is not None:
             for x in queryset:
                 self.dict[self.get_key(x)] = x
 
     def __iter__(self):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         self.dict_iter = self.dict.values().__iter__()
         return self
 
     def __next__(self):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         return self.dict_iter.__next__()
 
     def __str__(self):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         return str(list(self))
 
     def get_key(self, obj):
+        """Todo
+
+        Args:
+            obj ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         key = obj
         for key_str in self.attrib_key.split('.'):
             key = getattr(key, key_str)
         return key
 
     def add(self, x):
+        """Todo
+
+        Args:
+            x ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         self.dict[self.get_key(x)] = x
 
     def get(self, key):
+        """Todo
+
+        Args:
+            key ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
         if key in self.dict.keys():
             return self.dict[key]
         else:
             return None
 
     def count(self):
+        """Todo
+
+        Returns:
+            [type]: [description]
+        """
         return len(self.dict)
 
 

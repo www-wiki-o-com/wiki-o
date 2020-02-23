@@ -30,7 +30,7 @@ A web service for sharing opinions and avoiding arguments
 
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
-      
+
       <!-- PieChart -->
       <div class="card my-3">
         <h5 class="card-header"> Point Distribution </h5>
@@ -52,7 +52,7 @@ A web service for sharing opinions and avoiding arguments
       <!-- VennDiagram -->
       <div class="card my-3">
         <h5 class="card-header">
-          Evidence Dependencies 
+          Evidence Dependencies
           <small><small>
             <a href={{ swap_flat_url }}>
               {% if flat %}
@@ -72,9 +72,9 @@ A web service for sharing opinions and avoiding arguments
           {% include "theories/opinion_detail_table.html" with node_list=evidence.collaborative  title="Collaborative evidence" %}
         </div>
       </div>
-      
+
       <p> <a href={{ opinion01.url|add:params }}>Back to Opinion</a> </p>
-    
+
     </div> <!-- end column -->
     <div class="col-md-4"> <!-- Sidebar Column -->
 
@@ -88,7 +88,7 @@ A web service for sharing opinions and avoiding arguments
           </ul>
         </div>
       </div>
-      
+
       <!-- Comparisions -->
       <div class="card my-3">
         <h5 class="card-header">Other Comparisions</h5>
@@ -101,7 +101,7 @@ A web service for sharing opinions and avoiding arguments
                     <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
                   </td>
                   <td><a href="{{ x.url|add:params }}">
-                    &nbsp; {{ x.text }} 
+                    &nbsp; {{ x.text }}
                   </a></td>
                 </tr>
               {% endfor %}

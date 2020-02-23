@@ -44,7 +44,7 @@ A web service for sharing opinions and avoiding arguments
       <tr><th> Status:   </th><td/><td> {{ violation.get_status_str }}                                      </td></tr>
     </tbody>
   </table>
-   
+
   <!-- Title - Violation -->
 
   <!-- Title - Forum -->
@@ -54,7 +54,7 @@ A web service for sharing opinions and avoiding arguments
 
   <div class="row"> <!-- Row -->
     <div class="col-lg-8"> <!-- Main Column -->
-      
+
       <!-- Violation -->
       <div class="card my-3">
         <h5 class="card-header">
@@ -66,7 +66,7 @@ A web service for sharing opinions and avoiding arguments
               <tr>
                 <th style="width:1.5%"/> User </th>
                 <th style="width:1.5%"/>
-                <th style="width:auto"> 
+                <th style="width:auto">
                   Action
                 </th>
                 <th style="width:1.5%"/>
@@ -148,7 +148,7 @@ A web service for sharing opinions and avoiding arguments
           <!-- Current Revision -->
           <div class="card my-3">
             <div class="card-header">
-              <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" 
+              <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                  href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
                 <img src="{% static 'core/img/expand.svg' %}" height='13'>
                 &nbsp
@@ -170,12 +170,12 @@ A web service for sharing opinions and avoiding arguments
           {% for form in revision_formset %}
             <div class="card my-3">
               <div class="card-header">
-                <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" 
+                <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                    href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
                   <img src="{% static 'core/img/expand.svg' %}" height='13'>
                   &nbsp
-                  {{ form.instance.revision.date_created.date|date:"d/m/y" }} - 
-                  {{ form.instance.revision.comment }} 
+                  {{ form.instance.revision.date_created.date|date:"d/m/y" }} -
+                  {{ form.instance.revision.comment }}
                   ({{ form.instance.revision.user }})
                 </a>
               </div>
@@ -186,7 +186,7 @@ A web service for sharing opinions and avoiding arguments
               </div>
             </div>
           {% endfor %}
-      
+
       {% endif %}
 
 
@@ -196,7 +196,7 @@ A web service for sharing opinions and avoiding arguments
       {% endif %}
 
       <a href={{ prev }}>Go back to violations.</a>
-    
+
     </div> <!-- end column -->
     <div class="col-md-4"> <!-- Sidebar Column -->
 
@@ -219,7 +219,7 @@ A web service for sharing opinions and avoiding arguments
             {% else %}
               <li><a href="{% add_params request.get_full_path voters='True' %}"> Show Individual Votes </a></li>
             {% endif %}
-            
+
             <!-- Report -->
             <li><a data-target="#report_modal" data-toggle="modal" href="#report_modal"> Report a Violation </a></li>
 
@@ -233,7 +233,7 @@ A web service for sharing opinions and avoiding arguments
           Poll Closes {{ violation.get_end_date|date:"M d, Y" }}
         </h5>
         <div class="card card-body">
-        
+
           <!-- votes -->
           {% if request.GET.voters %}
             <center>
@@ -241,7 +241,7 @@ A web service for sharing opinions and avoiding arguments
                 <thead>
                   <tr>
                     <th> Voter </th> <th class="text-right"> Vote </th>
-                  </tr> 
+                  </tr>
                 </thead>
                 <tr style="border-top:2px solid #000;"> <td/><td/> </tr>
                 <tbody>
@@ -267,7 +267,7 @@ A web service for sharing opinions and avoiding arguments
               </table>
             </center>
           {% endif %}
-          
+
           <!-- vote -->
           <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
             {% csrf_token %}

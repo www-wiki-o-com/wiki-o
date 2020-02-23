@@ -34,13 +34,13 @@ A web service for sharing opinions and avoiding arguments
         {% include "include/link.html" with x=theory_node %}
         {% include "include/info.html" with x=theory_node %}
       </td>
-         
+
       <!-- Swap True/False -->
       <td/>
-      
+
       <!-- Description -->
       <td style="text-align:left"> {{ theory_node.get_title }} </td>
-      
+
       <!-- Button -->
       {% if ID_POSTFIX == '01' %}
         <td><span class="radio"> {{ form.select_collaborate.0.tag }} </span></td>
@@ -64,7 +64,7 @@ A web service for sharing opinions and avoiding arguments
         {% include "include/link.html" with x=theory_node %}
         {% include "include/info.html" with x=theory_node %}
       </td>
-      
+
       <!-- Swap True/False -->
       <td id={{ theory_node.tag_id }}{{ ID_POSTFIX }}TS style="display:table-cell; text-align:center;">
         {% if theory_node.is_subtheory %}
@@ -89,7 +89,7 @@ A web service for sharing opinions and avoiding arguments
           </a>
         {% endif %}
       </td>
-      
+
       <!-- Description -->
       <td style="text-align:left">
         {% if form.url %}
@@ -122,7 +122,7 @@ A web service for sharing opinions and avoiding arguments
         {% include "include/info.html" with x=theory_node %}
       </td>
       <td id={{ theory_node.tag_id }}{{ ID_POSTFIX }}FL1 style="display:none; text-align:center;"/>
-      
+
       <!-- Swap True/False -->
       <td id={{ theory_node.tag_id }}{{ ID_POSTFIX }}FS style="display:table-cell; text-align:center;">
         {% if theory_node.is_subtheory %}
@@ -132,7 +132,7 @@ A web service for sharing opinions and avoiding arguments
         {% endif %}
       </td>
       <td id={{ theory_node.tag_id }}{{ ID_POSTFIX }}FX style="display:none; text-align:center;"/>
-      
+
       <!-- Description -->
       <td style="text-align:left">
         {% if form.url %}

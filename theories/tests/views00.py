@@ -27,7 +27,7 @@ from theories.models import *
 from theories.forms import *
 from theories.views import *
 from theories.utils import *
-from users.utils import *
+from users.maintence import create_test_user
 from core.utils import get_form_data
 
 
@@ -144,7 +144,7 @@ class ViewsTestBase():
             '?')[0], redirect_url.split('?')[0])
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_index(self, override=False):
         test_url = reverse('theories:index')
@@ -153,7 +153,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_index_category(self, override=False, category='all'):
         test_url = reverse('theories:theories', kwargs={'cat': category})
@@ -162,7 +162,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_activity(self, override=False):
         test_url = reverse('theories:activity', kwargs={'cat': 'all'})
@@ -171,7 +171,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_create(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-create', kwargs={'cat': 'all'})
@@ -181,7 +181,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_detail(self, override=False):
         test_url = reverse('theories:theory-detail',
@@ -191,7 +191,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-edit',
@@ -202,7 +202,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_merge(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-merge',
@@ -213,7 +213,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_backup(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-backup',
@@ -224,7 +224,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_restore(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-restore',
@@ -235,7 +235,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_activity(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-activity',
@@ -246,7 +246,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit_evidence(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-edit-evidence',
@@ -257,7 +257,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit_subtheories(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-edit-subtheories',
@@ -268,7 +268,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_theory_inherit(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:theory-inherit',
@@ -279,7 +279,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_detail(self, override=False):
         test_url = reverse('theories:evidence-detail',
@@ -289,7 +289,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_edit(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:evidence-edit',
@@ -300,7 +300,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_merge(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:evidence-merge',
@@ -311,7 +311,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_restore(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:evidence-restore',
@@ -322,7 +322,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_activity(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:evidence-activity',
@@ -333,7 +333,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_demo(self, override=False):
         test_url = reverse('theories:opinion-demo')
@@ -342,7 +342,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_detail(self, override=False):
         test_url = reverse('theories:opinion-detail',
@@ -352,7 +352,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_my_opinion(self, override=False, redirect_url=None, code=302):
         test_url = reverse('theories:get_my_opinion',
@@ -363,7 +363,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_edit(self, override=False, redirect_url=None, code=200):
         test_url = reverse('theories:opinion-edit',
@@ -374,7 +374,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_slug(self, override=False):
         test_url = reverse('theories:opinion-slug',
@@ -384,7 +384,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_user_vs_user(self, override=False):
         test_url = reverse('theories:opinion-user_vs_user',
@@ -394,7 +394,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_user_vs_slug(self, override=False):
         test_url = reverse('theories:opinion-user_vs_slug',
@@ -404,7 +404,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_slug_vs_user(self, override=False):
         test_url = reverse('theories:opinion-slug_vs_user',
@@ -414,7 +414,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # GET - ViewsTestBase
+    # Get - ViewsTestBase
     # ******************************
     def test_get_slug_vs_slug(self, override=False):
         test_url = reverse('theories:opinion-slug_vs_slug',
@@ -424,7 +424,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # test categories
     # test activity
     # test notifications
@@ -454,7 +454,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
 
     def test_post_theory_edit(self, override=False, redirect_url=None, code=302, modified=True):
@@ -504,7 +504,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_backup(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -530,7 +530,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_delete_backup(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -554,7 +554,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_edit_evidence(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -579,7 +579,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_edit_subtheories(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -604,7 +604,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_new_evidence(self, override=False, redirect_url=None, code=302, created=True):
         # setup
@@ -630,7 +630,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_new_subtheories(self, override=False, redirect_url=None, code=302, created=True):
         # setup
@@ -656,7 +656,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_inherit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -680,7 +680,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_delete(self, override=False, redirect_url=None, code=302, deleted=True):
         # setup
@@ -703,7 +703,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_convert01(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
@@ -723,7 +723,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_convert02(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
@@ -744,7 +744,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_revert(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -771,7 +771,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_add_to_home(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
@@ -789,7 +789,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_theory_remove_from_home(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
@@ -807,7 +807,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_edit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -858,7 +858,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_delete_backup(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -882,7 +882,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_delete(self, override=False, redirect_url=None, code=302, deleted=True):
         # setup
@@ -906,7 +906,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_backup(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -928,7 +928,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_convert(self, override=False, redirect_url=None, code=302, modified=True):
        # test response
@@ -947,7 +947,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_evidence_revert(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -974,7 +974,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_opinion_new(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
@@ -999,7 +999,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_opinion_edit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -1024,7 +1024,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_delete_my_opinion(self, override=False, redirect_url=None, code=302, deleted=True):
         # setup
@@ -1048,7 +1048,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_delete_bobs_opinion(self, override=False, redirect_url=None, code=403, deleted=False):
         # setup
@@ -1072,7 +1072,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_opinion_copy(self, override=False, redirect_url=None, code=302, copied=True):
         # setup
@@ -1098,7 +1098,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_hide_my_opinion(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -1121,7 +1121,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_hide_bobs_opinion(self, override=False, redirect_url=None, code=403, modified=False):
         # setup
@@ -1144,7 +1144,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_reveal_my_opinion(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
@@ -1167,7 +1167,7 @@ class ViewsTestBase():
         self.assertTrue(override)
 
     # ******************************
-    # POST - ViewsTestBase
+    # Post - ViewsTestBase
     # ******************************
     def test_post_reveal_bobs_opinion(self, override=False, redirect_url=None, code=403, modified=False):
         # setup

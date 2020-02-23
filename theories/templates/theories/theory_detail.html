@@ -113,7 +113,7 @@ A web service for sharing opinions and avoiding arguments
           </ul>
         </div>
       </div>
-      
+
       <!-- Stats -->
       <div class="card my-3">
         <h5 class="card-header">
@@ -145,7 +145,7 @@ A web service for sharing opinions and avoiding arguments
           </div>
         </div>
       </div>
-      
+
       <!-- Social Media -->
       <div class="card my-3">
         <h5 class="card-header">Social Media</h5>
@@ -193,7 +193,7 @@ A web service for sharing opinions and avoiding arguments
 
         <!-- footer -->
         <div class="modal-footer">
-        
+
           <!-- remove edge -->
           {% if params.path %}
             {% has_perm 'theories.delete_edge' user theory as can_remove %}
@@ -202,14 +202,14 @@ A web service for sharing opinions and avoiding arguments
               <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
             </form>
           {% endif %}
-          
+
           <!-- full delete -->
           {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
           <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
             {% csrf_token %}
             <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
           </form>
-          
+
           <!-- cancel -->
           <button type="button" class="btn" data-dismiss="modal">No</button>
 

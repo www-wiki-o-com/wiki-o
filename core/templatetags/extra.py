@@ -173,7 +173,7 @@ def make_safe(text):
 
     Returns:
         str: Safe text.
-    """    
+    """
     result = text.replace('{', '[[').replace('}', ']]')
     result = result.replace('<', '&lt;').replace('>', '&gt;')
     return result

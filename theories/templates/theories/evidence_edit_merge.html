@@ -49,12 +49,12 @@ A web service for sharing opinions and avoiding arguments
                     {{ form.id }}
                     <td style="text-align:center">{{ form.select }}</td>
                     <td/>
-                    <td>{{ form.instance }}</td>             
+                    <td>{{ form.instance }}</td>
                   </tr>
                 {% endfor %}
                 <td><br></td>
               </tbody>
-            </table> 
+            </table>
           </div>
         </div>
 
@@ -63,13 +63,13 @@ A web service for sharing opinions and avoiding arguments
 
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-          
+
           <!-- Merge -->
           {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
           <button type="button" data-toggle="modal" data-target="#merge_modal" {% if not can_merge %} disabled {% endif %}>
             Merge
           </button>
-          
+
         </center>
 
 
@@ -116,7 +116,7 @@ A web service for sharing opinions and avoiding arguments
           </ul>
         </div>
       </div>
-      
+
       <!-- Search -->
       <div class="card my-3">
         <h5 class="card-header">Search</h5>

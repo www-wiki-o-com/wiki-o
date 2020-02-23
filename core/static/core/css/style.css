@@ -24,12 +24,12 @@ a:visited {
 }
 a.plain:visited, a.plain:link {
   color: black;
-  text-decoration: none; 
+  text-decoration: none;
 }
 input.plain {
      background:none!important;
      color:blue;
-     border:none; 
+     border:none;
      padding:0!important;
      font: inherit;
      cursor: pointer;
@@ -48,7 +48,7 @@ input.plain {
 }
 .bib li:before {
   content:      "[" counter(step-counter) "]";
-  display:      inline-block; 
+  display:      inline-block;
   width:        3.3ex;
   margin-left:  -2em;
 }
@@ -69,7 +69,7 @@ input.plain {
     visibility:     hidden;
     border-radius:  6px;
     padding:        8px 8px;
-    
+
 }
 :hover.about span {
     visibility:     visible;
@@ -92,7 +92,7 @@ input.plain {
 tbody.responsive {
     display:        block;
     max-height:     5000px;
-    overflow-y:     auto; 
+    overflow-y:     auto;
     overflow-x:     hidden;
 }
 

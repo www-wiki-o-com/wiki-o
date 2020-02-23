@@ -24,15 +24,15 @@ A web service for sharing opinions and avoiding arguments
 {% block content %}
   <!-- Title -->
   <h3>
-    <br> 
-    &ldquo;{{ theory }}&rdquo; 
+    <br>
+    &ldquo;{{ theory }}&rdquo;
     <small><small><small>
       <a href="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}">
         (switch to wizard)
       </a>
     </small></small></small>
   </h3>
-  
+
   <div class="row"> <!-- Row -->
     <div class="col-lg-12"> <!-- Main Column -->
 
@@ -54,13 +54,13 @@ A web service for sharing opinions and avoiding arguments
           <div class="card card-body">
             <table class="table-hover" align="center"  width="100%">
               <thead style="text-align:center" valign="bottom">
-                
+
                 <!-- Link -->
                 <th width="17"/>
-                
+
                 <!-- Info -->
                 <th width="17"/>
-                
+
                 <!-- Swap Expand/Cycle -->
                 <th width="20" id=TF_SWAP style="display:table-cell; text-align:center;">
                   <a onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
@@ -72,22 +72,22 @@ A web service for sharing opinions and avoiding arguments
                     <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                   </a>
                 </th>
-                
-                <th style="text-align:left"> Evidence/Sub-Theories </th> 
+
+                <th style="text-align:left"> Evidence/Sub-Theories </th>
                 <th width="1" data-toggle="tooltip" data-placement="top" title="Award points to evidence and theories.">
                   True
-                </th> 
+                </th>
                 <th width="1" data-toggle="tooltip" data-placement="top" title="Award points to evidence and theories.">
                   False
-                </th> 
+                </th>
                 <th width="1" data-toggle="tooltip" data-placement="top" title="Force the ratio of awarded points to match input.">
-                  Force 
+                  Force
                 </th>
               </thead>
               <tbody align="center" valign="top">
                 <tr> <td/></td><td/><td/><td/>  </tr>
                 <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/><td/><td/><td/> </tr>
-                
+
                 <!-- Opinion Nodes-->
                 {% for form in node_formset %}
 
@@ -105,22 +105,22 @@ A web service for sharing opinions and avoiding arguments
                       <tr>
                         <!-- Link -->
                         <td> {% include "include/link.html" with x=theory_node %} </td>
-                        
+
                         <!-- Info -->
                         <td> {% include "include/info.html" with x=theory_node %} </td>
-                           
+
                         <!-- Swap True/False -->
                         <td/>
-                        
+
                         <!-- Description -->
                         <td style="text-align:left; padding-left:5px"> {{ theory_node.get_title }} </td>
-                        
+
                         <!-- True Points -->
                         <td> {{ form.tt_input }} {{ form.ft_input.as_hidden }} </td>
 
                         <!-- False Points -->
                         <td> {{ form.tf_input }} {{ form.ff_input.as_hidden }} </td>
-                        
+
                         <!-- Force -->
                         <td/>
                       </tr>
@@ -134,13 +134,13 @@ A web service for sharing opinions and avoiding arguments
                       {% else %}
                       <tr id={{ theory_node.tag_id }}T style="display:none">
                       {% endif %}
-                        
+
                         <!-- Link -->
                         <td> {% include "include/link.html" with x=theory_node %} </td>
-                        
+
                         <!-- Info -->
                         <td> {% include "include/info.html" with x=theory_node %} </td>
-                        
+
                         <!-- Swap True/False -->
                         <td id={{ theory_node.tag_id }}TS style="display:table-cell; text-align:center;">
                           {% if theory_node.is_subtheory %}
@@ -165,7 +165,7 @@ A web service for sharing opinions and avoiding arguments
                             </a>
                           {% endif %}
                         </td>
-                        
+
                         <!-- Description -->
                         <td style="text-align:left; padding-left:5px">
                           {% if form.url %}
@@ -182,7 +182,7 @@ A web service for sharing opinions and avoiding arguments
 
                         <!-- False Points -->
                         <td> {{ form.tf_input }} </td>
-                        
+
                         <!-- Force -->
                         <td/>
                       </tr>
@@ -193,19 +193,19 @@ A web service for sharing opinions and avoiding arguments
                       {% else %}
                       <tr id={{ theory_node.tag_id }}F style="display:table-row">
                       {% endif %}
-                        
+
                         <!-- Link -->
                         <td id={{ theory_node.tag_id }}FL0 style="display:table-cell; text-align:right">
                           {% include "include/link.html" with x=theory_node %}
                         </td>
                         <td id={{ theory_node.tag_id }}FL1 style="display:none"/>
-                        
+
                         <!-- Info -->
                         <td id={{ theory_node.tag_id }}FL2 style="display:table-cell; text-align:right">
                           {% include "include/info.html" with x=theory_node %}
                         </td>
                         <td id={{ theory_node.tag_id }}FL3 style="display:none"/>
-                                                
+
                         <!-- Swap True/False -->
                         <td id={{ theory_node.tag_id }}FS style="display:table-cell; text-align:center;">
                           {% if theory_node.is_subtheory %}
@@ -215,7 +215,7 @@ A web service for sharing opinions and avoiding arguments
                           {% endif %}
                         </td>
                         <td id={{ theory_node.tag_id }}FX style="display:none; text-align:center;"/>
-                        
+
                         <!-- Description -->
                         <td style="text-align:left; padding-left:5px">
                           {% if form.url %}
@@ -232,7 +232,7 @@ A web service for sharing opinions and avoiding arguments
 
                         <!-- False Points -->
                         <td><font color="red"> {{ form.ff_input }} </font></td>
-                        
+
                         <!-- Force -->
                         <td/>
                       </tr>
@@ -258,7 +258,7 @@ A web service for sharing opinions and avoiding arguments
         </div>
 
         <!-- Buttons -->
-        <center>            
+        <center>
           <!-- Back -->
           <button><a class="plain" href="{{ prev }}">Back</a></button>
           &nbsp
@@ -270,7 +270,7 @@ A web service for sharing opinions and avoiding arguments
             </button>
             &nbsp
           {% endif %}
-          
+
           <!-- Save -->
           {% has_perm 'theories.change_opinion' user opinion as can_change %}
           <input type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
@@ -286,7 +286,7 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% block extra_modals %}
-  
+
   <!-- Delete -->
   {% if opinion.id %}
     <div class="modal" id="del_modal">
@@ -305,7 +305,7 @@ A web service for sharing opinions and avoiding arguments
           </div>
 
           <!-- footer -->
-          
+
           <div class="modal-footer">
             {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
             <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
@@ -324,20 +324,20 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% block extra_js %}
-  
+
   <!-- Enable tool tip for True and False titles. -->
   <script>
     $(document).ready(function(){
-      $('[data-toggle="tooltip"]').tooltip();   
+      $('[data-toggle="tooltip"]').tooltip();
     });
   </script>
 
-  
+
   <script>
     function TFSwap(id) {
       var true_row    = document.getElementById(id + 'T');
       var false_row   = document.getElementById(id + 'F');
-      
+
       if (true_row.style.display == 'none') {
           true_row.style.display      = 'table-row';
           false_row.style.display     = 'none';
@@ -347,19 +347,19 @@ A web service for sharing opinions and avoiding arguments
       }
     }
   </script>
-  
+
   <script>
     function TFExpand(id) {
       var true_clp_col = document.getElementById(id + 'TC');
       var true_exp_col = document.getElementById(id + 'TX');
       var true_row     = document.getElementById(id + 'T');
       var false_row    = document.getElementById(id + 'F');
-      
+
       if (false_row.style.display == 'none') {
           // row
           true_row.style.display      = 'table-row';
           false_row.style.display     = 'table-row';
-          
+
           // icon
           true_clp_col.style.display  = 'table-cell';
           true_exp_col.style.display  = 'none';
@@ -374,7 +374,7 @@ A web service for sharing opinions and avoiding arguments
       }
     }
   </script>
-  
+
   <script>
     function ExpandCycleSwap(id) {
         if (id == undefined) {
@@ -389,7 +389,7 @@ A web service for sharing opinions and avoiding arguments
                 exp_col.style.display   = 'table-cell';
             }
         } else {
-          
+
             var swap_col          = document.getElementById('TF_SWAP');
             var true_row          = document.getElementById(id + 'T');
             var false_row         = document.getElementById(id + 'F');
@@ -402,10 +402,10 @@ A web service for sharing opinions and avoiding arguments
             var false_link_col01  = document.getElementById(id + 'FL1');
             var false_link_col02  = document.getElementById(id + 'FL2');
             var false_link_col03  = document.getElementById(id + 'FL3');
-            
+
             if (true_swap_col.style.display == 'none') {
                 console.log(212, id);
-            
+
                 // rows
                 true_row.style.display          = 'table-row';
                 false_row.style.display         = 'none';
@@ -413,16 +413,16 @@ A web service for sharing opinions and avoiding arguments
                 // swap
                 true_swap_col.style.display     = 'table-cell';
                 false_swap_col.style.display    = 'table-cell';
-                
+
                 // expand/collapse
                 true_clp_col.style.display      = 'none';
                 true_exp_col.style.display      = 'none';
                 false_exp_col.style.display     = 'none';
-                
+
                 // link
                 false_link_col00.style.display  = 'table-cell';
                 false_link_col01.style.display  = 'none';
-                
+
                 // info
                 false_link_col02.style.display  = 'table-cell';
                 false_link_col03.style.display  = 'none';
@@ -437,12 +437,12 @@ A web service for sharing opinions and avoiding arguments
                 // swap
                 true_swap_col.style.display     = 'none';
                 false_swap_col.style.display    = 'none';
-                
+
                 // expand/collapse
                 true_clp_col.style.display      = 'table-cell';
                 true_exp_col.style.display      = 'none';
                 false_exp_col.style.display     = 'table-cell';
-                
+
                 // link
                 false_link_col00.style.display  = 'none';
                 false_link_col01.style.display  = 'table-cell';
