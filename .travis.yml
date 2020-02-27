@@ -4,4 +4,4 @@ python:
 install:
   - pip install -r requirements.freeze
 script:
-  - python manage.py test profiles
+  - python manage.py test
