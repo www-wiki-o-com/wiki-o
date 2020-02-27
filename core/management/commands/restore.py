@@ -6,7 +6,7 @@
 
 A web service for sharing opinions and avoiding arguments
 
-@file       core/management/restore.py
+@file       core/management/command/restore.py
 @copyright  GNU Public License, 2018
 @authors    Frank Imeson
 @brief      A managment script for restoring the database
