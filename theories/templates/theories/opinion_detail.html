@@ -111,6 +111,9 @@ A web service for sharing opinions and avoiding arguments
         <div class="card-body">
           <ul class="list-unstyled mb-0">
 
+            <!-- Share -->
+            <li> Share </li>
+
             {% if opinion|get_class == 'Opinion' %}
 
               <!-- Edit -->
@@ -162,8 +165,7 @@ A web service for sharing opinions and avoiding arguments
 
             <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a></li>
 
-            <!-- Share -->
-            <li> Share </li>
+            <li><a href="{% url 'theories:opinion-index' opinion.theory.pk 'all' %}">Browse Opinions</a></li>
 
           </ul>
         </div>
@@ -171,13 +173,19 @@ A web service for sharing opinions and avoiding arguments
 
       <!-- Opinions -->
       <div class="card my-3">
-        <h5 class="card-header">Other Opinions</h5>
+        <h5 class="card-header">Opinions</h5>
         <div class="card-body">
           <ul class="list-unstyled mb-0">
-            {% for x in opinions %}
-              <li><a href="{{ x.url }}" >{{ x.get_owner }} <span style="color:black">({{ x.true_points|float_to_percent }}/</span><span style="color:red">{{ x.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
-            {% endfor %}
-            <li><a href="{{ opinions_url }}">View All</a></li>
+            <!-- My Opinion -->
+            {% if user.is_authenticated %}
+              <li><a href="{{ opinions.user.url }}"> My Opinion <span style="color:black">({{ opinions.user.true_points|float_to_percent }}/</span><span style="color:red">{{ opinions.user.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
+            {% endif %}
+            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
+            <li><a href="{{ opinions.supporters.url }}"> {{ opinions.supporters.get_owner }} <span style="color:black">({{ opinions.supporters.true_points|float_to_percent }}/</span><span style="color:red">{{ opinions.supporters.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
+            <li><a href="{{ opinions.moderates.url }}"> {{ opinions.moderates.get_owner }} <span style="color:black">({{ opinions.moderates.true_points|float_to_percent }}/</span><span style="color:red">{{ opinions.moderates.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
+            <li><a href="{{ opinions.opposers.url }}"> {{ opinions.opposers.get_owner }} <span style="color:black">({{ opinions.opposers.true_points|float_to_percent }}/</span><span style="color:red">{{ opinions.opposers.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
+            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
+            <li><a href="{{ opinions.all.url }}"> {{ opinions.all.get_owner }} <span style="color:black">({{ opinions.all.true_points|float_to_percent }}/</span><span style="color:red">{{ opinions.all.false_points|float_to_percent }}</span><span style="color:black">)</span></a></li>
           </ul>
         </div>
       </div>

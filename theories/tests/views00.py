@@ -345,8 +345,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_detail(self, override=False):
-        test_url = reverse('theories:opinion-detail',
-                           kwargs={'pk': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-detail', 
+                           kwargs={'pk':self.bobs_opinion.theory.pk, 'slug':self.bobs_opinion.pk})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -377,8 +377,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_slug(self, override=False):
-        test_url = reverse('theories:opinion-slug',
-                           kwargs={'pk': self.theory.pk, 'slug': 'all'})
+        test_url = reverse('theories:opinion-detail', kwargs={'pk': self.theory.pk, 'slug': 'all'})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -387,8 +386,10 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_user_vs_user(self, override=False):
-        test_url = reverse('theories:opinion-user_vs_user',
-                           kwargs={'pk01': self.bobs_opinion.pk, 'pk02': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-compare',
+                           kwargs={'pk':self.bobs_opinion.theory.pk,
+                                   'slug01': self.bobs_opinion.get_slug(),
+                                   'slug02': self.bobs_opinion.get_slug()})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -397,8 +398,10 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_user_vs_slug(self, override=False):
-        test_url = reverse('theories:opinion-user_vs_slug',
-                           kwargs={'pk01': self.bobs_opinion.pk, 'slug02': 'all'})
+        test_url = reverse('theories:opinion-compare',
+                           kwargs={'pk': self.bobs_opinion.theory.pk,
+                                   'slug01': self.bobs_opinion.get_slug(),
+                                   'slug02': 'all'})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -407,8 +410,10 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_slug_vs_user(self, override=False):
-        test_url = reverse('theories:opinion-slug_vs_user',
-                           kwargs={'slug01': 'all', 'pk02': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-compare',
+                           kwargs={'pk':  self.bobs_opinion.theory.pk,
+                                   'slug01': 'all',
+                                   'slug02': self.bobs_opinion.get_slug()})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -417,8 +422,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_slug_vs_slug(self, override=False):
-        test_url = reverse('theories:opinion-slug_vs_slug',
-                           kwargs={'theory_pk': self.theory.pk, 'slug01': 'all', 'slug02': 'all'})
+        test_url = reverse('theories:opinion-compare',
+                           kwargs={'pk': self.theory.pk, 'slug01': 'all', 'slug02': 'all'})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -990,7 +995,7 @@ class ViewsTestBase():
             self.assertIsNotNone(opinion)
             self.assertEqual(opinion.true_input, 100)
             redirect_url = reverse(
-                'theories:opinion-detail', kwargs={'pk': opinion.pk})
+                'theories:opinion-detail', kwargs={'pk':opinion.theory.pk, 'slug': opinion.pk})
             self.verify_redirect(response, redirect_url)
         else:
             self.assertIsNone(opinion)
@@ -1005,7 +1010,8 @@ class ViewsTestBase():
         # setup
         if redirect_url is None:
             redirect_url = reverse(
-                'theories:opinion-detail', kwargs={'pk': self.my_opinion.pk})
+                'theories:opinion-detail',
+                kwargs={'pk':self.my_opinion.theory.pk, 'slug': self.my_opinion.pk})
 
         # test response
         test_url = reverse('theories:opinion-edit',
@@ -1078,7 +1084,8 @@ class ViewsTestBase():
         # setup
         if redirect_url is None:
             redirect_url = reverse(
-                'theories:opinion-detail', kwargs={'pk': self.my_opinion.pk})
+                'theories:opinion-detail',
+                kwargs={'pk':self.my_opinion.theory.pk, 'slug': self.my_opinion.pk})
         self.bobs_opinion.true_input = 1234
         self.bobs_opinion.save()
 

@@ -97,7 +97,7 @@ A web service for sharing opinions and avoiding arguments
               <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
             {% endif %}
 
-            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> Browse Opinions </a></li>
+            <li><a href="{% url 'theories:opinion-index' theory.pk 'all' %}">Browse Opinions</a></li>
 
             <!-- Activity -->
             <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> View Activity Log </a></li>

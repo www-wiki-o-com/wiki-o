@@ -260,7 +260,7 @@ def TheoryIndexView(request, cat=None):
         'theories':             theories,
         'category':             category,
         'categories':           categories,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -308,7 +308,7 @@ def ActivityView(request, cat=None):
         'categories':           categories,
         'subscribed':           subscribed,
         'date_filter':          date,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -461,7 +461,7 @@ def TheoryCreateView(request, cat):
         'form':                 form,
         'formset':              formset,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -528,7 +528,7 @@ def TheoryEditView(request, pk):
         'form':                 form,
         'formset':              formset,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -595,7 +595,7 @@ def TheoryEditEvidenceView(request, pk):
         'formset':              formset,
         'evidence_nodes':       evidence_nodes,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -662,7 +662,7 @@ def TheoryEditSubtheoriesView(request, pk):
         'formset':              formset,
         'subtheory_nodes':      subtheory_nodes,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -732,7 +732,7 @@ def TheoryMergeView(request, pk):
         'formset':              formset,
         'candidates':           candidates,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -802,7 +802,7 @@ def TheoryInheritView(request, pk01, pk02):
         'formset':              formset,
         'candidates':           candidates,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -871,7 +871,7 @@ def TheoryRestoreView(request, pk):
         'formset':              formset,
         'revisions':            revisions,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -934,7 +934,7 @@ def TheoryBackupView(request, pk):
         'formset':              formset,
         'candidates':           candidates,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -991,7 +991,7 @@ def TheoryReportView(request, pk):
         'closed_violations':    closed_violations,
         'form':                 form,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1029,7 +1029,7 @@ def EvidenceReportView(request, pk):
         'evidence':             evidence,
         'form':                 form,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1079,7 +1079,7 @@ def TheoryActivityView(request, pk):
         'actions':              actions,
         'subscribed':           subscribed,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1125,7 +1125,7 @@ class EvidenceDetail(generic.DetailView):
             'parent_theories':      parent_theories,
             'evidence':             evidence,
             'prev':                 prev,
-            'params':                params,
+            'params':               params,
         }
         return context
 
@@ -1165,7 +1165,7 @@ def EvidenceEditView(request, pk):
         'form':                 form,
         'evidence':             evidence,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1233,7 +1233,7 @@ def EvidenceMergeView(request, pk):
         'formset':              formset,
         'candidates':           candidates,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1294,7 +1294,7 @@ def EvidenceRestoreView(request, pk):
         'formset':              formset,
         'revisions':            revisions,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1337,7 +1337,7 @@ def EvidenceActivityView(request, pk):
         'actions':              actions,
         'subscribed':           subscribed,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
@@ -1618,67 +1618,26 @@ def RetrieveMyOpinion(request, pk):
         return redirect(opinion.url() + params)
 
 
-def OpinionSlugView(request, pk, slug):
-    """A method for constructing statistics and feeding it to the OpinionDetail view."""
-
-    # Setup
-    user = request.user
-    theory = get_object_or_404(TheoryNode, pk=pk)
-
-    # All
-    if slug == 'all':
-        opinion = theory.stats.get(stats_type=Stats.TYPE.ALL)
-        opinion_list = get_opinion_list(
-            theory, current_user=user, exclude_list=[Stats.TYPE.ALL])
-        # Render
-        return OpinionDetailView(request, opinion=opinion, theory=theory, opinion_list=opinion_list)
-    # Supporters
-    elif slug == 'supporters':
-        opinion = theory.stats.get(stats_type=Stats.TYPE.SUPPORTERS)
-        opinion_list = get_opinion_list(
-            theory, current_user=user, exclude_list=[Stats.TYPE.SUPPORTERS])
-        # Render
-        return OpinionDetailView(request, opinion=opinion, theory=theory, opinion_list=opinion_list)
-    # Moderates
-    elif slug == 'moderates':
-        opinion = theory.stats.get(stats_type=Stats.TYPE.MODERATES)
-        opinion_list = get_opinion_list(
-            theory, current_user=user, exclude_list=[Stats.TYPE.MODERATES])
-        # Render
-        return OpinionDetailView(request, opinion=opinion, theory=theory, opinion_list=opinion_list)
-    # Opposers
-    elif slug == 'opposers':
-        opinion = theory.stats.get(stats_type=Stats.TYPE.OPPOSERS)
-        opinion_list = get_opinion_list(
-            theory, current_user=user, exclude_list=[Stats.TYPE.OPPOSERS])
-        # Render
-        return OpinionDetailView(request, opinion=opinion, theory=theory, opinion_list=opinion_list)
-    # Invalid
-    else:
-        # Render
-        return TheoryDetialView(request, pk=pk)
-
-
-def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=[]):
+def OpinionDetailView(request, pk, slug):
     """The view for displaying opinion and statistical details."""
 
     # Setup
     user = request.user
-
-    # retrieve opinion if not provided
-    if opinion is None:
-        opinion = get_object_or_404(Opinion, pk=pk)
-    if theory is None:
-        theory = opinion.theory
+    theory = get_object_or_404(TheoryNode, pk=pk)
+    if re.match(r'^\d+$', slug):
+        opinion = get_object_or_404(Opinion, pk=int(slug))
+    else:
+        opinion = theory.get_stats(slug)
     opinion.cache()
 
     # Opinions
-    opinions = []
-    opinions.append(get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS))
-    opinions.append(get_or_none(theory.stats, stats_type=Stats.TYPE.MODERATES))
-    opinions.append(get_or_none(theory.stats, stats_type=Stats.TYPE.OPPOSERS))
-    opinions.append(get_or_none(theory.stats, stats_type=Stats.TYPE.ALL))
-    opinions_url = opinions[-1].opinions_url()
+    opinions = {}
+    if user.is_authenticated:
+        opinions['user'] = get_or_none(theory.opinions, user=user)
+    opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
+    opinions['moderates'] = get_or_none(theory.stats, stats_type=Stats.TYPE.MODERATES)
+    opinions['opposers'] = get_or_none(theory.stats, stats_type=Stats.TYPE.OPPOSERS)
+    opinions['all'] = get_or_none(theory.stats, stats_type=Stats.TYPE.ALL)
 
     # subscribed
     if isinstance(opinion, Opinion):
@@ -1762,7 +1721,6 @@ def OpinionDetailView(request, pk=None, opinion=None, theory=None, opinion_list=
         'theory':               theory,
         'opinion':              opinion,
         'opinions':             opinions,
-        'opinions_url':         opinions_url,
         'subscribed':           subscribed,
         'parent_opinions':      parent_opinions,
         'evidence':             evidence,
@@ -1797,32 +1755,118 @@ def OpinionDemoView(request):
     # Setup
     user = request.user
     opinion = Opinion.get_demo()
-    theory = opinion.theory
-    opinion_list = get_opinion_list(theory, current_user=user)
+    theory = TheoryNode.get_demo()
+
+    # Opinions
+    opinions = {}
+    if user.is_authenticated:
+        opinions['user'] = get_or_none(theory.opinions, user=user)
+    opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
+    opinions['moderates'] = get_or_none(theory.stats, stats_type=Stats.TYPE.MODERATES)
+    opinions['opposers'] = get_or_none(theory.stats, stats_type=Stats.TYPE.OPPOSERS)
+    opinions['all'] = get_or_none(theory.stats, stats_type=Stats.TYPE.ALL)
+
+    # subscribed
+    if isinstance(opinion, Opinion):
+        subscribed = user.is_authenticated and is_following(user, opinion)
+    else:
+        subscribed = False
+
+    # Hit counts
+    if isinstance(opinion, Opinion):
+        opinion.update_hits(request)
+
+    # parent opinions
+    parent_opinions = []
+    for parent_theory in theory.get_parent_nodes():
+        if isinstance(opinion, Opinion):
+            parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
+            if parent_opinion is not None and \
+               (parent_opinion.is_anonymous() == opinion.is_anonymous()):
+                parent_opinions.append(parent_opinion)
+        elif isinstance(opinion, Stats):
+            parent_opinion = get_or_none(parent_theory.stats, stats_type=opinion.stats_type)
+            assert parent_opinion is not None
+            parent_opinions.append(parent_opinion)
 
     # Navigation
-    params = Parameters(request)
-    prev = reverse('theories:index') + params
+    params = Parameters(request, pk=theory.pk)
+    prev = None
+    if len(params.path) > 0:
+        parent_theory = get_object_or_404(TheoryNode, pk=params.path[-1])
+        if hasattr(opinion, 'user'):
+            parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
+            if parent_opinion is not None and \
+               (parent_opinion.is_anonymous() == opinion.is_anonymous()):
+                prev = parent_opinion.url() + params.get_prev()
+    compare_url = opinion.compare_url()
+
+    # Flatten
+    flat = 'flat' in params.flags
+    params00 = params.get_new()
+    if flat:
+        params00.flags.remove('flat')
+    else:
+        params00.flags.append('flat')
+    swap_flat_url = opinion.url() + params00 + '#VennDiagram'
+
+    # Stats Flag
+    stats = 'stats' in params.flags
+    params00 = params.get_new()
+    if stats:
+        params00.flags.remove('stats')
+    else:
+        params00.flags.append('stats')
+    swap_stats_url = opinion.url() + params00
 
     # Diagrams
-    points_diagram = DemoPieChart()
-    evidence_diagram = DemoVennDiagram()
-    population_diagram = DemoBarGraph()
+    if stats:
+        points_diagram = DemoPieChart()
+        population_diagram = DemoBarGraph()
+        evidence_diagram = None
+        evidence = None
+    else:
+        points_diagram = None
+        population_diagram = None
+        evidence_diagram = DemoVennDiagram()
+        evidence = {
+            'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True),
+            'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True),
+            'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True),
+            'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
+        }
+        for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
+            if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
+               node not in evidence['contradicting'] and node not in evidence['unaccounted']:
+                pass
+                # evidence['unaccounted'].append(node)
 
     # Render
     context = {
-        'opinion':              opinion,
         'theory':               theory,
-        'opinion_list':         opinion_list,
-        'points_diagram':       points_diagram.get_svg(),
-        'evidence_diagram':     evidence_diagram.get_svg(),
-        'population_diagram':   population_diagram.get_svg(),
-        'points_text':          points_diagram.get_caption(),
-        'evidence_text':        evidence_diagram.get_caption(),
-        'population_text':      population_diagram.get_caption(),
+        'opinion':              opinion,
+        'opinions':             opinions,
+        'subscribed':           subscribed,
+        'parent_opinions':      parent_opinions,
+        'evidence':             evidence,
         'prev':                 prev,
-        'params':                params,
+        'params':               params,
+        'flat':                 flat,
+        'stats':                stats,
+        'swap_flat_url':        swap_flat_url,
+        'swap_stats_url':       swap_stats_url,
+        'compare_url':          compare_url,
     }
+    if evidence_diagram is not None:
+        context['evidence_diagram'] = evidence_diagram.get_svg()
+        context['evidence_text'] = evidence_diagram.get_caption()
+    if points_diagram is not None:
+        context['points_diagram'] =  points_diagram.get_svg()
+        context['points_text'] = points_diagram.get_caption()
+    if population_diagram is not None:
+        context['population_diagram'] = population_diagram.get_svg()
+        context['population_text'] =population_diagram.get_caption()
+
     return render(
         request,
         'theories/opinion_detail.html',
@@ -1830,143 +1874,24 @@ def OpinionDemoView(request):
     )
 
 
-def Opinion_User_vs_User_View(request, pk01, pk02):
-    """A method for retrieving and redirecting to the comparison view."""
-
-    # Setup
-    user = request.user
-    opinion01 = get_object_or_404(Opinion, pk=pk01)
-    opinion02 = get_object_or_404(Opinion, pk=pk02)
-    theory = opinion01.theory
-    exclude_list = [opinion02.user]
-    assert opinion01.theory == opinion02.theory
-
-    # Get compare list
-    compare_list = get_compare_list(
-        opinion01, current_user=user, exclude_list=exclude_list)
-
-    # Render
-    return OpinionCompareView(request, opinion01=opinion01, opinion02=opinion02, theory=theory, compare_list=compare_list)
-
-
-def Opinion_User_vs_Slug_View(request, pk01, slug02):
-    """A method for retrieving user opinions and statistical opinions to
-       redirect to the comparison view."""
-
-    # Setup
-    user = request.user
-    opinion01 = get_object_or_404(Opinion, pk=pk01)
-    theory = opinion01.theory
-    exclude_list = []
-
-    if slug02 == 'all':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.ALL)
-        exclude_list.append(Stats.TYPE.ALL)
-    elif slug02 == 'supporters':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.SUPPORTERS)
-        exclude_list.append(Stats.TYPE.SUPPORTERS)
-    elif slug02 == 'moderates':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.MODERATES)
-        exclude_list.append(Stats.TYPE.MODERATES)
-    elif slug02 == 'opposers':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.OPPOSERS)
-        exclude_list.append(Stats.TYPE.OPPOSERS)
-    else:
-        assert False
-
-    # Get compare list
-    compare_list = get_compare_list(
-        opinion01, current_user=user, exclude_list=exclude_list)
-
-    # Render
-    return OpinionCompareView(request, opinion01=opinion01, opinion02=opinion02, theory=theory, compare_list=compare_list)
-
-
-def Opinion_Slug_vs_User_View(request, slug01, pk02):
-    """A method for retrieving user opinions and statistical opinions to
-       redirect to the comparison view."""
-
-    # Setup
-    user = request.user
-    opinion02 = get_object_or_404(Opinion, pk=pk02)
-    theory = opinion02.theory
-    exclude_list = []
-
-    if slug01 == 'all':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.ALL)
-        exclude_list.append(Stats.TYPE.ALL)
-    elif slug01 == 'supporters':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.SUPPORTERS)
-        exclude_list.append(Stats.TYPE.SUPPORTERS)
-    elif slug01 == 'moderates':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.MODERATES)
-        exclude_list.append(Stats.TYPE.MODERATES)
-    elif slug01 == 'opposers':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.OPPOSERS)
-        exclude_list.append(Stats.TYPE.OPPOSERS)
-    else:
-        assert False
-
-    # Get compare list
-    compare_list = get_compare_list(
-        opinion01, current_user=user, exclude_list=exclude_list)
-
-    # Render
-    return OpinionCompareView(request, opinion01=opinion01, opinion02=opinion02, theory=theory, compare_list=compare_list)
-
-
-def Opinion_Slug_vs_Slug_View(request, theory_pk, slug01, slug02):
-    """A method for retrieving user opinions and statistical opinions to
-       redirect to the comparison view."""
-
-    # Setup
-    user = request.user
-    theory = get_object_or_404(TheoryNode, pk=theory_pk)
-    exclude_list = []
-
-    if slug01 == 'all':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.ALL)
-        exclude_list.append(Stats.TYPE.ALL)
-    elif slug01 == 'supporters':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.SUPPORTERS)
-        exclude_list.append(Stats.TYPE.SUPPORTERS)
-    elif slug01 == 'moderates':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.MODERATES)
-        exclude_list.append(Stats.TYPE.MODERATES)
-    elif slug01 == 'opposers':
-        opinion01 = theory.stats.get(stats_type=Stats.TYPE.OPPOSERS)
-        exclude_list.append(Stats.TYPE.OPPOSERS)
-    else:
-        assert False
-
-    if slug02 == 'all':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.ALL)
-        exclude_list.append(Stats.TYPE.ALL)
-    elif slug02 == 'supporters':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.SUPPORTERS)
-        exclude_list.append(Stats.TYPE.SUPPORTERS)
-    elif slug02 == 'moderates':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.MODERATES)
-        exclude_list.append(Stats.TYPE.MODERATES)
-    elif slug02 == 'opposers':
-        opinion02 = theory.stats.get(stats_type=Stats.TYPE.OPPOSERS)
-        exclude_list.append(Stats.TYPE.OPPOSERS)
-    else:
-        assert False
-
-    # Get compare list
-    compare_list = get_compare_list(
-        opinion01, current_user=user, exclude_list=exclude_list)
-
-    # Render
-    return OpinionCompareView(request, opinion01=opinion01, opinion02=opinion02, theory=theory, compare_list=compare_list)
-
-
-def OpinionCompareView(request, opinion01, opinion02, theory, compare_list):
+def OpinionCompareView(request, pk, slug01, slug02):
     """A view for displaying the differences between two opinions."""
 
     # Setup
     user = request.user
+    # Opinion01
+    if re.match(r'^\d+$', slug01):
+        opinion01 = get_object_or_404(Opinion, pk=int(slug01))
+    else:
+        opinion01 = theory.get_stats(slug01)
+    # Opinion02
+    if re.match(r'^\d+$', slug02):
+        opinion02 = get_object_or_404(Opinion, pk=int(slug02))
+    else:
+        opinion02 = theory.get_stats(slug02)
+    # Compare list
+    compare_list = get_compare_list(
+        opinion01, current_user=user, exclude_list=exclude_list)
 
     # Navigation
     params = Parameters(request)
@@ -2009,7 +1934,7 @@ def OpinionCompareView(request, opinion01, opinion02, theory, compare_list):
         'flat':                 flat,
         'swap_compare_url':     swap_compare_url,
         'swap_flat_url':        swap_flat_url,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,
