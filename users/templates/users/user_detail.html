@@ -51,7 +51,7 @@ A web service for sharing opinions and avoiding arguments
                       {% include "include/info.html" with x=opinion.theory %}
                     </td>
                     <td>
-                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.id %}"> {{ opinion }} </a>
+                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.theory.pk opinion.pk %}"> {{ opinion }} </a>
                     </td>
                   </tr>
                 {% endfor %}
@@ -85,7 +85,7 @@ A web service for sharing opinions and avoiding arguments
                       {% include "include/info.html" with x=opinion.theory %}
                     </td>
                     <td>
-                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.id %}"> {{ opinion }} </a>
+                      <a class="plain" href="{% url 'theories:opinion-detail' opinion.theory.pk opinion.pk %}"> {{ opinion }} </a>
                     </td>
                   </tr>
                 {% endfor %}

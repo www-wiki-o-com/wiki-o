@@ -97,12 +97,7 @@ A web service for sharing opinions and avoiding arguments
               <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
             {% endif %}
 
-            <!-- My Opinion -->
-            {% if user.is_authenticated %}
-              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
-            {% endif %}
-
-            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> Browse Opinions </a></li>
+            <li><a href="{% url 'theories:opinion-index' theory.pk 'all' %}">Browse Opinions</a></li>
 
             <!-- Activity -->
             <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> View Activity Log </a></li>
@@ -114,21 +109,25 @@ A web service for sharing opinions and avoiding arguments
         </div>
       </div>
 
-      <!-- Stats -->
+      <!-- Opinions -->
       <div class="card my-3">
         <h5 class="card-header">
-          Stats
+          Opinions
         </h5>
         <div class="card-body">
-          <table>
-            <tbody valign="top">
-              <tr><td><a href="{{ supporters.url|add:params }}">Supporters</a></td> <td style="width:100%"></td> <td><a href="{{ supporters.url|add:params }}">{{ supporters.opinions.count }}</a></td></tr>
-              <tr><td><a href="{{ moderates.url|add:params }}">Moderates</a></td> <td></td> <td><a href="{{ moderates.url|add:params }}">{{ moderates.opinions.count }}</a></td></tr>
-              <tr><td><a href="{{ opposers.url|add:params }}">Opposers</a></td> <td></td> <td><a href="{{ opposers.url|add:params }}">{{ opposers.opinions.count }}</a></td></tr>
-              <tr style="border-top:1px solid rgb(192, 192, 192);"><td/><td/><td/></tr>
-              <tr><td><a href="{{ everyone.url|add:params }}">Everyone</a></td> <td></td> <td><a href="{{ everyone.url|add:params }}">{{ everyone.opinions.count }}</a></td></tr>
-            </tbody>
-          </table>
+          <ul class="list-unstyled mb-0">
+            <!-- My Opinion -->
+            {% if user.is_authenticated %}
+              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
+            {% endif %}
+            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
+            <!-- Opinion Groups -->
+            <li><a href="{{ opinions.supporters.url|add:params }}">Supporters <div class="float-right">{{ opinions.supporters.opinions.count }}</div></a></li>
+            <li><a href="{{ opinions.moderates.url|add:params }}">Moderates <div class="float-right">{{ opinions.moderates.opinions.count }}</a></li>
+            <li><a href="{{ opinions.opposers.url|add:params }}">Opposers <div class="float-right">{{ opinions.opposers.opinions.count }}</a></li>
+            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
+            <li><a href="{{ opinions.all.url|add:params }}">Everyone <div class="float-right">{{ opinions.all.opinions.count }}</a></li>
+          </ul>
         </div>
       </div>
 

@@ -2176,7 +2176,7 @@ class OpinionTests(TestCase):
         assert hit_count.hits == 0
 
         # blah
-        url = reverse('theories:opinion-detail', kwargs={'pk': opinion.pk})
+        url = reverse('theories:opinion-detail', kwargs={'pk':opinion.theory.pk, 'slug': opinion.pk})
         self.client.get(url)
         hit_count = HitCount.objects.get_for_object(opinion)
         self.assertEqual(hit_count.hits, 1)
@@ -2406,13 +2406,13 @@ class StatsTests(TestCase):
     # StatsTests
     # ******************************
     def test_get_slug(self):
-        self.assertEqual(Stats.get_slug(Stats.TYPE.ALL), 'all')
+        self.assertEqual(Stats.type_to_slug(Stats.TYPE.ALL), 'all')
 
     # ******************************
     # StatsTests
     # ******************************
     def test_slug(self):
-        self.assertEqual(self.stats.slug(), 'all')
+        self.assertEqual(self.stats.get_slug(), 'all')
 
     # ******************************
     # StatsTests
@@ -2430,8 +2430,7 @@ class StatsTests(TestCase):
     # ******************************
     def test_get_owner_long(self):
         # blah
-        self.assertEqual(self.stats.get_owner_long(),
-                         'Statistics for Everyone')
+        self.assertEqual(self.stats.get_owner_long(), 'Everyone')
 
         # coverage
         for stats in self.theory.get_all_stats():

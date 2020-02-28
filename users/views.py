@@ -258,7 +258,7 @@ def violation_index_view(request):
     context = {
         'violations':           violations,
         'date_filter':          date,
-        'params':                params,
+        'params':               params,
     }
     return render(
         request,

@@ -291,22 +291,23 @@ class TheoryNode(models.Model):
     def get_demo(cls):
         """Generator to create a demo theory with sub-theories and evidence."""
         theory = cls.get_or_create_theory(true_title='Demo Theory')
-        subtheory = theory.get_or_create_subtheory(
-            true_title='Demo Sub-Theory')
-        fact = theory.get_or_create_evidence(title='Demo Fact', fact=True)
-        intuition = theory.get_or_create_evidence(title='Demo Intuition')
+        theory.get_or_create_subtheory(true_title='Demo Sub-Theory')
+        theory.get_or_create_evidence(title='Demo Fact', fact=True)
+        theory.get_or_create_evidence(title='Demo Intuition')
         return theory
 
     @classmethod
     def get_or_create_theory(cls, true_title, false_title=None, created_by=None, category='all'):
         """Generator to translate true_title input and etc to class variables."""
-        kwargs = {'node_type': cls.TYPE.THEORY, 'title01': true_title}
+        kwargs = {'title01': true_title}
+        defaults = {'node_type': cls.TYPE.THEORY}
         if false_title is not None:
-            kwargs['title00'] = false_title
+            defaults['title00'] = false_title
         if created_by is not None:
-            kwargs['created_by'] = created_by
-            kwargs['modified_by'] = created_by
-        theory, created = cls.objects.get_or_create(**kwargs)
+            defaults['created_by'] = created_by
+            defaults['modified_by'] = created_by
+        theory, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert theory.is_theory()
         theory.categories.add(Category.get(category))
         return theory
 
@@ -316,13 +317,15 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         cls = self.__class__
-        kwargs = {'node_type': cls.TYPE.THEORY, 'title01': true_title}
+        kwargs = {'title01': true_title}
+        defaults = {'node_type': cls.TYPE.THEORY}
         if false_title is not None:
-            kwargs['title00'] = false_title
+            defaults['title00'] = false_title
         if created_by is not None:
-            kwargs['created_by'] = created_by
-            kwargs['modified_by'] = created_by
-        subtheory, created = cls.objects.get_or_create(**kwargs)
+            defaults['created_by'] = created_by
+            defaults['modified_by'] = created_by
+        subtheory, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert subtheory.is_theory()
         self.add_node(subtheory)
         return subtheory
 
@@ -332,13 +335,15 @@ class TheoryNode(models.Model):
         if not self.assert_theory():
             return None
         cls = self.__class__
-        kwargs = {'node_type': cls.TYPE.EVIDENCE, 'title01': title}
+        kwargs = {'title01': title}
+        defaults = {'node_type': cls.TYPE.EVIDENCE}
         if fact:
-            kwargs['node_type'] = self.TYPE.FACT
+            defaults['node_type'] = self.TYPE.FACT
         if created_by is not None:
-            kwargs['created_by'] = created_by
-            kwargs['modified_by'] = created_by
-        evidence, created = cls.objects.get_or_create(**kwargs)
+            defaults['created_by'] = created_by
+            defaults['modified_by'] = created_by
+        evidence, created = cls.objects.get_or_create(defaults, **kwargs)
+        assert evidence.is_evidence()
         self.add_node(evidence)
         return evidence
 
@@ -1087,18 +1092,29 @@ class TheoryNode(models.Model):
         return Version.objects.get_for_object(self)
 
     def get_stats(self, stats_type):
-        """Return the stats connected to theory_node."""
-        # error checking
+        """Return the stats connected to theory_node.
+
+        Args:
+            stats_type (Stats.TYPE or str, optional): The stats sub-type to retrive. Defaults to None.
+
+        Returns:
+            Stats or None: The stats object, or none if the query failed.
+        """
+        # Error checking.
         if not self.assert_theory():
+            return None
+        # Allow the method to be called with type or slug.
+        if isinstance(stats_type, str):
+            stats_type = Stats.slug_to_type(stats_type)
+        if stats_type is None:
             return None
         if self.saved_stats is not None:
             return self.saved_stats.get(stats_type)
-        else:
-            return get_or_none(self.stats.all(), stats_type=stats_type)
+        return get_or_none(self.stats.all(), stats_type=stats_type)
 
     def get_all_stats(self, cache=False):
         """Return a list of all stats connected to theory_node, create if necessary."""
-        # error checking
+        # Error checking.
         if not self.assert_theory():
             return None
         if self.saved_stats is not None:
@@ -1284,6 +1300,9 @@ class Opinion(TheoryPointerBase, models.Model):
         else:
             return self.theory.get_false_statement()
 
+    def get_slug(self):
+        return str(self.pk)
+
     def delete(self):
         self.true_input = 0
         self.false_input = 0
@@ -1325,22 +1344,18 @@ class Opinion(TheoryPointerBase, models.Model):
 
     def compare_url(self, opinion02=None):
         """Return a default url for the compare view of this opinion."""
+        slug01 = self.get_slug()
         if opinion02 is None:
-            url = reverse('theories:opinion-user_vs_slug',
-                          kwargs={'pk01': self.pk, 'slug02': 'all'})
-        elif isinstance(opinion02, Opinion):
-            url = reverse('theories:opinion-user_vs_user',
-                          kwargs={'pk01': self.pk, 'pk02': opinion02.pk})
-        elif isinstance(opinion02, Stats):
-            url = reverse('theories:opinion-user_vs_slug',
-                          kwargs={'pk01': self.pk, 'slug02': opinion02.slug()})
+            slug02 = 'all'
         else:
-            url = ''
+            slug02 = opinion02.get_slug()
+        url = reverse('theories:opinion-compare',
+                      kwargs={'pk': self.theory.pk, 'slug01': slug01, 'slug02': slug02})
         return url
 
     def get_absolute_url(self):
         """Return the url that views the details of this opinion."""
-        return reverse('theories:opinion-detail', kwargs={'pk': self.pk})
+        return reverse('theories:opinion-detail', kwargs={'pk':self.theory.pk, 'slug': self.pk})
 
     def url(self):
         """Return the url that views the details of this opinion."""
@@ -1857,16 +1872,26 @@ class Stats(TheoryPointerBase, models.Model):
 
     def __str__(self):
         """Return stats_type + title."""
-        return self.get_owner() + ': ' + self.theory.__str__()
+        if self.is_true():
+            return self.theory.get_true_statement()
+        else:
+            return self.theory.get_false_statement()
 
-    # ToDo: fix list(cls.TYPE)
     @classmethod
     def initialize(cls, theory):
+        """[summary]
+
+        Returns:
+            [type]: [description]
+
+        Todo:
+            * Fix list(cls.TYPE).
+        """
         for stats_type in [x[0] for x in list(cls.TYPE)]:
             stats, created = theory.stats.get_or_create(stats_type=stats_type)
 
     @classmethod
-    def get_slug(cls, stats_type):
+    def type_to_slug(cls, stats_type):
         """Return the slug used for urls to reference this object."""
         if stats_type == cls.TYPE.ALL:
             return 'all'
@@ -1890,10 +1915,10 @@ class Stats(TheoryPointerBase, models.Model):
             return cls.TYPE.OPPOSERS
         return cls.TYPE.ALL
 
-    def slug(self):
+    def get_slug(self):
         """Return the slug used for urls to reference this object."""
         cls = self.__class__
-        return cls.get_slug(self.stats_type)
+        return cls.type_to_slug(self.stats_type)
 
     def get_owner(self, short=False):
         """Return a human readable type of this object."""
@@ -1911,13 +1936,13 @@ class Stats(TheoryPointerBase, models.Model):
     def get_owner_long(self, short=False):
         """Return a human readable possessive type of this object."""
         if self.stats_type == self.TYPE.ALL:
-            return "Statistics for Everyone"
+            return "Everyone"
         elif self.stats_type == self.TYPE.SUPPORTERS:
-            return "Statistics for Supporters'"
+            return "The Supporters'"
         elif self.stats_type == self.TYPE.MODERATES:
-            return "Statistics for Moderates'"
+            return "The Moderates'"
         elif self.stats_type == self.TYPE.OPPOSERS:
-            return "Statistics for Opposers'"
+            return "The Opposers'"
         else:
             assert False
 
@@ -2063,39 +2088,29 @@ class Stats(TheoryPointerBase, models.Model):
         """Return a query set of all opinions that meet the stats category's criterion."""
         return self.opinions.filter(deleted=False)
 
+    def get_absolute_url(self):
+        return self.opinion_url()
+
     def url(self):
         """Return the url for viewing the details of this object (opinion-details)."""
-        return reverse('theories:opinion-slug', kwargs={'pk': self.get_node_pk(), 'slug': self.slug()})
+        return self.get_absolute_url()
+
+    def opinion_url(self):
+        return reverse('theories:opinion-detail', kwargs={'pk': self.get_node_pk(), 'slug': self.get_slug()})
+
+    def opinions_url(self):
+        return reverse("theories:opinion-index", kwargs={'pk': self.theory.pk, 'slug':self.get_slug()})
 
     def compare_url(self, opinion02=None):
         """Return a url to compare this object with a default object (opinion-compare)."""
         cls = self.__class__
+        slug01 = self.get_slug()
         if opinion02 is None:
-            if self.stats_type == self.TYPE.MODERATES:
-                url = reverse(
-                    'theories:opinion-slug_vs_slug',
-                    kwargs={'theory_pk': self.theory.pk, 'slug01': self.slug(
-                    ), 'slug02': cls.get_slug(cls.TYPE.ALL)}
-                )
-            else:
-                url = reverse(
-                    'theories:opinion-slug_vs_slug',
-                    kwargs={'theory_pk': self.theory.pk, 'slug01': self.slug(
-                    ), 'slug02': cls.get_slug(cls.TYPE.MODERATES)}
-                )
-        elif isinstance(opinion02, Opinion):
-            url = reverse(
-                'theories:opinion-slug_vs_user',
-                kwargs={'slug01': self.slug(), 'pk02': opinion02.pk}
-            )
-        elif isinstance(opinion02, Stats):
-            url = reverse(
-                'theories:opinion-slug_vs_slug',
-                kwargs={'theory_pk': self.theory.pk,
-                        'slug01': self.slug(), 'slug02': opinion02.slug()}
-            )
+            slug02 = 'moderates'
         else:
-            url = ''
+            slug02 = opinion02.get_slug()
+        url = reverse('theories:opinion-compare',
+                       kwargs={'pk': self.theory.pk, 'slug01': slug01, 'slug02': slug02})
         return url
 
     def opinion_is_member(self, opinion):
@@ -2113,7 +2128,7 @@ class Stats(TheoryPointerBase, models.Model):
         else:
             return False
 
-    def cache(self, lazy=True):
+    def cache(self, lazy=False):
         """Save regular and flat node queries for the purpose of db efficiency."""
         if lazy:
             self.saved_nodes = QuerySetDict('theory_node.pk')

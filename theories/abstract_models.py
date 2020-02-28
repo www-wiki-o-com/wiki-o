@@ -139,10 +139,14 @@ class TheoryPointerBase():
 
     def true_points(self):
         """Returns true points."""
+        if self.saved_true_points is None:
+            return 0.0
         return self.saved_true_points
 
     def false_points(self):
         """Returns false points."""
+        if self.saved_false_points is None:
+            return 0.0
         return self.saved_false_points
 
     def is_true(self):
@@ -233,10 +237,14 @@ class NodePointerBase():
 
     def true_points(self):
         """Returns true points."""
+        if self.saved_true_points is None:
+            return 0.0
         return self.saved_true_points
 
     def false_points(self):
         """Returns false points."""
+        if self.saved_false_points is None:
+            return 0.0
         return self.saved_false_points
 
     def total_points(self):
