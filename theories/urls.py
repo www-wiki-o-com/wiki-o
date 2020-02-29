@@ -65,7 +65,6 @@ urlpatterns = [
 
     path('theory/<int:pk>/opinions_<str:slug>/', OpinionIndexView, name='opinion-index'),
 
-    path('opinion/demo/', OpinionDemoView, name='opinion-demo'),
     path('theory/<int:pk>/opinion/<str:slug>/', OpinionDetailView, name='opinion-detail'),
     path('opinion/<int:pk>/edit/', OpinionEditView, name='opinion-edit'),
     path('opinion/<int:pk>/wizard/', OpinionWizardView, name='opinion-wizard'),

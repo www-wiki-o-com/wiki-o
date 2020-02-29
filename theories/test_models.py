@@ -53,9 +53,6 @@ from theories.views import *
 # ************************************************************
 class CategoryTests(TestCase):
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -73,43 +70,25 @@ class CategoryTests(TestCase):
         self.category = Category.get('all')
         follow(self.bob, self.category, send_action=False)
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_str(self):
         self.assertEqual(str(self.category), 'All')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_save(self):
         category = Category.objects.create(title='New')
         self.assertEqual(category.slug, 'new')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_exisiting(self):
         category = Category.get('ALL')
         self.assertEqual(category.slug, 'all')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_none(self):
         category = Category.get('blah')
         self.assertIsNone(category)
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_create(self):
         category = Category.get('blah', create=True)
         self.assertIsNotNone(category)
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_all(self):
         categories = [x.slug for x in Category.get_all(exclude=['ALL'])]
         self.assertIn('legal', categories)
@@ -120,34 +99,19 @@ class CategoryTests(TestCase):
         self.assertIn('politics', categories)
         self.assertNotIn('all', categories)
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_url(self):
         self.assertEqual(self.category.get_absolute_url(), '/theories/all/')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_url(self):
         self.assertEqual(self.category.url(), '/theories/all/')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_activity_url(self):
         self.assertEqual(self.category.activity_url(),
                          '/theories/all/activity/')
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_get_theories(self):
         self.assertIn(self.theory, self.category.get_theories())
 
-    # ******************************
-    # CategoryTests
-    # ******************************
     def test_update_activity_logs(self):
         verb = "Yo Bob, what's up? Check out this theory yo."
 
@@ -875,9 +839,6 @@ class TheoryNodeTests(TestCase):
 # ************************************************************
 class OpinionTests(TestCase):
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -902,16 +863,6 @@ class OpinionTests(TestCase):
             parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
         self.intuition = self.theory.get_intuition_node()
 
-    # ******************************
-    # OpinionTests
-    # ******************************
-    def test_get_demo(self):
-        demo = get_demo_opinion()
-        self.assertIsNotNone(demo)
-
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_str(self):
         opinion = self.theory.opinions.create(user=self.user)
         if opinion.is_true():
@@ -919,9 +870,6 @@ class OpinionTests(TestCase):
         else:
             self.assertEqual(opinion.__str__(), self.theory.get_false_statement())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_evidence_nodes(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -939,9 +887,6 @@ class OpinionTests(TestCase):
         self.assertIn(opinion_node01, evidence)
         self.assertNotIn(opinion_node02, evidence)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_subtheory_nodes(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -959,9 +904,6 @@ class OpinionTests(TestCase):
         self.assertNotIn(opinion_node01, subtheories)
         self.assertIn(opinion_node02, subtheories)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_is_anonymous(self):
         # setup
         opinion = self.theory.opinions.create(user=self.user)
@@ -986,9 +928,6 @@ class OpinionTests(TestCase):
         opinion.anonymous = True
         self.assertTrue(opinion.is_anonymous())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_owner(self):
         # setup
         opinion = self.theory.opinions.create(user=self.user)
@@ -1003,9 +942,6 @@ class OpinionTests(TestCase):
         opinion.anonymous = True
         self.assertEqual(opinion.get_owner(), 'Anonymous')
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_owner_long(self):
         # setup
         opinion = self.theory.opinions.create(user=self.user)
@@ -1021,16 +957,10 @@ class OpinionTests(TestCase):
         opinion.anonymous = True
         self.assertEqual(opinion.get_owner_long(), 'Anonymous')
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_edit_url(self):
         opinion = self.theory.opinions.create(user=self.user)
         self.assertIsNotNone(opinion.edit_url())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_compare_url(self):
         opinion = self.theory.opinions.create(user=self.user)
         stats = self.theory.get_stats(Stats.TYPE.ALL)
@@ -1038,23 +968,14 @@ class OpinionTests(TestCase):
         self.assertIsNotNone(opinion.compare_url(opinion))
         self.assertIsNotNone(opinion.compare_url(stats))
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_absolute_url(self):
         opinion = self.theory.opinions.create(user=self.user)
         self.assertIsNotNone(opinion.get_absolute_url())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_url(self):
         opinion = self.theory.opinions.create(user=self.user)
         self.assertIsNotNone(opinion.url())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_node(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1078,9 +999,6 @@ class OpinionTests(TestCase):
         opinion_node = opinion.get_node(self.fiction, create=True)
         self.assertIsNotNone(opinion_node)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_node_cached(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1105,9 +1023,6 @@ class OpinionTests(TestCase):
         opinion_node = opinion.get_node(self.fiction, create=True)
         self.assertIsNotNone(opinion_node)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_cache(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1123,9 +1038,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.saved_nodes.count(), 1)
         self.assertIn(opinion_node, opinion.saved_nodes)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_nodes(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1156,9 +1068,6 @@ class OpinionTests(TestCase):
         self.assertIn(opinion_node01, nodes)
         self.assertIn(opinion_node02, nodes)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_flat_node(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1182,9 +1091,6 @@ class OpinionTests(TestCase):
         opinion_node = opinion.get_flat_node(self.fiction, create=True)
         self.assertIsNotNone(opinion_node)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_flat_nodes(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1220,9 +1126,6 @@ class OpinionTests(TestCase):
         self.assertIsNotNone(flat_nodes.get(self.evidence.pk))
         self.assertIsNone(flat_nodes.get(self.subtheory.pk))
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_intuition_node(self):
         opinion = self.theory.opinions.create(user=self.user)
 
@@ -1235,9 +1138,6 @@ class OpinionTests(TestCase):
         self.assertIsNotNone(node)
         self.assertEqual(node.theory_node, self.intuition)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_subtheory_nodes(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1265,9 +1165,6 @@ class OpinionTests(TestCase):
         self.assertEqual(nodes.count(), 1)
         self.assertEqual(nodes[0].theory_node, self.subtheory)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_evidence_nodes(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1295,9 +1192,6 @@ class OpinionTests(TestCase):
         self.assertEqual(nodes.count(), 1)
         self.assertEqual(nodes[0].theory_node, self.fact)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_get_parent_nodes(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1320,9 +1214,6 @@ class OpinionTests(TestCase):
         self.assertEqual(parent_nodes.count(), 1)
         self.assertIn(opinion_node, parent_nodes)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points00(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1334,9 +1225,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points01(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1350,9 +1238,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points02(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1366,9 +1251,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.0)
         self.assertEqual(opinion.false_points(), 1.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points03(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1382,9 +1264,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.5)
         self.assertEqual(opinion.false_points(), 0.5)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points04(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1399,9 +1278,6 @@ class OpinionTests(TestCase):
         nodes = opinion.get_nodes()
         self.assertNotIn(opinion_node, nodes)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_fact01(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1420,9 +1296,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_fact02(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1441,9 +1314,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.0)
         self.assertEqual(opinion.false_points(), 1.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_fact03(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1463,9 +1333,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.5)
         self.assertEqual(opinion.false_points(), 0.5)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_fact10(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1485,9 +1352,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.5)
         self.assertEqual(opinion.false_points(), 0.5)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_fact11(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1509,9 +1373,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.25)
         self.assertEqual(opinion.false_points(), 0.75)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory01(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1530,9 +1391,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory02(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1551,9 +1409,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.0)
         self.assertEqual(opinion.false_points(), 1.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory10(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1576,9 +1431,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory11(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1601,9 +1453,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.0)
         self.assertEqual(opinion.false_points(), 1.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory20(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1631,9 +1480,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory21(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1661,9 +1507,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 1.0)
         self.assertEqual(opinion.false_points(), 0.0)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory22(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1708,9 +1551,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.8)
         self.assertEqual(opinion.false_points(), 0.2)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_points_subtheory23(self):
         opinion = self.theory.opinions.create(
             user=self.user,
@@ -1755,9 +1595,6 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.true_points(), 0.8)
         self.assertEqual(opinion.false_points(), 0.2)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_copy(self):
         # setup existing opinion
         opinion = self.theory.opinions.create(
@@ -1831,9 +1668,6 @@ class OpinionTests(TestCase):
         self.assertEqual(copied_child.true_points(),
                          child_opinion.true_points())
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_true_points(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1862,9 +1696,6 @@ class OpinionTests(TestCase):
 
         # ToDo: Much more
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_false_points(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1893,9 +1724,6 @@ class OpinionTests(TestCase):
 
         # ToDo: Much more
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_swap_true_false(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -1919,9 +1747,6 @@ class OpinionTests(TestCase):
 
         # ToDo: much more
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_hits(self):
         # setup
         opinion = self.theory.opinions.create(user=self.user)
@@ -1934,9 +1759,6 @@ class OpinionTests(TestCase):
         hit_count = HitCount.objects.get_for_object(opinion)
         self.assertEqual(hit_count.hits, 1)
 
-    # ******************************
-    # OpinionTests
-    # ******************************
     def test_update_activity_logs(self):
         # setup
         opinion = self.theory.opinions.create(user=self.user)
@@ -1964,9 +1786,6 @@ class OpinionTests(TestCase):
 # ************************************************************
 class OpinionNodeTests(TestCase):
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -1996,9 +1815,6 @@ class OpinionNodeTests(TestCase):
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.opinion_node = self.opinion.get_node(self.fact)
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_get_absolute_url(self):
         # blah
         opinion_node = self.opinion.get_node(self.fact)
@@ -2008,9 +1824,6 @@ class OpinionNodeTests(TestCase):
         opinion_node = self.opinion.get_node(self.subtheory)
         self.assertIsNotNone(opinion_node.get_absolute_url())
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_url(self):
         # blah
         opinion_node = self.opinion.get_node(self.fact)
@@ -2020,9 +1833,6 @@ class OpinionNodeTests(TestCase):
         opinion_node = self.opinion.get_node(self.subtheory)
         self.assertIsNotNone(opinion_node.get_absolute_url())
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_get_root(self):
         # blah
         opinion_node = self.opinion.get_node(self.fact)
@@ -2032,51 +1842,30 @@ class OpinionNodeTests(TestCase):
         opinion_node = self.opinion.get_node(self.subtheory)
         self.assertEqual(opinion_node.get_root(), self.sub_opinion)
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_tt_points(self):
         self.opinion_node.tt_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_tf_points(self):
         self.opinion_node.tf_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_ft_points(self):
         self.opinion_node.ft_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_ff_points(self):
         self.opinion_node.ff_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_true_points(self):
         self.opinion_node.true_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_false_points(self):
         self.opinion_node.false_points()
         # ToDo: more
 
-    # ******************************
-    # OpinionNodeTests
-    # ******************************
     def test_is_deleted(self):
 
         # blah
@@ -2107,9 +1896,6 @@ class OpinionNodeTests(TestCase):
 # ************************************************************
 class StatsTests(TestCase):
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -2136,15 +1922,9 @@ class StatsTests(TestCase):
             theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_str(self):
         self.assertIsNotNone(self.stats.__str__())
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_initialize(self):
         for stats in self.theory.get_all_stats():
             stats.delete()
@@ -2155,21 +1935,12 @@ class StatsTests(TestCase):
         stats = self.theory.get_all_stats()
         self.assertEqual(stats.count(), 4)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_slug(self):
         self.assertEqual(Stats.type_to_slug(Stats.TYPE.ALL), 'all')
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_slug(self):
         self.assertEqual(self.stats.get_slug(), 'all')
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_owner(self):
         # blah
         self.assertEqual(self.stats.get_owner(), 'Everyone')
@@ -2178,9 +1949,6 @@ class StatsTests(TestCase):
         for stats in self.theory.get_all_stats():
             stats.get_owner()
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_owner_long(self):
         # blah
         self.assertEqual(self.stats.get_owner_long(), 'Everyone')
@@ -2189,9 +1957,6 @@ class StatsTests(TestCase):
         for stats in self.theory.get_all_stats():
             stats.get_owner_long()
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_point_range(self):
         # blah
         self.assertEqual(self.stats.get_point_range(), (0.0, 1.0))
@@ -2200,9 +1965,6 @@ class StatsTests(TestCase):
         for stats in self.theory.get_all_stats():
             stats.get_point_range()
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_node(self):
         # blah
         stats_node = self.stats.get_node(self.fact)
@@ -2216,9 +1978,6 @@ class StatsTests(TestCase):
         stats_node = self.stats.get_node(self.evidence, create=True)
         self.assertIsNotNone(stats_node)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_nodes(self):
         # blah
         nodes = self.stats.get_nodes(cache=False)
@@ -2230,9 +1989,6 @@ class StatsTests(TestCase):
         self.assertEqual(nodes.count(), 4)
         self.assertIsNotNone(self.stats.saved_nodes)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_flat_node(self):
         # blah
         stats_node = self.stats.get_flat_node(self.fact)
@@ -2246,9 +2002,6 @@ class StatsTests(TestCase):
         stats_node = self.stats.get_flat_node(self.evidence, create=True)
         self.assertIsNotNone(stats_node)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_flat_nodes(self):
         # blah
         nodes = self.stats.get_flat_nodes(cache=False)
@@ -2260,9 +2013,6 @@ class StatsTests(TestCase):
         self.assertEqual(nodes.count(), 3)
         self.assertIsNotNone(self.stats.saved_flat_nodes)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_add_opinion(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -2281,9 +2031,6 @@ class StatsTests(TestCase):
         self.stats.add_opinion(opinion)
         self.assertEqual(self.stats.opinions.count(), 1)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_remove_opinion(self):
         self.stats.remove_opinion(self.opinion)
         self.assertEqual(self.stats.opinions.count(), 0)
@@ -2291,9 +2038,6 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.false_points(), 0.0)
         # ToDo: more
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_cache(self):
         assert self.stats.saved_nodes is None
         assert self.stats.saved_flat_nodes is None
@@ -2310,9 +2054,6 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.saved_nodes.count(), 4)
         self.assertEqual(self.stats.saved_flat_nodes.count(), 3)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_save_changes(self):
         # setup
         true_points = self.stats.true_points()
@@ -2335,9 +2076,6 @@ class StatsTests(TestCase):
 
         # ToDo: more
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_total_points(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -2355,9 +2093,6 @@ class StatsTests(TestCase):
         # blah
         self.assertEqual(self.stats.total_points(), 1.0)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_true_points(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -2375,9 +2110,6 @@ class StatsTests(TestCase):
         # blah
         self.assertEqual(self.stats.true_points(), 0.20)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_false_points(self):
         # setup
         opinion = self.theory.opinions.create(
@@ -2395,9 +2127,6 @@ class StatsTests(TestCase):
         # blah
         self.assertEqual(self.stats.false_points(), 0.80)
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_swap_true_false(self):
         # setup
         true_points = self.stats.true_points()
@@ -2411,9 +2140,6 @@ class StatsTests(TestCase):
 
         # ToDo: more
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_reset(self):
         assert self.stats.true_points() != 0
         assert self.stats.false_points() != 0
@@ -2422,27 +2148,15 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.false_points(), 0)
         # ToDo: test save
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_opinion_is_member(self):
         self.assertTrue(self.stats.opinion_is_member(self.opinion))
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_get_opinions(self):
         self.assertIn(self.opinion, self.stats.get_opinions())
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_url(self):
         self.assertIsNotNone(self.stats.url())
 
-    # ******************************
-    # StatsTests
-    # ******************************
     def test_compare_url(self):
         self.assertIsNotNone(self.stats.compare_url())
 
@@ -2458,9 +2172,6 @@ class StatsTests(TestCase):
 # ************************************************************
 class StatsNodeTests(TestCase):
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -2488,9 +2199,6 @@ class StatsNodeTests(TestCase):
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_node(self.fact)
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_url(self):
         # blah
         stats_node = self.stats.get_node(self.fact)
@@ -2500,9 +2208,6 @@ class StatsNodeTests(TestCase):
         stats_node = self.stats.get_node(self.subtheory)
         self.assertIsNotNone(stats_node.url())
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_get_root(self):
         # blah
         stats_node = self.stats.get_node(self.fact)
@@ -2512,30 +2217,18 @@ class StatsNodeTests(TestCase):
         stats_node = self.stats.get_node(self.subtheory)
         self.assertIsNotNone(stats_node.get_root())
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_true_points(self):
         self.stats_node.true_points()
         # ToDo: more
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_false_points(self):
         self.stats_node.false_points()
         # ToDo: more
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_total_points(self):
         self.stats_node.total_points()
         # ToDo: more
 
-    # ******************************
-    # StatsNodeTests
-    # ******************************
     def test_reset(self, save=True):
         assert self.stats_node.true_points() != 0.0
         assert self.stats_node.false_points() != 0.0
@@ -2555,9 +2248,6 @@ class StatsNodeTests(TestCase):
 # ************************************************************
 class StatsFlatNodeTests(TestCase):
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -2585,44 +2275,26 @@ class StatsFlatNodeTests(TestCase):
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_url(self):
         stats_node = self.stats.get_flat_node(self.fact)
         self.assertIsNone(stats_node.url())
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_get_root(self):
         stats_node = self.stats.get_flat_node(self.fact)
         self.assertIsNone(stats_node.get_root())
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_true_points(self):
         self.stats_node.true_points()
         # ToDo: more
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_false_points(self):
         self.stats_node.false_points()
         # ToDo: more
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_total_points(self):
         self.stats_node.total_points()
         # ToDo: more
 
-    # ******************************
-    # StatsFlatNodeTests
-    # ******************************
     def test_reset(self, save=True):
         assert self.stats_node.true_points() != 0.0
         assert self.stats_node.false_points() != 0.0
@@ -2643,9 +2315,6 @@ class StatsFlatNodeTests(TestCase):
 # ************************************************************
 class TheoryPointerBaseTests(TestCase):
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -2673,99 +2342,44 @@ class TheoryPointerBaseTests(TestCase):
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
     def test_create(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_check_data(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_str(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_url(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_compare_url(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_get_node_pk(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_get_nodes(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_get_flat_nodes(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_get_point_distribution(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_true_points(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_false_points(self):
         pass
-
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
 
     def test_is_true(self):
         pass
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
-
     def test_is_false(self):
         pass
-
-    # ******************************
-    # TheoryPointerBase
-    # ******************************
 
     def test_get_point_range(self):
         pass
@@ -2783,9 +2397,6 @@ class TheoryPointerBaseTests(TestCase):
 # ************************************************************
 class NodePointerBaseTests(TestCase):
 
-    # ******************************
-    # TheoryPointerBaseTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -2813,140 +2424,62 @@ class NodePointerBaseTests(TestCase):
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
     def test_create(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_str(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_get_true_statement(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_get_false_statement(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_get_node_pk(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_tag_id(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_about(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_url(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_is_theory(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_is_subtheory(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_is_evidence(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_is_fact(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_is_verifiable(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_true_points(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_false_points(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_total_points(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
-
     def test_true_percent(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_false_percent(self):
         pass
 
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
     def test_true_ratio(self):
         pass
-
-    # ******************************
-    # NodePointerBaseTests
-    # ******************************
 
     def test_false_ratio(self):
         pass

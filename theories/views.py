@@ -1624,7 +1624,7 @@ def OpinionDetailView(request, pk, slug):
 
     # Setup
     user = request.user
-    if slug == 'demo':
+    if slug == 'debug':
         opinion = get_demo_opinion()
         theory = opinion.theory
     elif re.match(r'^\d+$', slug):
@@ -1699,7 +1699,7 @@ def OpinionDetailView(request, pk, slug):
 
     # Diagrams
     if stats:
-        if slug == 'demo':
+        if slug == 'debug':
             points_diagram = DemoPieChart()
             population_diagram = DemoBarGraph()
         else:
@@ -1710,7 +1710,7 @@ def OpinionDetailView(request, pk, slug):
     else:
         points_diagram = None
         population_diagram = None
-        if slug == 'demo':
+        if slug == 'debug':
             evidence_diagram = DemoVennDiagram()
             evidence = {
                 'collaborative':  [],
@@ -1767,7 +1767,7 @@ def OpinionDetailView(request, pk, slug):
 
 def OpinionDemoView(request):
     """A view for demoing the graph visualizations used for opinions."""
-    return OpinionDetailView(request, 0, 'demo')
+    return OpinionDetailView(request, 0, 'debug')
 
 
 def OpinionCompareView(request, pk, slug01, slug02):

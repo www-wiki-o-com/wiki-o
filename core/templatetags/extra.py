@@ -45,8 +45,6 @@ RE_WIKI_O_URL += r'|theory/%s/vs/\d+' % RE_STATS
 RE_WIKI_O_URL += r'|theory/\d+/%s/vs/%s)/' % (RE_STATS, RE_STATS)
 RE_WIKI_O = re.compile(RE_WIKI_O_URL)
 
-RE_HASHTAG = r'#\w+'
-
 
 # *******************************************************************************
 # Methods
