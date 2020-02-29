@@ -287,66 +287,6 @@ class TheoryNode(models.Model):
             ('convert_theorynode', 'Can convert theory <=> evidence.'),
         )
 
-    @classmethod
-    def get_demo(cls):
-        """Generator to create a demo theory with sub-theories and evidence."""
-        theory = cls.get_or_create_theory(true_title='Demo Theory')
-        theory.get_or_create_subtheory(true_title='Demo Sub-Theory')
-        theory.get_or_create_evidence(title='Demo Fact', fact=True)
-        theory.get_or_create_evidence(title='Demo Intuition')
-        return theory
-
-    @classmethod
-    def get_or_create_theory(cls, true_title, false_title=None, created_by=None, category='all'):
-        """Generator to translate true_title input and etc to class variables."""
-        kwargs = {'title01': true_title}
-        defaults = {'node_type': cls.TYPE.THEORY}
-        if false_title is not None:
-            defaults['title00'] = false_title
-        if created_by is not None:
-            defaults['created_by'] = created_by
-            defaults['modified_by'] = created_by
-        theory, created = cls.objects.get_or_create(defaults, **kwargs)
-        assert theory.is_theory()
-        theory.categories.add(Category.get(category))
-        return theory
-
-    def get_or_create_subtheory(self, true_title, false_title=None, created_by=None):
-        """Generator to translate true_title input and etc to class variables."""
-        # error checking
-        if not self.assert_theory():
-            return None
-        cls = self.__class__
-        kwargs = {'title01': true_title}
-        defaults = {'node_type': cls.TYPE.THEORY}
-        if false_title is not None:
-            defaults['title00'] = false_title
-        if created_by is not None:
-            defaults['created_by'] = created_by
-            defaults['modified_by'] = created_by
-        subtheory, created = cls.objects.get_or_create(defaults, **kwargs)
-        assert subtheory.is_theory()
-        self.add_node(subtheory)
-        return subtheory
-
-    def get_or_create_evidence(self, title, created_by=None, fact=False):
-        """Generator to translate title input and etc to class variables."""
-        # error checking
-        if not self.assert_theory():
-            return None
-        cls = self.__class__
-        kwargs = {'title01': title}
-        defaults = {'node_type': cls.TYPE.EVIDENCE}
-        if fact:
-            defaults['node_type'] = self.TYPE.FACT
-        if created_by is not None:
-            defaults['created_by'] = created_by
-            defaults['modified_by'] = created_by
-        evidence, created = cls.objects.get_or_create(defaults, **kwargs)
-        assert evidence.is_evidence()
-        self.add_node(evidence)
-        return evidence
-
     def __str__(self, true_points=1, false_points=0):
         """Returns title01 for evidence and true theories, otherwise title00, which represents the false title."""
         s = ''
@@ -1278,20 +1218,6 @@ class Opinion(TheoryPointerBase, models.Model):
         verbose_name = 'Opinion'
         verbose_name_plural = 'Opinions'
         unique_together = (('theory', 'user'),)
-
-    @classmethod
-    def get_demo(cls, theory=None):
-        """Generate a demo (fake) opinion."""
-        if theory is None:
-            theory = TheoryNode.get_demo()
-        true_points = random.random()
-        false_points = 1.0 - true_points
-        demo = TheoryPointerBase.create(
-            theory=theory,
-            true_points=true_points,
-            false_points=false_points,
-        )
-        return demo
 
     def __str__(self):
         """String method for OpinionNode."""

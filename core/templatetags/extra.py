@@ -222,10 +222,10 @@ def remove_punctuation(string):
 
 @register.filter
 def float_to_percent(x):
-    if isinstance(x, str) and len(x) == 0:
-        x = 0
-    elif not isinstance(x, float):
+    try:
         x = float(x)
+    except ValueError:
+        x = 0.0
     return str(int(x * 100))
 
 @register.filter

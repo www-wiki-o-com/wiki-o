@@ -26,7 +26,9 @@ from django.shortcuts import get_object_or_404, render, redirect
 from theories.models import *
 from theories.forms import *
 from theories.views import *
-from theories.utils import *
+from theories.utils import create_categories, create_reserved_nodes
+from theories.test_utils import create_test_opinion
+from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_test_user
 from core.utils import get_form_data
 

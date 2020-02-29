@@ -28,7 +28,9 @@ from actstream.actions import follow
 
 from theories.models import *
 from theories.forms import *
-from theories.utils import *
+from theories.utils import create_categories, create_reserved_nodes
+from theories.test_utils import get_or_create_subtheory, get_or_create_evidence, create_test_opinion
+from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_groups_and_permissions, create_test_user
 from theories.views import *
 
@@ -187,9 +189,6 @@ class CategoryTests(TestCase):
 # ************************************************************
 class TheoryNodeTests(TestCase):
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def setUp(self):
 
         # setup
@@ -222,69 +221,9 @@ class TheoryNodeTests(TestCase):
             stats.save_changes()
         follow(self.bob, self.theory, send_action=False)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_demo(self):
-        demo = TheoryNode.get_demo()
-        self.assertIsNotNone(demo)
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_or_create_theory(self):
-        node01 = TheoryNode.get_or_create_theory(
-            true_title='Test', false_title='Test', created_by=self.user)
-        node02 = TheoryNode.get_or_create_theory(true_title='Test')
-        self.assertEqual(node01, node02)
-        self.assertIn(node01, self.category.get_theories())
-        self.assertTrue(node01.is_theory())
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_or_create_subtheory00(self):
-        node = self.evidence.get_or_create_subtheory(true_title='TestXXX')
-        self.assertIsNone(node)
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_or_create_subtheory01(self):
-        node01 = self.theory.get_or_create_subtheory(
-            true_title='Test', false_title='Test', created_by=self.user)
-        node02 = self.theory.get_or_create_subtheory(true_title='Test')
-        self.assertIn(node01, self.theory.get_nodes())
-        self.assertEqual(node01, node02)
-        self.assertNotIn(node01, self.category.get_theories())
-        self.assertTrue(node01.is_theory())
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_or_create_evidence00(self):
-        node = self.evidence.get_or_create_evidence(title='TestXXX')
-        self.assertIsNone(node)
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
-    def test_get_or_create_evidence01(self):
-        node01 = self.theory.get_or_create_evidence(
-            title='Test', created_by=self.user)
-        node02 = self.theory.get_or_create_evidence(title='Test')
-        self.assertIn(node01, self.theory.get_nodes())
-        self.assertEqual(node01, node02)
-        self.assertNotIn(node01, self.category.get_theories())
-        self.assertTrue(node01.is_evidence())
-
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_str(self):
-        node01 = self.theory.get_or_create_subtheory(
-            true_title='Test01', false_title='XXX')
-        node02 = self.theory.get_or_create_evidence(title='Test02')
+        node01 = get_or_create_subtheory(self.theory, true_title='Test01', false_title='XXX')
+        node02 = get_or_create_evidence(self.theory, title='Test02')
         self.assertEqual(node01.__str__(1, 0), 'Test01')
         self.assertEqual(node01.__str__(0, 1), 'XXX')
         self.assertEqual(str(node01), 'Test01')
@@ -293,109 +232,64 @@ class TheoryNodeTests(TestCase):
         node01.delete()
         self.assertEqual(str(node01), 'Test01 (deleted)')
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_true_statement(self):
         self.assertEqual(self.theory.get_true_statement(), self.theory.title01)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_false_statement(self):
         self.assertEqual(self.theory.get_false_statement(),
                          self.theory.__str__(0, 1))
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_title(self):
         self.assertEqual(self.evidence.get_title(), self.evidence.title01)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_about(self):
         self.assertEqual(self.theory.about().strip(), self.theory.title01)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_absolute_url(self):
         self.assertIsNotNone(self.theory.get_absolute_url())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_url(self):
         self.assertIsNotNone(self.theory.url())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_activity_url(self):
         self.assertIsNotNone(self.theory.activity_url())
         self.assertIsNotNone(self.evidence.activity_url())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_tag_id(self):
         self.assertIsNotNone(self.theory.tag_id())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_deleted(self):
         self.assertFalse(self.theory.is_deleted())
         self.theory.delete()
         self.assertTrue(self.theory.is_deleted())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_theory(self):
         self.assertTrue(self.theory.is_theory())
         self.assertTrue(self.subtheory.is_theory())
         self.assertFalse(self.evidence.is_theory())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_evidence(self):
         self.assertTrue(self.evidence.is_evidence())
         self.assertFalse(self.theory.is_evidence())
         self.assertFalse(self.subtheory.is_evidence())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_root(self):
         self.assertTrue(self.theory.is_root())
         self.assertFalse(self.subtheory.is_root())
         self.assertFalse(self.evidence.is_root())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_fact(self):
         self.assertTrue(self.fact.is_fact())
         self.assertFalse(self.evidence.is_fact())
         self.assertFalse(self.theory.is_fact())
         self.assertFalse(self.subtheory.is_fact())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_is_verifiable(self):
         self.assertTrue(self.fact.is_verifiable())
         self.assertFalse(self.evidence.is_verifiable())
         self.assertFalse(self.theory.is_verifiable())
         self.assertFalse(self.subtheory.is_verifiable())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_assert_theory(self):
         self.evidence.nodes.add(self.theory)
         self.evidence.flat_nodes.add(self.theory)
@@ -409,9 +303,6 @@ class TheoryNodeTests(TestCase):
 
         # ToDo: test log
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_assert_evidence(self):
         self.assertTrue(self.evidence.assert_evidence())
         self.assertFalse(self.theory.assert_evidence())
@@ -425,18 +316,12 @@ class TheoryNodeTests(TestCase):
 
         # ToDo: test log
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_save01(self):
         self.theory.title01 = 'blah'
         self.theory.save()
         self.theory.refresh_from_db()
         self.assertEqual(self.theory.title01, 'blah')
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_save02(self):
         node01 = TheoryNode(title01='Test', node_type=TheoryNode.TYPE.THEORY)
         node01.save(user=self.user)
@@ -444,9 +329,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(node01.modified_by, self.user)
         self.assertIn(TheoryNode.get_intuition_node(), node01.get_flat_nodes())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_autosave(self):
         assert self.evidence.get_revisions().count() == 0
 
@@ -456,9 +338,6 @@ class TheoryNodeTests(TestCase):
         self.evidence.autosave(self.bob, force=True)
         self.assertEqual(self.evidence.get_revisions().count(), 2)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_save_snapshot(self):
         assert self.evidence.get_revisions().count() == 0
 
@@ -468,9 +347,6 @@ class TheoryNodeTests(TestCase):
         self.evidence.save_snapshot(self.bob)
         self.assertEqual(self.evidence.get_revisions().count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_add_node(self):
         new = TheoryNode.objects.create(
             title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
@@ -484,25 +360,16 @@ class TheoryNodeTests(TestCase):
         self.assertIn(new, self.subtheory.flat_nodes.all())
         self.assertIn(new, self.theory.flat_nodes.all())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_add_nodes(self):
         new = TheoryNode.objects.create(
             title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
         result = self.evidence.add_nodes([new])
         self.assertFalse(result)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_nodes00(self):
         nodes = self.evidence.get_nodes()
         self.assertIsNone(nodes)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_nodes01(self):
 
         self.subtheory.delete()
@@ -521,9 +388,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(nodes.count(), 3)
         self.assertIsNone(self.theory.saved_nodes)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_nodes02(self):
 
         nodes = self.theory.get_nodes(cache=True)
@@ -540,9 +404,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(nodes.count(), 3)
         self.assertEqual(self.theory.saved_nodes, nodes)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_flat_nodes(self):
 
         nodes = self.evidence.get_flat_nodes()
@@ -581,9 +442,6 @@ class TheoryNodeTests(TestCase):
         self.assertNotIn(self.evidence, self.theory.nodes.all())
         self.assertIsNotNone(self.theory.saved_flat_nodes)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_evidence_nodes(self):
 
         nodes = self.evidence.get_evidence_nodes()
@@ -605,9 +463,6 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.fiction, nodes)
         self.assertEqual(nodes.count(), 2)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_subtheory_nodes(self):
 
         nodes = self.evidence.get_subtheory_nodes()
@@ -626,9 +481,6 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_parent_nodes01(self):
 
         nodes = self.evidence.get_parent_nodes()
@@ -644,9 +496,6 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_parent_nodes02(self):
 
         nodes = self.evidence.get_parent_nodes(cache=True)
@@ -657,19 +506,13 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_climb_theory_nodes(self):
-        new = self.subtheory.get_or_create_subtheory(true_title='new')
+        new = get_or_create_subtheory(self.subtheory, true_title='new')
         nodes = new.climb_theory_nodes()
         self.assertIn(self.theory, nodes)
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 2)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_nested_nodes(self):
 
         nodes = self.evidence.get_nested_nodes()
@@ -699,11 +542,8 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.subtheory, nodes)
         self.assertEqual(nodes.count(), 5)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_nested_subtheory_nodes(self):
-        new = self.subtheory.get_or_create_subtheory(true_title='new')
+        new = get_or_create_subtheory(self.subtheory, true_title='new')
 
         nodes = self.evidence.get_nested_subtheory_nodes()
         self.assertIsNone(nodes)
@@ -723,26 +563,17 @@ class TheoryNodeTests(TestCase):
         self.assertIn(new, nodes)
         self.assertEqual(nodes.count(), 2)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_remove_node00(self):
         result = self.evidence.remove_node(self.intuition)
         self.assertFalse(result)
         # todo: test log
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_remove_node01(self):
         self.subtheory.remove_node(self.evidence)
         self.assertNotIn(self.evidence, self.subtheory.nodes.all())
         self.assertNotIn(self.evidence, self.subtheory.flat_nodes.all())
         self.assertNotIn(self.evidence, self.theory.flat_nodes.all())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_remove_node02(self):
         self.theory.add_node(self.evidence)
         self.theory.refresh_from_db()
@@ -752,17 +583,11 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.evidence, self.theory.nodes.all())
         self.assertIn(self.evidence, self.theory.flat_nodes.all())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_remove_node03(self):
         assert self.user.notifications.count() == 0
         self.theory.remove_node(self.fiction, user=self.bob)
         self.assertEqual(self.user.notifications.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_remove_flat_node(self):
         result = self.theory.remove_flat_node(self.intuition)
         self.assertFalse(result)
@@ -777,9 +602,6 @@ class TheoryNodeTests(TestCase):
         self.assertTrue(result)
         self.assertNotIn(self.evidence, self.theory.flat_nodes.all())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_opinions(self):
 
         opinions = self.evidence.get_opinions()
@@ -797,16 +619,10 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(opinions.count(), 1)
         self.assertEqual(self.theory.saved_opinions, opinions)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_revisions(self):
         revisions = self.theory.get_revisions()
         self.assertEqual(revisions.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_intuition_node(self):
         nodes = TheoryNode.objects.filter(title01='Intuition.')
         self.assertEqual(nodes.count(), 1)
@@ -838,9 +654,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(node.title01, 'Intuition.')
         self.assertEqual(nodes.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_cache(self):
         assert self.theory.saved_nodes is None
         assert self.theory.saved_flat_nodes is None
@@ -867,9 +680,6 @@ class TheoryNodeTests(TestCase):
         self.assertIsNotNone(self.theory.saved_flat_nodes)
         self.assertIsNotNone(self.theory.saved_stats)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_stats(self):
 
         stats = self.evidence.get_stats(Stats.TYPE.ALL)
@@ -886,9 +696,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.theory.stats.count(), 4)
         self.assertEqual(self.evidence.stats.count(), 0)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_get_all_stats(self):
         assert self.theory.saved_stats is None
 
@@ -903,9 +710,6 @@ class TheoryNodeTests(TestCase):
         stats = self.evidence.get_all_stats()
         self.assertIsNone(stats)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_update_hits(self):
         old_rank = self.theory.rank
         old_hit_count = HitCount.objects.get_for_object(self.theory)
@@ -915,9 +719,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(hit_count.hits, old_hit_count.hits+1)
         self.assertTrue(self.theory.rank > old_rank)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_update_activity_logs01(self):
         verb = "Created."
         self.subtheory.update_activity_logs(self.user, verb)
@@ -954,9 +755,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.category.target_actions.count(), 2)
         self.assertEqual(self.bob.notifications.count(), 2)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_update_activity_logs02(self):
         verb = "Deleted."
         self.subtheory.update_activity_logs(self.user, verb)
@@ -965,9 +763,6 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.category.target_actions.count(), 1)
         self.assertEqual(self.bob.notifications.count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete00(self):
         result = self.evidence.delete()
         self.assertTrue(result)
@@ -977,24 +772,15 @@ class TheoryNodeTests(TestCase):
         result = self.evidence.delete()
         self.assertFalse(result)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete01(self):
         self.evidence.delete()
         self.assertTrue(self.evidence.is_deleted())
         self.assertEqual(self.evidence.parent_flat_nodes.count(), 0)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete02(self):
         self.evidence.delete(soft=False)
         self.assertIsNone(self.evidence.id)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete03(self):
         self.subtheory.delete()
         self.evidence.refresh_from_db()
@@ -1003,11 +789,8 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.subtheory.parent_flat_nodes.count(), 0)
         self.assertEqual(self.evidence.parent_flat_nodes.count(), 0)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete04(self):
-        new = self.theory.get_or_create_subtheory(true_title='new')
+        new = get_or_create_subtheory(self.theory, true_title='new')
         new.add_node(self.evidence)
         self.subtheory.delete()
         self.evidence.refresh_from_db()
@@ -1018,9 +801,6 @@ class TheoryNodeTests(TestCase):
         self.assertIn(self.evidence, self.subtheory.get_nodes())
         self.assertEqual(self.evidence.get_parent_nodes().count(), 1)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_delete05(self):
         assert self.user.notifications.count() == 0
 
@@ -1030,17 +810,11 @@ class TheoryNodeTests(TestCase):
         self.theory.delete(user=self.bob)
         self.assertEqual(self.user.notifications.count(), 4)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_swap_titles00(self):
         self.evidence.title00 = 'False'
         self.evidence.swap_titles()
         self.assertNotEqual(self.evidence.title01, 'False')
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_swap_titles01(self):
         self.theory.title00 = 'False'
         self.theory.swap_titles()
@@ -1048,17 +822,11 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.user.notifications.count(), 1)
         # ToDo: test that points were reversed
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_convert00(self):
         success = self.theory.convert()
         self.assertTrue(self.theory.is_theory())
         self.assertFalse(success)
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_convert01(self):
         self.subtheory.convert()
         self.assertTrue(self.subtheory.is_evidence())
@@ -1066,39 +834,24 @@ class TheoryNodeTests(TestCase):
         # ToDo: lots...
         # ToDo: test notify
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_convert02(self):
         self.subtheory.convert(verifiable=True)
         self.assertTrue(self.subtheory.is_evidence())
         self.assertTrue(self.subtheory.is_fact())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_convert03(self):
         self.evidence.convert()
         self.assertTrue(self.subtheory.is_subtheory())
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_merge00(self):
         result = self.fact.merge(self.fiction)
         self.assertFalse(result)
         # todo lots more
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_merge01(self):
-        new = self.theory.get_or_create_subtheory(true_title='new')
+        new = get_or_create_subtheory(self.theory, true_title='new')
         assert new in self.theory.get_nodes()
 
-    # ******************************
-    # TheoryNodeTests
-    # ******************************
     def test_recalculate_stats(self):
 
         result = self.evidence.recalculate_stats()
@@ -1153,7 +906,7 @@ class OpinionTests(TestCase):
     # OpinionTests
     # ******************************
     def test_get_demo(self):
-        demo = Opinion.get_demo()
+        demo = get_demo_opinion()
         self.assertIsNotNone(demo)
 
     # ******************************
