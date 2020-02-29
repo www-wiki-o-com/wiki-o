@@ -20,6 +20,7 @@ import random
 import logging
 
 from theories.models import Category, TheoryNode
+from theories.abstract_models import TheoryPointerBase
 
 
 # *******************************************************************************
@@ -41,7 +42,6 @@ CATEGORY_TITLES = [
 # *******************************************************************************
 # Methods
 # *******************************************************************************
-
 
 def create_categories():
     """
@@ -69,100 +69,39 @@ def create_reserved_nodes(extra=False):
         LOGGER.info('Created intuition theory node.')
     if extra:
         for i in range(1, 100):
-            new_node, created = TheoryNode.objects.get_or_create(
+            TheoryNode.objects.get_or_create(
                 title01='R%d' % i,
                 node_type=TheoryNode.TYPE.EVIDENCE,
             )
 
 
-def create_test_theory(title='Theory', created_by=None, backup=False):
-    """
-    Create a test theory using the input data.
+def get_demo_theory():
+    """Generator a fake theory and populate it with fake evidence.
 
-    @details    Primarily used for unit tests.
-    @param[in]  title (optional, default 'Theory'): The theory's title.
-    @param[in]  created_by (optional, default None): The user that created the theory.
-    @param[in]  backup (optional, default False): If True, a backup is also created.
+    Returns:
+        TheoryNode: The demo theory.
     """
-    theory = TheoryNode.get_or_create_theory(
-        true_title=title,
-        created_by=created_by,
-    )
-    if backup:
-        theory.save_snapshot(user=created_by)
+    theory = TheoryNode(node_type=TheoryNode.TYPE.THEORY, title01='Demo Theory')
+    subtheory = TheoryNode(node_type=TheoryNode.TYPE.THEORY, title01='Demo Sub-Theory')
+    fact = TheoryNode(node_type=TheoryNode.TYPE.FACT, title01='Demo Fact')
+    intuition = TheoryNode(node_type=TheoryNode.TYPE.EVIDENCE, title01='Demo Intuition')
+    theory.id = subtheory.id = fact.id = intuition.id = 0
+    theory.saved_nodes = [subtheory, fact, intuition]
     return theory
 
 
-def create_test_subtheory(parent_theory, title='Sub-Theory', created_by=None, backup=False):
-    """
-    Create a test sub-theory using the input data.
+def get_demo_opinion():
+    """Generate a fake opinion.
 
-    @details    Primarily used for unit tests.
-    @param[in]  parent_theory: The TheoryNode that is to be this theory's parent.
-    @param[in]  title (optional, default 'Sub-Theory'): The sub-theory's title.
-    @param[in]  created_by (optional, default None): The user that created the theory.
-    @param[in]  backup (optional, default False): If True, a backup is also created.
+    Returns:
+        TheoryPointerBase: The demo opinion.
     """
-    subtheory = parent_theory.get_or_create_subtheory(
-        true_title=title,
-        created_by=created_by,
+    theory = get_demo_theory()
+    true_points = random.random()
+    false_points = 1.0 - true_points
+    opinion = TheoryPointerBase.create(
+        theory=theory,
+        true_points=true_points,
+        false_points=false_points,
     )
-    if backup:
-        subtheory.save_snapshot(user=created_by)
-    return subtheory
-
-
-def create_test_evidence(parent_theory, title='Evidence', fact=False, created_by=None, backup=False):
-    """
-    Create a test evidence using the input data.
-
-    @details    Primarily used for unit tests.
-    @param[in]  parent_theory: The TheoryNode that is to be this theory's parent.
-    @param[in]  title (optional, default 'Evidence'): The evidence's title.
-    @param[in]  created_by (optional, default None): The user that created the theory.
-    @param[in]  backup (optional, default False): If True, a backup is also created.
-    """
-    evidence = parent_theory.get_or_create_evidence(
-        title=title,
-        fact=fact,
-        created_by=created_by,
-    )
-    if backup:
-        evidence.save_snapshot(user=created_by)
-    return evidence
-
-
-def create_test_opinion(theory, user, true_input=None, false_input=None, force=False, nodes=False):
-    """
-    Create an opinion using the input data.
-
-    @details    Primarily used for unit tests.
-    @param[in]  theory: The TheoryNode that this opinion is based on.
-    @param[in]  true_input (optional, default None): The true points that are to be assigned to this opinion.
-    @param[in]  false_input (optional, default None): The false points that are to be assigned to this opinion.
-    @param[in]  force (optional, default False): If True, the true and false ratios will be preserved, otherwise they will be determined by the opinion's dependencies.
-    @param[in]  nodes (optional, default False): If True, a random set of dependencies will be added to the opinion.
-    """
-    opinion = theory.opinions.create(
-        user=user,
-    )
-    if true_input is not None:
-        opinion.true_input = true_input
-    if false_input is not None:
-        opinion.false_input = false_input
-    if force:
-        opinion.force = force
-    opinion.save()
-    if nodes:
-        random.seed(0)
-        for theory_node in theory.get_nodes():
-            opinion_node = opinion.nodes.create(
-                theory_node=theory_node,
-                tt_input=random.randint(0, 100),
-                tf_input=random.randint(0, 100),
-                ft_input=random.randint(0, 100),
-                ff_input=random.randint(0, 100),
-            )
-    opinion.update_points()
-    theory.add_to_stats(opinion)
     return opinion

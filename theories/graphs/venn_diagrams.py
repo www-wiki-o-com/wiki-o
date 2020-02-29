@@ -22,6 +22,7 @@ import random
 from theories.models import NodePointerBase, Opinion
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
+from theories.utils import get_demo_opinion
 
 
 # *******************************************************************************
@@ -527,9 +528,9 @@ class DemoVennDiagram(OpinionVennDiagram):
         seed = random.randint(0, 100)
         random.seed(seed)
 
-        opinion = Opinion.get_demo()
+        opinion = get_demo_opinion()
         theory = opinion.theory
-        theory_nodes = list(theory.nodes.all())
+        theory_nodes = theory.get_nodes()
 
         opinion.saved_true_points = opinion.true_points()
         opinion.saved_false_points = opinion.false_points()

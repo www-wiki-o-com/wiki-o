@@ -63,6 +63,7 @@ from theories.graphs.bar_graphs import DemoBarGraph
 from theories.graphs.venn_diagrams import OpinionVennDiagram
 from theories.graphs.venn_diagrams import OpinionComparisionVennDiagram
 from theories.graphs.venn_diagrams import DemoVennDiagram
+from theories.utils import get_demo_opinion
 
 from users.models import User
 from users.forms import ReportViolationForm
@@ -1623,12 +1624,17 @@ def OpinionDetailView(request, pk, slug):
 
     # Setup
     user = request.user
-    theory = get_object_or_404(TheoryNode, pk=pk)
-    if re.match(r'^\d+$', slug):
+    if slug == 'demo':
+        opinion = get_demo_opinion()
+        theory = opinion.theory
+    elif re.match(r'^\d+$', slug):
+        theory = get_object_or_404(TheoryNode, pk=pk)
         opinion = get_object_or_404(Opinion, pk=int(slug))
+        opinion.cache()
     else:
+        theory = get_object_or_404(TheoryNode, pk=pk)
         opinion = theory.get_stats(slug)
-    opinion.cache()
+        opinion.cache()
 
     # Opinions
     opinions = {}
@@ -1654,8 +1660,7 @@ def OpinionDetailView(request, pk, slug):
     for parent_theory in theory.get_parent_nodes():
         if isinstance(opinion, Opinion):
             parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
-            if parent_opinion is not None and \
-               (parent_opinion.is_anonymous() == opinion.is_anonymous()):
+            if parent_opinion is not None and parent_opinion.is_anonymous() == opinion.is_anonymous():
                 parent_opinions.append(parent_opinion)
         elif isinstance(opinion, Stats):
             parent_opinion = get_or_none(parent_theory.stats, stats_type=opinion.stats_type)
@@ -1693,28 +1698,39 @@ def OpinionDetailView(request, pk, slug):
     swap_stats_url = opinion.url() + params00
 
     # Diagrams
-    theory.cache()
-    opinion.cache()
     if stats:
-        points_diagram = OpinionPieChart(opinion)
-        population_diagram = OpinionBarGraph(opinion)
+        if slug == 'demo':
+            points_diagram = DemoPieChart()
+            population_diagram = DemoBarGraph()
+        else:
+            points_diagram = OpinionPieChart(opinion)
+            population_diagram = OpinionBarGraph(opinion)
         evidence_diagram = None
         evidence = None
     else:
         points_diagram = None
         population_diagram = None
-        evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
-        evidence = {
-            'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True),
-            'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True),
-            'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True),
-            'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
-        }
-        for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
-            if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
-               node not in evidence['contradicting'] and node not in evidence['unaccounted']:
-                pass
-                # evidence['unaccounted'].append(node)
+        if slug == 'demo':
+            evidence_diagram = DemoVennDiagram()
+            evidence = {
+                'collaborative':  [],
+                'controversial':  [],
+                'contradicting':  [],
+                'unaccounted':    [],
+            }
+        else:
+            evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
+            evidence = {
+                'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True),
+                'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True),
+                'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True),
+                'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
+            }
+            for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
+                if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
+                   node not in evidence['contradicting'] and node not in evidence['unaccounted']:
+                    pass
+                    # evidence['unaccounted'].append(node)
 
     # Render
     context = {
@@ -1751,127 +1767,7 @@ def OpinionDetailView(request, pk, slug):
 
 def OpinionDemoView(request):
     """A view for demoing the graph visualizations used for opinions."""
-
-    # Setup
-    user = request.user
-    opinion = Opinion.get_demo()
-    theory = TheoryNode.get_demo()
-
-    # Opinions
-    opinions = {}
-    if user.is_authenticated:
-        opinions['user'] = get_or_none(theory.opinions, user=user)
-    opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
-    opinions['moderates'] = get_or_none(theory.stats, stats_type=Stats.TYPE.MODERATES)
-    opinions['opposers'] = get_or_none(theory.stats, stats_type=Stats.TYPE.OPPOSERS)
-    opinions['all'] = get_or_none(theory.stats, stats_type=Stats.TYPE.ALL)
-
-    # subscribed
-    if isinstance(opinion, Opinion):
-        subscribed = user.is_authenticated and is_following(user, opinion)
-    else:
-        subscribed = False
-
-    # Hit counts
-    if isinstance(opinion, Opinion):
-        opinion.update_hits(request)
-
-    # parent opinions
-    parent_opinions = []
-    for parent_theory in theory.get_parent_nodes():
-        if isinstance(opinion, Opinion):
-            parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
-            if parent_opinion is not None and \
-               (parent_opinion.is_anonymous() == opinion.is_anonymous()):
-                parent_opinions.append(parent_opinion)
-        elif isinstance(opinion, Stats):
-            parent_opinion = get_or_none(parent_theory.stats, stats_type=opinion.stats_type)
-            assert parent_opinion is not None
-            parent_opinions.append(parent_opinion)
-
-    # Navigation
-    params = Parameters(request, pk=theory.pk)
-    prev = None
-    if len(params.path) > 0:
-        parent_theory = get_object_or_404(TheoryNode, pk=params.path[-1])
-        if hasattr(opinion, 'user'):
-            parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
-            if parent_opinion is not None and \
-               (parent_opinion.is_anonymous() == opinion.is_anonymous()):
-                prev = parent_opinion.url() + params.get_prev()
-    compare_url = opinion.compare_url()
-
-    # Flatten
-    flat = 'flat' in params.flags
-    params00 = params.get_new()
-    if flat:
-        params00.flags.remove('flat')
-    else:
-        params00.flags.append('flat')
-    swap_flat_url = opinion.url() + params00 + '#VennDiagram'
-
-    # Stats Flag
-    stats = 'stats' in params.flags
-    params00 = params.get_new()
-    if stats:
-        params00.flags.remove('stats')
-    else:
-        params00.flags.append('stats')
-    swap_stats_url = opinion.url() + params00
-
-    # Diagrams
-    if stats:
-        points_diagram = DemoPieChart()
-        population_diagram = DemoBarGraph()
-        evidence_diagram = None
-        evidence = None
-    else:
-        points_diagram = None
-        population_diagram = None
-        evidence_diagram = DemoVennDiagram()
-        evidence = {
-            'collaborative':  evidence_diagram.get_collaborative_evidence(sort_list=True),
-            'controversial':  evidence_diagram.get_controversial_evidence(sort_list=True),
-            'contradicting':  evidence_diagram.get_contradicting_evidence(sort_list=True),
-            'unaccounted':    evidence_diagram.get_unaccounted_evidence(sort_list=True),
-        }
-        for node in theory.get_nodes().exclude(pk=TheoryNode.INTUITION_PK):
-            if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
-               node not in evidence['contradicting'] and node not in evidence['unaccounted']:
-                pass
-                # evidence['unaccounted'].append(node)
-
-    # Render
-    context = {
-        'theory':               theory,
-        'opinion':              opinion,
-        'opinions':             opinions,
-        'subscribed':           subscribed,
-        'parent_opinions':      parent_opinions,
-        'evidence':             evidence,
-        'prev':                 prev,
-        'params':               params,
-        'flat':                 flat,
-        'stats':                stats,
-        'swap_flat_url':        swap_flat_url,
-        'swap_stats_url':       swap_stats_url,
-        'compare_url':          compare_url,
-    }
-    if evidence_diagram is not None:
-        context['evidence_diagram'] = evidence_diagram.get_svg()
-        context['evidence_text'] = evidence_diagram.get_caption()
-    if points_diagram is not None:
-        context['points_diagram'] =  points_diagram.get_svg()
-        context['points_text'] = points_diagram.get_caption()
-    if population_diagram is not None:
-        context['population_diagram'] = population_diagram.get_svg()
-        context['population_text'] =population_diagram.get_caption()
-
-    return render(
-        request,
-        'theories/opinion_detail.html',
-        context,
-    )
+    return OpinionDetailView(request, 0, 'demo')
 
 
 def OpinionCompareView(request, pk, slug01, slug02):
