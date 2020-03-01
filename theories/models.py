@@ -181,7 +181,7 @@ class Category(models.Model):
         Returns:
             list[TheoryNode]: The list of theories.
         """
-        return self.theories.all()
+        return self.theories.filter(node_type=TheoryNode.TYPE.THEORY)
 
     def update_activity_logs(self, user, verb, action_object=None):
         """Update the activity logs and notify the subscribers if the log is unique.
