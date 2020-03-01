@@ -49,10 +49,14 @@ def create_categories():
     Primarily used for initializing the database.
     """
     for title in CATEGORY_TITLES:
-        category, created = Category.objects.get_or_create(title=title)
-        if created:
-            LOGGER.info('Created category: %s.', category)
+        Category.get(title=title, create=True)
 
+def get_category_suggestions():
+    suggestions = ''
+    for x in Category.objects.all().values('title'):
+        suggestions += x['title'] + ','
+    suggestions.strip(',')
+    return suggestions
 
 def create_reserved_nodes(extra=False):
     """

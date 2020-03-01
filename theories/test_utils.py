@@ -193,7 +193,7 @@ class UtilsTests(TestCase):
         self.user = create_test_user(username='not bob', password='1234')
 
         # Create data
-        self.category = Category.get('all')
+        self.category = Category.get('All')
         self.theory = create_test_theory(created_by=self.user, backup=True)
         self.subtheory = create_test_subtheory(
             parent_theory=self.theory, created_by=self.user)

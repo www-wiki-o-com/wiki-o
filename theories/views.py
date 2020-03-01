@@ -51,7 +51,7 @@ from actstream.actions import is_following
 from notifications.signals import notify
 
 from theories.models import Category, TheoryNode, Opinion, OpinionNode, Stats
-from theories.forms import TheoryForm, EvidenceForm, CategoryForm, OpinionForm
+from theories.forms import TheoryForm, EvidenceForm, OpinionForm
 from theories.forms import SelectTheoryNodeForm, OpinionNodeForm
 from theories.forms import TheoryRevisionForm, EvidenceRevisionForm
 from theories.graphs.pie_charts import OpinionPieChart
@@ -64,6 +64,7 @@ from theories.graphs.venn_diagrams import OpinionVennDiagram
 from theories.graphs.venn_diagrams import OpinionComparisionVennDiagram
 from theories.graphs.venn_diagrams import DemoVennDiagram
 from theories.utils import get_demo_opinion
+from theories.utils import get_category_suggestions
 
 from users.models import User
 from users.forms import ReportViolationForm
@@ -227,6 +228,42 @@ def ImageView(request, pk=None):
     return HttpResponse(image, content_type="image/png")
 
 
+def CategoryIndexView(request):
+    """Index view for categories.
+
+    Args:
+        request ([type]): The post request data.
+    """
+
+    # Params
+    params = Parameters(request)
+
+    # Categories
+    search_term = request.GET.get('search', '')
+    if len(search_term) > 0:
+        categories = Category.objects.filter(title__icontains=search_term)
+    else:
+        categories = Category.objects.all()
+    categories = list(categories)
+
+    # Pagination
+    page = request.GET.get('page')
+    paginator = Paginator(categories, NUM_ITEMS_PER_PAGE*3)
+    categories = paginator.get_page(page)
+    categories.page_list = get_page_list(paginator.num_pages, page)
+
+    # Render
+    context = {
+        'categories':           categories,
+        'params':               params,
+    }
+    return render(
+        request,
+        'theories/category_index.html',
+        context,
+    )
+
+
 def TheoryIndexView(request, cat=None):
     """Home view for display all root theories."""
 
@@ -238,7 +275,7 @@ def TheoryIndexView(request, cat=None):
         category = get_object_or_404(Category, title='All')
     else:
         category = get_object_or_404(Category, slug=cat)
-    categories = Category.get_all().exclude(pk=category.pk)
+    categories = Category.get_all().exclude(pk=category.pk)[:6]
 
     # Theories
     search_term = request.GET.get('search', '')
@@ -421,9 +458,6 @@ def TheoryCreateView(request, cat):
     # Setup
     user = request.user
     category = get_object_or_404(Category, slug=cat)
-    categories = Category.get_all(exclude=['all'])
-    CategoryFormSet = modelformset_factory(
-        Category, form=CategoryForm, extra=0)
 
     # Navigation
     params = Parameters(request)
@@ -431,42 +465,29 @@ def TheoryCreateView(request, cat):
 
     # Post request
     if request.method == 'POST':
-        form = TheoryForm(request.POST, user=user)
-        formset = CategoryFormSet(request.POST, queryset=categories)
-        if form.is_valid() and formset.is_valid():
-            # save
+        form = TheoryForm(request.POST, user=user, show_categories=True, initial_categories=category.title)
+        if form.is_valid():
             theory = form.save()
-            # categories
-            theory.categories.add(get_object_or_404(Category, title='All'))
-            for x in formset:
-                if x.cleaned_data['member']:
-                    theory.categories.add(x.instance)
-                else:
-                    theory.categories.remove(x.instance)
-            # activity log
-            theory.update_activity_logs(user, verb='Created.')
+             # Todo: Update newly added categories and newly removed categories
+            theory.update_activity_logs(user, verb=form.get_verb())
             return redirect(theory.url() + params)
-        else:
-            print(70, form.errors)
     # Get request
     else:
-        form = TheoryForm(user=user)
-        formset = CategoryFormSet(queryset=categories)
-        for x in formset:
-            if x.instance == category:
-                x.fields['member'].initial = True
+        form = TheoryForm(user=user, show_categories=True, initial_categories=category.title)
 
     # Render
     context = {
+        'edit':                 False,
+        'category_list':        Category.objects.all(),
+        'category_suggestions': get_category_suggestions(),
         'category':             category,
         'form':                 form,
-        'formset':              formset,
         'prev':                 prev,
         'params':               params,
     }
     return render(
         request,
-        'theories/theory_create.html',
+        'theories/theory_edit.html',
         context,
     )
 
@@ -479,10 +500,7 @@ def TheoryEditView(request, pk):
     # Setup
     user = request.user
     theory = get_object_or_404(TheoryNode, pk=pk)
-    categories = Category.get_all(exclude=['all'])
-    CategoryFormSet = modelformset_factory(
-        Category, form=CategoryForm, extra=0)
-
+    
     # Navigation
     params = Parameters(request, pk=pk)
     prev = theory.url() + params
@@ -496,38 +514,25 @@ def TheoryEditView(request, pk):
 
     # Post request
     if request.method == 'POST':
-        form = TheoryForm(request.POST, instance=theory, user=user)
-        formset = CategoryFormSet(request.POST, queryset=categories)
-        # autosave?
-        if form.is_valid() and formset.is_valid():
-            # theory
+        form = TheoryForm(request.POST, instance=theory, user=user, show_categories=True)
+        if form.is_valid():
             theory = form.save()
-            # categories
-            for x in formset:
-                if x.cleaned_data['member']:
-                    theory.categories.add(x.instance)
-                else:
-                    theory.categories.remove(x.instance)
-            # activity log
+             # Todo: Update newly added categories and newly removed categories
             theory.update_activity_logs(user, verb=form.get_verb())
-            # done
             return redirect(next)
-        else:
-            print(226, form.errors)
 
     # Get request
     else:
-        form = TheoryForm(instance=theory, user=user)
-        formset = CategoryFormSet(queryset=categories)
-        for x in formset:
-            if theory.categories.filter(pk=x.instance.pk).exists():
-                x.fields['member'].initial = True
+        form = TheoryForm(instance=theory, user=user, show_categories=True)
+
     # Render
     context = {
+        'edit':                 True,
+        'category_list':        Category.objects.all(),
+        'category_suggestions': get_category_suggestions(),
         'root_theory':          root_theory,
         'theory':               theory,
         'form':                 form,
-        'formset':              formset,
         'prev':                 prev,
         'params':               params,
     }

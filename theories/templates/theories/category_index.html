@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+
+<!-- __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
+
+A web service for sharing opinions and avoiding arguments
+
+@file       theories/templates/theories/category_index.html
+@brief      The default page for viewing categories
+@copyright  GNU Public License, 2018
+@authors    Frank Imeson
+-->
+
+
+{% extends 'base.html' %}
+{% load static %}
+{% load extra %}
+{% load rules %}
+
+
+{% block header %}{% endblock %}
+{% block content %}
+
+  <div class="row"> <!-- Row -->
+    <div class="col-md-12 col-lg-8"> <!-- Main Column -->
+
+      <div class="card my-3">
+        <h5 class="card-header">Categories</h5>
+        <div class="card-body">
+          <div class="row">
+            {% for category in categories %}
+              <div class="col-sm-12 col-md-6">
+                <a href={{ category.url }}> {{ category }} ({{ category.count }}) </a>
+              </div>
+            {% endfor %}
+          </div> <!-- end row -->
+          {% include "include/paginator.html" with list=categories %}
+        </div> <!-- end card body -->
+      </div> <!-- end card -->
+
+    </div> <!-- end column -->
+    <div class="col-md-12 col-lg-4"> <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+          </ul>
+        </div>
+      </div>
+      
+      <!-- Search -->
+      <div class="card my-3">
+        <h5 class="card-header">Search</h5>
+        <div class="card-body">
+          <form class="bd-search d-flex align-items-center">
+            <input type="search" class="form-control" name="search" placeholder="Enter keywords..." autocomplete="off">
+          </form>
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+{% endblock %}

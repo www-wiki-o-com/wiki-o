@@ -98,6 +98,7 @@ class Category(models.Model):
         db_table = 'theories_category'
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'
+        ordering = ['title']
 
     def __str__(self):
         """Returns the category's title.
@@ -113,7 +114,7 @@ class Category(models.Model):
         super().save(*args, **kwargs)
 
     @classmethod
-    def get(cls, title, create=False):
+    def get(cls, title, create=True):
         """Return the category model with the matching title
 
         Args:
@@ -125,10 +126,9 @@ class Category(models.Model):
             Category: The category matching the title.
         """
         slug = slugify(title)
-        if create:
-            category, created = cls.objects.get_or_create(slug=slug)
-        else:
-            category = get_or_none(cls.objects, slug=slug)
+        category = get_or_none(cls.objects, slug=slug)
+        if category is None and create:
+            category = cls.objects.create(title=title, slug=slug)
         return category
 
     @classmethod
@@ -172,6 +172,9 @@ class Category(models.Model):
         """
         return reverse('theories:activity', kwargs={'cat': self.slug})
 
+    def count(self):
+        return self.theories.count()
+    
     def get_theories(self):
         """Return all theories within category.
 
@@ -299,6 +302,9 @@ class TheoryNode(models.Model):
         if self.is_deleted():
             s += ' (deleted)'
         return s
+
+    def get_categories(self):
+        return self.categories.all()
 
     def get_title(self):
         self.assert_evidence()

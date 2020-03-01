@@ -55,19 +55,19 @@ class CategoryTests(TestCase):
 
     def setUp(self):
 
-        # setup
+        # Setup
         random.seed(0)
         create_groups_and_permissions()
         create_reserved_nodes()
         create_categories()
 
-        # create user(s)
+        # Create user(s)
         self.bob = create_test_user(username='bob', password='1234')
         self.user = create_test_user(username='not_bob', password='1234')
 
-        # create data
+        # Create data
         self.theory = create_test_theory(created_by=self.user)
-        self.category = Category.get('all')
+        self.category = Category.get('All')
         follow(self.bob, self.category, send_action=False)
 
     def test_str(self):
@@ -78,11 +78,11 @@ class CategoryTests(TestCase):
         self.assertEqual(category.slug, 'new')
 
     def test_get_exisiting(self):
-        category = Category.get('ALL')
+        category = Category.get('All')
         self.assertEqual(category.slug, 'all')
 
     def test_get_none(self):
-        category = Category.get('blah')
+        category = Category.get('blah', create=False)
         self.assertIsNone(category)
 
     def test_get_create(self):
@@ -90,7 +90,7 @@ class CategoryTests(TestCase):
         self.assertIsNotNone(category)
 
     def test_get_all(self):
-        categories = [x.slug for x in Category.get_all(exclude=['ALL'])]
+        categories = [x.slug for x in Category.get_all(exclude=['All'])]
         self.assertIn('legal', categories)
         self.assertIn('health', categories)
         self.assertIn('conspiracy', categories)
@@ -166,7 +166,7 @@ class TheoryNodeTests(TestCase):
         self.user = create_test_user(username='not bob', password='1234')
 
         # create data
-        self.category = Category.get('all')
+        self.category = Category.get('All')
         self.theory = create_test_theory(created_by=self.user, backup=True)
         self.subtheory = create_test_subtheory(
             parent_theory=self.theory, created_by=self.user)

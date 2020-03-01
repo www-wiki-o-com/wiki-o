@@ -186,7 +186,6 @@ def make_safe(text):
 #
 # *******************************************************************************
 
-
 @register.filter
 def possessive(string):
     """Add the possesive 's or ' to the end of the string.
@@ -270,7 +269,7 @@ def unfollow_url(obj):
 
 
 @register.filter
-def bibliography(detail_text, inc_links=True, autoescape=True):
+def long_details(detail_text, inc_links=True, autoescape=True):
     """Formats the detail text to include a linked bibliograpy.
 
     Args:
@@ -281,16 +280,18 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
     Returns:
         str: The formated output text.
     """
+    # Autoescape
     autoescape = autoescape and not isinstance(detail_text, SafeData)
     detail_text = normalize_newlines(detail_text)
     if autoescape:
         detail_text = escape(detail_text)
 
-    # create bib and external links
+    # Create bib and external links
     prev_index = 0
     bib = []
     result = ''
-    # make unsafe by replacing brackets
+
+    # Make unsafe by replacing brackets
     detail_text = re.sub(r'&lt;!--', '«', detail_text)
     detail_text = re.sub(r'--&gt;\s*', '»', detail_text)
     detail_text = detail_text.replace('[[', '{').replace(']]', '}')
@@ -311,14 +312,14 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
             name = url[k:].strip()
             url = url[:k].strip()
         if URLValidator.regex.search(url):
-            # scrub wiki-o links
+            # Scrub wiki-o links
             if re.search('wiki-o', url):
                 x = RE_WIKI_O.match(url)
                 if x:
                     url = x.group()
                 else:
                     url = ''
-            # regular citation
+            # Regular citation
             if bib00:
                 # don't add duplicates to bib
                 if (url, name) in bib:
@@ -332,11 +333,11 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
                     result = result.strip()
                     result += '&nbsp;'
                 result += '[%d]' % (bib_index + 1)
-            # add to bib but not inline
+            # Add to bib but not inline
             elif bib01:
                 if (url, name) not in bib:
                     bib.append((url, name))
-            # inline url, done with () brackets
+            # Inline url, done with () brackets
             elif inline:
                 if inc_links:
                     result += '<a href="%s" target="_blank">%s</a>' % (url, name)
@@ -355,7 +356,7 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
     result += make_safe(detail_text[prev_index:])
     detail_text = result
 
-    # create lists
+    # Create lists
     result = ''
     ul_depth = 0
     ol_depth = 0
@@ -400,7 +401,7 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
         ol_depth -= 1
     detail_text = result
 
-    # bib
+    # Bib
     if len(bib) > 0:
         result = result.strip()
         result += '<ol class="bib">'
@@ -415,14 +416,14 @@ def bibliography(detail_text, inc_links=True, autoescape=True):
     result = result.replace(']&nbsp;[', ',')
     detail_text = result.strip()
 
-    # ship it
+    # Ship it
     detail_text = detail_text.replace('\n', '<br/>')
     detail_text = detail_text.replace('  ', '&nbsp&nbsp')
     return mark_safe(detail_text)
 
 
 @register.filter
-def short_bib(detail_text, length=500, autoescape=True):
+def short_details(detail_text, length=500, autoescape=True):
     """Formats the detail text to include a non-linked bibliograpy.
 
     Args:
@@ -433,7 +434,7 @@ def short_bib(detail_text, length=500, autoescape=True):
     Returns:
         str: The formated output text.
     """
-    detail_text = bibliography(detail_text, inc_links=False, autoescape=autoescape)
+    detail_text = long_details(detail_text, inc_links=False, autoescape=autoescape)
     if len(detail_text) > length:
         detail_text = detail_text[:length]
         i = detail_text.rfind(' ')

@@ -25,51 +25,63 @@ A web service for sharing opinions and avoiding arguments
 
   <!-- Title -->
   <h3><br>{{ theory }}</h3>
-  {% with TheoryTab=True %}
-    {% include "theories/theory_edit_tabs.html" %}
-  {% endwith %}
+  {% if edit %}
+    {% with TheoryTab=True %}
+      {% include "theories/theory_edit_tabs.html" %}
+    {% endwith %}
+  {% endif %}
 
-  <form action="{% url_extra 'theories:theory-edit' theory.id extra=params %}" method="post">
-    {% csrf_token %}
-    {{ formset.management_form }}
     <div class="row"> <!-- Row -->
-      <div class="col-lg-8"> <!-- Main Column -->
+      <div class="col-sm-12 col-md-12 col-lg-8"> <!-- Main Column -->
 
-        <div class="card my-3">
-          <h5 class="card-header">
-            Edit:
-          </h5>
-          <div class="card card-body">
-              {{ form|crispy }}
+        {% if edit %}
+        <form action="{% url_extra 'theories:theory-edit' theory.id extra=params %}" method="post">
+        {% else %}
+        <form action="{% url_extra 'theories:theory-create' category.slug extra=params %}" method="post">
+        {% endif %}
+          {% csrf_token %}
+
+          <!-- The form -->
+          <div class="card my-3">
+            <h5 class="card-header">
+              {% if edit %}
+                Edit
+              {% else %}
+                Create New Theory
+              {% endif %}
+            </h5>
+            <div class="card card-body">
+                {{ form|crispy }}
+                <div id="category-suggestions" suggestions={{ category_suggestions }}></div>
+            </div>
           </div>
-        </div>
 
-        <!-- Buttons -->
-        <center>
+          <!-- The Buttons. -->
+          <center>
 
-          <!-- Back -->
-          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+            <!-- Back -->
+            <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
-          <!-- Delete -->
-          {% has_perm 'theories.delete_theorynode' user theory as can_del %}
-          <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_del %} disabled {% endif %}>
-            Delete
-          </button>
-          &nbsp
+            <!-- Delete -->
+            {% if edit %}
+            {% has_perm 'theories.delete_theorynode' user theory as can_del %}
+              <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_del %} disabled {% endif %}>
+                Delete
+              </button>
+              &nbsp
+            {% endif %}
 
-          <!-- Save -->
-          {% has_perm 'theories.change_theorynode' user theory as can_change %}
-          <input accesskey="s" type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
-
-        </center>
-
-        <br>
-        {% include "theories/theory_how2.html" %}
+            <!-- Save -->
+            {% has_perm 'theories.change_theorynode' user theory as can_change %}
+            <input accesskey="s" type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
+          </center>
+        </form>
 
       </div> <!-- end column -->
-      <div class="col-md-4"> <!-- Sidebar Column -->
+      <div class="col-md-12 col-lg-4"> <!-- Sidebar Column -->
 
         <!-- Actions -->
+        {% if edit %}
         <div class="card my-3">
           <h5 class="card-header"> Actions </h5>
           <div class="card-body">
@@ -87,93 +99,43 @@ A web service for sharing opinions and avoiding arguments
                 <li><a data-target="#convert_modal" data-toggle="modal" href="#convert_modal"> Convert to Evidence </a></li>
               {% endif %}
 
-              <!-- Add to categories -->
-              {% has_perm 'theories.add_category' user as can_add %}
-              {% if can_add %}
-                <li><a data-target="#home_modal" data-toggle="modal" href="#home_modal">
-                  {% if theory.is_root %}
-                    Remove from Home
-                  {% else %}
-                    Show in Home
-                  {% endif %}
-                </a></li>
-              {% endif %}
-
-            </ul>
-          </div>
-        </div>
-
-        <!-- Categories -->
-        {% for x in formset %}
-          {{ x.id }}
-        {% endfor %}
-        {% if theory.is_root %}
-        <div class="card my-3">
-          <h5 class="card-header"> Categories </h5>
-          <div class="card-body">
-            <ul class="list-unstyled row mb-0">
-              {% for x in formset %}
-                <li class="list-item col-lg-6">
-                  {{ x.id }}
-                  {{ x.member }}
-                  {{ x.instance }}
-                </li>
-              {% endfor %}
             </ul>
           </div>
         </div>
         {% endif %}
 
+        <!-- Categories -->
+        <div class="card my-3">
+          <h5 class="card-header"> Categories </h5>
+          <div class="card-body">
+            <div class="row">
+              {% for x in category_list %}
+                <div class="fake-link col-sm-12 col-md-6 col-lg-6" name="category-item-input" title="{{ x.title }}">
+                  {{ x }}
+                </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+
       </div> <!-- end column-->
+
+      <div class="col-sm-12 col-md-12 col-lg-8">
+        <br></br></br>
+        {% include "theories/theory_how2.html" %}
+      </div>
+
     </div> <!-- end row -->
-  </form>
+
+
+
 {% endblock %}
 
 
 {% block extra_modals %}
 
-  <!-- Add to Home -->
-  <div class="modal" id="home_modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-
-        <!-- Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Please confirm</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-
-        <!-- body -->
-        <div class="modal-body">
-          {% if theory.is_root %}
-            Are you sure you want to remove &ldquo;{{ theory }}&rdquo; from the home screen?
-          {% else %}
-            Are you sure you want to add &ldquo;{{ theory }}&rdquo; to the home screen?
-          {% endif %}
-        </div>
-
-        <!-- footer -->
-        <div class="modal-footer">
-          {% has_perm 'theories.add_category' user as can_add %}
-          {% if theory.is_root %}
-            <form action="{% url_extra 'theories:theory-remove-from-home' theory.id extra=params %}" method="post">
-              {% csrf_token %}
-              <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
-            </form>
-          {% else %}
-            <form action="{% url_extra 'theories:theory-add-to-home' theory.id extra=params %}" method="post">
-              {% csrf_token %}
-              <input type="submit" class="btn btn-danger" name="add" value="Yes" {% if not can_add %} disabled {% endif %}>
-            </form>
-          {% endif %}
-          <button type="button" class="btn" data-dismiss="modal">No</button>
-        </div>
-
-      </div>
-    </div>
-  </div>
-
   <!-- Swap true/false titles -->
+  {% if edit %}
   <div class="modal" id="swap_modal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -204,9 +166,11 @@ A web service for sharing opinions and avoiding arguments
       </div>
     </div>
   </div>
+  {% endif %}
 
 
   <!-- Convert -->
+  {% if edit %}
   <div class="modal" id="convert_modal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -239,8 +203,10 @@ A web service for sharing opinions and avoiding arguments
       </div>
     </div>
   </div>
+  {% endif %}
 
   <!-- Delete -->
+  {% if edit %}
   <div class="modal" id="del_modal">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -289,7 +255,29 @@ A web service for sharing opinions and avoiding arguments
       </div>
     </div>
   </div>
+  {% endif %}
 
 {% endblock %}
+
+{% block extra_js %}
+{% comment %} Suggestions  {% endcomment %}
+<script>
+  $(document).ready(function(){
+    {% comment %} Inital setup {% endcomment %}
+    categories = document.getElementById('category-suggestions').getAttribute('suggestions').split(',');
+    category_tags = new AmsifySuggestags($('input[name="category_list_input"]'));
+    category_tags._settings({
+      suggestions: categories,
+    });
+    category_tags._init();
+
+    {% comment %} On Click {% endcomment %}
+    $('div[name="category-item-input"]').click(function() { 
+      category_tags.addTag($(this).attr("title"));
+    }); 
+
+  });
+</script>
+{% endblock extra_js %}
 
 

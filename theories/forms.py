@@ -19,17 +19,19 @@ A web service for sharing opinions and avoiding arguments
 import copy
 
 from django import forms
+from django.urls import reverse
 from django.forms import TextInput
 from django.contrib.auth.models import AnonymousUser
 from reversion.models import Version
 
-from .models import *
+from theories.models import Category, TheoryNode, Opinion, OpinionNode
+from core.utils import string_to_list, get_or_none
 
 
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-RE_HASHTAG = r'#\w+'
+CATEGORY_MAX_LENGTH = 30
 
 INT_VALUES = {
     "initial":    0,
@@ -60,7 +62,27 @@ DETAILS_CHARFEILD = {
 # *******************************************************************************
 
 class TheoryForm(forms.ModelForm):
-    """Theory form."""
+    """Theory form.
+
+    This form is used to create and edit theories and sub-theories. The form class itself will
+    take care of updating the TheoryNode and its related fields, which includes the categories.
+
+    Attributes:
+        user (User): The current user requesting the changes.
+
+    Todo:
+        * Migrate activity stream updates to the form.
+    """
+    user = None
+    action_verb = None
+    old_instance = None
+    initial_categories = ''
+    category_list_input = forms.CharField(widget=forms.TextInput(
+        attrs={'size':80,
+                'data-role':'tagsinput',
+                'class':'form-control',
+                'autocomplete':'off'}),
+        required=False)
 
     class Meta:
         """Where the form options are defined."""
@@ -91,25 +113,41 @@ class TheoryForm(forms.ModelForm):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly."""
 
-        # setup
+        # Remove key word arguments
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')
         else:
             self.user = AnonymousUser
+        if 'initial_categories' in kwargs.keys():
+            self.initial_categories = kwargs.pop('initial_categories')
+        else:
+            self.initial_categories = ''
+        if 'show_categories' not in kwargs.keys() or not kwargs.pop('show_categories'):
+            hide_category_list_input = True
+        else:
+            hide_category_list_input = False
         super().__init__(*args, **kwargs)
 
-        # autosave
-        self.old_instance = None
+        # Autosave
         if self.instance.pk is not None:
             self.old_instance = copy.copy(self.instance)
 
-        # config
+        # Category list input.
+        if self.instance.pk is not None:
+            for x in self.instance.categories.all().values('title'):
+                self.initial_categories += x['title'] + ','
+            self.initial_categories = self.initial_categories.strip(',')
+        self.fields['category_list_input'].initial = self.initial_categories
+        if hide_category_list_input:
+            self.fields['category_list_input'].widget = forms.HiddenInput()
+
+        # Config
         if self.instance.pk is not None:
             self.fields['title01'].required = False
         self.fields['title00'].required = False
         self.fields['details'].required = False
 
-        # permissions
+        # Permissions
         if self.instance.pk is not None:
             self.fields['title01'].widget.attrs['readonly'] = True
             self.fields['title00'].widget.attrs['readonly'] = True
@@ -125,46 +163,53 @@ class TheoryForm(forms.ModelForm):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('title01')
-        elif self.user.has_perm('theories.change_title', self.instance):
+        if self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('title01')
-        else:
-            return self.instance.title01
+        return self.instance.title01
 
     def clean_title00(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('title00')
-        elif self.user.has_perm('theories.change_title', self.instance):
+        if self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('title00')
-        else:
-            return self.instance.title00
+        return self.instance.title00
 
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('details')
-        elif self.user.has_perm('theories.change_details', self.instance):
+        if self.user.has_perm('theories.change_details', self.instance):
             return self.cleaned_data.get('details')
-        else:
-            return self.instance.details
+        return self.instance.details
+
+    def clean_categories(self):
+        for title in self.cleaned_data.get('category_list_input').split(','):
+            if len(title) > CATEGORY_MAX_LENGTH:
+                self.add_error('category_list_input', 'Title too long, please limit to %d charaters.' % CATEGORY_MAX_LENGTH)
+                break
+        return self.cleaned_data.get('category_list_input')
 
     def get_verb(self):
-        if hasattr(self, 'action_verb'):
-            return self.action_verb
-        else:
-            return None
+        return self.action_verb
 
     def save(self, commit=True):
         """Sets node_type to THEORY."""
         created = self.instance.pk is None
         theory = super().save(commit=False)
 
-        # populate data
+        # Populate data
         theory.node_type = TheoryNode.TYPE.THEORY
         if created and self.user is not None:
-            self.created_by = self.user
+            theory.created_by = self.user
 
-        # action verb
+        # Save
+        if commit:
+            if self.old_instance is not None:
+                self.old_instance.autosave(self.user)
+            theory.save(self.user)
+
+        # Action verb (must come after the theory is created)
         if created:
             self.action_verb = 'Created'
         else:
@@ -175,16 +220,30 @@ class TheoryForm(forms.ModelForm):
                 self.action_verb += 'Details'
             self.action_verb = self.action_verb.strip(' & ')
 
-        # save
-        if commit:
-            if self.old_instance is not None:
-                self.old_instance.autosave(self.user)
-            theory.save(self.user)
+        # Update categories (must come after the theory is created)
+        if self.initial_categories != self.cleaned_data.get('category_list_input'):
+            previous_categories = set(string_to_list(self.initial_categories))
+            current_categories = set(string_to_list(self.cleaned_data.get('category_list_input')))
+            for category_title in previous_categories - current_categories:
+                category = Category.get(category_title)
+                theory.categories.remove(category)
+            for category_title in current_categories - previous_categories:
+                category = Category.get(category_title)
+                theory.categories.add(category)
+            # Update the "All" category
+            all_category = Category.get('All')
+            if len(theory.parent_nodes.all()) == 0 or theory.categories.count() > 0:
+                theory.categories.add(all_category)
+            else:
+                theory.categories.remove(all_category)
+
         return theory
 
 
 class EvidenceForm(forms.ModelForm):
     verifiable = forms.BooleanField(initial=False)
+
+    action_verb = None
 
     class Meta:
         """Where the form options are defined."""
@@ -279,10 +338,7 @@ class EvidenceForm(forms.ModelForm):
             return self.instance.node_type == TheoryNode.TYPE.FACT
 
     def get_verb(self):
-        if hasattr(self, 'action_verb'):
-            return self.action_verb
-        else:
-            return None
+        return self.action_verb
 
     def save(self, commit=True):
         """Sets node_type to EVIDENCE (optinally, verifiable)."""
@@ -315,28 +371,6 @@ class EvidenceForm(forms.ModelForm):
                 self.old_instance.autosave(self.user)
             evidence.save(self.user)
         return evidence
-
-
-class CategoryForm(forms.ModelForm):
-    """A form for choosing membership, not creating a category."""
-
-    # non-model fields
-    member = forms.BooleanField(initial=False)
-
-    class Meta:
-        """Where the form options are defined."""
-        model = Category
-        fields = ('member', 'title')
-        labels = {
-            'title':    '',
-            'member':   '',
-        }
-
-    def __init__(self, *args, **kwargs):
-        """Create and populate the form."""
-        super().__init__(*args, **kwargs)
-        self.fields['member'].required = False
-        self.fields['title'].required = False
 
 
 class SelectTheoryNodeForm(forms.ModelForm):
@@ -492,8 +526,7 @@ class OpinionNodeForm(forms.ModelForm):
 
         # url
         if theory_node.is_theory():
-            self.url = reverse('theories:get_my_opinion',
-                               kwargs={'pk': theory_node.pk})
+            self.url = reverse('theories:get_my_opinion', kwargs={'pk': theory_node.pk})
         else:
             self.url = None
 
