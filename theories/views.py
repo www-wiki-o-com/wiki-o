@@ -799,8 +799,6 @@ def TheoryInheritView(request, pk01, pk02):
                     theory.update_activity_logs(
                         user, verb='Inherited <# object.url {{ object }} #>', action_object=node)
             return redirect(next)
-        else:
-            print(200, formset.errors)
 
     # Get request
     else:
