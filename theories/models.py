@@ -52,7 +52,7 @@ from theories.abstract_models import TheoryPointerBase, NodePointerBase
 # Defines
 # *******************************************************************************
 DEBUG = False
-logger = logging.getLogger('django')
+LOGGER = logging.getLogger('django')
 
 
 # *******************************************************************************
@@ -388,18 +388,20 @@ class TheoryNode(models.Model):
                 'code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
             error += '  Traceback[2]: %s, %d, %s, %s \n' % (stack02[1].split(
                 'code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
-            logger.error(error)
+            LOGGER.error(error)
             if self.nodes.count() > 0:
-                logger.error(
-                    '842: This node should not have nodes (pk=%d).' % self.pk)
+                LOGGER.error('TheoryNode.assert_theory: This node should not have nodes (pk=%d).',
+                             self.pk)
             if self.flat_nodes.count() > 0:
-                logger.error(
-                    '844: This node should not have flat nodes (pk=%d).' % self.pk)
+                LOGGER.error(
+                    'TheoryNode.assert_theory: This node should not have flat nodes (pk=%d).',
+                    self.pk)
             return False
         elif check_nodes:
             if self.flat_nodes.filter(node_type__lt=0).exists():
-                logger.error(
-                    '846: There should not be any flat deleted nodes (pk=%d).' % self.pk)
+                LOGGER.error(
+                    'TheoryNode.assert_theory: There should not be any flat deleted nodes (pk=%d).',
+                    self.pk)
                 return False
         return True
 
@@ -412,15 +414,15 @@ class TheoryNode(models.Model):
                 'code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
             error += '  Traceback[2]: %s, %d, %s, %s \n' % (stack02[1].split(
                 'code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
-            logger.error(error)
+            LOGGER.error(error)
             return False
         elif check_nodes:
             if self.nodes.count() > 0:
-                logger.error(
+                LOGGER.error(
                     '592: This node should not have nodes (pk=%d).' % self.pk)
                 return False
             if self.flat_nodes.count() > 0:
-                logger.error(
+                LOGGER.error(
                     '593: This node should not have flat nodes (pk=%d).' % self.pk)
                 return False
         return True
@@ -536,7 +538,7 @@ class TheoryNode(models.Model):
         if self.is_theory():
             # error checking
             if self.parent_nodes.count() == 0 or self.is_root():
-                logger.error(
+                LOGGER.error(
                     '461: Cannot convert a root theory to evidence (pk=%d).' % self.pk)
                 return False
             # inherit nodes
@@ -600,7 +602,7 @@ class TheoryNode(models.Model):
         """
         # error checking
         if self.node_type != theory_node.node_type:
-            logger.error('496: Cannot merge theory nodes of different type (pk01=%d, pk02=%d).' % (
+            LOGGER.error('496: Cannot merge theory nodes of different type (pk01=%d, pk02=%d).' % (
                 self.pk, theory_node.pk))
             return False
         # setup
@@ -685,11 +687,11 @@ class TheoryNode(models.Model):
         """
         # error checking
         if self.pk == self.INTUITION_PK:
-            logger.error(
+            LOGGER.error(
                 '720: Intuition node should not be deleted (pk=%d).' % self.pk)
             return False
         if self.is_deleted():
-            logger.error(
+            LOGGER.error(
                 '721: Theory node is already deleted (pk=%d).' % self.pk)
             return False
         # setup
