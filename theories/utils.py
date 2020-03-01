@@ -55,7 +55,7 @@ def get_category_suggestions():
     suggestions = ''
     for x in Category.objects.all().values('title'):
         suggestions += x['title'] + ','
-    suggestions.strip(',')
+    suggestions = suggestions.strip(',')
     return suggestions
 
 def create_reserved_nodes(extra=False):
