@@ -46,7 +46,7 @@ A web service for sharing opinions and avoiding arguments
       <!-- Slide Three - Set the background image for this slide in the line below -->
       <div class="carousel-item" style="background-image:url({% static 'core/img/brains.svg' %})">
         <div class="carousel-caption">
-          <h3>&ldquo;Liked Making A Murder?&rdquo;</h3>
+          <h3>&ldquo;Liked Making A Murderer?&rdquo;</h3>
           Join Wiki-O and be part of the jury.
         </div>
       </div>
@@ -104,15 +104,13 @@ A web service for sharing opinions and avoiding arguments
         {% endif %}
       </div> <!-- end card -->
     </div> <!-- end column -->
-    <div class="col-md-4 col-sx-0"> <!-- Sidebar Column -->
+    <div class="col-md-12 col-lg-4 col-sx-0"> <!-- Sidebar Column -->
 
       <!-- Actions -->
       <div class="card my-3">
         <h5 class="card-header">Actions</h5>
         <div class="card-body">
           <ul class="list-unstyled mb-0">
-            <!-- Demo -->
-            <li><a href="{% url 'theories:opinion-demo' %}"> View Demo </a></li>
             <!-- Create Theory -->
             {% has_perm 'theories.add_theorynode' user as can_add %}
             {% if can_add %}
@@ -122,6 +120,8 @@ A web service for sharing opinions and avoiding arguments
             <li><a href="{% url 'theories:activity' category.slug %}"> View Activity Log </a></li>
             <!-- Violations -->
             <li><a href="{% url 'users:violations' %}"> Review Violations </a></li>
+            <!-- Brows Categories -->
+            <li><a href="{% url 'theories:categories' %}"> Browse Categories </a></li>
           </ul>
         </div>
       </div>
@@ -130,11 +130,16 @@ A web service for sharing opinions and avoiding arguments
       <div class="card my-3">
         <h5 class="card-header">Categories</h5>
         <div class="card-body">
-          <ul class="list-unstyled row mb-0">
+          <div class="row">
             {% for category in categories %}
-              <li class="list-item col-lg-6"><a href={{ category.url }}> {{ category }} </a></li>
+              <div class="col-sm-12 col-md-6 col-lg-12">
+                <a href={{ category.url }}> {{ category }} ({{ category.count }}) </a>
+              </div>
             {% endfor %}
-          </ul>
+            <div class="col-sm-12 col-md-6 col-lg-12">
+              <a href="{% url 'theories:categories' %}"> ... </a>
+            </div>
+          </div>
         </div>
       </div>
 

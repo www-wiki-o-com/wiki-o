@@ -22,7 +22,8 @@ from django.test import TestCase
 from actstream.actions import follow
 
 from theories.models import Category, TheoryNode
-from theories.utils import create_categories, create_reserved_nodes, get_demo_theory
+from theories.utils import get_demo_theory, get_demo_opinion
+from theories.utils import create_categories, create_reserved_nodes
 from users.maintence import create_groups_and_permissions, create_test_user
 
 
@@ -192,7 +193,7 @@ class UtilsTests(TestCase):
         self.user = create_test_user(username='not bob', password='1234')
 
         # Create data
-        self.category = Category.get('all')
+        self.category = Category.get('All')
         self.theory = create_test_theory(created_by=self.user, backup=True)
         self.subtheory = create_test_subtheory(
             parent_theory=self.theory, created_by=self.user)
@@ -210,10 +211,6 @@ class UtilsTests(TestCase):
                 stats.add_opinion(self.opinion, save=False)
             stats.save_changes()
         follow(self.bob, self.theory, send_action=False)
-
-    def test_get_demo_theory(self):
-        demo = get_demo_theory()
-        self.assertIsNotNone(demo)
 
     def test_get_or_create_theory(self):
         node01 = get_or_create_theory(true_title='Test', false_title='Test', created_by=self.user)
@@ -246,3 +243,11 @@ class UtilsTests(TestCase):
         self.assertEqual(node01, node02)
         self.assertNotIn(node01, self.category.get_theories())
         self.assertTrue(node01.is_evidence())
+
+    def test_get_demo_theory(self):
+        demo = get_demo_theory()
+        self.assertIsNotNone(demo)
+
+    def test_get_demo(self):
+        demo = get_demo_opinion()
+        self.assertIsNotNone(demo)

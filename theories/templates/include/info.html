@@ -20,17 +20,17 @@ A web service for sharing opinions and avoiding arguments
 {% if x.is_subtheory %}
   <div class="about">
     <img src="{% static 'core/img/info_theory.svg' %}" height='16'>
-    <span class="abouttext">{{ x.about|short_bib }}</span>
+    <span class="abouttext">{{ x.about|short_details }}</span>
   </div>
 {% else %} {% if x.is_fact %}
   <div class="about">
     <img src="{% static 'core/img/info_fact.svg' %}" height='16'>
-    <span class="abouttext">{{ x.about|short_bib }}</span>
+    <span class="abouttext">{{ x.about|short_details }}</span>
   </div>
 {% else %}
   <div class="about">
     <img src="{% static 'core/img/info_other.svg' %}" height='16'>
-    <span class="abouttext">{{ x.about|short_bib }}</span>
+    <span class="abouttext">{{ x.about|short_details }}</span>
   </div>
 {% endif %} {% endif %}
 

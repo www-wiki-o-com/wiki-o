@@ -338,7 +338,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_demo(self, override=False):
-        test_url = reverse('theories:opinion-demo')
+        test_url = reverse('theories:opinion-detail', kwargs={'pk':0, 'slug':'debug'})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)

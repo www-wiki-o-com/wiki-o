@@ -35,7 +35,7 @@ A web service for sharing opinions and avoiding arguments
       <form action="{% url_extra 'theories:evidence-restore' evidence.id extra=params %}" method="post">
         {% csrf_token %}
         {{ formset.management_form }}
-        <!-- errors -->
+        <!-- Errors -->
         {% include "include/formset_errors.html" with formset=formset %}
         {% for form in formset %}
           {{ form.id }}
@@ -53,9 +53,9 @@ A web service for sharing opinions and avoiding arguments
             </div>
             <div class="collapse" id="form{{forloop.counter}}">
               <div class="card card-body">
-                  <!-- errors -->
+                  <!-- Errors -->
                   {% include "include/form_errors.html" with form=form %}
-                  <!-- data -->
+                  <!-- Data -->
                   {{ form.title01|as_crispy_field }}
                   {{ form.details|as_crispy_field }}
                   {{ form.verifiable|as_crispy_field }}

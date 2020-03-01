@@ -16,7 +16,6 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from django.conf.urls import url
 from django.urls import path
 from theories.views import *
 
@@ -27,6 +26,8 @@ from theories.views import *
 app_name = 'theories'
 urlpatterns = [
     path('media/opinion<int:pk>.png', ImageView, name='media01'),
+
+    path('categories/', CategoryIndexView, name='categories'),
 
     path('theories/', TheoryIndexView, name='index'),
     path('theories/<slug:cat>/', TheoryIndexView, name='theories'),
@@ -63,10 +64,9 @@ urlpatterns = [
     path('evidence/<int:pk>/convert/', TheoryNodeConvert, name='evidence-convert'),
     path('evidence/<int:pk>/revert/<int:vid>/', RevertTheoryNode, name='evidence-revert'),
 
-    path('theory/<int:pk>/opinions_<str:slug>/', OpinionIndexView, name='opinion-index'),
+    path('theory/<int:pk>/opinions_<slug:slug>/', OpinionIndexView, name='opinion-index'),
 
-    path('opinion/demo/', OpinionDemoView, name='opinion-demo'),
-    path('theory/<int:pk>/opinion/<str:slug>/', OpinionDetailView, name='opinion-detail'),
+    path('theory/<int:pk>/opinion/<slug:slug>/', OpinionDetailView, name='opinion-detail'),
     path('opinion/<int:pk>/edit/', OpinionEditView, name='opinion-edit'),
     path('opinion/<int:pk>/wizard/', OpinionWizardView, name='opinion-wizard'),
     path('opinion/<int:pk>/my_editor/', RetrieveMyOpinionEditor, name='opinion-my-editor'),
@@ -77,5 +77,5 @@ urlpatterns = [
     path('opinion/<int:pk>/hide/', OpinionHideUser, name='opinion-hide-user'),
     path('opinion/<int:pk>/unhide/', OpinionRevealUser, name='opinion-reveal-user'),
 
-    path('theory/<int:pk>/opinion/<str:slug01>_vs_<str:slug02>/', OpinionCompareView, name='opinion-compare'),
+    path('theory/<int:pk>/opinion/<slug:slug01>_vs_<slug:slug02>/', OpinionCompareView, name='opinion-compare'),
 ]

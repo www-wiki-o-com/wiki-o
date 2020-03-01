@@ -33,7 +33,6 @@ from notifications.signals import notify
 # *******************************************************************************
 DEBUG = False
 
-
 class LogDiffResult(enum.Enum):
     """Enum for log_is_different return result."""
     MATCH = 1
@@ -59,7 +58,7 @@ def string_to_list(input_string, braces='[]'):
     right_brace = braces[1]
     result = []
     for x in input_string.lstrip(left_brace).rstrip(right_brace).split(','):
-        x = x.strip("'")
+        x = x.strip("'").strip()
         if len(x) > 0:
             if x[0] == left_brace and x[-1] == right_brace:
                 x = string_to_list(x, braces)
