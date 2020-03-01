@@ -468,7 +468,6 @@ def TheoryCreateView(request, cat):
         form = TheoryForm(request.POST, user=user, show_categories=True, initial_categories=category.title)
         if form.is_valid():
             theory = form.save()
-             # Todo: Update newly added categories and newly removed categories
             theory.update_activity_logs(user, verb=form.get_verb())
             return redirect(theory.url() + params)
     # Get request
@@ -516,8 +515,15 @@ def TheoryEditView(request, pk):
     if request.method == 'POST':
         form = TheoryForm(request.POST, instance=theory, user=user, show_categories=True)
         if form.is_valid():
+            categories_before = set(theory.get_categories())
             theory = form.save()
-             # Todo: Update newly added categories and newly removed categories
+            categories_after = set(theory.get_categories())
+            for category in categories_before - categories_after:
+                category.update_activity_logs(
+                    user, verb='Removed <# object.url {{ object }} #>', action_object=theory)
+            for category in categories_after - categories_before:
+                category.update_activity_logs(
+                    user, verb='Added <# object.url {{ object }} #>', action_object=theory)
             theory.update_activity_logs(user, verb=form.get_verb())
             return redirect(next)
 
@@ -722,7 +728,7 @@ def TheoryMergeView(request, pk):
                     theory.merge(theory_node, user=user)
                     # activity log
                     theory.update_activity_logs(
-                        user, verb='Merged with <# a.object.url {{ a.object }} #>', action_object=theory_node)
+                        user, verb='Merged with <# object.url {{ object }} #>', action_object=theory_node)
             return redirect(next)
         else:
             print(200, formset.errors)
@@ -791,7 +797,7 @@ def TheoryInheritView(request, pk01, pk02):
                     theory.add_node(node)
                     # activity log
                     theory.update_activity_logs(
-                        user, verb='Inherited <# a.object.url {{ a.object }} #>', action_object=node)
+                        user, verb='Inherited <# object.url {{ object }} #>', action_object=node)
             return redirect(next)
         else:
             print(200, formset.errors)
@@ -1383,7 +1389,7 @@ def TheoryNodeRemove(request, pk):
     if request.method == 'POST':
         parent_theory.remove_node(theory_node, user)
         parent_theory.update_activity_logs(
-            user, verb='Removed <# a.object.url {{ a.object }} #>', action_object=theory_node)
+            user, verb='Removed <# object.url {{ object }} #>', action_object=theory_node)
         # cleanup abandoned theory
         if theory_node.parent_nodes.count() == 0 and not theory_node.is_root():
             theory_node.delete(user)

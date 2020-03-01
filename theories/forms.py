@@ -217,7 +217,9 @@ class TheoryForm(forms.ModelForm):
             if ('title00' in self.changed_data or 'title01' in self.changed_data):
                 self.action_verb += 'Title & '
             if 'details' in self.changed_data:
-                self.action_verb += 'Details'
+                self.action_verb += 'Details &'
+            if self.initial_categories != self.cleaned_data.get('category_list_input'):
+                self.action_verb += 'Categories'
             self.action_verb = self.action_verb.strip(' & ')
 
         # Update categories (must come after the theory is created)
