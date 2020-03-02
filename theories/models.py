@@ -835,7 +835,7 @@ class TheoryNode(models.Model):
         # assume intuition_pk is known
         try:
             intuition_node = cls.objects.get(pk=cls.INTUITION_PK)
-            if intuition_node.title01 != 'Intuition.':
+            if intuition_node.title01 != 'Intuition':
                 intuition_node = None
         except:
             intuition_node = None
@@ -843,7 +843,7 @@ class TheoryNode(models.Model):
         if create and intuition_node is None:
             intuition_node, created = cls.objects.get_or_create(
                 node_type=cls.TYPE.EVIDENCE,
-                title01='Intuition.',
+                title01='Intuition',
             )
             cls.INTUITION_PK = intuition_node.pk
         # blah
