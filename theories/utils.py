@@ -66,7 +66,7 @@ def create_reserved_nodes(extra=False):
     @param[in]  extra (optional, default False): If True, 100 reserved nodes will be created.
     """
     intuition_node, created = TheoryNode.objects.get_or_create(
-        title01='Intuition.',
+        title01='Intuition',
         node_type=TheoryNode.TYPE.EVIDENCE,
     )
     if created:

@@ -588,34 +588,34 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(revisions.count(), 1)
 
     def test_get_intuition_node(self):
-        nodes = TheoryNode.objects.filter(title01='Intuition.')
+        nodes = TheoryNode.objects.filter(title01='Intuition')
         self.assertEqual(nodes.count(), 1)
 
         node = TheoryNode.get_intuition_node()
-        nodes = TheoryNode.objects.filter(title01='Intuition.')
+        nodes = TheoryNode.objects.filter(title01='Intuition')
         self.assertTrue(node.is_evidence())
         self.assertFalse(node.is_fact())
         self.assertFalse(node.is_deleted())
-        self.assertEqual(node.title01, 'Intuition.')
+        self.assertEqual(node.title01, 'Intuition')
         self.assertEqual(nodes.count(), 1)
 
         node.delete(soft=False)
         TheoryNode.INTUITION_PK += 1
-        nodes = TheoryNode.objects.filter(title01='Intuition.')
+        nodes = TheoryNode.objects.filter(title01='Intuition')
         self.assertEqual(nodes.count(), 1)
 
         super(TheoryNode, node).delete()
         node = TheoryNode.get_intuition_node(create=False)
-        nodes = TheoryNode.objects.filter(title01='Intuition.')
+        nodes = TheoryNode.objects.filter(title01='Intuition')
         self.assertIsNone(node)
         self.assertEqual(nodes.count(), 0)
 
         node = TheoryNode.get_intuition_node()
-        nodes = TheoryNode.objects.filter(title01='Intuition.')
+        nodes = TheoryNode.objects.filter(title01='Intuition')
         self.assertTrue(node.is_evidence())
         self.assertFalse(node.is_fact())
         self.assertFalse(node.is_deleted())
-        self.assertEqual(node.title01, 'Intuition.')
+        self.assertEqual(node.title01, 'Intuition')
         self.assertEqual(nodes.count(), 1)
 
     def test_cache(self):
