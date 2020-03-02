@@ -29,6 +29,7 @@ from django.utils import timezone
 from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 from notifications.models import Notification
+from misaka import Markdown, HtmlRenderer, SaferHtmlRenderer, escape_html
 
 
 # *******************************************************************************
@@ -47,14 +48,55 @@ RE_WIKI_O = re.compile(RE_WIKI_O_URL)
 
 
 # *******************************************************************************
-# Methods
-#
-#
-#
-#
-#
+# Helper classes
 # *******************************************************************************
 
+class CustomRendererForDetails(SaferHtmlRenderer):
+
+    def header(self, content, level):
+        level += 4
+        return "<h%d>%s</h%d>" % (level, content, level)
+
+    def link(self, content, link, title=''):
+        if self.check_url(link):
+            link = self.rewrite_url(link)
+            return '<a href="%s">%s</a>' % (link, content)
+        return '[%s](%s)' % (content, link)
+
+    def image(self, link, title='', alt=''):
+        if self.check_url(link):
+            link = self.rewrite_url(link)
+            return '<a href="%s">%s</a>' % (link, title)
+        return '[%s](%s)' % (title, link)
+   
+    def footnote_ref(self, num):
+        return '[%d]' % num
+
+    def footnote_def(self, content, num):
+        return '  <li>' + content.strip() + '</li>\n'
+
+    def footnotes(self, content):
+        content = '\n<ol class="bib">\n' + content + '</ol>'
+        return content
+
+    def table(self, content):
+        return '<table class="table table-sm" style="width:90%;"  align="center">\n' + content + '\n</table>'
+
+
+MARKDOWN = Markdown(CustomRendererForDetails(),
+                    extensions=('strikethrough', 'underline', 'quote', 'superscript',
+                                'math', 'math-explicit', 'fenced-code', 'tables', 'footnotes'))
+
+
+def custom_markdown(raw_content):
+    rendered_content = MARKDOWN(raw_content)
+    rendered_content = re.sub(r'\]\[', ',', rendered_content)
+    return rendered_content
+
+
+# *******************************************************************************
+# Methods
+# *******************************************************************************
 
 def get_brace_indices(text):
     """Parenthesized contents in text as pairs (level, contents).
@@ -269,162 +311,23 @@ def unfollow_url(obj):
 
 
 @register.filter
-def long_details(detail_text, inc_links=True, autoescape=True):
-    """Formats the detail text to include a linked bibliograpy.
+def long_details(detail_text):
+    """Formats the detail text.
 
     Args:
-        detail_text (str): The raw input text.
-        inc_links (bool, optional): If true, replace html links with actual links. Defaults to True.
+        detail_text (str): The un-rendered detail text.
         autoescape (bool, optional): If true, applies autoescape. Defaults to True.
 
     Returns:
-        str: The formated output text.
+        str: The rendered output text.
     """
-    # Autoescape
-    autoescape = autoescape and not isinstance(detail_text, SafeData)
-    detail_text = normalize_newlines(detail_text)
-    if autoescape:
-        detail_text = escape(detail_text)
-
-    # Create bib and external links
-    prev_index = 0
-    bib = []
-    result = ''
-
-    # Make unsafe by replacing brackets
-    detail_text = re.sub(r'&lt;!--', '«', detail_text)
-    detail_text = re.sub(r'--&gt;\s*', '»', detail_text)
-    detail_text = detail_text.replace('[[', '{').replace(']]', '}')
-    detail_text = detail_text.replace('&lt;', '<').replace('&gt;', '>')
-    for start_index, end_index, nested_depth in get_brace_indices(detail_text):
-        result += make_safe(detail_text[prev_index:start_index])
-        prev_index = end_index + 1
-        inline = detail_text[start_index] == '<' and detail_text[end_index] == '>'
-        bib00 = detail_text[start_index] == '[' and detail_text[end_index] == ']'
-        bib01 = detail_text[start_index] == '{' and detail_text[end_index] == '}'
-        comment = detail_text[start_index] == '«' and detail_text[end_index] == '»'
-        if comment:
-            continue
-        url = make_safe(detail_text[start_index+1:end_index].strip())
-        name = url
-        k = url.find(' ')
-        if k > 0:
-            name = url[k:].strip()
-            url = url[:k].strip()
-        if URLValidator.regex.search(url):
-            # Scrub wiki-o links
-            if re.search('wiki-o', url):
-                x = RE_WIKI_O.match(url)
-                if x:
-                    url = x.group()
-                else:
-                    url = ''
-            # Regular citation
-            if bib00:
-                # don't add duplicates to bib
-                if (url, name) in bib:
-                    for bib_index, x in enumerate(bib):
-                        if x == (url, name):
-                            break
-                else:
-                    bib.append((url, name))
-                    bib_index = len(bib) - 1
-                if result[-1] == ' ':
-                    result = result.strip()
-                    result += '&nbsp;'
-                result += '[%d]' % (bib_index + 1)
-            # Add to bib but not inline
-            elif bib01:
-                if (url, name) not in bib:
-                    bib.append((url, name))
-            # Inline url, done with () brackets
-            elif inline:
-                if inc_links:
-                    result += '<a href="%s" target="_blank">%s</a>' % (url, name)
-                else:
-                    result += '%s' % (name)
-            else:
-                assert False
-        else:
-            s = make_safe(detail_text[start_index+1:end_index])
-            if inline:
-                result += '&lt;%s&gt;' % s
-            elif bib00:
-                result += '[%s]' % s
-            elif bib01:
-                result += '[[%s]]' % s
-    result += make_safe(detail_text[prev_index:])
-    detail_text = result
-
-    # Create lists
-    result = ''
-    ul_depth = 0
-    ol_depth = 0
-    for line in detail_text.split('\n'):
-        if re.match(r'\s*\*+\s+.+$', line):
-            bullets = re.findall(r'\*+', line)[0]
-            while len(bullets) > ul_depth:
-                if ul_depth == 0 and ol_depth == 0:
-                    result += '<ul style="width:95%">'
-                else:
-                    result += '<ul>'
-                ul_depth += 1
-            while len(bullets) < ul_depth:
-                result += '</ul>'
-                ul_depth -= 1
-            result += '<li> %s </li>' % line.strip().strip('*').strip()
-        elif re.match(r'\s*#+\s+.+$', line):
-            bullets = re.findall(r'#+', line)[0]
-            while len(bullets) > ol_depth:
-                if ul_depth == 0 and ol_depth == 0:
-                    result += '<ol style="width:95%">'
-                else:
-                    result += '<ol>'
-                ol_depth += 1
-            while len(bullets) < ol_depth:
-                result += '</ol>'
-                ol_depth -= 1
-            result += '<li> %s </li>' % line.strip().strip('#').strip()
-        else:
-            while ul_depth > 0:
-                result += '</ul>'
-                ul_depth -= 1
-            while ol_depth > 0:
-                result += '</ol>'
-                ol_depth -= 1
-            result += line + '\n'
-    while ul_depth > 0:
-        result += '</ul>'
-        ul_depth -= 1
-    while ol_depth > 0:
-        result += '</ol>'
-        ol_depth -= 1
-    detail_text = result
-
-    # Bib
-    if len(bib) > 0:
-        result = result.strip()
-        result += '<ol class="bib">'
-        for i, (url, name) in enumerate(bib):
-            if inc_links:
-                result += '<li> <a href="%s" target="_blank">%s</a> </li>\n' % (
-                    url, name)
-            else:
-                result += '<li> %s </li>\n' % (name)
-        result += '</ol>'
-    result = result.replace('][', ',')
-    result = result.replace(']&nbsp;[', ',')
-    detail_text = result.strip()
-
-    # Ship it
-    detail_text = detail_text.replace('\n', '<br/>')
-    detail_text = detail_text.replace('  ', '&nbsp&nbsp')
-    return mark_safe(detail_text)
+    rendered_text = custom_markdown(detail_text)
+    return mark_safe(rendered_text)
 
 
 @register.filter
-def short_details(detail_text, length=500, autoescape=True):
-    """Formats the detail text to include a non-linked bibliograpy.
+def short_details(detail_text, length=500):
+    """Formats the detail and cuts it off at length.
 
     Args:
         detail_text (str): The raw input text.
@@ -434,12 +337,13 @@ def short_details(detail_text, length=500, autoescape=True):
     Returns:
         str: The formated output text.
     """
-    detail_text = long_details(detail_text, inc_links=False, autoescape=autoescape)
+    # Shorten and render.
     if len(detail_text) > length:
         detail_text = detail_text[:length]
         i = detail_text.rfind(' ')
         detail_text = detail_text[:i] + '...'
-    return mark_safe(detail_text)
+    rendered_text = custom_markdown(detail_text)
+    return mark_safe(rendered_text)
 
 
 @register.filter
