@@ -33,7 +33,7 @@ RE_PUNCTUATOIN = r'\s*[\.!?]\s*$'
 # *******************************************************************************
 # Methods
 # *******************************************************************************
-
+# blahs
 
 class Command(BaseCommand):
     """Runs a series of scripts to clean up the database."""
