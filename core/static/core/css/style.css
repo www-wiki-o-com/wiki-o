@@ -47,14 +47,14 @@ input.plain {
 }
 .bib li {
   counter-increment: step-counter;
-  line-height:  1.25;
-  margin-left:  1em;
+  margin-bottom:  1.25em;
+  margin-left:    0.5em;
 }
 .bib li:before {
   content:      "[" counter(step-counter) "]";
   display:      inline-block;
   width:        3.3ex;
-  margin-left:  -2em;
+  margin-left:  -1.5em;
 }
 
 
