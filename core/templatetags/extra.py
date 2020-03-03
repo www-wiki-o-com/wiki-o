@@ -68,19 +68,30 @@ class CustomRendererForDetails(SaferHtmlRenderer):
             link = self.rewrite_url(link)
             return '<a href="%s">%s</a>' % (link, title)
         return '[%s](%s)' % (title, link)
+   
+    def footnote_ref(self, num):
+        return '[%d]' % num
+
+    def footnote_def(self, content, num):
+        return '  <li>' + content.strip() + '</li>\n'
 
     def footnotes(self, content):
-        content = re.sub(r'&nbsp;<a href="#fnref\d+" rev="footnote">&#8617;</a></p>', '</p>', content)
-        content = re.sub(r'</li>[\s\n]+<li', '</li>\n<li', content)
-        content = '<ol class="bib">' + content.strip() + '</ol>'
+        content = '\n<ol class="bib">\n' + content + '</ol>'
         return content
 
     def table(self, content):
         return '<table class="table table-sm" style="width:90%;"  align="center">\n' + content + '\n</table>'
 
+
 MARKDOWN = Markdown(CustomRendererForDetails(),
                     extensions=('strikethrough', 'underline', 'quote', 'superscript',
                                 'math', 'math-explicit', 'fenced-code', 'tables', 'footnotes'))
+
+
+def custom_markdown(raw_content):
+    rendered_content = MARKDOWN(raw_content)
+    rendered_content = re.sub(r'\]\[', ',', rendered_content)
+    return rendered_content
 
 
 # *******************************************************************************
@@ -310,7 +321,7 @@ def long_details(detail_text):
     Returns:
         str: The rendered output text.
     """
-    rendered_text = MARKDOWN(detail_text)
+    rendered_text = custom_markdown(detail_text)
     return mark_safe(rendered_text)
 
 
@@ -331,7 +342,7 @@ def short_details(detail_text, length=500):
         detail_text = detail_text[:length]
         i = detail_text.rfind(' ')
         detail_text = detail_text[:i] + '...'
-    rendered_text = MARKDOWN(detail_text)
+    rendered_text = custom_markdown(detail_text)
     return mark_safe(rendered_text)
 
 
