@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -20,20 +19,16 @@ import re
 import datetime
 
 from django import template
-from django.utils.html import escape
-from django.utils.text import normalize_newlines
-from django.core.validators import URLValidator
-from django.utils.safestring import mark_safe, SafeData
+from django.utils.safestring import mark_safe
 from django.utils.http import urlencode
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
 from notifications.models import Notification
-from misaka import Markdown, HtmlRenderer, SaferHtmlRenderer, escape_html
-
+from misaka import Markdown, SaferHtmlRenderer
 
 # *******************************************************************************
-# defs
+# Defines
 # *******************************************************************************
 register = template.Library()
 
@@ -46,57 +41,10 @@ RE_WIKI_O_URL += r'|theory/%s/vs/\d+' % RE_STATS
 RE_WIKI_O_URL += r'|theory/\d+/%s/vs/%s)/' % (RE_STATS, RE_STATS)
 RE_WIKI_O = re.compile(RE_WIKI_O_URL)
 
-
-# *******************************************************************************
-# Helper classes
-# *******************************************************************************
-
-class CustomRendererForDetails(SaferHtmlRenderer):
-
-    def header(self, content, level):
-        level += 4
-        return "<h%d>%s</h%d>" % (level, content, level)
-
-    def link(self, content, link, title=''):
-        if self.check_url(link):
-            link = self.rewrite_url(link)
-            return '<a href="%s">%s</a>' % (link, content)
-        return '[%s](%s)' % (content, link)
-
-    def image(self, link, title='', alt=''):
-        if self.check_url(link):
-            link = self.rewrite_url(link)
-            return '<a href="%s">%s</a>' % (link, title)
-        return '[%s](%s)' % (title, link)
-   
-    def footnote_ref(self, num):
-        return '[%d]' % num
-
-    def footnote_def(self, content, num):
-        return '  <li>' + content.strip() + '</li>\n'
-
-    def footnotes(self, content):
-        content = '\n<ol class="bib">\n' + content + '</ol>'
-        return content
-
-    def table(self, content):
-        return '<table class="table table-sm" style="width:90%;"  align="center">\n' + content + '\n</table>'
-
-
-MARKDOWN = Markdown(CustomRendererForDetails(),
-                    extensions=('strikethrough', 'underline', 'quote', 'superscript',
-                                'math', 'math-explicit', 'fenced-code', 'tables', 'footnotes'))
-
-
-def custom_markdown(raw_content):
-    rendered_content = MARKDOWN(raw_content)
-    rendered_content = re.sub(r'\]\[', ',', rendered_content)
-    return rendered_content
-
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
+
 
 def get_brace_indices(text):
     """Parenthesized contents in text as pairs (level, contents).
@@ -148,7 +96,7 @@ def interpret_log_text(log, log_text, extra=''):
     for start_index, end_index, nested_depth in get_brace_indices(log_text):
         if log_text[start_index] == '{' and log_text[end_index] == '}':
             result += log_text[prev_index:start_index]
-            name = log_text[start_index+1:end_index].strip()
+            name = log_text[start_index + 1:end_index].strip()
             if name == 'object' and log.action_object is not None:
                 name = log.action_object.__str__()
             elif name == 'target' and log.target is not None:
@@ -156,7 +104,7 @@ def interpret_log_text(log, log_text, extra=''):
             elif name == 'target.get_owner' and log.target is not None:
                 name = log.target.get_owner()
             result += name
-            prev_index = end_index+1
+            prev_index = end_index + 1
     result += log_text[prev_index:]
 
     # Interpret links
@@ -166,7 +114,8 @@ def interpret_log_text(log, log_text, extra=''):
     for start_index, end_index, nested_depth in get_brace_indices(log_text):
         if log_text[start_index] == '«' and log_text[end_index] == '»':
             result += log_text[prev_index:start_index]
-            url, name = log_text[start_index+1:end_index].strip().split(' ', 1)
+            url, name = log_text[start_index + 1:end_index].strip().split(
+                ' ', 1)
             name = name.strip()
 
             # url
@@ -184,7 +133,7 @@ def interpret_log_text(log, log_text, extra=''):
             # date
             if add_date:
                 date = log.timestamp - datetime.timedelta(seconds=30)
-                date = date.strftime("%Y-%m-%d %X")
+                date = date.strftime('%Y-%m-%d %X')
                 if extra == '':
                     extra += '?' + urlencode({'date': date})
                 else:
@@ -194,8 +143,8 @@ def interpret_log_text(log, log_text, extra=''):
                 url += extra
             # redirect to mark notification as read
             if isinstance(log, Notification):
-                mark_as_read_url = reverse(
-                    'notifications:mark_as_read', kwargs={'slug': log.slug})
+                mark_as_read_url = reverse('notifications:mark_as_read',
+                                           kwargs={'slug': log.slug})
                 url = mark_as_read_url + '?next=' + url
 
             # link
@@ -228,6 +177,7 @@ def make_safe(text):
 #
 # *******************************************************************************
 
+
 @register.filter
 def possessive(string):
     """Add the possesive 's or ' to the end of the string.
@@ -259,13 +209,23 @@ def remove_punctuation(string):
         return string[:-1]
     return string
 
+
 @register.filter
 def float_to_percent(x):
+    """[summary]
+
+    Args:
+        x ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     try:
         x = float(x)
     except ValueError:
         x = 0.0
     return str(int(x * 100))
+
 
 @register.filter
 def get_class(obj):
@@ -291,8 +251,13 @@ def follow_url(obj):
         str: The url.
     """
     content_type = ContentType.objects.get_for_model(obj)
-    return reverse('activity:follow',
-                   kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
+    return reverse(
+        'activity:follow',
+        kwargs={
+            'content_type_id': content_type.pk,
+            'object_id': obj.pk
+        },
+    )
 
 
 @register.filter
@@ -306,8 +271,13 @@ def unfollow_url(obj):
         str: The url.
     """
     content_type = ContentType.objects.get_for_model(obj)
-    return reverse('activity:unfollow',
-                   kwargs={'content_type_id': content_type.pk, 'object_id': obj.pk})
+    return reverse(
+        'activity:unfollow',
+        kwargs={
+            'content_type_id': content_type.pk,
+            'object_id': obj.pk
+        },
+    )
 
 
 @register.filter
@@ -321,7 +291,7 @@ def long_details(detail_text):
     Returns:
         str: The rendered output text.
     """
-    rendered_text = custom_markdown(detail_text)
+    rendered_text = render_details(detail_text)
     return mark_safe(rendered_text)
 
 
@@ -342,7 +312,7 @@ def short_details(detail_text, length=500):
         detail_text = detail_text[:length]
         i = detail_text.rfind(' ')
         detail_text = detail_text[:i] + '...'
-    rendered_text = custom_markdown(detail_text)
+    rendered_text = render_details(detail_text)
     return mark_safe(rendered_text)
 
 
@@ -438,38 +408,185 @@ def timepassed(time_then):
     minutes = 1.0 * seconds / 60
     if minutes <= 3:
         return '%0.1f mins' % minutes
-    elif minutes <= 90:
+    if minutes <= 90:
         return '%d mins' % round(minutes)
     # hours
     hours = minutes / 60
     if hours <= 3:
         return '%0.1f hours' % hours
-    elif hours <= 36:
+    if hours <= 36:
         return '%d hours' % round(hours)
     # days
     days = hours / 24
     if days < 3:
         return '%0.1f days' % days
-    elif days <= 10:
+    if days <= 10:
         return '%d days' % round(days)
     # weeks
     weeks = days / 7
     if weeks <= 3:
         return '%0.1f weeks' % weeks
-    elif weeks <= 6:
+    if weeks <= 6:
         return '%d weeks' % round(weeks)
     # months
     months = days / 365 * 12
     if months <= 3:
         return '%0.1f months' % months
-    elif months <= 18:
+    if months <= 18:
         return '%d months' % round(months)
     # years
     years = days / 365
     if years <= 3:
         return '%0.1f years' % years
-    else:
-        return '%d years'
+    return '%d years'
+
+
+# *******************************************************************************
+# Helper classes
+# *******************************************************************************
+
+
+class CustomRendererForDetails(SaferHtmlRenderer):
+    """A custom markdown renderer.
+
+    Inherits from SaferHtmlRenderer, which adds protection for cross-site scripting
+    and filters out html code.
+
+    Attributes:
+        bib_labels(dict): A mapping for bib labels to bib numbers.
+    """
+    bib_labels = dict()
+
+    def header(self, content, level):
+        """[summary]
+
+        Args:
+            content ([type]): [description]
+            level ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        level += 4
+        return '<h%d>%s</h%d>' % (level, content, level)
+
+    def link(self, content, link, title=''):
+        """[summary]
+
+        Args:
+            content ([type]): [description]
+            link ([type]): [description]
+            title (str, optional): [description]. Defaults to ''.
+
+        Returns:
+            [type]: [description]
+        """
+        # Regular links.
+        if self.check_url(link):
+            link = self.rewrite_url(link)
+            if len(title) > 0:
+                return '<a href="%s" title="%s">%s</a>' % (link, content,
+                                                           title)
+            return '<a href="%s">%s</a>' % (link, content)
+        # Bib 'links'.
+        if content == '#':
+            bib_numbers = ''
+            for label in re.findall(r'\w+', link):
+                if label not in self.bib_labels:
+                    self.bib_labels[label] = len(self.bib_labels) + 1
+                bib_numbers += '%d,' % self.bib_labels[label]
+            return '[%s]' % bib_numbers.strip(',')
+        # Broken links.
+        return '[%s](---broken link---)' % content
+
+    def image(self, link, title='', alt=''):
+        """Convert image links to regular links.
+
+        Currently, Wiki-O does not allow images to be displayed.
+
+        Args:
+            link (str): The image link.
+            title (str, optional): The image title. Defaults to ''.
+            alt (str, optional): The alternative text. Defaults to ''.
+
+        Returns:
+            str: A html redered link to the image (if it is safe).
+        """
+        if self.check_url(link):
+            link = self.rewrite_url(link)
+            if len(title) > 0 and len(alt) > 0:
+                return '<a href="%s" title="%s" alt="%s">image(%s)</a>' % (
+                    link, title, alt, title)
+            elif len(title) > 0:
+                return '<a href="%s">image(%s)</a>' % (link, title)
+            else:
+                return '<a href="%s">image</a>' % link
+        return '[%s](---broken image---)' % (title)
+
+    def table(self, content):
+        """[summary]
+
+        Args:
+            content ([type]): [description]
+
+        Returns:
+            [type]: [description]
+        """
+        return (
+            '<table class="table table-sm" style="width:90%;"  align="center">\n'
+            + content + '\n</table>')
+
+
+def render_details(raw_content):
+    """[summary]
+
+    Args:
+        raw_content ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
+    bib_content = ''
+    if re.search(r'</bib>[\n\s]*$', raw_content):
+        i = raw_content.rfind('<bib>')
+        if i > 0:
+            bib_content = raw_content[i:]
+            raw_content = raw_content[:i]
+
+    md = Markdown(
+        CustomRendererForDetails(),
+        extensions=(
+            'strikethrough',
+            'underline',
+            'quote',
+            'superscript',
+            'math',
+            'math-explicit',
+            'fenced-code',
+            'tables',
+        ),
+    )
+    rendered_content = md(raw_content)
+    bib_labels = md.renderer.bib_labels
+
+    if len(bib_content) > 0:
+        bib_entries = dict()
+        for entry in re.findall(r'\[\w*\]:.+', bib_content):
+            i = entry.find(':')
+            label = entry[1:i - 1]
+            content = entry[i + 1:].strip()
+            bib_entries[label] = md(content).strip()
+        rendered_content += '\n<ol class="bib">\n'
+        for label in bib_labels:
+            if label in bib_entries:
+                rendered_content += '  <li>%s</li>\n' % bib_entries[label]
+                del bib_entries[label]
+            else:
+                rendered_content += ('  <li><p>Missing entry.</p></li>\n')
+        for label in bib_entries:
+            rendered_content += '  <li>%s</li>\n' % bib_entries[label]
+        rendered_content += '</ol>'
+    return rendered_content
 
 
 # *******************************************************************************
@@ -480,5 +597,5 @@ def timepassed(time_then):
 #
 #
 # *******************************************************************************
-if __name__ == "__main__":
+if __name__ == '__main__':
     pass
