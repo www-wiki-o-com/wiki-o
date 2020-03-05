@@ -549,7 +549,7 @@ def render_details(raw_content):
     bib_content = ''
     if re.search(r'</bib>[\n\s]*$', raw_content):
         i = raw_content.rfind('<bib>')
-        if i > 0:
+        if i >= 0:
             bib_content = raw_content[i:]
             raw_content = raw_content[:i]
 
