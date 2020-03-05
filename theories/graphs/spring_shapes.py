@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -113,8 +112,8 @@ class SpringShapeBase(ShapeBase):
         dx = shape02.x - self.x
         dy = shape02.y - self.y
         d = math.sqrt(dx**2 + dy**2)
-        unit_x = 1.0 * dx/d
-        unit_y = 1.0 * dy/d
+        unit_x = 1.0 * dx / d
+        unit_y = 1.0 * dy / d
         if direction == Direction.OUT:
             separation = d - self.r - shape02.r
             return unit_x, unit_y, separation
@@ -177,7 +176,7 @@ class EvidenceShape(SpringShapeBase):
         """
         self.node = node
         self.length = math.sqrt(area)
-        bounding_radius = (self.length/2) * math.sqrt(2)
+        bounding_radius = (self.length / 2) * math.sqrt(2)
         super().__init__(x, y, bounding_radius)
 
     def get_highlight_svg(self, offset=None):
@@ -193,8 +192,8 @@ class EvidenceShape(SpringShapeBase):
             str: The svg code for displaying the shape.
         """
         length = self.length + 15
-        x = self.x - length/2
-        y = self.y - length/2
+        x = self.x - length / 2
+        y = self.y - length / 2
         x, y = offset_xy(x, y, offset)
         svg = '<rect id="%s" visibility="hidden"' % self.node.tag_id()
         svg += ' x="%d" y="%d" ' % (x, y)
@@ -227,8 +226,8 @@ class EvidenceShape(SpringShapeBase):
             else:
                 colour = Colour.PINK
         length = self.length
-        x = self.x - length/2
-        y = self.y - length/2
+        x = self.x - length / 2
+        y = self.y - length / 2
         x, y = offset_xy(x, y, offset)
         svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
         svg += '<rect x="%d" y="%d"' % (x, y)
@@ -252,7 +251,7 @@ class SubtheoryShape(SpringShapeBase):
             area (float): The area of the circle.
         """
         self.node = node
-        bounding_radius = math.sqrt(area/PI)
+        bounding_radius = math.sqrt(area / PI)
         super().__init__(x, y, bounding_radius)
 
     def get_highlight_svg(self, offset=None):
@@ -314,8 +313,14 @@ class Ring(SpringShapeBase):
     DEFAULT_SPRING_LENGTH = 10
     DEFAULT_SPRING_CONSTANT = 1.0
 
-    def __init__(self, x, y, r, colour=Colour.NONE, stroke_colour=Colour.BLACK,
-                 x_min=None, x_max=None):
+    def __init__(self,
+                 x,
+                 y,
+                 r,
+                 colour=Colour.NONE,
+                 stroke_colour=Colour.BLACK,
+                 x_min=None,
+                 x_max=None):
         """The constructor for the Ring class.
 
         Rings will not propigate in the y direction or outside their x boundaries.

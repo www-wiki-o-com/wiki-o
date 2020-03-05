@@ -13,7 +13,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -27,11 +26,11 @@ from django.utils import timezone
 from django.utils.http import urlencode
 from notifications.signals import notify
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 DEBUG = False
+
 
 class LogDiffResult(enum.Enum):
     """Enum for log_is_different return result."""
@@ -43,6 +42,7 @@ class LogDiffResult(enum.Enum):
 # *******************************************************************************
 # General methods
 # *******************************************************************************
+
 
 def string_to_list(input_string, braces='[]'):
     """Convert a string to a list.
@@ -86,6 +86,7 @@ def list_to_string(input_list):
 # *******************************************************************************
 # Model methods
 # *******************************************************************************
+
 
 def get_or_none(objects, **kwargs):
     """Queries a data model for a matching object.
@@ -222,6 +223,7 @@ def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
 # View methods
 # *******************************************************************************
 
+
 def get_page_list(num_pages, page, max_num_pages=5):
     """A helper method for constructing Paginator page links.
 
@@ -236,7 +238,7 @@ def get_page_list(num_pages, page, max_num_pages=5):
     if page is None:
         page = 1
     page = int(page)
-    high_index = min(num_pages + 1, page + max_num_pages//2 + 1)
+    high_index = min(num_pages + 1, page + max_num_pages // 2 + 1)
     low_index = high_index - max_num_pages
     while low_index < 1:
         low_index += 1
@@ -399,7 +401,6 @@ class QuerySetDict():
             [type]: [description]
         """
         return len(self.dict)
-
 
 
 class Parameters():

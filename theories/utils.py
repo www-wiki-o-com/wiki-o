@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -21,7 +20,6 @@ import logging
 
 from theories.models import Category, TheoryNode
 from theories.abstract_models import TheoryPointerBase
-
 
 # *******************************************************************************
 # Defines
@@ -38,10 +36,10 @@ CATEGORY_TITLES = [
     'Conspiracy',
 ]
 
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
+
 
 def create_categories():
     """
@@ -51,12 +49,14 @@ def create_categories():
     for title in CATEGORY_TITLES:
         Category.get(title=title, create=True)
 
+
 def get_category_suggestions():
     suggestions = ''
     for x in Category.objects.all().values('title'):
         suggestions += x['title'] + ','
     suggestions = suggestions.strip(',')
     return suggestions
+
 
 def create_reserved_nodes(extra=False):
     """

@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -26,15 +25,14 @@ from theories.utils import get_demo_theory, get_demo_opinion
 from theories.utils import create_categories, create_reserved_nodes
 from users.maintence import create_groups_and_permissions, create_test_user
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 
-
 # *******************************************************************************
 # Helper Methods
 # *******************************************************************************
+
 
 def get_or_create_theory(true_title, false_title=None, created_by=None, category='all'):
     """Generator to translate true_title input and etc to class variables."""
@@ -47,6 +45,7 @@ def get_or_create_theory(true_title, false_title=None, created_by=None, category
     theory, created = TheoryNode.objects.get_or_create(**kwargs)
     theory.categories.add(Category.get(category))
     return theory
+
 
 def get_or_create_subtheory(parent_theory, true_title, false_title=None, created_by=None):
     """Generator to translate true_title input and etc to class variables."""
@@ -117,7 +116,11 @@ def create_test_subtheory(parent_theory, title='Sub-Theory', created_by=None, ba
     return subtheory
 
 
-def create_test_evidence(parent_theory, title='Evidence', fact=False, created_by=None, backup=False):
+def create_test_evidence(parent_theory,
+                         title='Evidence',
+                         fact=False,
+                         created_by=None,
+                         backup=False):
     """
     Create a test evidence using the input data.
 
@@ -149,9 +152,7 @@ def create_test_opinion(theory, user, true_input=None, false_input=None, force=F
     @param[in]  force (optional, default False): If True, the true and false ratios will be preserved, otherwise they will be determined by the opinion's dependencies.
     @param[in]  nodes (optional, default False): If True, a random set of dependencies will be added to the opinion.
     """
-    opinion = theory.opinions.create(
-        user=user,
-    )
+    opinion = theory.opinions.create(user=user,)
     if true_input is not None:
         opinion.true_input = true_input
     if false_input is not None:
@@ -178,6 +179,7 @@ def create_test_opinion(theory, user, true_input=None, false_input=None, force=F
 # Unit tests
 # *******************************************************************************
 
+
 class UtilsTests(TestCase):
 
     def setUp(self):
@@ -195,17 +197,18 @@ class UtilsTests(TestCase):
         # Create data
         self.category = Category.get('All')
         self.theory = create_test_theory(created_by=self.user, backup=True)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
         self.intuition = TheoryNode.get_intuition_node()
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         for stats in self.theory.get_all_stats():
             if stats.opinion_is_member(self.opinion):
                 stats.add_opinion(self.opinion, save=False)
@@ -224,8 +227,10 @@ class UtilsTests(TestCase):
         self.assertIsNone(node)
 
     def test_get_or_create_subtheory01(self):
-        node01 = get_or_create_subtheory(
-            self.theory, true_title='Test', false_title='Test', created_by=self.user)
+        node01 = get_or_create_subtheory(self.theory,
+                                         true_title='Test',
+                                         false_title='Test',
+                                         created_by=self.user)
         node02 = get_or_create_subtheory(self.theory, true_title='Test')
         self.assertIn(node01, self.theory.get_nodes())
         self.assertEqual(node01, node02)

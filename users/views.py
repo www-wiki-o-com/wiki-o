@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -34,18 +33,15 @@ from theories.models import Category, TheoryNode, Opinion
 from theories.forms import TheoryForm, TheoryRevisionForm
 from core.utils import Parameters, get_page_list, get_first_or_none
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 MAX_NUM_PAGES = 5
 NUM_ITEMS_PER_PAGE = 25
 
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
-
 
 # *******************************************************************************
 # Classes
@@ -78,18 +74,16 @@ def public_profile_view(request, pk):
 
     # Render
     context = {
-        'user':                 user,
-        'current_user':         current_user,
-        'public_opinions':      public_opinions,
-        'private_opinions':     private_opinions,
-        'num_soft_strikes':     user.count_strikes(recent=True, expired=False, soft=True,
-                                                   hard=False),
-        'num_hard_strikes':     user.count_strikes(recent=True, expired=False, soft=False,
-                                                   hard=True),
-        'num_expired_strikes':  user.count_strikes(recent=False, expired=True),
-        'num_total_strikes':    user.count_strikes(recent=True, expired=True),
-        'prev_url':             prev_url,
-        'params':               params,
+        'user': user,
+        'current_user': current_user,
+        'public_opinions': public_opinions,
+        'private_opinions': private_opinions,
+        'num_soft_strikes': user.count_strikes(recent=True, expired=False, soft=True, hard=False),
+        'num_hard_strikes': user.count_strikes(recent=True, expired=False, soft=False, hard=True),
+        'num_expired_strikes': user.count_strikes(recent=False, expired=True),
+        'num_total_strikes': user.count_strikes(recent=True, expired=True),
+        'prev_url': prev_url,
+        'params': params,
     }
     return render(
         request,
@@ -128,7 +122,7 @@ def private_profile_view(request):
 
     # Render
     context = {
-        'form':     form,
+        'form': form,
         'prev_url': prev_url,
     }
     return render(
@@ -175,10 +169,12 @@ def notifications_view(request):
     # Post request
     if request.method == 'POST':
         action = request.POST.get('action')
-        formset01 = NotificationFormset(
-            request.POST, queryset=notifications.object_list, prefix='notifications')
-        formset02 = ViolationFormset(
-            request.POST, queryset=user_violations.object_list, prefix='feedback')
+        formset01 = NotificationFormset(request.POST,
+                                        queryset=notifications.object_list,
+                                        prefix='notifications')
+        formset02 = ViolationFormset(request.POST,
+                                     queryset=user_violations.object_list,
+                                     prefix='feedback')
         if formset01.is_valid() and formset02.is_valid():
             if action == 'Mark as Read':
                 for form in formset01:
@@ -207,13 +203,13 @@ def notifications_view(request):
 
     # Render
     context = {
-        'notifications':            notifications,
-        'user_violations':          user_violations,
-        'opinions':                 opinions,
-        'theories':                 theories,
-        'categories':               categories,
-        'formset01':                formset01,
-        'formset02':                formset02,
+        'notifications': notifications,
+        'user_violations': user_violations,
+        'opinions': opinions,
+        'theories': theories,
+        'categories': categories,
+        'formset01': formset01,
+        'formset02': formset02,
     }
     return render(
         request,
@@ -256,9 +252,9 @@ def violation_index_view(request):
 
     # Render
     context = {
-        'violations':           violations,
-        'date_filter':          date,
-        'params':               params,
+        'violations': violations,
+        'date_filter': date,
+        'params': params,
     }
     return render(
         request,
@@ -293,8 +289,11 @@ def violation_resolve_view(request, pk):
         revisions = theory_node.get_revisions().filter(
             revision__date_created__date__lte=violation.pub_date)
         RevisionFormSet = modelformset_factory(Version, form=TheoryRevisionForm, extra=0)
-        revision_formset = RevisionFormSet(
-            queryset=revisions, form_kwargs={'user': user, 'hide_delete': True})
+        revision_formset = RevisionFormSet(queryset=revisions,
+                                           form_kwargs={
+                                               'user': user,
+                                               'hide_delete': True
+                                           })
     else:
         theory_node = None
         revision_formset = []
@@ -308,8 +307,11 @@ def violation_resolve_view(request, pk):
     if request.method == 'POST':
 
         # Vote
-        vote_form = VoteForm(
-            request.POST, instance=vote, violation=violation, user=user, prefix='vote')
+        vote_form = VoteForm(request.POST,
+                             instance=vote,
+                             violation=violation,
+                             user=user,
+                             prefix='vote')
         if 'save_vote' in request.POST.keys() and \
                 user.has_perm('users.can_vote_violation', violation):
             if vote_form.is_valid():
@@ -317,8 +319,10 @@ def violation_resolve_view(request, pk):
             return redirect(next_url)
 
         # Report
-        report_form = ReportViolationForm(
-            request.POST, content=violation, user=user, prefix='report')
+        report_form = ReportViolationForm(request.POST,
+                                          content=violation,
+                                          user=user,
+                                          prefix='report')
         if 'save_report' in request.POST.keys() and \
                 user.has_perm('users.can_report_violation', violation):
             if report_form.is_valid():
@@ -326,8 +330,10 @@ def violation_resolve_view(request, pk):
             return redirect(next_url)
 
         # Comment and override
-        feedback_form = ResolveViolationForm(
-            request.POST, violation=violation, user=user, prefix='feedback')
+        feedback_form = ResolveViolationForm(request.POST,
+                                             violation=violation,
+                                             user=user,
+                                             prefix='feedback')
         if 'save_feedback' in request.POST.keys() and \
                 user.has_perm('users.can_comment_violation', violation):
             if feedback_form.is_valid():
@@ -336,8 +342,10 @@ def violation_resolve_view(request, pk):
 
         # Display the theory node in contention.
         if theory_node is not None:
-            theorynode_form = TheoryForm(
-                request.POST, instance=theory_node, user=user, prefix='theorynode')
+            theorynode_form = TheoryForm(request.POST,
+                                         instance=theory_node,
+                                         user=user,
+                                         prefix='theorynode')
             if 'save_theorynode' in request.POST.keys() and \
                     user.has_perm('theories.change_theorynode', theory_node):
                 if theorynode_form.is_valid():
@@ -357,16 +365,16 @@ def violation_resolve_view(request, pk):
 
     # Render
     context = {
-        'violation':            violation,
-        'related_violations':   related_violations,
-        'user_violations':      user_violations,
-        'feedback_form':        feedback_form,
-        'report_form':          report_form,
-        'vote_form':            vote_form,
-        'theorynode_form':      theorynode_form,
-        'revision_formset':     revision_formset,
-        'params':               params,
-        'prev_url':             prev_url,
+        'violation': violation,
+        'related_violations': related_violations,
+        'user_violations': user_violations,
+        'feedback_form': feedback_form,
+        'report_form': report_form,
+        'vote_form': vote_form,
+        'theorynode_form': theorynode_form,
+        'revision_formset': revision_formset,
+        'params': params,
+        'prev_url': prev_url,
     }
     return render(
         request,

@@ -28,8 +28,10 @@ class SimpleTest(TestCase):
     def test_send_email(self):
         # Send message.
         mail.send_mail(
-            'Subject here', 'Here is the message.',
-            'fcimeson@wiki-o.com', ['fcimeson@gmail.com'],
+            'Subject here',
+            'Here is the message.',
+            'fcimeson@wiki-o.com',
+            ['fcimeson@gmail.com'],
             fail_silently=False,
         )
         # Test that one message has been sent.

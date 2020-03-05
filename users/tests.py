@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -26,7 +25,6 @@ from notifications.signals import notify
 from theories.utils import *
 from users.maintence import create_test_user
 from core.utils import get_form_data
-
 
 # *******************************************************************************
 # Defines
@@ -55,7 +53,7 @@ class LogInTest(TestCase):
             'password': '1234',
         }
         self.login = {
-            'login':    'testuser',
+            'login': 'testuser',
             'password': '1234',
         }
         User.objects.create_user(**self.credentials)
@@ -73,13 +71,17 @@ class LogInTest(TestCase):
     # ******************************
     # Verify POST - ViewsTestBase
     # ******************************
-    def verify_post_response(self, url, redirect_url=None, post_data=None, code=302, verbose_level=0):
+    def verify_post_response(self,
+                             url,
+                             redirect_url=None,
+                             post_data=None,
+                             code=302,
+                             verbose_level=0):
         # get and populate form(s)
         if post_data is None:
             response = self.client.post(url)
         else:
-            form_data = get_form_data(response=self.client.get(
-                url), verbose_level=verbose_level)
+            form_data = get_form_data(response=self.client.get(url), verbose_level=verbose_level)
             if form_data is None:
                 form_data = {}
             for key in form_data.keys():
@@ -92,14 +94,12 @@ class LogInTest(TestCase):
                         print(100, key, form_data[key])
             response = self.client.post(url, post_data)
             if verbose_level > 0:
-                form_data = get_form_data(
-                    response=self.client.get(url), verbose_level=10)
+                form_data = get_form_data(response=self.client.get(url), verbose_level=10)
 
         # test response
         self.assertEqual(response.status_code, code)
         if response.status_code != 403 and redirect_url is not None:
-            self.assertEqual(response.url.split(
-                '?')[0], redirect_url.split('?')[0])
+            self.assertEqual(response.url.split('?')[0], redirect_url.split('?')[0])
 
         # return
         return response
@@ -108,15 +108,13 @@ class LogInTest(TestCase):
     # Verify Redirect - ViewsTestBase
     # ******************************
     def verify_redirect(self, response, redirect_url):
-        self.assertEqual(response.url.split(
-            '?')[0], redirect_url.split('?')[0])
+        self.assertEqual(response.url.split('?')[0], redirect_url.split('?')[0])
 
     # ******************************
     #
     # ******************************
     def test_login(self):
-        response = self.client.post(
-            '/accounts/login/', self.login, follow=True)
+        response = self.client.post('/accounts/login/', self.login, follow=True)
         self.assertTrue(response.context['user'].is_active)
 
     # ******************************
@@ -124,8 +122,12 @@ class LogInTest(TestCase):
     # ******************************
     def test_post_signup(self):
         test_url = '/accounts/signup/'
-        post_data = {'username': 'Bob', 'email': 'bob@gmail.com',
-                     'password1': 'bob!!!1234BOB', 'password2': 'bob!!!1234BOB'}
+        post_data = {
+            'username': 'Bob',
+            'email': 'bob@gmail.com',
+            'password1': 'bob!!!1234BOB',
+            'password2': 'bob!!!1234BOB'
+        }
         response = self.verify_post_response(test_url, None, post_data, 302)
         self.assertTrue(response.context['user'].is_active)
 
@@ -169,13 +171,17 @@ class UserViews(TestCase):
     # ******************************
     # Verify POST - ViewsTestBase
     # ******************************
-    def verify_post_response(self, url, redirect_url=None, post_data=None, code=302, verbose_level=0):
+    def verify_post_response(self,
+                             url,
+                             redirect_url=None,
+                             post_data=None,
+                             code=302,
+                             verbose_level=0):
         # get and populate form(s)
         if post_data is None:
             response = self.client.post(url)
         else:
-            form_data = get_form_data(response=self.client.get(
-                url), verbose_level=verbose_level)
+            form_data = get_form_data(response=self.client.get(url), verbose_level=verbose_level)
             if form_data is None:
                 form_data = {}
             for key in form_data.keys():
@@ -188,14 +194,12 @@ class UserViews(TestCase):
                         print(100, key, form_data[key])
             response = self.client.post(url, post_data)
             if verbose_level > 0:
-                form_data = get_form_data(
-                    response=self.client.get(url), verbose_level=10)
+                form_data = get_form_data(response=self.client.get(url), verbose_level=10)
 
         # test response
         self.assertEqual(response.status_code, code)
         if response.status_code != 403 and redirect_url is not None:
-            self.assertEqual(response.url.split(
-                '?')[0], redirect_url.split('?')[0])
+            self.assertEqual(response.url.split('?')[0], redirect_url.split('?')[0])
 
         # return
         return response
@@ -204,8 +208,7 @@ class UserViews(TestCase):
     # Verify Redirect - ViewsTestBase
     # ******************************
     def verify_redirect(self, response, redirect_url):
-        self.assertEqual(response.url.split(
-            '?')[0], redirect_url.split('?')[0])
+        self.assertEqual(response.url.split('?')[0], redirect_url.split('?')[0])
 
     # ******************************
     # Login
@@ -252,8 +255,11 @@ class UserViews(TestCase):
     # ******************************
     def test_post_profile(self):
         test_url = reverse('users:profile-edit')
-        post_data = {'username': 'Bobarinio', 'fullname_visible': True,
-                     'birth_date': datetime.date.today()}
+        post_data = {
+            'username': 'Bobarinio',
+            'fullname_visible': True,
+            'birth_date': datetime.date.today()
+        }
         self.verify_post_response(test_url, None, post_data, 302)
         self.user.refresh_from_db()
         self.assertEqual(self.user.username, 'Bobarinio')

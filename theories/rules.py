@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -22,7 +21,6 @@ from rules.contrib.views import PermissionRequiredMixin
 
 from theories.models import TheoryNode, Opinion
 from reversion.models import Version
-
 
 # *******************************************************************************
 # ToDos:
@@ -43,6 +41,7 @@ has_level02 = rules.is_group_member('user level: 2')
 has_level03 = rules.is_group_member('user level: 3')
 has_level04 = rules.is_group_member('user level: 4')
 
+
 # ******************************
 #
 # ******************************
@@ -55,6 +54,7 @@ def is_author(user, obj):
             return obj.user == user
         elif isinstance(obj, Version):
             return obj.revision.user == user
+
 
 # ******************************
 #
@@ -75,6 +75,7 @@ def can_edit_title(user, obj=None):
             return True
     return False
 
+
 # ******************************
 #
 # ******************************
@@ -83,6 +84,7 @@ def can_edit_details(user, obj):
     if has_level00(user):
         return False
     return True
+
 
 # ******************************
 #
@@ -103,6 +105,7 @@ def can_remove(user, obj):
             return True
     return False
 
+
 # ******************************
 #
 # ******************************
@@ -117,6 +120,7 @@ def can_delete(user, obj):
         elif has_level04(user):
             return True
     return False
+
 
 # ******************************
 #

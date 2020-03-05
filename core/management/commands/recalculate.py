@@ -12,18 +12,15 @@ A web service for sharing opinions and avoiding arguments
 @brief      A managment script for recalculating stats stored within the database
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 from django.core.management.base import BaseCommand
 from theories.models import TheoryNode
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-
 
 # *******************************************************************************
 # Methods
@@ -36,7 +33,9 @@ class Command(BaseCommand):
 
     def add_arguments(self, parser):
         # Positional arguments
-        parser.add_argument('primary_keys', nargs='*', type=int,
+        parser.add_argument('primary_keys',
+                            nargs='*',
+                            type=int,
                             help='A set of theory primary keys to recaculate the stats for.')
 
     def handle(self, *args, **options):

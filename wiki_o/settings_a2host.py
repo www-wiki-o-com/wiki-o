@@ -16,14 +16,11 @@ import os
 import sys
 from .settings_base import *
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-
 # Host Config
 ALLOWED_HOSTS = ['www.wiki-o.com', 'admin.wiki-o.com', 'wiki-o.com', '75.98.169.10']
-
 
 # AllAuth Config
 ACCOUNT_USERNAME_MIN_LENGTH = 3
@@ -36,7 +33,6 @@ INVITATIONS_INVITATION_ONLY = True
 INVITATIONS_INVITATION_EXPIRY = 14
 INVITATIONS_ACCEPT_INVITE_AFTER_SIGNUP = True
 
-
 # Email setup (postfix)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'localhost'
@@ -45,4 +41,3 @@ EMAIL_HOST_USER = ''
 EMAIL_HOST_PASSWORD = ''
 DEFAULT_FROM_EMAIL = 'accounts@wiki-o.com'
 EMAIL_USE_TLS = False
-

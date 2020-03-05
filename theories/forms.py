@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -27,39 +26,41 @@ from reversion.models import Version
 from theories.models import Category, TheoryNode, Opinion, OpinionNode
 from core.utils import string_to_list, get_or_none
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 CATEGORY_MAX_LENGTH = 30
 
 INT_VALUES = {
-    "initial":    0,
-    "min_value":  0,
-    "max_value":  100,
+    "initial": 0,
+    "min_value": 0,
+    "max_value": 100,
 }
 TRUE_INPUT_WIDGET = TextInput(attrs={
-    "size":         "3",
-    "class":        "text-center",
-    "style":        "border:1.25px solid gray;",
+    "size": "3",
+    "class": "text-center",
+    "style": "border:1.25px solid gray;",
     "autocomplete": "off",
 })
-FALSE_INPUT_WIDGET = TextInput(attrs={
-    "size":         "3",
-    "class":        "text-center",
-    "style":        "color:red; border:1.25px solid red;",
-    "autocomplete": "off",
-})
+FALSE_INPUT_WIDGET = TextInput(
+    attrs={
+        "size": "3",
+        "class": "text-center",
+        "style": "color:red; border:1.25px solid red;",
+        "autocomplete": "off",
+    })
 
 DETAILS_CHARFEILD = {
-    'widget':     forms.Textarea,
-    'help_text':  'Information pertaining to the theory that does not make assumptions about its correctness.',
+    'widget':
+        forms.Textarea,
+    'help_text':
+        'Information pertaining to the theory that does not make assumptions about its correctness.',
 }
-
 
 # *******************************************************************************
 # Forms
 # *******************************************************************************
+
 
 class TheoryForm(forms.ModelForm):
     """Theory form.
@@ -77,11 +78,13 @@ class TheoryForm(forms.ModelForm):
     action_verb = None
     old_instance = None
     initial_categories = ''
-    category_list_input = forms.CharField(widget=forms.TextInput(
-        attrs={'size':80,
-                'data-role':'tagsinput',
-                'class':'form-control',
-                'autocomplete':'off'}),
+    category_list_input = forms.CharField(
+        widget=forms.TextInput(attrs={
+            'size': 80,
+            'data-role': 'tagsinput',
+            'class': 'form-control',
+            'autocomplete': 'off'
+        }),
         required=False)
 
     class Meta:
@@ -98,7 +101,8 @@ class TheoryForm(forms.ModelForm):
             'title00': 'False Statement',
         }
         help_texts = {
-            'details': 'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details':
+                'Information pertaining to the theory that does not make assumptions about its correctness.',
         }
         widgets = {
             'details': forms.Textarea(attrs={
@@ -186,7 +190,9 @@ class TheoryForm(forms.ModelForm):
     def clean_categories(self):
         for title in self.cleaned_data.get('category_list_input').split(','):
             if len(title) > CATEGORY_MAX_LENGTH:
-                self.add_error('category_list_input', 'Title too long, please limit to %d charaters.' % CATEGORY_MAX_LENGTH)
+                self.add_error(
+                    'category_list_input',
+                    'Title too long, please limit to %d charaters.' % CATEGORY_MAX_LENGTH)
                 break
         return self.cleaned_data.get('category_list_input')
 
@@ -258,11 +264,12 @@ class EvidenceForm(forms.ModelForm):
         model = TheoryNode
         fields = ('title01', 'details', 'verifiable')
         labels = {
-            'title01':    'Statement',
+            'title01': 'Statement',
             'verifiable': 'Is this verifiable?',
         }
         help_texts = {
-            'details':    'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details':
+                'Information pertaining to the theory that does not make assumptions about its correctness.',
         }
         widgets = {
             'details': forms.Textarea(attrs={
@@ -401,25 +408,24 @@ class OpinionForm(forms.ModelForm):
     """A form for user's opinions (the root opinion)."""
     WIZARD_RESOLUTION = 10
     WIZARD_POINTS = []
-    for x in range(WIZARD_RESOLUTION+1):
-        true_points = 100 - 100//WIZARD_RESOLUTION*x
+    for x in range(WIZARD_RESOLUTION + 1):
+        true_points = 100 - 100 // WIZARD_RESOLUTION * x
         false_points = 100 - true_points
         WIZARD_POINTS.append(
             ('%d' % true_points, '%d/<font color="red">%d</font>' % (true_points, false_points)))
-    wizard_points = forms.ChoiceField(
-        choices=WIZARD_POINTS, widget=forms.RadioSelect)
+    wizard_points = forms.ChoiceField(choices=WIZARD_POINTS, widget=forms.RadioSelect)
 
     class Meta:
         """Where the form options are defined."""
         model = Opinion
         fields = ('true_input', 'false_input', 'force')
         labels = {
-            'true_input':  'True Points',
+            'true_input': 'True Points',
             'false_input': 'False Points',
         }
         widgets = {
-            'true_input':   TRUE_INPUT_WIDGET,
-            'false_input':  TRUE_INPUT_WIDGET,
+            'true_input': TRUE_INPUT_WIDGET,
+            'false_input': TRUE_INPUT_WIDGET,
         }
 
     def __init__(self, *args, **kwargs):
@@ -443,7 +449,7 @@ class OpinionForm(forms.ModelForm):
         # generate initial data
         if self.instance.id is not None:
             x = round(self.instance.true_points() *
-                      self.WIZARD_RESOLUTION) * 100//self.WIZARD_RESOLUTION
+                      self.WIZARD_RESOLUTION) * 100 // self.WIZARD_RESOLUTION
             self.fields['wizard_points'].initial = str(x)
 
         # hidden inputs
@@ -482,16 +488,14 @@ class OpinionNodeForm(forms.ModelForm):
         (True, 'true'),
         (False, 'false'),
     ]
-    select_collaborate = forms.ChoiceField(
-        choices=CHOICES, widget=forms.RadioSelect())
-    select_contradict = forms.ChoiceField(
-        choices=CHOICES, widget=forms.RadioSelect())
+    select_collaborate = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
+    select_contradict = forms.ChoiceField(choices=CHOICES, widget=forms.RadioSelect())
 
     class Meta:
         """Where the form options are defined."""
         model = OpinionNode
-        fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input',
-                  'select_collaborate', 'select_contradict')
+        fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input', 'select_collaborate',
+                  'select_contradict')
         labels = {
             'tt_input': 'True Points',
             'tf_input': 'False Points',
@@ -499,10 +503,10 @@ class OpinionNodeForm(forms.ModelForm):
             'ff_input': 'False Points',
         }
         widgets = {
-            'tt_input':     TRUE_INPUT_WIDGET,
-            'tf_input':     TRUE_INPUT_WIDGET,
-            'ft_input':     FALSE_INPUT_WIDGET,
-            'ff_input':     FALSE_INPUT_WIDGET,
+            'tt_input': TRUE_INPUT_WIDGET,
+            'tf_input': TRUE_INPUT_WIDGET,
+            'ft_input': FALSE_INPUT_WIDGET,
+            'ff_input': FALSE_INPUT_WIDGET,
         }
 
     def __init__(self, *args, **kwargs):
@@ -584,8 +588,7 @@ class OpinionNodeForm(forms.ModelForm):
                 else:
                     self.display_true = True
             else:
-                opinion_root = get_or_none(
-                    theory_node.opinions.all(), user=self.user)
+                opinion_root = get_or_none(theory_node.opinions.all(), user=self.user)
                 if opinion_root is None or opinion_root.is_true():
                     self.display_true = True
                 else:
@@ -697,7 +700,12 @@ class EvidenceRevisionForm(forms.ModelForm):
     class Meta:
         """Where the form options are defined."""
         model = Version
-        fields = ('title01', 'details', 'verifiable', 'delete',)
+        fields = (
+            'title01',
+            'details',
+            'verifiable',
+            'delete',
+        )
 
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
@@ -712,7 +720,8 @@ class EvidenceRevisionForm(forms.ModelForm):
         # populate data
         self.fields['title01'].initial = self.instance.field_dict['title01']
         self.fields['details'].initial = self.instance.field_dict['details']
-        self.fields['verifiable'].initial = self.instance.field_dict['node_type'] == TheoryNode.TYPE.FACT
+        self.fields['verifiable'].initial = self.instance.field_dict[
+            'node_type'] == TheoryNode.TYPE.FACT
 
         # config
         self.fields['delete'].required = False

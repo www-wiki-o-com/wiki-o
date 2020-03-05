@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -47,17 +46,16 @@ from core.utils import get_or_none, get_first_or_none
 from core.utils import stream_if_unique, notify_if_unique
 from theories.abstract_models import TheoryPointerBase, NodePointerBase
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 DEBUG = False
 LOGGER = logging.getLogger('django')
 
-
 # *******************************************************************************
 # Models
 # *******************************************************************************
+
 
 class Category(models.Model):
     """A container for categories.
@@ -174,7 +172,7 @@ class Category(models.Model):
 
     def count(self):
         return self.theories.count()
-    
+
     def get_theories(self):
         """Return all theories within category.
 
@@ -193,7 +191,7 @@ class Category(models.Model):
                 Defaults to None.
         """
         # Setup the log and update the activity log if unique.
-        log = {'sender':user, 'verb':verb, 'action_object':action_object, 'target':self}
+        log = {'sender': user, 'verb': verb, 'action_object': action_object, 'target': self}
         if stream_if_unique(self.target_actions, log):
             # Notify each subscriber if the log is unique.
             for follower in followers(self):
@@ -241,19 +239,28 @@ class TheoryNode(models.Model):
     categories = models.ManyToManyField(Category, related_name='theories', blank=True)
 
     pub_date = models.DateField(auto_now_add=True)
-    created_by = models.ForeignKey(
-        User, models.SET_NULL, related_name='created_nodes', blank=True, null=True)
-    modified_by = models.ForeignKey(
-        User, models.SET_NULL, related_name='edited_nodes', blank=True, null=True)
-    modified_date = models.DateTimeField(
-        models.SET_NULL, blank=True, null=True)
+    created_by = models.ForeignKey(User,
+                                   models.SET_NULL,
+                                   related_name='created_nodes',
+                                   blank=True,
+                                   null=True)
+    modified_by = models.ForeignKey(User,
+                                    models.SET_NULL,
+                                    related_name='edited_nodes',
+                                    blank=True,
+                                    null=True)
+    modified_date = models.DateTimeField(models.SET_NULL, blank=True, null=True)
 
     utilization = models.IntegerField(default=0)
     rank = models.SmallIntegerField(default=0)
-    nodes = models.ManyToManyField(
-        'self', related_name='parent_nodes', symmetrical=False, blank=True)
-    flat_nodes = models.ManyToManyField(
-        'self', related_name='parent_flat_nodes', symmetrical=False, blank=True)
+    nodes = models.ManyToManyField('self',
+                                   related_name='parent_nodes',
+                                   symmetrical=False,
+                                   blank=True)
+    flat_nodes = models.ManyToManyField('self',
+                                        related_name='parent_flat_nodes',
+                                        symmetrical=False,
+                                        blank=True)
 
     violations = GenericRelation(Violation)
 
@@ -384,10 +391,10 @@ class TheoryNode(models.Model):
             stack02 = inspect.stack()[2]
             error = 'Error (%s): This node should not be evidence (pk=%d).\n' % (
                 timezone.now().strftime("%Y-%m-%d %X"), self.pk)
-            error += '  Traceback[1]: %s, %d, %s, %s \n' % (stack01[1].split(
-                'code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
-            error += '  Traceback[2]: %s, %d, %s, %s \n' % (stack02[1].split(
-                'code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
+            error += '  Traceback[1]: %s, %d, %s, %s \n' % (
+                stack01[1].split('code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
+            error += '  Traceback[2]: %s, %d, %s, %s \n' % (
+                stack02[1].split('code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
             LOGGER.error(error)
             if self.nodes.count() > 0:
                 LOGGER.error('TheoryNode.assert_theory: This node should not have nodes (pk=%d).',
@@ -410,20 +417,18 @@ class TheoryNode(models.Model):
             stack01 = inspect.stack()[1]
             stack02 = inspect.stack()[2]
             error = 'Error: This node should not be a theory (pk=%d).\n' % self.pk
-            error += '  Traceback[1]: %s, %d, %s, %s \n' % (stack01[1].split(
-                'code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
-            error += '  Traceback[2]: %s, %d, %s, %s \n' % (stack02[1].split(
-                'code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
+            error += '  Traceback[1]: %s, %d, %s, %s \n' % (
+                stack01[1].split('code')[-1], stack01[2], stack01[3], stack01[4][0].strip())
+            error += '  Traceback[2]: %s, %d, %s, %s \n' % (
+                stack02[1].split('code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
             LOGGER.error(error)
             return False
         elif check_nodes:
             if self.nodes.count() > 0:
-                LOGGER.error(
-                    '592: This node should not have nodes (pk=%d).' % self.pk)
+                LOGGER.error('592: This node should not have nodes (pk=%d).' % self.pk)
                 return False
             if self.flat_nodes.count() > 0:
-                LOGGER.error(
-                    '593: This node should not have flat nodes (pk=%d).' % self.pk)
+                LOGGER.error('593: This node should not have flat nodes (pk=%d).' % self.pk)
                 return False
         return True
 
@@ -471,7 +476,8 @@ class TheoryNode(models.Model):
     def save_snapshot(self, user, *args, **kwargs):
         """Create a snapshot of the title(s) and details."""
         # get and delete user's previous snapshots
-        for revision in self.get_revisions().filter(revision__user=user, revision__comment='Snapshot'):
+        for revision in self.get_revisions().filter(revision__user=user,
+                                                    revision__comment='Snapshot'):
             revision.delete()
         # create new snapshot
         with reversion.create_revision():
@@ -507,7 +513,8 @@ class TheoryNode(models.Model):
             notify.send(
                 sender=user,
                 recipient=opinion.user,
-                verb="""<# object.url The theory, "{{ object }}" has had its true and false titles swapped. #>""",
+                verb=
+                """<# object.url The theory, "{{ object }}" has had its true and false titles swapped. #>""",
                 description='This should not effect your <# target.url opinion #> in anyway.',
                 action_object=self,
                 target=opinion,
@@ -538,8 +545,7 @@ class TheoryNode(models.Model):
         if self.is_theory():
             # error checking
             if self.parent_nodes.count() == 0 or self.is_root():
-                LOGGER.error(
-                    '461: Cannot convert a root theory to evidence (pk=%d).' % self.pk)
+                LOGGER.error('461: Cannot convert a root theory to evidence (pk=%d).' % self.pk)
                 return False
             # inherit nodes
             for parent_theory in self.get_parent_nodes():
@@ -564,8 +570,10 @@ class TheoryNode(models.Model):
                 notify.send(
                     sender=user,
                     recipient=opinion.user,
-                    verb='<# object.url The theory, "{{ object }}" has been converted to evidence. #>',
-                    description='This change has rendered your <# target.url opinion #> unnecessary.',
+                    verb=
+                    '<# object.url The theory, "{{ object }}" has been converted to evidence. #>',
+                    description=
+                    'This change has rendered your <# target.url opinion #> unnecessary.',
                     action_object=self,
                     target=opinion,
                     level='warning',
@@ -602,8 +610,8 @@ class TheoryNode(models.Model):
         """
         # error checking
         if self.node_type != theory_node.node_type:
-            LOGGER.error('496: Cannot merge theory nodes of different type (pk01=%d, pk02=%d).' % (
-                self.pk, theory_node.pk))
+            LOGGER.error('496: Cannot merge theory nodes of different type (pk01=%d, pk02=%d).' %
+                         (self.pk, theory_node.pk))
             return False
         # setup
         if user is None:
@@ -617,8 +625,7 @@ class TheoryNode(models.Model):
             self.flat_nodes.add(*flat_nodes)
             # opinions
             for opinion02 in theory_node.get_opinions():
-                opinion01 = get_or_none(
-                    self.get_opinions(), user=opinion02.user)
+                opinion01 = get_or_none(self.get_opinions(), user=opinion02.user)
                 if opinion01 is None:
                     theory = opinion02.theory
                     theory.remove_from_stats(opinion02, cache=True, save=False)
@@ -635,7 +642,8 @@ class TheoryNode(models.Model):
                     log['action_object'] = opinion01
                     log['target'] = opinion02
                     log['level'] = 'warning'
-                    notify_if_unique(opinion02.user, log) # TODO: might be a bug, should it be opinion01.user?
+                    notify_if_unique(opinion02.user,
+                                     log)  # TODO: might be a bug, should it be opinion01.user?
             # stats
             theory_node.save_stats()
             self.save_stats()
@@ -687,12 +695,10 @@ class TheoryNode(models.Model):
         """
         # error checking
         if self.pk == self.INTUITION_PK:
-            LOGGER.error(
-                '720: Intuition node should not be deleted (pk=%d).' % self.pk)
+            LOGGER.error('720: Intuition node should not be deleted (pk=%d).' % self.pk)
             return False
         if self.is_deleted():
-            LOGGER.error(
-                '721: Theory node is already deleted (pk=%d).' % self.pk)
+            LOGGER.error('721: Theory node is already deleted (pk=%d).' % self.pk)
             return False
         # setup
         if user is None:
@@ -731,7 +737,8 @@ class TheoryNode(models.Model):
                         sender=user,
                         recipient=opinion.user,
                         verb='<# object.url {{ object }} has been deleted. #>',
-                        description='This change means that your <# target.url opinion #> of {{ target }} is no longer valid.',
+                        description=
+                        'This change means that your <# target.url opinion #> of {{ target }} is no longer valid.',
                         action_object=self,
                         target=opinion,
                         level='warning',
@@ -878,26 +885,19 @@ class TheoryNode(models.Model):
             flat_nodes = self.saved_flat_nodes
         elif cache:
             self.saved_flat_nodes = self.flat_nodes.filter(
-                Q(node_type=self.TYPE.FACT) |
-                Q(node_type=self.TYPE.EVIDENCE)
-            )
+                Q(node_type=self.TYPE.FACT) | Q(node_type=self.TYPE.EVIDENCE))
             list(self.saved_flat_nodes)
             flat_nodes = self.saved_flat_nodes
         else:
             flat_nodes = self.flat_nodes.filter(
-                Q(node_type=self.TYPE.FACT) |
-                Q(node_type=self.TYPE.EVIDENCE)
-            )
+                Q(node_type=self.TYPE.FACT) | Q(node_type=self.TYPE.EVIDENCE))
         # get deleted nodes
         if deleted:
             # recursively build up nodes
             flat_nodes |= self.nodes.filter(
-                Q(node_type=-self.TYPE.FACT) |
-                Q(node_type=-self.TYPE.EVIDENCE)
-            )
+                Q(node_type=-self.TYPE.FACT) | Q(node_type=-self.TYPE.EVIDENCE))
             for theory_node in self.nodes.filter(node_type=-self.TYPE.THEORY):
-                flat_nodes |= theory_node.get_flat_nodes(
-                    deleted=True, distinct=False)
+                flat_nodes |= theory_node.get_flat_nodes(deleted=True, distinct=False)
             if distinct:
                 flat_nodes = flat_nodes.distinct()
         return flat_nodes
@@ -912,8 +912,7 @@ class TheoryNode(models.Model):
         if deleted:
             nodes |= self.nodes.filter(node_type__lt=0)
             for theory_node in self.nodes.filter(node_type=-self.TYPE.THEORY):
-                nodes |= theory_node.get_nested_nodes(
-                    deleted=True, distinct=False)
+                nodes |= theory_node.get_nested_nodes(deleted=True, distinct=False)
             if distinct:
                 nodes = nodes.distinct()
         return nodes
@@ -928,8 +927,7 @@ class TheoryNode(models.Model):
         if deleted:
             nodes |= self.nodes.filter(node_type=-self.TYPE.THEORY)
             for theory_node in self.nodes.filter(node_type=-self.TYPE.THEORY):
-                nodes |= theory_node.get_nested_subtheory_nodes(
-                    deleted=True, distinct=False)
+                nodes |= theory_node.get_nested_subtheory_nodes(deleted=True, distinct=False)
             if distinct:
                 nodes = nodes.distinct()
         return nodes
@@ -941,14 +939,10 @@ class TheoryNode(models.Model):
             return None
         # blah
         nodes = self.get_nodes().filter(
-            Q(node_type=self.TYPE.FACT) |
-            Q(node_type=self.TYPE.EVIDENCE)
-        )
+            Q(node_type=self.TYPE.FACT) | Q(node_type=self.TYPE.EVIDENCE))
         if deleted:
             nodes |= self.nodes.filter(
-                Q(node_type=-self.TYPE.FACT) |
-                Q(node_type=-self.TYPE.EVIDENCE)
-            )
+                Q(node_type=-self.TYPE.FACT) | Q(node_type=-self.TYPE.EVIDENCE))
         return nodes
 
     def get_subtheory_nodes(self, deleted=False, cache=False):
@@ -1134,13 +1128,15 @@ class TheoryNode(models.Model):
             nested_verb = '<strike>' + nested_verb + '</strike>'
 
         # this activity log
-        log = {'sender':user, 'verb':verb, 'action_object':action_object, 'target':self}
+        log = {'sender': user, 'verb': verb, 'action_object': action_object, 'target': self}
         if stream_if_unique(self.target_actions, log):
             # parent node
             for parent_node in self.get_parent_nodes():
                 if parent_node.pk not in path:
-                    parent_node.update_activity_logs(
-                        user, nested_verb, action_object=self, path=path)
+                    parent_node.update_activity_logs(user,
+                                                     nested_verb,
+                                                     action_object=self,
+                                                     path=path)
 
             # categories
             for category in self.categories.all():
@@ -1162,15 +1158,9 @@ class TheoryNode(models.Model):
 
         # filter by status
         if opened:
-            violations |= self.violations.filter(
-                Q(status__lt=110) &
-                Q(status__gt=-110)
-            )
+            violations |= self.violations.filter(Q(status__lt=110) & Q(status__gt=-110))
         if closed:
-            violations |= self.violations.filter(
-                Q(status__gte=110) |
-                Q(status__lte=-110)
-            )
+            violations |= self.violations.filter(Q(status__gte=110) | Q(status__lte=-110))
 
         # filter by date
         if recent and expired:
@@ -1186,7 +1176,6 @@ class TheoryNode(models.Model):
         return violations
 
 
-
 class Opinion(TheoryPointerBase, models.Model):
     """A container for user opinion data.
 
@@ -1194,10 +1183,8 @@ class Opinion(TheoryPointerBase, models.Model):
         * Remove all auto_now and auto_now_add.
     """
 
-    user = models.ForeignKey(
-        User, related_name='opinions', on_delete=models.CASCADE)
-    theory = models.ForeignKey(
-        TheoryNode, related_name='opinions', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, related_name='opinions', on_delete=models.CASCADE)
+    theory = models.ForeignKey(TheoryNode, related_name='opinions', on_delete=models.CASCADE)
     pub_date = models.DateField(auto_now_add=True)
     modified_date = models.DateField(auto_now=True)
     anonymous = models.BooleanField(default=False)
@@ -1284,12 +1271,16 @@ class Opinion(TheoryPointerBase, models.Model):
         else:
             slug02 = opinion02.get_slug()
         url = reverse('theories:opinion-compare',
-                      kwargs={'pk': self.theory.pk, 'slug01': slug01, 'slug02': slug02})
+                      kwargs={
+                          'pk': self.theory.pk,
+                          'slug01': slug01,
+                          'slug02': slug02
+                      })
         return url
 
     def get_absolute_url(self):
         """Return the url that views the details of this opinion."""
-        return reverse('theories:opinion-detail', kwargs={'pk':self.theory.pk, 'slug': self.pk})
+        return reverse('theories:opinion-detail', kwargs={'pk': self.theory.pk, 'slug': self.pk})
 
     def url(self):
         """Return the url that views the details of this opinion."""
@@ -1301,14 +1292,12 @@ class Opinion(TheoryPointerBase, models.Model):
         # check saved nodes first
         opinion_node = None
         if self.saved_nodes is not None:
-            opinion_node = get_or_none(
-                self.saved_nodes, theory_node=theory_node)
+            opinion_node = get_or_none(self.saved_nodes, theory_node=theory_node)
 
         # make db query
         if opinion_node is None:
             if create:
-                opinion_node, created = self.nodes.get_or_create(
-                    theory_node=theory_node)
+                opinion_node, created = self.nodes.get_or_create(theory_node=theory_node)
             else:
                 opinion_node = get_or_none(self.nodes, theory_node=theory_node)
 
@@ -1369,8 +1358,7 @@ class Opinion(TheoryPointerBase, models.Model):
             self.saved_flat_nodes = QuerySetDict('theory_node.pk')
 
             # setup intuition_node
-            intuition_node = self.get_flat_node(
-                self.theory.get_intuition_node())
+            intuition_node = self.get_flat_node(self.theory.get_intuition_node())
 
             # evidence
             for evidence_node in self.get_evidence_nodes():
@@ -1383,15 +1371,15 @@ class Opinion(TheoryPointerBase, models.Model):
                 if verbose_level >= 10:
                     print('\n\n\n')
                     print(1690, '%s: %s' % (self, evidence_node))
-                    print(1691, '  : true_points  = %0.2f' %
-                          evidence_node.true_points())
-                    print(1692, '  : false_points = %0.2f' %
-                          evidence_node.false_points())
-                    print(1694, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                        evidence_node.true_percent() * self.true_points(),
-                        evidence_node.false_percent() * self.false_points(),
-                        0, 0,
-                    ))
+                    print(1691, '  : true_points  = %0.2f' % evidence_node.true_points())
+                    print(1692, '  : false_points = %0.2f' % evidence_node.false_points())
+                    print(
+                        1694, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
+                            evidence_node.true_percent() * self.true_points(),
+                            evidence_node.false_percent() * self.false_points(),
+                            0,
+                            0,
+                        ))
 
             # sub-theories
             for subtheory_node in self.get_subtheory_nodes():
@@ -1402,21 +1390,18 @@ class Opinion(TheoryPointerBase, models.Model):
                         # debug
                         if verbose_level >= 10:
                             print('\n\n\n')
-                            print(1720, '%s: %s' %
-                                  (subtheory_opinion, evidence_node))
-                            print(1721, '  : true_points  = %0.2f' %
-                                  evidence_node.true_points())
-                            print(1722, '  : false_points = %0.2f' %
-                                  evidence_node.false_points())
-                            print(1724, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                                evidence_node.true_percent() * subtheory_node.tt_points(),
-                                evidence_node.false_percent() * subtheory_node.tf_points(),
-                                evidence_node.true_percent() * subtheory_node.tf_points(),
-                                evidence_node.false_percent() * subtheory_node.ff_points(),
-                            ))
+                            print(1720, '%s: %s' % (subtheory_opinion, evidence_node))
+                            print(1721, '  : true_points  = %0.2f' % evidence_node.true_points())
+                            print(1722, '  : false_points = %0.2f' % evidence_node.false_points())
+                            print(
+                                1724, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
+                                    evidence_node.true_percent() * subtheory_node.tt_points(),
+                                    evidence_node.false_percent() * subtheory_node.tf_points(),
+                                    evidence_node.true_percent() * subtheory_node.tf_points(),
+                                    evidence_node.false_percent() * subtheory_node.ff_points(),
+                                ))
 
-                        flat_node = self.get_flat_node(
-                            evidence_node.theory_node)
+                        flat_node = self.get_flat_node(evidence_node.theory_node)
                         # true_points
                         flat_node.saved_true_points += evidence_node.true_percent() * \
                             subtheory_node.tt_points()
@@ -1437,15 +1422,16 @@ class Opinion(TheoryPointerBase, models.Model):
                     # debug
                     if verbose_level >= 10:
                         print('\n\n\n')
-                        print(1740, '%s: %s' %
-                              (subtheory_node, intuition_node))
-                        print(1741, '  : true_points  = %0.2f' %
-                              intuition_node.true_points())
-                        print(1742, '  : false_points = %0.2f' %
-                              intuition_node.false_points())
-                        print(1744, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                            subtheory_node.tt_points(), subtheory_node.tf_points(), 0, 0,
-                        ))
+                        print(1740, '%s: %s' % (subtheory_node, intuition_node))
+                        print(1741, '  : true_points  = %0.2f' % intuition_node.true_points())
+                        print(1742, '  : false_points = %0.2f' % intuition_node.false_points())
+                        print(
+                            1744, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
+                                subtheory_node.tt_points(),
+                                subtheory_node.tf_points(),
+                                0,
+                                0,
+                            ))
 
                 # intuition false points
                 if subtheory_opinion is None or subtheory_opinion.false_points() == 0:
@@ -1455,15 +1441,16 @@ class Opinion(TheoryPointerBase, models.Model):
                     # debug
                     if verbose_level >= 10:
                         print('\n\n\n')
-                        print(1760, '%s: %s' %
-                              (subtheory_node, intuition_node))
-                        print(1761, '  : true_points  = %0.2f' %
-                              intuition_node.true_points())
-                        print(1762, '  : false_points = %0.2f' %
-                              intuition_node.false_points())
-                        print(1764, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                            0, 0, subtheory_node.ft_points(), subtheory_node.ff_points(),
-                        ))
+                        print(1760, '%s: %s' % (subtheory_node, intuition_node))
+                        print(1761, '  : true_points  = %0.2f' % intuition_node.true_points())
+                        print(1762, '  : false_points = %0.2f' % intuition_node.false_points())
+                        print(
+                            1764, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
+                                0,
+                                0,
+                                subtheory_node.ft_points(),
+                                subtheory_node.ff_points(),
+                            ))
 
         # debug
         if verbose_level > 0:
@@ -1477,27 +1464,22 @@ class Opinion(TheoryPointerBase, models.Model):
            Additionally, this action adds an intuition node to theory.nodes."""
         theory_node = self.theory.get_intuition_node()
         if create:
-            intuition_node, created = self.nodes.get_or_create(
-                theory_node=theory_node)
+            intuition_node, created = self.nodes.get_or_create(theory_node=theory_node)
         else:
-            intuition_node = get_or_none(
-                self.get_nodes(), theory_node=theory_node)
+            intuition_node = get_or_none(self.get_nodes(), theory_node=theory_node)
         return intuition_node
 
     def get_evidence_nodes(self):
         """Returns a query set of the evidence opinion nodes."""
 
-        return self.nodes.filter(
-            ~Q(theory_node__node_type=TheoryNode.TYPE.THEORY) &
-            ~Q(theory_node__node_type=-TheoryNode.TYPE.THEORY)
-        )
+        return self.nodes.filter(~Q(theory_node__node_type=TheoryNode.TYPE.THEORY) &
+                                 ~Q(theory_node__node_type=-TheoryNode.TYPE.THEORY))
 
     def get_subtheory_nodes(self):
         """Return all opinion nodes that point to sub-theories of self.theory"""
         return self.nodes.filter(
             Q(theory_node__node_type=TheoryNode.TYPE.THEORY) |
-            Q(theory_node__node_type=-TheoryNode.TYPE.THEORY)
-        )
+            Q(theory_node__node_type=-TheoryNode.TYPE.THEORY))
 
     def get_parent_nodes(self):
         """Return a query set of opinion nodes that point to this opinion."""
@@ -1525,8 +1507,7 @@ class Opinion(TheoryPointerBase, models.Model):
                 if verbose_level >= 10:
                     print("  delete: %s" % node)
             elif verbose_level >= 10:
-                print("  %s: true_input = %d, false_input = %d" %
-                      (node, true_input, false_input))
+                print("  %s: true_input = %d, false_input = %d" % (node, true_input, false_input))
 
         # debug
         if verbose_level > 0:
@@ -1663,7 +1644,12 @@ class Opinion(TheoryPointerBase, models.Model):
         system_user = User.get_system_user()
 
         # this activity log
-        log = {'sender':system_user, 'verb':verb, 'action_object':action_object, 'target':self} # TODO: might be a bug but the prev diff had action_object = self
+        log = {
+            'sender': system_user,
+            'verb': verb,
+            'action_object': action_object,
+            'target': self
+        }  # TODO: might be a bug but the prev diff had action_object = self
         stream_if_unique(self.target_actions, log)
 
         # subscribed users
@@ -1680,10 +1666,10 @@ class Opinion(TheoryPointerBase, models.Model):
 class OpinionNode(NodePointerBase, models.Model):
     """A container for user opinion dependencies."""
 
-    parent = models.ForeignKey(
-        Opinion, related_name='nodes', on_delete=models.CASCADE)
-    theory_node = models.ForeignKey(
-        TheoryNode, related_name='opinion_nodes', on_delete=models.CASCADE)
+    parent = models.ForeignKey(Opinion, related_name='nodes', on_delete=models.CASCADE)
+    theory_node = models.ForeignKey(TheoryNode,
+                                    related_name='opinion_nodes',
+                                    on_delete=models.CASCADE)
 
     tt_input = models.SmallIntegerField(default=0)
     tf_input = models.SmallIntegerField(default=0)
@@ -1726,8 +1712,7 @@ class OpinionNode(NodePointerBase, models.Model):
             root_opinion = self.saved_root_opinion
         else:
             if self.is_subtheory():
-                root_opinion = get_or_none(
-                    self.theory_node.opinions, user=self.parent.user)
+                root_opinion = get_or_none(self.theory_node.opinions, user=self.parent.user)
                 self.saved_root_opinion = root_opinion
             else:
                 root_opinion = None
@@ -1926,8 +1911,7 @@ class Stats(TheoryPointerBase, models.Model):
             return self.saved_flat_nodes.get(theory_node.pk)
         # make db query
         elif create:
-            node, created = self.flat_nodes.get_or_create(
-                theory_node=theory_node)
+            node, created = self.flat_nodes.get_or_create(theory_node=theory_node)
             if self.saved_flat_nodes is not None:
                 self.saved_flat_nodes.add(node)
             return node
@@ -1959,8 +1943,7 @@ class Stats(TheoryPointerBase, models.Model):
 
             # nodes
             for opinion_node in opinion.get_nodes():
-                stats_node = self.get_node(
-                    theory_node=opinion_node.theory_node)
+                stats_node = self.get_node(theory_node=opinion_node.theory_node)
                 stats_node.total_true_points += opinion_node.true_points()
                 stats_node.total_false_points += opinion_node.false_points()
                 if save:
@@ -1970,8 +1953,7 @@ class Stats(TheoryPointerBase, models.Model):
 
             # flat_nodes
             for flat_opinion_node in opinion.get_flat_nodes():
-                flat_stats_node = self.get_flat_node(
-                    theory_node=flat_opinion_node.theory_node)
+                flat_stats_node = self.get_flat_node(theory_node=flat_opinion_node.theory_node)
                 flat_stats_node.total_true_points += flat_opinion_node.true_points()
                 flat_stats_node.total_false_points += flat_opinion_node.false_points()
                 if save:
@@ -1995,8 +1977,7 @@ class Stats(TheoryPointerBase, models.Model):
 
             # nodes
             for opinion_node in opinion.get_nodes():
-                stats_node = self.get_node(
-                    theory_node=opinion_node.theory_node)
+                stats_node = self.get_node(theory_node=opinion_node.theory_node)
                 stats_node.total_true_points -= opinion_node.true_points()
                 stats_node.total_false_points -= opinion_node.false_points()
                 if save:
@@ -2006,8 +1987,7 @@ class Stats(TheoryPointerBase, models.Model):
 
             # flat_nodes
             for flat_opinion_node in opinion.get_flat_nodes():
-                flat_stats_node = self.get_flat_node(
-                    theory_node=opinion_node.theory_node)
+                flat_stats_node = self.get_flat_node(theory_node=opinion_node.theory_node)
                 flat_stats_node.total_true_points -= flat_opinion_node.true_points()
                 flat_stats_node.total_false_points -= flat_opinion_node.false_points()
                 if save:
@@ -2030,10 +2010,18 @@ class Stats(TheoryPointerBase, models.Model):
         return self.get_absolute_url()
 
     def opinion_url(self):
-        return reverse('theories:opinion-detail', kwargs={'pk': self.get_node_pk(), 'slug': self.get_slug()})
+        return reverse('theories:opinion-detail',
+                       kwargs={
+                           'pk': self.get_node_pk(),
+                           'slug': self.get_slug()
+                       })
 
     def opinions_url(self):
-        return reverse("theories:opinion-index", kwargs={'pk': self.theory.pk, 'slug':self.get_slug()})
+        return reverse("theories:opinion-index",
+                       kwargs={
+                           'pk': self.theory.pk,
+                           'slug': self.get_slug()
+                       })
 
     def compare_url(self, opinion02=None):
         """Return a url to compare this object with a default object (opinion-compare)."""
@@ -2044,7 +2032,11 @@ class Stats(TheoryPointerBase, models.Model):
         else:
             slug02 = opinion02.get_slug()
         url = reverse('theories:opinion-compare',
-                       kwargs={'pk': self.theory.pk, 'slug01': slug01, 'slug02': slug02})
+                      kwargs={
+                          'pk': self.theory.pk,
+                          'slug01': slug01,
+                          'slug02': slug02
+                      })
         return url
 
     def opinion_is_member(self, opinion):
@@ -2055,7 +2047,8 @@ class Stats(TheoryPointerBase, models.Model):
             return True
         elif self.stats_type == self.TYPE.SUPPORTERS and opinion.true_points() >= 0.666:
             return True
-        elif self.stats_type == self.TYPE.MODERATES and opinion.true_points() < 0.666 and opinion.false_points() < 0.666:
+        elif self.stats_type == self.TYPE.MODERATES and opinion.true_points(
+        ) < 0.666 and opinion.false_points() < 0.666:
             return True
         elif self.stats_type == self.TYPE.OPPOSERS and opinion.false_points() >= 0.666:
             return True
@@ -2168,8 +2161,9 @@ class StatsNode(NodePointerBase, models.Model):
             has a total of 1.0 points to distribute to theories/nodes).
     """
     parent = models.ForeignKey(Stats, related_name='nodes', on_delete=models.CASCADE)
-    theory_node = models.ForeignKey(
-        TheoryNode, related_name='stats_nodes', on_delete=models.CASCADE)
+    theory_node = models.ForeignKey(TheoryNode,
+                                    related_name='stats_nodes',
+                                    on_delete=models.CASCADE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
@@ -2233,10 +2227,10 @@ class StatsNode(NodePointerBase, models.Model):
 
 class StatsFlatNode(NodePointerBase, models.Model):
     """A container for flat node (nested evidence) statistics"""
-    parent = models.ForeignKey(
-        Stats, related_name='flat_nodes', on_delete=models.CASCADE)
-    theory_node = models.ForeignKey(
-        TheoryNode, related_name='stats_flat_nodes', on_delete=models.CASCADE)
+    parent = models.ForeignKey(Stats, related_name='flat_nodes', on_delete=models.CASCADE)
+    theory_node = models.ForeignKey(TheoryNode,
+                                    related_name='stats_flat_nodes',
+                                    on_delete=models.CASCADE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 

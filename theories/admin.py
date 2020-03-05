@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -63,6 +62,7 @@ class OpinionNodeAdmin(admin.ModelAdmin):
     # ******************************
     def get_user(self, obj):
         return obj.parent.user
+
     get_user.short_description = 'User'
 
     # ******************************
@@ -94,6 +94,7 @@ class StatsNodeAdmin(admin.ModelAdmin):
     # ******************************
     def get_owner(self, obj):
         return obj.parent.get_owner()
+
     get_owner.short_description = 'Type'
 
     # ******************************
@@ -113,6 +114,7 @@ class StatsFlatNodeAdmin(admin.ModelAdmin):
     # ******************************
     def get_owner(self, obj):
         return obj.parent.get_owner()
+
     get_owner.short_description = 'Type'
 
     # ******************************

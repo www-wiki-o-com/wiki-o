@@ -24,14 +24,12 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
-
 
 # *******************************************************************************
 # urls
@@ -43,12 +41,9 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/actstream/', include('users.activity_urls', namespace='activity')),
-    path('accounts/notifications/',
-         include('users.notifications_urls', namespace='notifications')),
-    path('accounts/invitations/',
-         include('invitations.urls', namespace='invitations')),
+    path('accounts/notifications/', include('users.notifications_urls', namespace='notifications')),
+    path('accounts/invitations/', include('invitations.urls', namespace='invitations')),
 ]
-
 
 # *******************************************************************************
 # Django Toolbar

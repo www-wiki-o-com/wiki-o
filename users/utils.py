@@ -12,16 +12,15 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 from django.contrib.auth.models import Group
 
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
+
 
 def get_group(level):
     """Get the user group corresponding to the level.

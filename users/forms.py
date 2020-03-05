@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -21,7 +20,6 @@ from notifications.models import Notification
 
 from users.models import *
 from core.utils import get_first_or_none
-
 
 # *******************************************************************************
 # Classes
@@ -34,6 +32,7 @@ from core.utils import get_first_or_none
 #
 #
 # *******************************************************************************
+
 
 class UserForm(forms.ModelForm):
     """Todo
@@ -64,23 +63,23 @@ class UserForm(forms.ModelForm):
             'use_wizard',
         )
         labels = {
-            'fullname':             'Full Name',
-            'politics':             'Political Alignment',
-            'sex_visible':          'Sex',
-            'fullname_visible':     'Full Name',
-            'location_visible':     'Location',
-            'religion_visible':     'Religion',
-            'politics_visible':     'Political Alignment',
-            'birth_date_visible':   'Age',
-            'hidden':               'Hide Identity',
-            'use_wizard':           'Use Wizard',
+            'fullname': 'Full Name',
+            'politics': 'Political Alignment',
+            'sex_visible': 'Sex',
+            'fullname_visible': 'Full Name',
+            'location_visible': 'Location',
+            'religion_visible': 'Religion',
+            'politics_visible': 'Political Alignment',
+            'birth_date_visible': 'Age',
+            'hidden': 'Hide Identity',
+            'use_wizard': 'Use Wizard',
         }
         help_texts = {
-            'email':      'We do not share your email address with anyone.',
-            'location':   'Country, State/Province, City/Town',
-            'religion':   'Christian, Muslim, Spiritual, ...',
-            'sex':        'Male, Female, trans, ...',
-            'politics':   'Liberal/Left, Moderate/Middle, Conservitive/Right, ...',
+            'email': 'We do not share your email address with anyone.',
+            'location': 'Country, State/Province, City/Town',
+            'religion': 'Christian, Muslim, Spiritual, ...',
+            'sex': 'Male, Female, trans, ...',
+            'politics': 'Liberal/Left, Moderate/Middle, Conservitive/Right, ...',
             'birth_date': 'YYYY-MM-DD',
         }
 
@@ -137,8 +136,11 @@ class SelectViolationForm(forms.ModelForm):
 class ReportViolationForm(forms.ModelForm):
     """Report user violation form."""
 
-    explanation = forms.CharField(max_length=700, widget=forms.Textarea(
-        attrs={'rows': 4, 'style': 'width:100%;'}))
+    explanation = forms.CharField(max_length=700,
+                                  widget=forms.Textarea(attrs={
+                                      'rows': 4,
+                                      'style': 'width:100%;'
+                                  }))
     offences = forms.MultipleChoiceField(
         widget=forms.CheckboxSelectMultiple,
         choices=Violation.THEORY_OFFENCES,
@@ -220,10 +222,9 @@ class ReportViolationForm(forms.ModelForm):
             # Create new report
             if feedback is None:
                 # intent/offences
-                offence_list = str([int(x)
-                                    for x in self.cleaned_data.get('offences')])
-                comment = '%s/%s/%s' % (self.cleaned_data.get('intent'),
-                                        offence_list, self.cleaned_data.get('explanation'))
+                offence_list = str([int(x) for x in self.cleaned_data.get('offences')])
+                comment = '%s/%s/%s' % (self.cleaned_data.get('intent'), offence_list,
+                                        self.cleaned_data.get('explanation'))
                 violation.feedback.create(
                     user=self.user,
                     action=ViolationFeedback.ACTIONS00.REPORTED,
@@ -264,11 +265,15 @@ class ResolveViolationForm(forms.ModelForm):
         model = ViolationFeedback
         fields = ('action', 'comment')
         labels = {
-            'action':   'Make a Decision',
-            'comment':  'Comment',
+            'action': 'Make a Decision',
+            'comment': 'Comment',
         }
         widgets = {
-            'comment': forms.Textarea(attrs={'max_length': 700, 'rows': 4, 'style': 'width:100%;'}),
+            'comment': forms.Textarea(attrs={
+                'max_length': 700,
+                'rows': 4,
+                'style': 'width:100%;'
+            }),
         }
 
     def __init__(self, *args, **kwargs):
@@ -321,8 +326,8 @@ class ResolveViolationForm(forms.ModelForm):
 
         # comment/intent/offences
         offence_list = str([int(x) for x in self.cleaned_data.get('offences')])
-        feedback.comment = '%s/%s/%s' % (self.cleaned_data.get(
-            'intent'), offence_list, self.cleaned_data.get('comment'))
+        feedback.comment = '%s/%s/%s' % (self.cleaned_data.get('intent'), offence_list,
+                                         self.cleaned_data.get('comment'))
 
         # violation
         if 'action' in self.changed_data and feedback.action > 0:
@@ -363,7 +368,7 @@ class VoteForm(forms.ModelForm):
         model = ViolationVote
         fields = ('action',)
         labels = {
-            'action':   'Your Vote',
+            'action': 'Your Vote',
         }
 
     def __init__(self, *args, **kwargs):

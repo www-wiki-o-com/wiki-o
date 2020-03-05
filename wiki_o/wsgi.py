@@ -20,6 +20,7 @@ import sys
 
 from django.core.wsgi import get_wsgi_application
 
+
 # Convert Apache environement varaibles to os environement variables.
 def application_wrapper(wsgi_environ, start_response):
     """A wrapper that loads environment varaibles passed in by Apache."""
@@ -32,6 +33,7 @@ def application_wrapper(wsgi_environ, start_response):
             pass
     application_ = get_wsgi_application()
     return application_(wsgi_environ, start_response)
+
 
 # Setup
 sys.path.append('/home/django/www.wiki-o.com')
