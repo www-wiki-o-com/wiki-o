@@ -231,7 +231,7 @@ class TheoryNode(models.Model):
     )
 
     # Variables
-    INTUITION_PK = 1
+    INTUITION_PK = -1
     node_type = models.SmallIntegerField(choices=TYPE)
     title00 = models.CharField(max_length=255, blank=True, null=True)
     title01 = models.CharField(max_length=255, unique=True)
@@ -837,6 +837,11 @@ class TheoryNode(models.Model):
         return False
 
     @classmethod
+    def update_intuition_node(cls, create=True):
+        if cls.INTUITION_PK < 0:
+            cls.get_intuition_node(create=True)
+
+    @classmethod
     def get_intuition_node(cls, create=True):
         """Creates and returns an intuition node."""
         # assume intuition_pk is known
@@ -848,10 +853,8 @@ class TheoryNode(models.Model):
             intuition_node = None
         # get or create
         if create and intuition_node is None:
-            intuition_node, created = cls.objects.get_or_create(
-                node_type=cls.TYPE.EVIDENCE,
-                title01='Intuition',
-            )
+            intuition_node, created = cls.objects.get_or_create(node_type=cls.TYPE.EVIDENCE,
+                                                                title01='Intuition')
             cls.INTUITION_PK = intuition_node.pk
         # blah
         return intuition_node

@@ -357,6 +357,7 @@ class TheoryDetail(generic.DetailView):
     """A view for displaying theory details."""
     model = TheoryNode
     template_name = 'theories/theory_detail.html'
+    TheoryNode.update_intuition_node()
 
     def get_context_data(self, **kwargs):
 
