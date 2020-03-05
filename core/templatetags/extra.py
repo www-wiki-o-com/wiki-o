@@ -566,6 +566,7 @@ def render_details(raw_content):
             'tables',
         ),
     )
+    md.renderer.bib_labels = {}
     rendered_content = md(raw_content)
     bib_labels = md.renderer.bib_labels
 
