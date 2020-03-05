@@ -439,7 +439,6 @@ class TheoryNode(models.Model):
             self.modified_date = timezone.now()
             if self.pk is None:
                 self.created_by = user
-                self.pub_date = timezone.now()
         super().save(*args, **kwargs)
         if self.is_theory():
             Stats.initialize(self)
@@ -1169,10 +1168,10 @@ class TheoryNode(models.Model):
         if recent and expired:
             pass
         elif recent:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__gte=date00)
         elif expired:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__lt=date00)
 
         # done
