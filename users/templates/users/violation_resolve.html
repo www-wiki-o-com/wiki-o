@@ -1,420 +1,411 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       users/templates/users/violation_resolve.html
-@brief      The resolution page for violations
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-{% load rules %}
-{% load urls %}
+{% endcomment %}
 
 
-{% block content %}
-{% with violation.content_type.model as content_type %}
+  {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
+  {% load urls %} {% block content %} {% with violation.content_type.model as content_type %} <h3><br>Violation
+  {{ violation.pk }} </h3>
+  <table style="margin-left:3ex; font-size: large;">
+    <thead>
+      <tr>
+        <th />
+        <th width="2.5%" />
+        <th />
+    </thead>
+    <tbody>
+      <tr>
+        <th> Content: </th>
+        <td />
+        {% if content_type == 'theorynode' %}
+        <td><a href="{{ violation.content.url }}"> {{ violation }} </a></td>
+        {% endif %}
+        {% if content_type == 'violation' %}
+        <td> Violation {{ violation.content.pk }} </a></td>
+        {% endif %}
+      </tr>
+      <tr>
+        <th> Offender: </th>
+        <td />
+        <td><a href="{{ violation.offender.url }}"> {{ violation.offender }} </a></td>
+      </tr>
+      <tr>
+        <th> Status: </th>
+        <td />
+        <td> {{ violation.get_status_str }} </td>
+      </tr>
+    </tbody>
+  </table>
 
-<h3><br>Violation {{ violation.pk }} </h3>
-<table style="margin-left:3ex; font-size: large;">
-  <thead>
-    <tr>
-      <th />
-      <th width="2.5%" />
-      <th />
-  </thead>
-  <tbody>
-    <tr>
-      <th> Content: </th>
-      <td />
-      {% if content_type == 'theorynode' %}
-      <td><a href="{{ violation.content.url }}"> {{ violation }} </a></td>
-      {% endif %}
-      {% if content_type == 'violation' %}
-      <td> Violation {{ violation.content.pk }} </a></td>
-      {% endif %}
-    </tr>
-    <tr>
-      <th> Offender: </th>
-      <td />
-      <td><a href="{{ violation.offender.url }}"> {{ violation.offender }} </a></td>
-    </tr>
-    <tr>
-      <th> Status: </th>
-      <td />
-      <td> {{ violation.get_status_str }} </td>
-    </tr>
-  </tbody>
-</table>
+  <!-- Title - Violation -->
 
-<!-- Title - Violation -->
+  <!-- Title - Forum -->
+  {% if content_type == 'forum' %}
+  <h3><br>Resolve User Violation of Conduct on our <a href="{{ violation.content_url|add:params.get_next }}">Feedback
+      Forum</a> </h3>
+  {% endif %}
 
-<!-- Title - Forum -->
-{% if content_type == 'forum' %}
-<h3><br>Resolve User Violation of Conduct on our <a href="{{ violation.content_url|add:params.get_next }}">Feedback
-    Forum</a> </h3>
-{% endif %}
+  <div class="row">
+    <!-- Row -->
+    <div class="col-lg-8">
+      <!-- Main Column -->
 
-<div class="row">
-  <!-- Row -->
-  <div class="col-lg-8">
-    <!-- Main Column -->
-
-    <!-- Violation -->
-    <div class="card my-3">
-      <h5 class="card-header">
-        Feedback
-      </h5>
-      <div class="card card-body">
-        <table>
-          <thead>
-            <tr>
-              <th style="width:1.5%" /> User </th>
-              <th style="width:1.5%" />
-              <th style="width:auto">
-                Action
-              </th>
-              <th style="width:1.5%" />
-              <th style="white-space:nowrap; text-align:right">
-                {% if request.GET.rel %}
-                <a class="plain" href="{% del_params request.get_full_path 'rel' %}"> Time Since </a>
-                {% else %}
-                <a class="plain" href="{% add_params request.get_full_path rel='True' %}"> D/M/Y </a>
-                {% endif %}
-              </th>
-            </tr>
-          </thead>
-          <tr style="border-top:2px solid #000;">
-            <td />
-            <td />
-            <td />
-            <td />
-            <td />
-          </tr>
-          <tbody align="left" valign="top">
-            {% for feedback in violation.get_feedback %}
-            <tr>
-              <!-- user -->
-              <td>
-                {{ feedback.user }}
-              </td>
-              <td />
-              <!-- action & comment -->
-              <td>
-                <div style="margin-left:10px; text-align:justify">
-                  <!-- action & comment -->
-                  {% if feedback.get_comment %}
-                  <span style="margin-left:-10px;">{{ feedback.get_action }}:</span> {{ feedback.get_comment }}
-                  {% else %}
-                  <span style="margin-left:-10px;">{{ feedback.get_action }}</span>
-                  {% endif %}
-                </div>
-                <!-- offences -->
-                {% if feedback.get_offences %}
-                <ul style="margin-bottom:0px;">
-                  {% if feedback.get_intent or feedback.get_offences %}
-                  <li> {{ feedback.get_intent }} (intent). </li>
-                  {% endif %}
-
-                  {% for offence in feedback.get_offences %}
-                  <li> {{ offence }} </li>
-                  {% endfor %}
-                </ul>
-                {% endif %}
-              </td>
-              <td />
-              <!-- datetime -->
-              <td align="right">
-                {% if request.GET.rel %}
-                {{ feedback.timestamp|timepassed }}
-                {% else %}
-                {{ feedback.timestamp|date:"d/m/y" }}
-                {% endif %}
-              </td>
-            </tr>
-            {% endfor %}
-
-            <!-- feedback -->
-            <tr>
-              <td />
-              <td />
-              <td>
-                {% has_perm 'users.can_resolve_violation' user as can_resolve %}
-                <a data-target="#feedback_modal" data-toggle="modal" href="#feedback_modal">
-                  {% if can_resolve %}
-                  Resolve/Comment
-                  {% else %}
-                  Make a Comment
-                  {% endif %}
-                </a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-
-    <!-- TheoryNode -->
-    {% if content_type == 'theorynode' %}
-
-    <!-- Current Revision -->
-    <div class="card my-3">
-      <div class="card-header">
-        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
-          aria-controls="form{{forloop.counter}}">
-          <img src="{% static 'core/img/expand.svg' %}" height='13'>
-          &nbsp
-          {{ theorynode_form.instance.modified_date|date:"d/m/y" }} - Current Version
-          ({{ theorynode_form.instance.modified_by }})
-        </a>
-      </div>
-      <div class="collapse" id="form{{forloop.counter}}">
+      <!-- Violation -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Feedback
+        </h5>
         <div class="card card-body">
-          <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
-            {% csrf_token %}
-            {{ theorynode_form|crispy }}
-            <input type="submit" name="save_theorynode" value="Save">
-          </form>
-        </div>
-      </div>
-    </div>
-
-    <!-- Revisions -->
-    {% for form in revision_formset %}
-    <div class="card my-3">
-      <div class="card-header">
-        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
-          aria-controls="form{{forloop.counter}}">
-          <img src="{% static 'core/img/expand.svg' %}" height='13'>
-          &nbsp
-          {{ form.instance.revision.date_created.date|date:"d/m/y" }} -
-          {{ form.instance.revision.comment }}
-          ({{ form.instance.revision.user }})
-        </a>
-      </div>
-      <div class="collapse" id="form{{forloop.counter}}">
-        <div class="card card-body">
-          {{ form|crispy }}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-
-    {% endif %}
-
-
-    <!-- Violation -->
-    {% if content_type == 'violation' %}
-    <a href="{{ violation.content.url|add:params.get_next }}">Visit resolution forum.</a><br>
-    {% endif %}
-
-    <a href={{ prev }}>Go back to violations.</a>
-
-  </div> <!-- end column -->
-  <div class="col-md-4">
-    <!-- Sidebar Column -->
-
-    <!-- Actions -->
-    <div class="card my-3">
-      <h5 class="card-header">Actions</h5>
-      <div class="card-body">
-        <ul class="list-unstyled mb-0">
-
-          <!-- ABS/REL Datetime -->
-          {% if request.GET.rel %}
-          <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
-          {% else %}
-          <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
-          {% endif %}
-
-          <!-- Voters/Total Poll -->
-          {% if request.GET.voters %}
-          <li><a href="{% del_params request.get_full_path 'voters' %}"> Show Vote Total </a></li>
-          {% else %}
-          <li><a href="{% add_params request.get_full_path voters='True' %}"> Show Individual Votes </a></li>
-          {% endif %}
-
-          <!-- Report -->
-          <li><a data-target="#report_modal" data-toggle="modal" href="#report_modal"> Report a Violation </a></li>
-
-        </ul>
-      </div>
-    </div>
-
-    <!-- Poll -->
-    <div class="card my-3">
-      <h5 class="card-header">
-        Poll Closes {{ violation.get_end_date|date:"M d, Y" }}
-      </h5>
-      <div class="card card-body">
-
-        <!-- votes -->
-        {% if request.GET.voters %}
-        <center>
-          <table class="table-hover" width="90%">
+          <table>
             <thead>
               <tr>
-                <th> Voter </th>
-                <th class="text-right"> Vote </th>
+                <th style="width:1.5%" /> User </th>
+                <th style="width:1.5%" />
+                <th style="width:auto">
+                  Action
+                </th>
+                <th style="width:1.5%" />
+                <th style="white-space:nowrap; text-align:right">
+                  {% if request.GET.rel %}
+                  <a class="plain" href="{% del_params request.get_full_path 'rel' %}"> Time Since </a>
+                  {% else %}
+                  <a class="plain" href="{% add_params request.get_full_path rel='True' %}"> D/M/Y </a>
+                  {% endif %}
+                </th>
               </tr>
             </thead>
             <tr style="border-top:2px solid #000;">
               <td />
               <td />
+              <td />
+              <td />
+              <td />
             </tr>
-            <tbody>
-              {% for vote in violation.votes.all %}
+            <tbody align="left" valign="top">
+              {% for feedback in violation.get_feedback %}
               <tr>
-                <td> {{ vote.user }} </td>
-                <td class="text-right"> {{ vote.get_vote_str }} </td>
-                {% endfor %}
-            </tbody>
-          </table>
-        </center>
-        <!-- stats -->
-        {% else %}
-        <center>
-          <table style="text-align:center" width="90%">
-            <thead>
-              <tr> {% for x in violation.get_poll_count %} <th>{{ x.2 }}</th> {% endfor %} </tr>
-            </thead>
-            <tr style="border-top:2px solid #000;"> {% for x in violation.get_poll_count %}
-              <td /> {% endfor %} </tr>
-            <tbody>
-              <tr> {% for x in violation.get_poll_count %} <td> {{ x.0 }} </td> {% endfor %} </tr>
-            </tbody>
-          </table>
-        </center>
-        {% endif %}
+                <!-- user -->
+                <td>
+                  {{ feedback.user }}
+                </td>
+                <td />
+                <!-- action & comment -->
+                <td>
+                  <div style="margin-left:10px; text-align:justify">
+                    <!-- action & comment -->
+                    {% if feedback.get_comment %}
+                    <span style="margin-left:-10px;">{{ feedback.get_action }}:</span> {{ feedback.get_comment }}
+                    {% else %}
+                    <span style="margin-left:-10px;">{{ feedback.get_action }}</span>
+                    {% endif %}
+                  </div>
+                  <!-- offences -->
+                  {% if feedback.get_offences %}
+                  <ul style="margin-bottom:0px;">
+                    {% if feedback.get_intent or feedback.get_offences %}
+                    <li> {{ feedback.get_intent }} (intent). </li>
+                    {% endif %}
 
-        <!-- vote -->
+                    {% for offence in feedback.get_offences %}
+                    <li> {{ offence }} </li>
+                    {% endfor %}
+                  </ul>
+                  {% endif %}
+                </td>
+                <td />
+                <!-- datetime -->
+                <td align="right">
+                  {% if request.GET.rel %}
+                  {{ feedback.timestamp|timepassed }}
+                  {% else %}
+                  {{ feedback.timestamp|date:"d/m/y" }}
+                  {% endif %}
+                </td>
+              </tr>
+              {% endfor %}
+
+              <!-- feedback -->
+              <tr>
+                <td />
+                <td />
+                <td>
+                  {% has_perm 'users.can_resolve_violation' user as can_resolve %}
+                  <a data-target="#feedback_modal" data-toggle="modal" href="#feedback_modal">
+                    {% if can_resolve %}
+                    Resolve/Comment
+                    {% else %}
+                    Make a Comment
+                    {% endif %}
+                  </a>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+
+      <!-- TheoryNode -->
+      {% if content_type == 'theorynode' %}
+
+      <!-- Current Revision -->
+      <div class="card my-3">
+        <div class="card-header">
+          <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
+            aria-controls="form{{forloop.counter}}">
+            <img src="{% static 'core/img/expand.svg' %}" height='13'>
+            &nbsp
+            {{ theorynode_form.instance.modified_date|date:"d/m/y" }} - Current Version
+            ({{ theorynode_form.instance.modified_by }})
+          </a>
+        </div>
+        <div class="collapse" id="form{{forloop.counter}}">
+          <div class="card card-body">
+            <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
+              {% csrf_token %}
+              {{ theorynode_form|crispy }}
+              <input type="submit" name="save_theorynode" value="Save">
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Revisions -->
+      {% for form in revision_formset %}
+      <div class="card my-3">
+        <div class="card-header">
+          <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
+            aria-controls="form{{forloop.counter}}">
+            <img src="{% static 'core/img/expand.svg' %}" height='13'>
+            &nbsp
+            {{ form.instance.revision.date_created.date|date:"d/m/y" }} -
+            {{ form.instance.revision.comment }}
+            ({{ form.instance.revision.user }})
+          </a>
+        </div>
+        <div class="collapse" id="form{{forloop.counter}}">
+          <div class="card card-body">
+            {{ form|crispy }}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
+      {% endif %}
+
+
+      <!-- Violation -->
+      {% if content_type == 'violation' %}
+      <a href="{{ violation.content.url|add:params.get_next }}">Visit resolution forum.</a><br>
+      {% endif %}
+
+      <a href={{ prev }}>Go back to violations.</a>
+
+    </div> <!-- end column -->
+    <div class="col-md-4">
+      <!-- Sidebar Column -->
+
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+
+            <!-- ABS/REL Datetime -->
+            {% if request.GET.rel %}
+            <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
+            {% else %}
+            <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
+            {% endif %}
+
+            <!-- Voters/Total Poll -->
+            {% if request.GET.voters %}
+            <li><a href="{% del_params request.get_full_path 'voters' %}"> Show Vote Total </a></li>
+            {% else %}
+            <li><a href="{% add_params request.get_full_path voters='True' %}"> Show Individual Votes </a></li>
+            {% endif %}
+
+            <!-- Report -->
+            <li><a data-target="#report_modal" data-toggle="modal" href="#report_modal"> Report a Violation </a></li>
+
+          </ul>
+        </div>
+      </div>
+
+      <!-- Poll -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Poll Closes {{ violation.get_end_date|date:"M d, Y" }}
+        </h5>
+        <div class="card card-body">
+
+          <!-- votes -->
+          {% if request.GET.voters %}
+          <center>
+            <table class="table-hover" width="90%">
+              <thead>
+                <tr>
+                  <th> Voter </th>
+                  <th class="text-right"> Vote </th>
+                </tr>
+              </thead>
+              <tr style="border-top:2px solid #000;">
+                <td />
+                <td />
+              </tr>
+              <tbody>
+                {% for vote in violation.votes.all %}
+                <tr>
+                  <td> {{ vote.user }} </td>
+                  <td class="text-right"> {{ vote.get_vote_str }} </td>
+                  {% endfor %}
+              </tbody>
+            </table>
+          </center>
+          <!-- stats -->
+          {% else %}
+          <center>
+            <table style="text-align:center" width="90%">
+              <thead>
+                <tr> {% for x in violation.get_poll_count %} <th>{{ x.2 }}</th> {% endfor %} </tr>
+              </thead>
+              <tr style="border-top:2px solid #000;"> {% for x in violation.get_poll_count %}
+                <td /> {% endfor %} </tr>
+              <tbody>
+                <tr> {% for x in violation.get_poll_count %} <td> {{ x.0 }} </td> {% endfor %} </tr>
+              </tbody>
+            </table>
+          </center>
+          {% endif %}
+
+          <!-- vote -->
+          <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
+            {% csrf_token %}
+            {{ vote_form|crispy }}
+            <input type="submit" name="save_vote" value="Submit">
+          </form>
+        </div>
+      </div>
+
+      <!-- Related -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Related Violations
+        </h5>
+        <div class="card card-body">
+          <ul>
+            {% for x in related_violations %}
+            <li><a href="{{ x.url|add:params.get_next }}"> {{ x.offender }}: {{ x.get_offence }} </a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <!-- User -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Other Violations by {{ violation.offender }}
+        </h5>
+        <div class="card card-body">
+          <ul>
+            {% for x in user_violations %}
+            <li><a href="{{ x.url|add:params.get_next }}"> {{ x }} ({{ x.get_offence }}) </a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+  {% endwith %}
+  {% endblock %}
+
+
+
+  {% block extra_modals %}
+
+  <!-- feedback -->
+  <div class="modal" id="feedback_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
         <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
           {% csrf_token %}
-          {{ vote_form|crispy }}
-          <input type="submit" name="save_vote" value="Submit">
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Contribute Feedback</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- body -->
+          <div class="modal-body">
+            {{ feedback_form.comment|as_crispy_field }}
+            {% if can_resolve %}
+            {{ feedback_form.action|as_crispy_field }}
+            {% endif %}
+            {{ feedback_form.intent|as_crispy_field }}
+            Offences (choose all that apply)
+            <div style="padding-left:2ex">
+              {{ feedback_form.offences|as_crispy_field }}
+            </div>
+          </div>
+
+          <!-- footer -->
+          <div class="modal-footer">
+            <!-- submit -->
+            <input type="submit" class="btn btn-danger" name="save_feedback" value="Submit">
+            <!-- cancel -->
+            <button type="button" class="btn" data-dismiss="modal"> Cancel </button>
+          </div>
         </form>
       </div>
     </div>
+  </div>
 
-    <!-- Related -->
-    <div class="card my-3">
-      <h5 class="card-header">
-        Related Violations
-      </h5>
-      <div class="card card-body">
-        <ul>
-          {% for x in related_violations %}
-          <li><a href="{{ x.url|add:params.get_next }}"> {{ x.offender }}: {{ x.get_offence }} </a></li>
-          {% endfor %}
-        </ul>
+  <!-- Report -->
+  <div class="modal" id="report_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
+          {% csrf_token %}
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Report Resolution Violation</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- body -->
+          <div class="modal-body">
+            {{ report_form.offender|as_crispy_field }}
+            {{ report_form.intent|as_crispy_field }}
+            Offences (choose all that apply)
+            <div style="padding-left:2ex">
+              {{ report_form.offences|as_crispy_field }}
+            </div>
+            {{ report_form.explanation|as_crispy_field }}
+          </div>
+
+          <!-- footer -->
+          <div class="modal-footer">
+            <!-- submit -->
+            <input type="submit" class="btn btn-danger" name="save_report" value="Submit">
+            <!-- cancel -->
+            <button type="button" class="btn" data-dismiss="modal"> Cancel </button>
+          </div>
+        </form>
       </div>
     </div>
-
-    <!-- User -->
-    <div class="card my-3">
-      <h5 class="card-header">
-        Other Violations by {{ violation.offender }}
-      </h5>
-      <div class="card card-body">
-        <ul>
-          {% for x in user_violations %}
-          <li><a href="{{ x.url|add:params.get_next }}"> {{ x }} ({{ x.get_offence }}) </a></li>
-          {% endfor %}
-        </ul>
-      </div>
-    </div>
-
-  </div> <!-- end column-->
-</div> <!-- end row -->
-{% endwith %}
-{% endblock %}
-
-
-
-{% block extra_modals %}
-
-<!-- feedback -->
-<div class="modal" id="feedback_modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
-        {% csrf_token %}
-
-        <!-- Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Contribute Feedback</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-
-        <!-- body -->
-        <div class="modal-body">
-          {{ feedback_form.comment|as_crispy_field }}
-          {% if can_resolve %}
-          {{ feedback_form.action|as_crispy_field }}
-          {% endif %}
-          {{ feedback_form.intent|as_crispy_field }}
-          Offences (choose all that apply)
-          <div style="padding-left:2ex">
-            {{ feedback_form.offences|as_crispy_field }}
-          </div>
-        </div>
-
-        <!-- footer -->
-        <div class="modal-footer">
-          <!-- submit -->
-          <input type="submit" class="btn btn-danger" name="save_feedback" value="Submit">
-          <!-- cancel -->
-          <button type="button" class="btn" data-dismiss="modal"> Cancel </button>
-        </div>
-      </form>
-    </div>
   </div>
-</div>
 
-<!-- Report -->
-<div class="modal" id="report_modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
-        {% csrf_token %}
-
-        <!-- Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Report Resolution Violation</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
-
-        <!-- body -->
-        <div class="modal-body">
-          {{ report_form.offender|as_crispy_field }}
-          {{ report_form.intent|as_crispy_field }}
-          Offences (choose all that apply)
-          <div style="padding-left:2ex">
-            {{ report_form.offences|as_crispy_field }}
-          </div>
-          {{ report_form.explanation|as_crispy_field }}
-        </div>
-
-        <!-- footer -->
-        <div class="modal-footer">
-          <!-- submit -->
-          <input type="submit" class="btn btn-danger" name="save_report" value="Submit">
-          <!-- cancel -->
-          <button type="button" class="btn" data-dismiss="modal"> Cancel </button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-{% endblock extra_modals %}
+  {% endblock extra_modals %}

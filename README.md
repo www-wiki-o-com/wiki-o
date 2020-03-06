@@ -4,19 +4,15 @@
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       README.md
-@brief      The help file for this project
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 -->
 
-Wiki-O Documentation
-=======================================
+# Wiki-O Documentation
 
-Requirements
-============
+# Requirements
 
 - Ubuntu 16 (VPS)
 - Python 3.5, 3.6
@@ -39,9 +35,7 @@ Ubuntu Packages
     $ export LC_ALL=C
     $ pip3 install virtualenv
 
-
-Virtual Envionment
-==================
+# Virtual Envionment
 
 Step 1: Setup Environment (add config to bashrc)
 ::
@@ -53,17 +47,15 @@ Step 1: Setup Environment (add config to bashrc)
 Step 2: Install Packages
 ::
 
-  To install requirments:
+To install requirments:
 
     $ pip3 install -r /home/django/www.wiki-o.com/requirements.freeze
 
-  To show the requirments:
+To show the requirments:
 
     $ pip3 freeze
 
-
-Postgrsql
-============
+# Postgrsql
 
 Step 1: Setup Database
 ::
@@ -74,10 +66,7 @@ Step 1: Setup Database
     $ sudo -u postgres psql -c "grant all privileges on database wiki_o to django;"
     $ sudo -u postgres psql -c "alter user django CREATEDB;"
 
-
-
-Django
-============
+# Django
 
 Step 1: Migrate
 ::

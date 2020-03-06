@@ -1,23 +1,19 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/opinion_detail_table.html
-@brief      The table template for a user's opinion (used by opinion_detail.html)
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
+
+{% endcomment %}
 
 
-{% load static %}
-{% load extra %}
-
-{% if opinion_nodes %}
-<table style="margin:5px">
+  {% load static %} {% load extra %} {% if opinion_nodes %} <table style="margin:5px">
   <tbody align="left" valign="top">
     <tr>
       <td width="10">
@@ -59,5 +55,5 @@ A web service for sharing opinions and avoiding arguments
       </tr>
       {% endfor %}
   </tbody>
-</table>
-{% endif %}
+  </table>
+  {% endif %}

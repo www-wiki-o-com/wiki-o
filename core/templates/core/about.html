@@ -1,24 +1,19 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/templates/account/core/about.html
-@brief      The about page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
+
+{% endcomment %}
 
 
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-
-{% block content %}
-<div class="row">
+  {% extends 'base.html' %} {% load static %} {% load extra %} {% block content %} <div class="row">
 
   <div class="col-lg-8">
 
@@ -112,41 +107,41 @@ A web service for sharing opinions and avoiding arguments
     We need someone experienced to consult with and or manage the
     promotion side of Wiki-O.
   </div>
-</div>
-
-<div class="row">
-  <div class="col-3 text-center">
-    <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
   </div>
-  <div class="col-0.5" />
-</div>
-<div class="col-8 text-justify align-self-center">
-  <h5>User Liaison</h5>
-  We need someone to review user feedback, interface with the users,
-  report bugs, and be a part of the design team for the user
-  interface.
-</div>
-</div>
 
-</div>
-</div>
-
-</div>
-
-<!-- Sidebar Widgets Column -->
-<div class="col-lg-4">
-
-  <!-- Riki-Oh Widget -->
-  <div class="card my-3">
-    <h5 class="card-header text-center">Riki-Oh</h5>
-    <div class="card-body">
-      <img src="{% static 'core/img/profiles/riki-oh.jpg' %}" class="img-fluid" alt="Responsive image">
-      <h6 style="padding-top:1ex"> Our light to guide us through the darkness. </h6>
+  <div class="row">
+    <div class="col-3 text-center">
+      <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
     </div>
+    <div class="col-0.5" />
+  </div>
+  <div class="col-8 text-justify align-self-center">
+    <h5>User Liaison</h5>
+    We need someone to review user feedback, interface with the users,
+    report bugs, and be a part of the design team for the user
+    interface.
+  </div>
   </div>
 
-</div> <!-- end row -->
-</div> <!-- /.container -->
+  </div>
+  </div>
+
+  </div>
+
+  <!-- Sidebar Widgets Column -->
+  <div class="col-lg-4">
+
+    <!-- Riki-Oh Widget -->
+    <div class="card my-3">
+      <h5 class="card-header text-center">Riki-Oh</h5>
+      <div class="card-body">
+        <img src="{% static 'core/img/profiles/riki-oh.jpg' %}" class="img-fluid" alt="Responsive image">
+        <h6 style="padding-top:1ex"> Our light to guide us through the darkness. </h6>
+      </div>
+    </div>
+
+  </div> <!-- end row -->
+  </div> <!-- /.container -->
 
 
-{% endblock %}
+  {% endblock %}

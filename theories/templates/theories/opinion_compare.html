@@ -1,143 +1,137 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/opinion_compare.html
-@brief      The page for comparing opinions
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-{% load rules %}
+{% endcomment %}
 
 
-{% block header %}{% endblock %}
-{% block content %}
-<!-- Title -->
-<h3><br>
-  {{ opinion01.get_owner }} vs. {{ opinion02.get_owner }}
-  <small><small><a href={{ swap_compare_url }}> (swap) </a></small></small>
-</h3>
-<h3>Opinions of &ldquo;{{ theory }}&rdquo;</h3>
+  {% extends 'base.html' %} {% load static %} {% load extra %} {% load rules %} {% block header %}{% endblock %}
+  {% block content %} <!-- Title -->
+  <h3><br>
+    {{ opinion01.get_owner }} vs. {{ opinion02.get_owner }}
+    <small><small><a href={{ swap_compare_url }}> (swap) </a></small></small>
+  </h3>
+  <h3>Opinions of &ldquo;{{ theory }}&rdquo;</h3>
 
-<div class="row">
-  <!-- Row -->
-  <div class="col-lg-8">
-    <!-- Main Column -->
+  <div class="row">
+    <!-- Row -->
+    <div class="col-lg-8">
+      <!-- Main Column -->
 
-    <!-- PieChart -->
-    <div class="card my-3">
-      <h5 class="card-header"> Point Distribution </h5>
-      <div class="card-body text-justify">
-        {{ points_diagram|safe }}
-        {{ points_text|safe }}
+      <!-- PieChart -->
+      <div class="card my-3">
+        <h5 class="card-header"> Point Distribution </h5>
+        <div class="card-body text-justify">
+          {{ points_diagram|safe }}
+          {{ points_text|safe }}
+        </div>
       </div>
-    </div>
 
-    <!-- BarGraph -->
-    <div class="card my-3">
-      <h5 class="card-header"> Population Histogram </h5>
-      <div class="card-body text-justify">
-        {{ population_diagram|safe }}
-        {{ population_text|safe }}
+      <!-- BarGraph -->
+      <div class="card my-3">
+        <h5 class="card-header"> Population Histogram </h5>
+        <div class="card-body text-justify">
+          {{ population_diagram|safe }}
+          {{ population_text|safe }}
+        </div>
       </div>
-    </div>
 
-    <!-- VennDiagram -->
-    <div class="card my-3">
-      <h5 class="card-header">
-        Evidence Dependencies
-        <small><small>
-            <a href={{ swap_flat_url }}>
-              {% if flat %}
-              (unflatten)
-              {% else %}
-              (flatten)
-              {% endif %}
-            </a>
-          </small></small>
-      </h5>
-      <div class="card-body text-justify">
-        {{ evidence_diagram|safe }}
-        {{ evidence_text|safe }}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.unaccounted    title="Unaccounted for evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.contradicting  title="Contradicting evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.controversial  title="Controversial evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.collaborative  title="Collaborative evidence" %}
+      <!-- VennDiagram -->
+      <div class="card my-3">
+        <h5 class="card-header">
+          Evidence Dependencies
+          <small><small>
+              <a href={{ swap_flat_url }}>
+                {% if flat %}
+                (unflatten)
+                {% else %}
+                (flatten)
+                {% endif %}
+              </a>
+            </small></small>
+        </h5>
+        <div class="card-body text-justify">
+          {{ evidence_diagram|safe }}
+          {{ evidence_text|safe }}
+          {% include "theories/opinion_detail_table.html" with node_list=evidence.unaccounted    title="Unaccounted for evidence" %}
+          {% include "theories/opinion_detail_table.html" with node_list=evidence.contradicting  title="Contradicting evidence" %}
+          {% include "theories/opinion_detail_table.html" with node_list=evidence.controversial  title="Controversial evidence" %}
+          {% include "theories/opinion_detail_table.html" with node_list=evidence.collaborative  title="Collaborative evidence" %}
+        </div>
       </div>
-    </div>
 
-    <p> <a href={{ opinion01.url|add:params }}>Back to Opinion</a> </p>
+      <p> <a href={{ opinion01.url|add:params }}>Back to Opinion</a> </p>
 
-  </div> <!-- end column -->
-  <div class="col-md-4">
-    <!-- Sidebar Column -->
+    </div> <!-- end column -->
+    <div class="col-md-4">
+      <!-- Sidebar Column -->
 
-    <!-- Actions -->
-    <div class="card my-3">
-      <h5 class="card-header">Actions</h5>
-      <div class="card-body">
-        <ul class="list-unstyled mb-0">
-          <li><a href={{ swap_compare_url }}> Swap Comparision </a></li>
-          <li> Share </li>
-        </ul>
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header">Actions</h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
+            <li><a href={{ swap_compare_url }}> Swap Comparision </a></li>
+            <li> Share </li>
+          </ul>
+        </div>
       </div>
-    </div>
 
-    <!-- Comparisions -->
-    <div class="card my-3">
-      <h5 class="card-header">Other Comparisions</h5>
-      <div class="card-body">
-        <table>
-          <tbody valign="top">
-            {% for x in compare_list %}
-            <tr>
-              <td style="color:black" align="center">
-                <span style="color:black">{{ x.true_points }}/</span><span style="color:red">{{ x.false_points }}</span>
-              </td>
-              <td><a href="{{ x.url|add:params }}">
-                  &nbsp; {{ x.text }}
-                </a></td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+      <!-- Comparisions -->
+      <div class="card my-3">
+        <h5 class="card-header">Other Comparisions</h5>
+        <div class="card-body">
+          <table>
+            <tbody valign="top">
+              {% for x in compare_list %}
+              <tr>
+                <td style="color:black" align="center">
+                  <span style="color:black">{{ x.true_points }}/</span><span
+                    style="color:red">{{ x.false_points }}</span>
+                </td>
+                <td><a href="{{ x.url|add:params }}">
+                    &nbsp; {{ x.text }}
+                  </a></td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </div>
 
-  </div> <!-- end column-->
-</div> <!-- end row -->
-{% endblock %}
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+  {% endblock %}
 
 
-{% block extra_js %}
-<!--https://api.jquery.com/hover/-->
-<script>
-  $("a").hover(
-    function () {
-      var tag_id = $(this).attr('tag_id');
-      ShowElement(tag_id);
-    },
-    function () {
-      var tag_id = $(this).attr('tag_id');
-      HideElement(tag_id);
+  {% block extra_js %}
+  <!--https://api.jquery.com/hover/-->
+  <script>
+    $("a").hover(
+      function () {
+        var tag_id = $(this).attr('tag_id');
+        ShowElement(tag_id);
+      },
+      function () {
+        var tag_id = $(this).attr('tag_id');
+        HideElement(tag_id);
+      }
+    );
+
+    function HideElement(id) {
+      obj = document.getElementById(id).style.visibility = 'hidden';
     }
-  );
 
-  function HideElement(id) {
-    obj = document.getElementById(id).style.visibility = 'hidden';
-  }
-
-  function ShowElement(id) {
-    document.getElementById(id).style.visibility = 'visible';
-  }
-</script>
-{% endblock extra_js %}
+    function ShowElement(id) {
+      document.getElementById(id).style.visibility = 'visible';
+    }
+  </script>
+  {% endblock extra_js %}

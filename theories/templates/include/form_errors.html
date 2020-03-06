@@ -1,29 +1,26 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/include/form_errors.html
-@brief      A helper template for displaying errors
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
+
+{% endcomment %}
 
 
-{% if form.errors %}
-{% for field in form %}
-{% for error in field.errors %}
-<div class="alert alert-danger">
+  {% if form.errors %} {% for field in form %} {% for error in field.errors %} <div class="alert alert-danger">
   <strong>{{ error|escape }}</strong>
-</div>
-{% endfor %}
-{% endfor %}
-{% for error in form.non_field_errors %}
-<div class="alert alert-danger">
-  <strong>{{ error|escape }}</strong>
-</div>
-{% endfor %}
-{% endif %}
+  </div>
+  {% endfor %}
+  {% endfor %}
+  {% for error in form.non_field_errors %}
+  <div class="alert alert-danger">
+    <strong>{{ error|escape }}</strong>
+  </div>
+  {% endfor %}
+  {% endif %}

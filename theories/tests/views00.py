@@ -4,12 +4,10 @@
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/tests/views00.py
-@brief      The base set of unit tests for the app's views
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 """
 
 # *******************************************************************************

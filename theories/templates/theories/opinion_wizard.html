@@ -1,329 +1,321 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/opinion_wizard.html
-@brief      The opinion wizard page (the easy opinion editor)
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-{% load rules %}
+{% endcomment %}
 
 
-{% block header %}{% endblock %}
-{% block content %}
-<!-- Title -->
-<h3>
-  <br>
-  Welcome to the opinion wizard.
-  <small><small><small>
-        <a href="{% url_extra 'theories:opinion-edit' theory.id extra=params %}">
-          (switch to advanced editor)
-        </a>
-      </small></small></small>
-</h3>
-<h5> Complete the following steps to form an opinion for &ldquo;{{ theory }}&rdquo; </h5>
+  {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
+  {% block header %}{% endblock %} {% block content %} <!-- Title -->
+  <h3>
+    <br>
+    Welcome to the opinion wizard.
+    <small><small><small>
+          <a href="{% url_extra 'theories:opinion-edit' theory.id extra=params %}">
+            (switch to advanced editor)
+          </a>
+        </small></small></small>
+  </h3>
+  <h5> Complete the following steps to form an opinion for &ldquo;{{ theory }}&rdquo; </h5>
 
-<form action="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}" method="post">
-  {% csrf_token %}
-  {{ opinion_form.id }}
-  {{ node_formset.management_form }}
+  <form action="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}" method="post">
+    {% csrf_token %}
+    {{ opinion_form.id }}
+    {{ node_formset.management_form }}
 
-  <!-- Step 1 -->
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="card my-3 text-justify"">
+    <!-- Step 1 -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card my-3 text-justify"">
           <h6 class=" card-header">
-        Step 1: Using the scale below indicate how strongly you feel the theory is True or <font color="red">False
-        </font>.
-        </h6>
-        <div class="card card-body">
-          <table width="80%" align="center">
-            <tbody align="center">
-              <tr>
+          Step 1: Using the scale below indicate how strongly you feel the theory is True or <font color="red">False
+          </font>.
+          </h6>
+          <div class="card card-body">
+            <table width="80%" align="center">
+              <tbody align="center">
+                <tr>
+                  {% for x in opinion_form.wizard_points %}
+                  <th> {{ x.choice_label|safe }} </th>
+                  {% endfor %}
+                </tr>
                 {% for x in opinion_form.wizard_points %}
-                <th> {{ x.choice_label|safe }} </th>
+                <td> <span class="radio">{{ x.tag }}</span> </td>
                 {% endfor %}
-              </tr>
-              {% for x in opinion_form.wizard_points %}
-              <td> <span class="radio">{{ x.tag }}</span> </td>
-              {% endfor %}
-            </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Step 2 -->
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="card my-3 text-justify"">
+    <!-- Step 2 -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card my-3 text-justify"">
           <h6 class=" card-header">
-        Step 2: Indicate the most significant evidence and sub-theories that support your opinion, we suggest 3-5.
-        </h6>
-        <div class="card card-body">
-          <!-- errors -->
-          {% include "include/formset_errors.html" with formset=node_formset %}
-          <table class="table-hover">
-            <thead style="text-align:center" valign="bottom">
-              <th width="40" />
-              <th width="30" />
-              <th style="text-align:left"> Evidence/Sub-Theories </th>
-            </thead>
-            <tbody align="left" valign="top">
-              <tr>
-                <td />
-                </td>
-                <td />
-                <td />
-              </tr>
-              <tr style="border-top:2px solid #000;">
-                <td />
-                <td />
-                <td />
-                <td />
-              </tr>
-              {% for x in node_formset %}
-              {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="01" %}
-              {% endfor %}
-            </tbody>
-          </table>
+          Step 2: Indicate the most significant evidence and sub-theories that support your opinion, we suggest 3-5.
+          </h6>
+          <div class="card card-body">
+            <!-- errors -->
+            {% include "include/formset_errors.html" with formset=node_formset %}
+            <table class="table-hover">
+              <thead style="text-align:center" valign="bottom">
+                <th width="40" />
+                <th width="30" />
+                <th style="text-align:left"> Evidence/Sub-Theories </th>
+              </thead>
+              <tbody align="left" valign="top">
+                <tr>
+                  <td />
+                  </td>
+                  <td />
+                  <td />
+                </tr>
+                <tr style="border-top:2px solid #000;">
+                  <td />
+                  <td />
+                  <td />
+                  <td />
+                </tr>
+                {% for x in node_formset %}
+                {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="01" %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Step 3 -->
-  <div class="row">
-    <div class="col-lg-12">
-      <div class="card my-3 text-justify"">
+    <!-- Step 3 -->
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="card my-3 text-justify"">
           <h6 class=" card-header">
-        Step 3: Indicate, the most significant evidence and sub-theories that contradiction your opinion, we suggest
-        0-3.
-        </h6>
-        <div class="card card-body">
-          {% include "include/formset_errors.html" with formset=node_formset %}
-          <table class="table-hover">
-            <thead style="text-align:center" valign="bottom">
-              <th width="40" />
-              <th width="30" />
-              <th style="text-align:left"> Evidence/Sub-Theories </th>
-            </thead>
-            <tbody align="left" valign="top">
-              <tr>
-                <td />
-                </td>
-                <td />
-                <td />
-              </tr>
-              <tr style="border-top:2px solid #000;">
-                <td />
-                <td />
-                <td />
-                <td />
-              </tr>
-              {% for x in node_formset %}
-              {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="02" %}
-              {% endfor %}
-            </tbody>
-          </table>
+          Step 3: Indicate, the most significant evidence and sub-theories that contradiction your opinion, we suggest
+          0-3.
+          </h6>
+          <div class="card card-body">
+            {% include "include/formset_errors.html" with formset=node_formset %}
+            <table class="table-hover">
+              <thead style="text-align:center" valign="bottom">
+                <th width="40" />
+                <th width="30" />
+                <th style="text-align:left"> Evidence/Sub-Theories </th>
+              </thead>
+              <tbody align="left" valign="top">
+                <tr>
+                  <td />
+                  </td>
+                  <td />
+                  <td />
+                </tr>
+                <tr style="border-top:2px solid #000;">
+                  <td />
+                  <td />
+                  <td />
+                  <td />
+                </tr>
+                {% for x in node_formset %}
+                {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="02" %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Buttons -->
-  <div class="row">
-    <div class="col-lg-12">
-      <center>
-        <!-- Back -->
-        <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-        <!-- Save -->
-        <input type="submit" name="save" value="Save">
-      </center>
+    <!-- Buttons -->
+    <div class="row">
+      <div class="col-lg-12">
+        <center>
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+          <!-- Save -->
+          <input type="submit" name="save" value="Save">
+        </center>
+      </div>
+    </div>
+
+  </form>
+
+  {% endblock %}
+
+
+  {% block extra_modals %}
+
+  <!-- Delete -->
+  {% if opinion.id %}
+  <div class="modal" id="del_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+
+        <!-- Header -->
+        <div class="modal-header">
+          <h4 class="modal-title">Please confirm</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+        </div>
+
+        <!-- body -->
+        <div class="modal-body">
+          Are you sure you want to delete "{{ theory }}"?
+        </div>
+
+        <!-- footer -->
+
+        <div class="modal-footer">
+          {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
+          <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="delete" value="Yes" {% if not can_delete %} disabled
+              {% endif %}>
+          </form>
+          <button type="button" class="btn" data-dismiss="modal">No</button>
+        </div>
+
+      </div>
     </div>
   </div>
+  {% endif %}
 
-</form>
-
-{% endblock %}
-
-
-{% block extra_modals %}
-
-<!-- Delete -->
-{% if opinion.id %}
-<div class="modal" id="del_modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <!-- Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">Please confirm</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-
-      <!-- body -->
-      <div class="modal-body">
-        Are you sure you want to delete "{{ theory }}"?
-      </div>
-
-      <!-- footer -->
-
-      <div class="modal-footer">
-        {% has_perm 'theories.delete_opinion' user opinion as can_delete %}
-        <form action="{% url_extra 'theories:opinion-delete' opinion.id extra=params %}" method="post">
-          {% csrf_token %}
-          <input type="submit" class="btn btn-danger" name="delete" value="Yes" {% if not can_delete %} disabled
-            {% endif %}>
-        </form>
-        <button type="button" class="btn" data-dismiss="modal">No</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-{% endif %}
-
-{% endblock extra_modals %}
+  {% endblock extra_modals %}
 
 
 
-{% block extra_js %}
+  {% block extra_js %}
 
-<!-- Enable tool tip for True and False titles. -->
-<script>
-  $(document).ready(function () {
-    $('[data-toggle="tooltip"]').tooltip();
-  });
-</script>
+  <!-- Enable tool tip for True and False titles. -->
+  <script>
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
+  </script>
 
 
-<script>
-  function TFSwap(id) {
-    var true_row = document.getElementById(id + 'T');
-    var false_row = document.getElementById(id + 'F');
-
-    if (true_row.style.display == 'none') {
-      true_row.style.display = 'table-row';
-      false_row.style.display = 'none';
-    } else {
-      true_row.style.display = 'none';
-      false_row.style.display = 'table-row';
-    }
-  }
-</script>
-
-<script>
-  function TFExpand(id) {
-    var true_clp_col = document.getElementById(id + 'TC');
-    var true_exp_col = document.getElementById(id + 'TX');
-    var true_row = document.getElementById(id + 'T');
-    var false_row = document.getElementById(id + 'F');
-
-    if (false_row.style.display == 'none') {
-      // row
-      true_row.style.display = 'table-row';
-      false_row.style.display = 'table-row';
-
-      // icon
-      true_clp_col.style.display = 'table-cell';
-      true_exp_col.style.display = 'none';
-    } else {
-      // row
-      true_row.style.display = 'table-row';
-      false_row.style.display = 'none';
-
-      // icon
-      true_clp_col.style.display = 'none';
-      true_exp_col.style.display = 'table-cell';
-    }
-  }
-</script>
-
-<script>
-  function ExpandCycleSwap(id) {
-    if (id == undefined) {
-      var swap_col = document.getElementById('TF_SWAP');
-      var exp_col = document.getElementById('TF_EXP');
-
-      if (swap_col.style.display == 'none') {
-        swap_col.style.display = 'table-cell';
-        exp_col.style.display = 'none';
-      } else {
-        swap_col.style.display = 'none';
-        exp_col.style.display = 'table-cell';
-      }
-    } else {
-
-      var swap_col = document.getElementById('TF_SWAP');
+  <script>
+    function TFSwap(id) {
       var true_row = document.getElementById(id + 'T');
       var false_row = document.getElementById(id + 'F');
-      var true_swap_col = document.getElementById(id + 'TS');
-      var false_swap_col = document.getElementById(id + 'FS');
-      var true_clp_col = document.getElementById(id + 'TC');
-      var true_exp_col = document.getElementById(id + 'TX');
-      var false_exp_col = document.getElementById(id + 'FX');
-      var false_link_col00 = document.getElementById(id + 'FL0');
-      var false_link_col01 = document.getElementById(id + 'FL1');
 
-      if (true_swap_col.style.display == 'none') {
-        console.log(212, id);
-
-        // rows
+      if (true_row.style.display == 'none') {
         true_row.style.display = 'table-row';
         false_row.style.display = 'none';
-
-        // swap
-        true_swap_col.style.display = 'table-cell';
-        false_swap_col.style.display = 'table-cell';
-
-        // expand/collapse
-        true_clp_col.style.display = 'none';
-        true_exp_col.style.display = 'none';
-        false_exp_col.style.display = 'none';
-
-        // link
-        false_link_col00.style.display = 'table-cell';
-        false_link_col01.style.display = 'none';
-        /*
-         */
-
       } else {
-        console.log(213, id);
+        true_row.style.display = 'none';
+        false_row.style.display = 'table-row';
+      }
+    }
+  </script>
 
-        // rows
+  <script>
+    function TFExpand(id) {
+      var true_clp_col = document.getElementById(id + 'TC');
+      var true_exp_col = document.getElementById(id + 'TX');
+      var true_row = document.getElementById(id + 'T');
+      var false_row = document.getElementById(id + 'F');
+
+      if (false_row.style.display == 'none') {
+        // row
         true_row.style.display = 'table-row';
         false_row.style.display = 'table-row';
 
-        // swap
-        true_swap_col.style.display = 'none';
-        false_swap_col.style.display = 'none';
-
-        // expand/collapse
+        // icon
         true_clp_col.style.display = 'table-cell';
         true_exp_col.style.display = 'none';
-        false_exp_col.style.display = 'table-cell';
+      } else {
+        // row
+        true_row.style.display = 'table-row';
+        false_row.style.display = 'none';
 
-        // link
-        false_link_col00.style.display = 'none';
-        false_link_col01.style.display = 'table-cell';
-        /*
-         */
+        // icon
+        true_clp_col.style.display = 'none';
+        true_exp_col.style.display = 'table-cell';
       }
-
     }
-  }
-</script>
-{% endblock extra_js %}
+  </script>
+
+  <script>
+    function ExpandCycleSwap(id) {
+      if (id == undefined) {
+        var swap_col = document.getElementById('TF_SWAP');
+        var exp_col = document.getElementById('TF_EXP');
+
+        if (swap_col.style.display == 'none') {
+          swap_col.style.display = 'table-cell';
+          exp_col.style.display = 'none';
+        } else {
+          swap_col.style.display = 'none';
+          exp_col.style.display = 'table-cell';
+        }
+      } else {
+
+        var swap_col = document.getElementById('TF_SWAP');
+        var true_row = document.getElementById(id + 'T');
+        var false_row = document.getElementById(id + 'F');
+        var true_swap_col = document.getElementById(id + 'TS');
+        var false_swap_col = document.getElementById(id + 'FS');
+        var true_clp_col = document.getElementById(id + 'TC');
+        var true_exp_col = document.getElementById(id + 'TX');
+        var false_exp_col = document.getElementById(id + 'FX');
+        var false_link_col00 = document.getElementById(id + 'FL0');
+        var false_link_col01 = document.getElementById(id + 'FL1');
+
+        if (true_swap_col.style.display == 'none') {
+          console.log(212, id);
+
+          // rows
+          true_row.style.display = 'table-row';
+          false_row.style.display = 'none';
+
+          // swap
+          true_swap_col.style.display = 'table-cell';
+          false_swap_col.style.display = 'table-cell';
+
+          // expand/collapse
+          true_clp_col.style.display = 'none';
+          true_exp_col.style.display = 'none';
+          false_exp_col.style.display = 'none';
+
+          // link
+          false_link_col00.style.display = 'table-cell';
+          false_link_col01.style.display = 'none';
+          /*
+           */
+
+        } else {
+          console.log(213, id);
+
+          // rows
+          true_row.style.display = 'table-row';
+          false_row.style.display = 'table-row';
+
+          // swap
+          true_swap_col.style.display = 'none';
+          false_swap_col.style.display = 'none';
+
+          // expand/collapse
+          true_clp_col.style.display = 'table-cell';
+          true_exp_col.style.display = 'none';
+          false_exp_col.style.display = 'table-cell';
+
+          // link
+          false_link_col00.style.display = 'none';
+          false_link_col01.style.display = 'table-cell';
+          /*
+           */
+        }
+
+      }
+    }
+  </script>
+  {% endblock extra_js %}

@@ -1,101 +1,98 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/templates/account/core/alpha.html
-@brief      The in developement disclaimer page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
+
+{% endcomment %}
 
 
-{% load staticfiles %}
-{% load extra %}
+  {% load staticfiles %} {% load extra %} <!DOCTYPE html>
+  <html lang="en">
 
-<!DOCTYPE html>
-<html lang="en">
+  <head>
 
-<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
 
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="">
-  <meta name="author" content="">
+    <title>wiki-o</title>
 
-  <title>wiki-o</title>
+    <!-- Bootstrap core CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{% static 'core/css/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'core/css/style.css' %}" rel="stylesheet">
 
-  <!-- Bootstrap core CSS -->
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet">
-  <link href="{% static 'core/css/custom.css' %}" rel="stylesheet">
-  <link href="{% static 'core/css/style.css' %}" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="css/scrolling-nav.css" rel="stylesheet">
 
-  <!-- Custom styles for this template -->
-  <link href="css/scrolling-nav.css" rel="stylesheet">
+  </head>
 
-</head>
+  <body id="page-top">
 
-<body id="page-top">
+    <!-- Header -->
+    <header class="bg-white text-white">
+      <div class="container">
+        <center>
+          <img class="img-responsive" src="{% static 'core/img/alpha.svg' %}" width="50%">
+        </center>
+    </header>
+    <!-- Header -->
 
-  <!-- Header -->
-  <header class="bg-white text-white">
-    <div class="container">
-      <center>
-        <img class="img-responsive" src="{% static 'core/img/alpha.svg' %}" width="50%">
-      </center>
-  </header>
-  <!-- Header -->
-
-  <!-- Page Content -->
-  <br /><br>
-  <section id="about">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto text-center">
-          <h2>About this page</h2>
-          <p class="lead">Wiki-O is a platform for people to share their
-            opinions without emotion or argument. The alpha version of this site
-            is intended to test out concepts with a restricted set of users. If
-            you are one of the select few users of the site, thank you for your
-            participation and feedback, otherwise feel free to click through and
-            take a look. </p>
+    <!-- Page Content -->
+    <br /><br>
+    <section id="about">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2>About this page</h2>
+            <p class="lead">Wiki-O is a platform for people to share their
+              opinions without emotion or argument. The alpha version of this site
+              is intended to test out concepts with a restricted set of users. If
+              you are one of the select few users of the site, thank you for your
+              participation and feedback, otherwise feel free to click through and
+              take a look. </p>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="about">
-    <div class="container">
-      <div class="row">
-        <div class="col-lg-8 mx-auto text-center">
-          <h2><a href="{%url 'theories:index' %}"> Proceed </a></h2>
+    <section id="about">
+      <div class="container">
+        <div class="row">
+          <div class="col-lg-8 mx-auto text-center">
+            <h2><a href="{%url 'theories:index' %}"> Proceed </a></h2>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
 
-  <!-- Footer -->
-  <footer class="py-5 bg-white">
-    <div class="container">
-      <p class="m-0 text-center text-black">Copyright &copy; Wiki-O 2018</p>
-    </div>
-    <!-- /.container -->
-  </footer>
+    <!-- Footer -->
+    <footer class="py-5 bg-white">
+      <div class="container">
+        <p class="m-0 text-center text-black">Copyright &copy; Wiki-O 2018</p>
+      </div>
+      <!-- /.container -->
+    </footer>
 
-  <!-- Bootstrap core JavaScript -->
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.bundle.min.js"></script>
 
-  <!-- Plugin JavaScript -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
+    <!-- Plugin JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-easing/1.4.1/jquery.easing.min.js"></script>
 
-  <!-- Custom JavaScript for this theme -->
-  <script src="js/scrolling-nav.js"></script>
+    <!-- Custom JavaScript for this theme -->
+    <script src="js/scrolling-nav.js"></script>
 
-</body>
+  </body>
 
-</html>
+  </html>

@@ -4,12 +4,10 @@
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/tests.py
-@brief      A collection of app specific unit tests
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 */
 
 /* link setup */
@@ -17,15 +15,18 @@ a:link {
   color: blue;
   text-decoration: none;
 }
+
 a:visited {
   color: blue;
   text-decoration: none;
 }
+
 a.plain:visited,
 a.plain:link {
   color: black;
   text-decoration: none;
 }
+
 input.plain {
   background: none !important;
   color: blue;
@@ -34,6 +35,7 @@ input.plain {
   font: inherit;
   cursor: pointer;
 }
+
 .fake-link {
   color: blue;
   cursor: pointer;
@@ -45,11 +47,11 @@ ol.bib {
   counter-reset: step-counter;
 }
 
-ol.bib li > p {
+ol.bib li>p {
   display: inline;
 }
 
-ol.bib li > p + p {
+ol.bib li>p+p {
   display: block;
   margin-left: 0.3ex;
   margin-bottom: 0;
@@ -57,7 +59,7 @@ ol.bib li > p + p {
 }
 
 ol.bib li:before {
-  content: "[" counter(step-counter) "]";
+  content: "["counter(step-counter) "]";
   counter-increment: step-counter;
   margin-left: -1.5em;
   margin-right: 1ex;
@@ -68,6 +70,7 @@ ol.bib li:before {
   position: relative;
   display: inline;
 }
+
 .about span {
   position: absolute;
   width: 70vw;
@@ -79,6 +82,7 @@ ol.bib li:before {
   border-radius: 6px;
   padding: 8px 8px;
 }
+
 :hover.about span {
   visibility: visible;
   opacity: 1;
@@ -88,6 +92,7 @@ ol.bib li:before {
   margin-left: 15px;
   z-index: 999;
 }
+
 @media only screen and (min-width: 768px) {
   .about span {
     position: absolute;

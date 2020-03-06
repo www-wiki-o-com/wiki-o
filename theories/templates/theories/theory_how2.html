@@ -1,19 +1,19 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/theory_how2.html
-@brief      The HowTo content for creating/editing theories
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-{% load static %}
-<div class="card my-3">
+{% endcomment %}
+
+
+  {% load static %} <div class="card my-3">
   <div class="card-header">
     <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo00" aria-controls="HowTo00">
       <img src="{% static 'core/img/expand.svg' %}" height='13'>
@@ -34,6 +34,6 @@ A web service for sharing opinions and avoiding arguments
         genius" is the complement.</p>
     </div>
   </div>
-</div>
+  </div>
 
-{% include "theories/markdown_how2.html" %}
+  {% include "theories/markdown_how2.html" %}

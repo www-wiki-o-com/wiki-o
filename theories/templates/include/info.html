@@ -1,35 +1,30 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/include/info.html
-@brief      A helper template for displaying the theory/evidence info
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% load static %}
-{% load extra %}
+{% endcomment %}
 
 
-{% if x.is_subtheory %}
-<div class="about">
+  {% load static %} {% load extra %} {% if x.is_subtheory %} <div class="about">
   <img src="{% static 'core/img/info_theory.svg' %}" height='16'>
   <span class="abouttext">{{ x.about|short_details }}</span>
-</div>
-{% else %} {% if x.is_fact %}
-<div class="about">
-  <img src="{% static 'core/img/info_fact.svg' %}" height='16'>
-  <span class="abouttext">{{ x.about|short_details }}</span>
-</div>
-{% else %}
-<div class="about">
-  <img src="{% static 'core/img/info_other.svg' %}" height='16'>
-  <span class="abouttext">{{ x.about|short_details }}</span>
-</div>
-{% endif %} {% endif %}
+  </div>
+  {% else %} {% if x.is_fact %}
+  <div class="about">
+    <img src="{% static 'core/img/info_fact.svg' %}" height='16'>
+    <span class="abouttext">{{ x.about|short_details }}</span>
+  </div>
+  {% else %}
+  <div class="about">
+    <img src="{% static 'core/img/info_other.svg' %}" height='16'>
+    <span class="abouttext">{{ x.about|short_details }}</span>
+  </div>
+  {% endif %} {% endif %}

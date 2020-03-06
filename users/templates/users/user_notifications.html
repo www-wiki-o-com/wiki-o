@@ -1,29 +1,21 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       users/templates/users/user_notifications.html
-@brief      The users message/notification inbox page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-{% load activity_tags %}
-{% load notifications_tags %}
-{% load urls %}
+{% endcomment %}
 
 
-{% block header %}{% endblock %}
-{% block content %}
-<form action="{% url_extra 'users:notifications' extra=params %}" method="post">
+  {% extends 'base.html' %} {% load static %} {% load extra %} {% load activity_tags %} {% load notifications_tags %}
+  {% load urls %} {% block header %}{% endblock %} {% block content %} <form
+  action="{% url_extra 'users:notifications' extra=params %}" method="post">
   {% csrf_token %}
   {{ formset01.management_form }}
   {{ formset02.management_form }}
@@ -289,28 +281,28 @@ A web service for sharing opinions and avoiding arguments
 
     </div> <!-- end column-->
   </div> <!-- end row -->
-</form>
-{% endblock %}
+  </form>
+  {% endblock %}
 
 
-{% block extra_js %}
-<script>
-  function CheckAll(id) {
-    if (id == undefined) {
-      document.getElementById("CHECK_ALL").style.display = "none";
-      document.getElementById("CHECK_NONE").style.display = "inline";
-    } else {
-      document.getElementById(id).checked = true;
+  {% block extra_js %}
+  <script>
+    function CheckAll(id) {
+      if (id == undefined) {
+        document.getElementById("CHECK_ALL").style.display = "none";
+        document.getElementById("CHECK_NONE").style.display = "inline";
+      } else {
+        document.getElementById(id).checked = true;
+      }
     }
-  }
 
-  function CheckNone(id) {
-    if (id == undefined) {
-      document.getElementById("CHECK_ALL").style.display = "inline";
-      document.getElementById("CHECK_NONE").style.display = "none";
-    } else {
-      document.getElementById(id).checked = false;
+    function CheckNone(id) {
+      if (id == undefined) {
+        document.getElementById("CHECK_ALL").style.display = "inline";
+        document.getElementById("CHECK_NONE").style.display = "none";
+      } else {
+        document.getElementById(id).checked = false;
+      }
     }
-  }
-</script>
-{% endblock extra_js %}
+  </script>
+  {% endblock extra_js %}

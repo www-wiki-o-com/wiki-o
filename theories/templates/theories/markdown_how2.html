@@ -1,19 +1,19 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/evidence_how2.html
-@brief      The HowTo section for creating/editing evidence
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-{% load static %}
-<div class="card my-3">
+{% endcomment %}
+
+
+  {% load static %} <div class="card my-3">
   <div class="card-header">
     <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#help0" aria-controls="help0">
       <img src="{% static 'core/img/expand.svg' %}" height='13'>
@@ -32,99 +32,102 @@ A web service for sharing opinions and avoiding arguments
         users to help verify the statement.</p>
     </div>
   </div>
-</div>
-
-<div class="card my-3">
-  <div class="card-header">
-    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#help1" aria-controls="help1">
-      <img src="{% static 'core/img/expand.svg' %}" height='13'>
-      &nbsp
-      Is this Verifiable?
-    </a>
   </div>
-  <div class="collapse" id="help1">
-    <div class="card card-body">
-      <p>Statements must be composed without implication. For example the
-        statement "The idiot Trump claims he is a genius" makes the additional
-        implication that Trump is an idiot. It should instead be composed as
-        "Trump claims he is a genius".</p>
+
+  <div class="card my-3">
+    <div class="card-header">
+      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#help1" aria-controls="help1">
+        <img src="{% static 'core/img/expand.svg' %}" height='13'>
+        &nbsp
+        Is this Verifiable?
+      </a>
     </div>
-  </div>
-</div>
-
-<div class="card my-3">
-  <div class="card-header">
-    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo10" aria-controls="HowTo10">
-      <img src="{% static 'core/img/expand.svg' %}" height='13'>
-      &nbsp
-      How To Format The Text
-    </a>
-  </div>
-  <div class="collapse" id="HowTo10">
-    <div class="card card-body">
-      <p>The deail section can be composed with Markdown. See the markdown
-        guide for some <a href="https://www.markdownguide.org/basic-syntax/">basic</a>
-        and <a href="https://www.markdownguide.org/extended-syntax/">extended</a> syntax.</p>
-    </div>
-  </div>
-</div>
-
-<div class="card my-3">
-  <div class="card-header">
-    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo11" aria-controls="HowTo11">
-      <img src="{% static 'core/img/expand.svg' %}" height='13'>
-      &nbsp
-      How To Create Links
-    </a>
-  </div>
-  <div class="collapse" id="HowTo11">
-    <div class="card card-body">
-      <p>A link is created with round brackets preceeded by a set of square brackets
-        to provide a discription of the link.</p>
-
-      <p>For example: [Wiki-O](http://www.wiki-o.com) will render as
-        <a href="http://www.wiki-o.com">Wiki-O</a>.</p>
-    </div>
-  </div>
-</div>
-
-<div class="card my-3">
-  <div class="card-header">
-    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo12" aria-controls="HowTo12">
-      <img src="{% static 'core/img/expand.svg' %}" height='13'>
-      &nbsp
-      How To Create a Bibliography
-    </a>
-  </div>
-  <div class="collapse" id="HowTo12">
-    <div class="card card-body">
-      <p>To create a bibliography, use the link syntax within Markdown: "[#](tags)" inline
-        with your text followed by "[tag]: The bib text." and for bib items that do not
-        appear in the text add them to the bottom surround the bibliography in bib tags.</p>
-      <b>Example:</b>
-      <div style="margin-left:2em">
-        To create a bibliography, use the link syntax [#](bib_one, bib2).</br>
-        &lt;bib&gt;</br>
-        &nbsp;&nbsp;[bib_one]: Bib item one.</br>
-        &nbsp;&nbsp;[bib2]: Bib item two.</br>
-        &nbsp;&nbsp;[wiki_o]: An un-referenced item to [Wiki-O](http://www.wiki-o.com)</br>
-        &lt;/bib&gt;</br>
-      </div>
-      <b>Renders as:</b>
-      <div style="margin-left:2em">
-        To create a bibliography, use the link syntax [1,2].</br>
-        <ol class="bib">
-          <li>
-            <p>Bib item one.</p>
-          </li>
-          <li>
-            <p>Bib item two.</p>
-          </li>
-          <li>
-            <p>An un-referenced item to <a href="http://www.wiki-o.com">Wiki-O</a>.</p>
-          </li>
-        </ol>
+    <div class="collapse" id="help1">
+      <div class="card card-body">
+        <p>Statements must be composed without implication. For example the
+          statement "The idiot Trump claims he is a genius" makes the additional
+          implication that Trump is an idiot. It should instead be composed as
+          "Trump claims he is a genius".</p>
       </div>
     </div>
   </div>
-</div>
+
+  <div class="card my-3">
+    <div class="card-header">
+      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo10"
+        aria-controls="HowTo10">
+        <img src="{% static 'core/img/expand.svg' %}" height='13'>
+        &nbsp
+        How To Format The Text
+      </a>
+    </div>
+    <div class="collapse" id="HowTo10">
+      <div class="card card-body">
+        <p>The deail section can be composed with Markdown. See the markdown
+          guide for some <a href="https://www.markdownguide.org/basic-syntax/">basic</a>
+          and <a href="https://www.markdownguide.org/extended-syntax/">extended</a> syntax.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card my-3">
+    <div class="card-header">
+      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo11"
+        aria-controls="HowTo11">
+        <img src="{% static 'core/img/expand.svg' %}" height='13'>
+        &nbsp
+        How To Create Links
+      </a>
+    </div>
+    <div class="collapse" id="HowTo11">
+      <div class="card card-body">
+        <p>A link is created with round brackets preceeded by a set of square brackets
+          to provide a discription of the link.</p>
+
+        <p>For example: [Wiki-O](http://www.wiki-o.com) will render as
+          <a href="http://www.wiki-o.com">Wiki-O</a>.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card my-3">
+    <div class="card-header">
+      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo12"
+        aria-controls="HowTo12">
+        <img src="{% static 'core/img/expand.svg' %}" height='13'>
+        &nbsp
+        How To Create a Bibliography
+      </a>
+    </div>
+    <div class="collapse" id="HowTo12">
+      <div class="card card-body">
+        <p>To create a bibliography, use the link syntax within Markdown: "[#](tags)" inline
+          with your text followed by "[tag]: The bib text." and for bib items that do not
+          appear in the text add them to the bottom surround the bibliography in bib tags.</p>
+        <b>Example:</b>
+        <div style="margin-left:2em">
+          To create a bibliography, use the link syntax [#](bib_one, bib2).</br>
+          &lt;bib&gt;</br>
+          &nbsp;&nbsp;[bib_one]: Bib item one.</br>
+          &nbsp;&nbsp;[bib2]: Bib item two.</br>
+          &nbsp;&nbsp;[wiki_o]: An un-referenced item to [Wiki-O](http://www.wiki-o.com)</br>
+          &lt;/bib&gt;</br>
+        </div>
+        <b>Renders as:</b>
+        <div style="margin-left:2em">
+          To create a bibliography, use the link syntax [1,2].</br>
+          <ol class="bib">
+            <li>
+              <p>Bib item one.</p>
+            </li>
+            <li>
+              <p>Bib item two.</p>
+            </li>
+            <li>
+              <p>An un-referenced item to <a href="http://www.wiki-o.com">Wiki-O</a>.</p>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </div>

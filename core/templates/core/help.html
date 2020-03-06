@@ -1,24 +1,19 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/templates/account/core/help.html
-@brief      Our help page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
+
+{% endcomment %}
 
 
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-
-{% block content %}
-<div class="row">
+  {% extends 'base.html' %} {% load static %} {% load extra %} {% block content %} <div class="row">
 
   <div class="col-lg-8">
 
@@ -644,7 +639,7 @@ A web service for sharing opinions and avoiding arguments
     </div>
 
   </div><!-- end row -->
-</div><!-- /.container -->
+  </div><!-- /.container -->
 
 
-{% endblock %}
+  {% endblock %}

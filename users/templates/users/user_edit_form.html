@@ -1,149 +1,144 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       users/templates/users/user_edit_form.html
-@brief      The edit form for user details
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-
-{% block content %}
-<!-- Title -->
-<h3><br>
-  {{ user.get_fullname }}
-</h3>
+{% endcomment %}
 
 
-<form action="{% url_extra 'users:profile-edit' extra=path %}" method="post">
-  {% csrf_token %}
+  {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {% load extra %} {% block content %} <!--
+  Title -->
+  <h3><br>
+    {{ user.get_fullname }}
+  </h3>
 
-  <!-- Content -->
-  <div class="row">
-    <!-- Row -->
-    <div class="col-lg-8">
-      <!-- Main Column -->
 
-      <div class="card my-3">
-        <h5 class="card-header">
-          Required Fields:
-        </h5>
-        <div class="card card-body">
-          {{ form.username|as_crispy_field }}
-          {{ form.email|as_crispy_field }}
+  <form action="{% url_extra 'users:profile-edit' extra=path %}" method="post">
+    {% csrf_token %}
+
+    <!-- Content -->
+    <div class="row">
+      <!-- Row -->
+      <div class="col-lg-8">
+        <!-- Main Column -->
+
+        <div class="card my-3">
+          <h5 class="card-header">
+            Required Fields:
+          </h5>
+          <div class="card card-body">
+            {{ form.username|as_crispy_field }}
+            {{ form.email|as_crispy_field }}
+          </div>
         </div>
-      </div>
 
 
-      <div class="card my-3">
-        <h5 class="card-header">
-          Optional Fields:
-        </h5>
-        <div class="card card-body">
-          {{ form.fullname|as_crispy_field }}
-          {{ form.birth_date|as_crispy_field }}
-          {{ form.sex|as_crispy_field }}
-          {{ form.location|as_crispy_field }}
-          {{ form.religion|as_crispy_field }}
-          {{ form.politics|as_crispy_field }}
+        <div class="card my-3">
+          <h5 class="card-header">
+            Optional Fields:
+          </h5>
+          <div class="card card-body">
+            {{ form.fullname|as_crispy_field }}
+            {{ form.birth_date|as_crispy_field }}
+            {{ form.sex|as_crispy_field }}
+            {{ form.location|as_crispy_field }}
+            {{ form.religion|as_crispy_field }}
+            {{ form.politics|as_crispy_field }}
+          </div>
         </div>
-      </div>
 
 
 
-      <center>
-        <button><a class="plain" href={{ prev }}>Back</a></button>
-        &nbsp
-        <input type="submit" name="save" value="Save">
-      </center>
+        <center>
+          <button><a class="plain" href={{ prev }}>Back</a></button>
+          &nbsp
+          <input type="submit" name="save" value="Save">
+        </center>
 
-    </div> <!-- end column -->
-    <div class="col-md-4">
-      <!-- Sidebar Column -->
+      </div> <!-- end column -->
+      <div class="col-md-4">
+        <!-- Sidebar Column -->
 
-      <!-- Private -->
-      <div class="card my-3">
-        <h5 class="card-header">Privacy Settings</h5>
-        <div class="card-body">
-          <table class="table table-borderless table-sm">
-            <thead>
+        <!-- Private -->
+        <div class="card my-3">
+          <h5 class="card-header">Privacy Settings</h5>
+          <div class="card-body">
+            <table class="table table-borderless table-sm">
+              <thead>
+                <tr>
+                  <th />
+                  <th class="text-right">Visible</th>
+                </tr>
+              </thead>
               <tr>
-                <th />
-                <th class="text-right">Visible</th>
+                <td> {{ form.fullname_visible.label }} </td>
+                <td class="text-right"> {{ form.fullname_visible }} </td>
               </tr>
-            </thead>
-            <tr>
-              <td> {{ form.fullname_visible.label }} </td>
-              <td class="text-right"> {{ form.fullname_visible }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.birth_date_visible.label }} </td>
-              <td class="text-right"> {{ form.birth_date_visible }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.sex_visible.label }} </td>
-              <td class="text-right"> {{ form.sex_visible }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.location_visible.label }} </td>
-              <td class="text-right"> {{ form.location_visible }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.religion_visible.label }} </td>
-              <td class="text-right"> {{ form.religion_visible }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.politics_visible.label }} </td>
-              <td class="text-right"> {{ form.politics_visible }} </td>
-            </tr>
-          </table>
-        </div>
-      </div>
-
-      <!-- Behaviour -->
-      <div class="card my-3">
-        <h5 class="card-header">Opinion Behaviour</h5>
-        <div class="card-body">
-          <table class="table table-borderless table-sm">
-            <thead>
               <tr>
-                <th />
-                <th class="text-right">Yes</th>
+                <td> {{ form.birth_date_visible.label }} </td>
+                <td class="text-right"> {{ form.birth_date_visible }} </td>
               </tr>
-            </thead>
-            <tr>
-              <td> {{ form.hidden.label }} </td>
-              <td class="text-right"> {{ form.hidden }} </td>
-            </tr>
-            <tr>
-              <td> {{ form.use_wizard.label }} </td>
-              <td class="text-right"> {{ form.use_wizard }} </td>
-            </tr>
-          </table>
+              <tr>
+                <td> {{ form.sex_visible.label }} </td>
+                <td class="text-right"> {{ form.sex_visible }} </td>
+              </tr>
+              <tr>
+                <td> {{ form.location_visible.label }} </td>
+                <td class="text-right"> {{ form.location_visible }} </td>
+              </tr>
+              <tr>
+                <td> {{ form.religion_visible.label }} </td>
+                <td class="text-right"> {{ form.religion_visible }} </td>
+              </tr>
+              <tr>
+                <td> {{ form.politics_visible.label }} </td>
+                <td class="text-right"> {{ form.politics_visible }} </td>
+              </tr>
+            </table>
+          </div>
         </div>
-      </div>
 
-      <!-- Actions -->
-      <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0">
-            <li><a href="/accounts/password/change"> Change Password </a></li>
-          </ul>
+        <!-- Behaviour -->
+        <div class="card my-3">
+          <h5 class="card-header">Opinion Behaviour</h5>
+          <div class="card-body">
+            <table class="table table-borderless table-sm">
+              <thead>
+                <tr>
+                  <th />
+                  <th class="text-right">Yes</th>
+                </tr>
+              </thead>
+              <tr>
+                <td> {{ form.hidden.label }} </td>
+                <td class="text-right"> {{ form.hidden }} </td>
+              </tr>
+              <tr>
+                <td> {{ form.use_wizard.label }} </td>
+                <td class="text-right"> {{ form.use_wizard }} </td>
+              </tr>
+            </table>
+          </div>
         </div>
-      </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
-</form>
-{% endblock %}
+        <!-- Actions -->
+        <div class="card my-3">
+          <h5 class="card-header">Actions</h5>
+          <div class="card-body">
+            <ul class="list-unstyled mb-0">
+              <li><a href="/accounts/password/change"> Change Password </a></li>
+            </ul>
+          </div>
+        </div>
+
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+  {% endblock %}

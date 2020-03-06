@@ -1,106 +1,97 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/theory_edit_report.html
-@brief      The report user page for theories
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-{% load rules %}
+{% endcomment %}
 
 
-{% block header %}{% endblock %}
-{% block content %}
+  {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
+  {% block header %}{% endblock %} {% block content %} <!-- Title -->
+  <h3><br>{{ theory }}</h3>
+  {% with ReportTab=True %}
+  {% include "theories/theory_edit_tabs.html" %}
+  {% endwith %}
 
-<!-- Title -->
-<h3><br>{{ theory }}</h3>
-{% with ReportTab=True %}
-{% include "theories/theory_edit_tabs.html" %}
-{% endwith %}
+  <form action="{% url_extra 'theories:theory-report' theory.id extra=params %}" method="post">
+    {% csrf_token %}
+    <div class="row">
+      <!-- Row -->
+      <div class="col-lg-8">
+        <!-- Main Column -->
 
-<form action="{% url_extra 'theories:theory-report' theory.id extra=params %}" method="post">
-  {% csrf_token %}
-  <div class="row">
-    <!-- Row -->
-    <div class="col-lg-8">
-      <!-- Main Column -->
-
-      <div class="card my-3">
-        <h5 class="card-header">
-          Report User Violation:
-        </h5>
-        <div class="card card-body">
-          {{ form.offender|as_crispy_field }}
-          {{ form.intent|as_crispy_field }}
-          Offences (choose all that apply)
-          <div style="padding-left:2ex">
-            {{ form.offences|as_crispy_field }}
+        <div class="card my-3">
+          <h5 class="card-header">
+            Report User Violation:
+          </h5>
+          <div class="card card-body">
+            {{ form.offender|as_crispy_field }}
+            {{ form.intent|as_crispy_field }}
+            Offences (choose all that apply)
+            <div style="padding-left:2ex">
+              {{ form.offences|as_crispy_field }}
+            </div>
+            {{ form.explanation|as_crispy_field }}
           </div>
-          {{ form.explanation|as_crispy_field }}
         </div>
-      </div>
 
-      <!-- Buttons -->
-      <center>
+        <!-- Buttons -->
+        <center>
 
-        <!-- Back -->
-        <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+          <!-- Back -->
+          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
-        <!-- Report -->
-        {% has_perm 'theories.report' user as can_report %}
-        <input type="submit" name="report" value="Report" {% if not can_report %} disabled {% endif %}>
+          <!-- Report -->
+          {% has_perm 'theories.report' user as can_report %}
+          <input type="submit" name="report" value="Report" {% if not can_report %} disabled {% endif %}>
 
-      </center>
+        </center>
 
-      <br>
-      {% include "theories/theory_how2.html" %}
+        <br>
+        {% include "theories/theory_how2.html" %}
 
-    </div> <!-- end column -->
-    <div class="col-md-4">
-      <!-- Sidebar Column -->
+      </div> <!-- end column -->
+      <div class="col-md-4">
+        <!-- Sidebar Column -->
 
-      <!-- Pending -->
-      <div class="card my-3">
-        <h5 class="card-header"> Open Violations </h5>
-        <div class="card-body">
-          <ul class="list mb-0">
-            {% for x in open_violations %}
-            <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
-            {% endfor %}
-          </ul>
+        <!-- Pending -->
+        <div class="card my-3">
+          <h5 class="card-header"> Open Violations </h5>
+          <div class="card-body">
+            <ul class="list mb-0">
+              {% for x in open_violations %}
+              <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
-      </div>
 
-      <!-- Past -->
-      <div class="card my-3">
-        <h5 class="card-header"> Archived Violations </h5>
-        <div class="card-body">
-          <ul class="list mb-0">
-            {% for x in closed_violations %}
-            <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
-            {% endfor %}
-          </ul>
+        <!-- Past -->
+        <div class="card my-3">
+          <h5 class="card-header"> Archived Violations </h5>
+          <div class="card-body">
+            <ul class="list mb-0">
+              {% for x in closed_violations %}
+              <li><a href="{{ x.url|add:params.get_next }}"> {{ x.pub_date|date:"d/m/y" }} - {{ x.offender }} </a></li>
+              {% endfor %}
+            </ul>
+          </div>
         </div>
-      </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
-</form>
-{% endblock %}
-
-
-{% block extra_modals %}
+      </div> <!-- end column-->
+    </div> <!-- end row -->
+  </form>
+  {% endblock %}
 
 
-{% endblock %}
+  {% block extra_modals %}
+
+
+  {% endblock %}

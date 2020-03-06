@@ -1,27 +1,20 @@
-<!-- __      __    __               ___
+{% comment %}
+     __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/evidence_detail.html
-@brief      The evidence info page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE file in the root directory of this source tree.
 
-
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-{% load rules %}
+{% endcomment %}
 
 
-{% block header %}{% endblock %}
-{% block content %}
-<div class="row">
+  {% extends 'base.html' %} {% load static %} {% load extra %} {% load rules %} {% block header %}{% endblock %}
+  {% block content %} <div class="row">
   <!-- Row -->
   <div class="col-lg-8">
     <!-- Main Column -->
@@ -112,18 +105,47 @@ A web service for sharing opinions and avoiding arguments
     </div>
 
   </div> <!-- end column-->
-</div> <!-- end row -->
-{% endblock %}
+  </div> <!-- end row -->
+  {% endblock %}
 
 
-{% block extra_modals %}
+  {% block extra_modals %}
 
-<!-- Backup -->
-<div class="modal" id="backup_modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form action="{% url_extra 'theories:evidence-backup' evidence.id extra=params %}" method="post">
-        {% csrf_token %}
+  <!-- Backup -->
+  <div class="modal" id="backup_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="{% url_extra 'theories:evidence-backup' evidence.id extra=params %}" method="post">
+          {% csrf_token %}
+
+          <!-- Header -->
+          <div class="modal-header">
+            <h4 class="modal-title">Please confirm</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+
+          <!-- body -->
+          <div class="modal-body">
+            Backup "{{ evidence }}"?
+          </div>
+
+          <!-- footer -->
+          <div class="modal-footer">
+            {% has_perm 'theories.backup_theorynode' user evidence as can_backup %}
+            <input type="submit" class="btn btn-danger" name="backup" value="Yes" {% if not can_backup %} disabled
+              {% endif %}>
+            <button type="button" class="btn" data-dismiss="modal">No</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete -->
+  <div class="modal" id="del_modal">
+    <div class="modal-dialog">
+      <div class="modal-content">
 
         <!-- Header -->
         <div class="modal-header">
@@ -133,68 +155,39 @@ A web service for sharing opinions and avoiding arguments
 
         <!-- body -->
         <div class="modal-body">
-          Backup "{{ evidence }}"?
+          Are you sure you want to delete &ldquo;{{ evidence }}&rdquo;? Choose
+          <b>remove</b> to remove from parent theory or <b>delete</b> to
+          remove from all theories.
         </div>
 
         <!-- footer -->
         <div class="modal-footer">
-          {% has_perm 'theories.backup_theorynode' user evidence as can_backup %}
-          <input type="submit" class="btn btn-danger" name="backup" value="Yes" {% if not can_backup %} disabled
-            {% endif %}>
+
+          <!-- remove edge -->
+          {% if params.path %}
+          {% has_perm 'theories.delete_edge' user evidence as can_remove %}
+          <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=params %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled
+              {% endif %}>
+          </form>
+          {% endif %}
+
+          <!-- full delete -->
+          {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
+          <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
+            {% csrf_token %}
+            <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled
+              {% endif %}>
+          </form>
+
+          <!-- cancel -->
           <button type="button" class="btn" data-dismiss="modal">No</button>
+
         </div>
 
-      </form>
+      </div>
     </div>
   </div>
-</div>
 
-<!-- Delete -->
-<div class="modal" id="del_modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-
-      <!-- Header -->
-      <div class="modal-header">
-        <h4 class="modal-title">Please confirm</h4>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
-      </div>
-
-      <!-- body -->
-      <div class="modal-body">
-        Are you sure you want to delete &ldquo;{{ evidence }}&rdquo;? Choose
-        <b>remove</b> to remove from parent theory or <b>delete</b> to
-        remove from all theories.
-      </div>
-
-      <!-- footer -->
-      <div class="modal-footer">
-
-        <!-- remove edge -->
-        {% if params.path %}
-        {% has_perm 'theories.delete_edge' user evidence as can_remove %}
-        <form action="{% url_extra 'theories:evidence-remove' evidence.id extra=params %}" method="post">
-          {% csrf_token %}
-          <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled
-            {% endif %}>
-        </form>
-        {% endif %}
-
-        <!-- full delete -->
-        {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
-        <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
-          {% csrf_token %}
-          <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled
-            {% endif %}>
-        </form>
-
-        <!-- cancel -->
-        <button type="button" class="btn" data-dismiss="modal">No</button>
-
-      </div>
-
-    </div>
-  </div>
-</div>
-
-{% endblock extra_modals %}
+  {% endblock extra_modals %}
