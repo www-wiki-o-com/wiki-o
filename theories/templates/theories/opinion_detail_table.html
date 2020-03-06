@@ -17,48 +17,47 @@ A web service for sharing opinions and avoiding arguments
 {% load extra %}
 
 {% if opinion_nodes %}
-  <table style="margin:5px">
-    <tbody align="left" valign="top">
-        <tr>
-          <td width="10">
-          <td width="17">
-          <td width="17">
-          <td>
-        </tr>
-        <tr>
-          <th colspan="4"> {{ title }} </th>
-        </tr>
-        {% for x in opinion_nodes %}
-          <tr">
-            <!-- Blank -->
-            <td/>
-            <!-- Link -->
-            <td> {% include "include/link.html" with x=x.theory_node %} </td>
-            <!-- Info -->
-            <td> {% include "include/info.html" with x=x.theory_node %} </td>
-            <!-- Description -->
-            <td style="padding-left:5px">
-              {% if x.url %}
-                <a tag_id={{ x.tag_id }} class="plain" href={{ x.url|add:params.get_next }}>
-                  {% if x.is_deleted %}
-                    <strike>{{ x }}</strike>
-                  {% else %}
-                    {{ x }}
-                  {% endif %}
-                </a>
-              {% else %}
-                <a tag_id={{ x.tag_id }} class="plain">
-                  {% if x.is_deleted %}
-                    <strike>{{ x }}</strike>
-                  {% else %}
-                    {{ x }}
-                  {% endif %}
-                </a>
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-    </tbody>
-  </table>
+<table style="margin:5px">
+  <tbody align="left" valign="top">
+    <tr>
+      <td width="10">
+      <td width="17">
+      <td width="17">
+      <td>
+    </tr>
+    <tr>
+      <th colspan="4"> {{ title }} </th>
+    </tr>
+    {% for x in opinion_nodes %}
+    <tr">
+      <!-- Blank -->
+      <td />
+      <!-- Link -->
+      <td> {% include "include/link.html" with x=x.theory_node %} </td>
+      <!-- Info -->
+      <td> {% include "include/info.html" with x=x.theory_node %} </td>
+      <!-- Description -->
+      <td style="padding-left:5px">
+        {% if x.url %}
+        <a tag_id={{ x.tag_id }} class="plain" href={{ x.url|add:params.get_next }}>
+          {% if x.is_deleted %}
+          <strike>{{ x }}</strike>
+          {% else %}
+          {{ x }}
+          {% endif %}
+        </a>
+        {% else %}
+        <a tag_id={{ x.tag_id }} class="plain">
+          {% if x.is_deleted %}
+          <strike>{{ x }}</strike>
+          {% else %}
+          {{ x }}
+          {% endif %}
+        </a>
+        {% endif %}
+      </td>
+      </tr>
+      {% endfor %}
+  </tbody>
+</table>
 {% endif %}
-

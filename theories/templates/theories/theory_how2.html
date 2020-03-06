@@ -12,29 +12,28 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 -->
 
-  {% load static %}
-  <div class="card my-3">
-    <div class="card-header">
-      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-          href="#HowTo00" aria-controls="HowTo00">
-        <img src="{% static 'core/img/expand.svg' %}" height='13'>
-        &nbsp
-        How To Compose the Statement
-      </a>
-    </div>
-    <div class="collapse" id="HowTo00">
-      <div class="card card-body">
-        <p>Statements must be composed without implication. For example the
+{% load static %}
+<div class="card my-3">
+  <div class="card-header">
+    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo00" aria-controls="HowTo00">
+      <img src="{% static 'core/img/expand.svg' %}" height='13'>
+      &nbsp
+      How To Compose the Statement
+    </a>
+  </div>
+  <div class="collapse" id="HowTo00">
+    <div class="card card-body">
+      <p>Statements must be composed without implication. For example the
         statement "Anyone with a brain can see that Trump is a genius" implies
         that the statement is true. It should instead be composed as "Trump is
         a genius".</p>
 
-        <p>The false statement must be the logical complement and must not make
+      <p>The false statement must be the logical complement and must not make
         any additional implications. For example the statement "Trump is
         stupid" is not the compliment of "Trump is a genius", "Trump is not a
         genius" is the complement.</p>
-      </div>
     </div>
   </div>
+</div>
 
-  {% include "theories/markdown_how2.html" %}
+{% include "theories/markdown_how2.html" %}

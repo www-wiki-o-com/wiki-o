@@ -21,176 +21,187 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% block content %}
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
 
-      <!-- Violations -->
-      <div class="card my-3">
-        <h5 class="card-header">
-          User Violations
-        </h5>
-        <div class="card card-body">
-          <table>
-            <thead>
-              <tr>
-                <th style="width:1.5%"/> Offender </th>
-                <th style="width:1.5%"/>
-                <th style="width:auto">
-                  Content
-                </th>
-                <th style="width:1.5%"/>
-                <!-- Time -->
-                <th style="white-space:nowrap; text-align:right">
-                  {% if request.GET.rel %}
-                    <a class="plain" href="{% del_params request.get_full_path 'rel' %}"> Time Since </a>
-                  {% else %}
-                    <a class="plain" href="{% add_params request.get_full_path rel='True' %}"> D/M/Y </a>
+    <!-- Violations -->
+    <div class="card my-3">
+      <h5 class="card-header">
+        User Violations
+      </h5>
+      <div class="card card-body">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:1.5%" /> Offender </th>
+              <th style="width:1.5%" />
+              <th style="width:auto">
+                Content
+              </th>
+              <th style="width:1.5%" />
+              <!-- Time -->
+              <th style="white-space:nowrap; text-align:right">
+                {% if request.GET.rel %}
+                <a class="plain" href="{% del_params request.get_full_path 'rel' %}"> Time Since </a>
+                {% else %}
+                <a class="plain" href="{% add_params request.get_full_path rel='True' %}"> D/M/Y </a>
+                {% endif %}
+              </th>
+            </tr>
+          </thead>
+          <tr style="border-top:2px solid #000;">
+            <td />
+            <td />
+            <td />
+            <td />
+            <td />
+          </tr>
+          <tbody align="left" valign="top">
+            {% for violation in violations %}
+            <tr>
+              <!-- user -->
+              <td>
+                {% if violation.is_open %}
+                <strong> {{ violation.offender }} </strong>
+                {% else %}
+                {{ violation.offender }}
+                {% endif %}
+              </td>
+              <td />
+              <!-- violation -->
+              <td>
+                <!-- title -->
+                {% if violation.is_open %}
+                <strong>
                   {% endif %}
-                </th>
-              </tr>
-            </thead>
-            <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/><td/> </tr>
-            <tbody align="left" valign="top">
-              {% for violation in violations %}
-                <tr>
-                  <!-- user -->
-                  <td>
-                    {% if violation.is_open %}
-                      <strong> {{ violation.offender }} </strong>
-                    {% else %}
-                      {{ violation.offender }}
+                  <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
+                    href="#for{{ forloop.counter }}" aria-controls="for{{ forloop.counter }}">
+
+                    <!-- theory node -->
+                    {% if violation.content_type.model == 'theorynode' %}
+                    {{ violation }}
                     {% endif %}
-                  </td>
-                  <td/>
-                  <!-- violation -->
-                  <td>
-                    <!-- title -->
-                    {% if violation.is_open %}
-                    <strong>
+
+                    <!-- violation -->
+                    {% if violation.content_type.model == 'violation' %}
+                    Violation {{ violation.content.pk }}, {{ violation.content.offender }}.
                     {% endif %}
-                    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-                       href="#for{{ forloop.counter }}" aria-controls="for{{ forloop.counter }}">
 
-                      <!-- theory node -->
-                      {% if violation.content_type.model == 'theorynode' %}
-                        {{ violation }}
-                      {% endif %}
+                  </a>
+                  {% if violation.is_open %}
+                </strong>
+                {% endif %}
+                <!-- content -->
+                <div id="for{{ forloop.counter }}" class="collapse" style="margin-left:10px">
 
-                      <!-- violation -->
-                      {% if violation.content_type.model == 'violation' %}
-                        Violation {{ violation.content.pk }}, {{ violation.content.offender }}.
-                      {% endif %}
+                  <!-- status -->
+                  <table>
+                    <thead>
+                      <tr>
+                        <td style="width:80px" />
+                      </tr>
+                    </thead>
+                    <tbody>
 
-                    </a>
-                    {% if violation.is_open %}
-                    </strong>
-                    {% endif %}
-                    <!-- content -->
-                    <div id="for{{ forloop.counter }}" class="collapse" style="margin-left:10px">
+                      <!-- feedback -->
+                      {% for feedback in violation.get_feedback %}
+                      <tr>
+                        <td>
+                          <div style="margin-left:10px; text-align:justify">
+                            <span style="margin-left:-10px;">{{ feedback.timestamp|date:"d/m/y" }}</span> -
+                            {% if feedback.get_comment %}
+                            {{ feedback.get_action }}: {{ feedback.get_comment }}
+                            {% else %}
+                            {{ feedback.get_action }}
+                            {% endif %}
+                          </div>
+                          {% if feedback.get_offences %}
+                          <ul style="margin-bottom:0px;">
+                            {% if feedback.get_intent or feedback.get_offences %}
+                            <li> {{ feedback.get_intent }} (intent). </li>
+                            {% endif %}
 
-                      <!-- status -->
-                      <table>
-                        <thead>
-                          <tr> <td style="width:80px"/> </tr>
-                        </thead>
-                        <tbody>
+                            {% for offence in feedback.get_offences %}
+                            <li> {{ offence }} </li>
+                            {% endfor %}
+                          </ul>
+                          {% endif %}
+                        </td>
+                      </tr>
+                      {% endfor %}
 
-                          <!-- feedback -->
-                          {% for feedback in violation.get_feedback %}
-                            <tr>
-                              <td>
-                                <div style="margin-left:10px; text-align:justify">
-                                  <span style="margin-left:-10px;">{{ feedback.timestamp|date:"d/m/y" }}</span> -
-                                  {% if feedback.get_comment %}
-                                    {{ feedback.get_action }}: {{ feedback.get_comment }}
-                                  {% else %}
-                                    {{ feedback.get_action }}
-                                  {% endif %}
-                                </div>
-                                {% if feedback.get_offences %}
-                                  <ul style="margin-bottom:0px;">
-                                    {% if feedback.get_intent or feedback.get_offences %}
-                                      <li> {{ feedback.get_intent }} (intent). </li>
-                                    {% endif %}
+                      <!--                          <tr><th> Status: </th><th> {{ violation.get_status_str }} </th></tr>-->
 
-                                    {% for offence in feedback.get_offences %}
-                                      <li> {{ offence }} </li>
-                                    {% endfor %}
-                                  </ul>
-                                {% endif %}
-                              </td>
-                            </tr>
-                          {% endfor %}
-
-<!--                          <tr><th> Status: </th><th> {{ violation.get_status_str }} </th></tr>-->
-
-                        </tbody>
-                      </table>
+                    </tbody>
+                  </table>
 
 
 
-                      <!-- links -->
-<!--                      <a href="{{ violation.content_url }}" target="_blank"> Go to content </a>-->
-<!--                      <br>-->
-                      <a href="{% url_extra 'users:violation-resolve' violation.pk extra=params %}"> Resolve </a>
-                    </div>
-                  </td>
-                  <td/>
-                  <!-- datetime -->
-                  <td align="right">
-                    {% if violation.is_unresolved %} <strong> {% endif %}
-                    {% if request.GET.rel %}
-                      {{ violation.pub_date|timepassed }}
-                    {% else %}
-                      {{ violation.pub_date|date:"d/m/y" }}
-                    {% endif %}
-                    {% if violation.is_unresolved %} </strong> {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          <!-- Paginator -->
-          {% include "include/paginator.html" with list=violations %}
-        </div>
+                  <!-- links -->
+                  <!--                      <a href="{{ violation.content_url }}" target="_blank"> Go to content </a>-->
+                  <!--                      <br>-->
+                  <a href="{% url_extra 'users:violation-resolve' violation.pk extra=params %}"> Resolve </a>
+                </div>
+              </td>
+              <td />
+              <!-- datetime -->
+              <td align="right">
+                {% if violation.is_unresolved %} <strong> {% endif %}
+                  {% if request.GET.rel %}
+                  {{ violation.pub_date|timepassed }}
+                  {% else %}
+                  {{ violation.pub_date|date:"d/m/y" }}
+                  {% endif %}
+                  {% if violation.is_unresolved %} </strong> {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <!-- Paginator -->
+        {% include "include/paginator.html" with list=violations %}
       </div>
+    </div>
 
-    </div> <!-- end column -->
-    <div class="col-md-4"> <!-- Sidebar Column -->
+  </div> <!-- end column -->
+  <div class="col-md-4">
+    <!-- Sidebar Column -->
 
-      <!-- Actions -->
-      <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0">
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
 
-            <!-- View All -->
-            {% if request.GET.date %}
-              <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
-            {% endif %}
+          <!-- View All -->
+          {% if request.GET.date %}
+          <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
+          {% endif %}
 
-            <!-- ABS/REL Datetime -->
-            {% if request.GET.rel %}
-              <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
-            {% else %}
-              <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
-            {% endif %}
+          <!-- ABS/REL Datetime -->
+          {% if request.GET.rel %}
+          <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
+          {% else %}
+          <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
+          {% endif %}
 
-          </ul>
-        </div>
+        </ul>
       </div>
+    </div>
 
-      <!-- Search -->
-      <div class="card my-3">
-        <h5 class="card-header">Search</h5>
-        <div class="card-body">
-          <form class="bd-search d-flex align-items-center">
-            <input type="search" class="form-control" name="search" placeholder="Enter offender's username..." autocomplete="off">
-          </form>
-        </div>
+    <!-- Search -->
+    <div class="card my-3">
+      <h5 class="card-header">Search</h5>
+      <div class="card-body">
+        <form class="bd-search d-flex align-items-center">
+          <input type="search" class="form-control" name="search" placeholder="Enter offender's username..."
+            autocomplete="off">
+        </form>
       </div>
+    </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
-

@@ -24,127 +24,134 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
 
-  <!-- Title -->
-  <h3><br>{{ evidence }}</h3>
-  {% with ActivityTab=True %}
-    {% include "theories/evidence_edit_tabs.html" %}
-  {% endwith %}
+<!-- Title -->
+<h3><br>{{ evidence }}</h3>
+{% with ActivityTab=True %}
+{% include "theories/evidence_edit_tabs.html" %}
+{% endwith %}
 
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
 
-      <div class="card my-3">
-        <h5 class="card-header">
-          Activity Log:
-        </h5>
-        <div class="card card-body">
-          <table>
-            <thead>
-              <tr>
-                <!--user -->
-                <td style="width:1.5%">
-                  User
-                </td>
-                <td style="width:1.5%"/>
-                <!-- verb/subject -->
-                <td style="width:auto">
-                  Modified/Created*
-                </td>
-                <td style="width:1.5%"/>
-                <!-- datetime -->
-                <td style="width:90px" align="right">
-                  {% if request.GET.abs %}
-                    D/M/Y
-                  {% else %}
-                    Time Since
-                  {% endif %}
-                </td>
-              </tr>
-            </thead>
-            <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/><td/> </tr>
-            <tbody align="left" valign="top">
-              {% for action in actions %}
-                <tr>
-                  <!--user -->
-                  <td>
-                    {% if action.actor.url %}
-                      <a href="{{ action.actor.url }}"> {{ action.actor }} </a>
-                    {% else %}
-                      {{ action.actor }}
-                    {% endif %}
-                  </td>
-                  <td/>
-                  <!-- verb/subject -->
-                  <td>
-                    {{ action|get_verb:params.get_next }}
-                  </td>
-                  <td/>
-                  <!-- datetime -->
-                  <td align="right">
-                    {% if request.GET.abs %}
-                      {{ action.timestamp|date:"d/m/y" }}
-                    {% else %}
-                      {{ action.timestamp|timepassed }}
-                    {% endif %}
-                  </td>
-                </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          {% include "include/paginator.html" with list=actions %}
+    <div class="card my-3">
+      <h5 class="card-header">
+        Activity Log:
+      </h5>
+      <div class="card card-body">
+        <table>
+          <thead>
+            <tr>
+              <!--user -->
+              <td style="width:1.5%">
+                User
+              </td>
+              <td style="width:1.5%" />
+              <!-- verb/subject -->
+              <td style="width:auto">
+                Modified/Created*
+              </td>
+              <td style="width:1.5%" />
+              <!-- datetime -->
+              <td style="width:90px" align="right">
+                {% if request.GET.abs %}
+                D/M/Y
+                {% else %}
+                Time Since
+                {% endif %}
+              </td>
+            </tr>
+          </thead>
+          <tr style="border-top:2px solid #000;">
+            <td />
+            <td />
+            <td />
+            <td />
+            <td />
+          </tr>
+          <tbody align="left" valign="top">
+            {% for action in actions %}
+            <tr>
+              <!--user -->
+              <td>
+                {% if action.actor.url %}
+                <a href="{{ action.actor.url }}"> {{ action.actor }} </a>
+                {% else %}
+                {{ action.actor }}
+                {% endif %}
+              </td>
+              <td />
+              <!-- verb/subject -->
+              <td>
+                {{ action|get_verb:params.get_next }}
+              </td>
+              <td />
+              <!-- datetime -->
+              <td align="right">
+                {% if request.GET.abs %}
+                {{ action.timestamp|date:"d/m/y" }}
+                {% else %}
+                {{ action.timestamp|timepassed }}
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% include "include/paginator.html" with list=actions %}
+      </div>
+    </div>
+    <a href={{ prev }}> Go to detail view. </a>
+
+  </div> <!-- end column -->
+  <div class="col-md-4">
+    <!-- Sidebar Column -->
+
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+
+          <!-- View All -->
+          {% if request.GET.date %}
+          <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
+          {% endif %}
+
+          <!-- ABS/REL Datetime -->
+          {% if request.GET.abs %}
+          <li><a href="{% del_params request.get_full_path 'abs' %}"> Relative Time </a></li>
+          {% else %}
+          <li><a href="{% add_params request.get_full_path abs='True' %}"> Switch to D/M/Y </a></li>
+          {% endif %}
+
+          <!-- Follow/Un-Follow -->
+          {% if user.is_authenticated %}
+          {% if subscribed %}
+          <li><a href="{{ evidence|unfollow_url }}?next={{ request.get_full_path }}"> Un-Follow </a></li>
+          {% else %}
+          <li><a href="{{ evidence|follow_url }}?next={{ request.get_full_path }}"> Follow </a></li>
+          {% endif %}
+          {% endif %}
+
+        </ul>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card my-3">
+      <h5 class="card-header">Search</h5>
+      <div class="card-body">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search for...">
+          <span class="input-group-btn">
+            <button class="btn btn-secondary" type="button">Go!</button>
+          </span>
         </div>
       </div>
-      <a href={{ prev }}> Go to detail view. </a>
+    </div>
 
-    </div> <!-- end column -->
-    <div class="col-md-4"> <!-- Sidebar Column -->
-
-      <!-- Actions -->
-      <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0">
-
-            <!-- View All -->
-            {% if request.GET.date %}
-              <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
-            {% endif %}
-
-            <!-- ABS/REL Datetime -->
-            {% if request.GET.abs %}
-              <li><a href="{% del_params request.get_full_path 'abs' %}"> Relative Time </a></li>
-            {% else %}
-              <li><a href="{% add_params request.get_full_path abs='True' %}"> Switch to D/M/Y </a></li>
-            {% endif %}
-
-            <!-- Follow/Un-Follow -->
-            {% if user.is_authenticated %}
-              {% if subscribed %}
-                <li><a href="{{ evidence|unfollow_url }}?next={{ request.get_full_path }}"> Un-Follow </a></li>
-              {% else %}
-                <li><a href="{{ evidence|follow_url }}?next={{ request.get_full_path }}"> Follow </a></li>
-              {% endif %}
-            {% endif %}
-
-          </ul>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="card my-3">
-        <h5 class="card-header">Search</h5>
-        <div class="card-body">
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for...">
-            <span class="input-group-btn">
-              <button class="btn btn-secondary" type="button">Go!</button>
-            </span>
-          </div>
-        </div>
-      </div>
-
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
-
-

@@ -23,113 +23,123 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
 
-  <!-- Title -->
-  <h3><br>{{ theory }}</h3>
-  {% with BackupTab=True %}
-    {% include "theories/theory_edit_tabs.html" %}
-  {% endwith %}
+<!-- Title -->
+<h3><br>{{ theory }}</h3>
+{% with BackupTab=True %}
+{% include "theories/theory_edit_tabs.html" %}
+{% endwith %}
 
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:theory-backup' theory.id extra=params %}" method="post">
-        {% csrf_token %}
-        {{ formset.management_form }}
-        <div class="card my-3">
-          <h5 class="card-header">
-            Backup:
-          </h5>
-          <div class="card card-body">
-            <!-- errors -->
-            {% include "include/formset_errors.html" with formset=formset %}
-            <table>
-              <tbody align="center" valign="top">
-                <tr>
-                  <td width="40">
-                    <span id="CHECK_ALL" style="display:inline">
-                      <a onclick="CheckAll(); {% for form in formset %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_all.svg' %}" height='12'>
-                      </a>
-                    </span>
-                    <span id="CHECK_NONE" style="display:none">
-                      <a onclick="CheckNone(); {% for form in formset %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_none.svg' %}" height='12'>
-                      </a>
-                    </span>
-                  </td>
-                  </td>
-                </tr>
-                <tr style="border-top:2px solid #000;"> <td/><td/><td/> </tr>
-                {% for form in formset %}
-                  <tr>
-                    {{ form.id }}
-                    <td>{{ form.select }}</td>
-                    <td/>
-                    <td style="text-align:left">{{ form.instance }}</td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-            {% include "include/paginator.html" with list=candidates %}
-          </div>
-        </div>
-
-        <!-- Buttons -->
-        <center>
-          <!-- Back -->
-          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-
-          <!-- Backup -->
-          {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
-          <button>
-            <a class="plain" data-target="#snapshot_modal" data-toggle="modal" href="#snapshot_modal"> Backup </a>
-          </button>
-        </center>
-
-        <!-- Snapshot Modal -->
-        <div class="modal" id="snapshot_modal">
-          <div class="modal-dialog">
-            <div class="modal-content">
-
-              <!-- Header -->
-              <div class="modal-header">
-                <h4 class="modal-title">Please confirm</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-              </div>
-
-              <!-- body -->
-              <div class="modal-body">
-                Each user may have up to one snapshot per theoery, sub-theory, and
-                evidence. This action will replace the user's old snapshots with new
-                ones. Additionally, snapshots are only created for new content. Do
-                you wish to proceed?
-              </div>
-
-              <!-- footer -->
-              {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
-              <div class="modal-footer">
-                <input type="submit" class="btn btn-danger" name="yes" value="Yes" {% if not can_backup %} disabled {% endif %}>
-                <button type="button" class="btn" data-dismiss="modal">No</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </form>
-
-    </div> <!-- end column -->
-    <div class="col-md-4"> <!-- Sidebar Column -->
-
-      <!-- Actions -->
+    <form action="{% url_extra 'theories:theory-backup' theory.id extra=params %}" method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
       <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="mb-0">
-          </ul>
+        <h5 class="card-header">
+          Backup:
+        </h5>
+        <div class="card card-body">
+          <!-- errors -->
+          {% include "include/formset_errors.html" with formset=formset %}
+          <table>
+            <tbody align="center" valign="top">
+              <tr>
+                <td width="40">
+                  <span id="CHECK_ALL" style="display:inline">
+                    <a
+                      onclick="CheckAll(); {% for form in formset %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_all.svg' %}" height='12'>
+                    </a>
+                  </span>
+                  <span id="CHECK_NONE" style="display:none">
+                    <a
+                      onclick="CheckNone(); {% for form in formset %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_none.svg' %}" height='12'>
+                    </a>
+                  </span>
+                </td>
+                </td>
+              </tr>
+              <tr style="border-top:2px solid #000;">
+                <td />
+                <td />
+                <td />
+              </tr>
+              {% for form in formset %}
+              <tr>
+                {{ form.id }}
+                <td>{{ form.select }}</td>
+                <td />
+                <td style="text-align:left">{{ form.instance }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          {% include "include/paginator.html" with list=candidates %}
         </div>
       </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+      <!-- Buttons -->
+      <center>
+        <!-- Back -->
+        <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+
+        <!-- Backup -->
+        {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
+        <button>
+          <a class="plain" data-target="#snapshot_modal" data-toggle="modal" href="#snapshot_modal"> Backup </a>
+        </button>
+      </center>
+
+      <!-- Snapshot Modal -->
+      <div class="modal" id="snapshot_modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
+
+            <!-- Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Please confirm</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+
+            <!-- body -->
+            <div class="modal-body">
+              Each user may have up to one snapshot per theoery, sub-theory, and
+              evidence. This action will replace the user's old snapshots with new
+              ones. Additionally, snapshots are only created for new content. Do
+              you wish to proceed?
+            </div>
+
+            <!-- footer -->
+            {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
+            <div class="modal-footer">
+              <input type="submit" class="btn btn-danger" name="yes" value="Yes" {% if not can_backup %} disabled
+                {% endif %}>
+              <button type="button" class="btn" data-dismiss="modal">No</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+
+  </div> <!-- end column -->
+  <div class="col-md-4">
+    <!-- Sidebar Column -->
+
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="mb-0">
+        </ul>
+      </div>
+    </div>
+
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
 
 
@@ -137,25 +147,23 @@ A web service for sharing opinions and avoiding arguments
 {% endblock extra_modals %}
 
 {% block extra_js %}
-  <script>
-    function CheckAll(id) {
-        if (id == undefined) {
-            document.getElementById("CHECK_ALL").style.display  = "none";
-            document.getElementById("CHECK_NONE").style.display = "inline";
-        } else {
-            document.getElementById(id).checked = true;
-        }
+<script>
+  function CheckAll(id) {
+    if (id == undefined) {
+      document.getElementById("CHECK_ALL").style.display = "none";
+      document.getElementById("CHECK_NONE").style.display = "inline";
+    } else {
+      document.getElementById(id).checked = true;
     }
+  }
 
-    function CheckNone(id) {
-        if (id == undefined) {
-            document.getElementById("CHECK_ALL").style.display  = "inline";
-            document.getElementById("CHECK_NONE").style.display = "none";
-        } else {
-            document.getElementById(id).checked = false;
-        }
+  function CheckNone(id) {
+    if (id == undefined) {
+      document.getElementById("CHECK_ALL").style.display = "inline";
+      document.getElementById("CHECK_NONE").style.display = "none";
+    } else {
+      document.getElementById(id).checked = false;
     }
-  </script>
+  }
+</script>
 {% endblock extra_js %}
-
-

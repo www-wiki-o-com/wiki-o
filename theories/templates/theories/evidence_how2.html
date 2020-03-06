@@ -12,46 +12,44 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 -->
 
-  {% load static %}
-  <div class="card my-3">
-    <div class="card-header">
-      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-          href="#HowTo00" aria-controls="HowTo00">
-        <img src="{% static 'core/img/expand.svg' %}" height='13'>
-        &nbsp
-        How To Compose the Statement
-      </a>
-    </div>
-    <div class="collapse" id="HowTo00">
-      <div class="card card-body">
-        <p>The evidence is verifiable if and only if anyone with an unlimited
-           amount of resources could confirm the correctness of the statment. For
-           example, the statement "Trump is stupid" is not verifialbe but the
-           statment "Trump claims he is a genius" is verifiable.</p>
+{% load static %}
+<div class="card my-3">
+  <div class="card-header">
+    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo00" aria-controls="HowTo00">
+      <img src="{% static 'core/img/expand.svg' %}" height='13'>
+      &nbsp
+      How To Compose the Statement
+    </a>
+  </div>
+  <div class="collapse" id="HowTo00">
+    <div class="card card-body">
+      <p>The evidence is verifiable if and only if anyone with an unlimited
+        amount of resources could confirm the correctness of the statment. For
+        example, the statement "Trump is stupid" is not verifialbe but the
+        statment "Trump claims he is a genius" is verifiable.</p>
 
-        <p>We encourage the user to include references that will allow other
-           users to help verify the statement.</p>
-      </div>
+      <p>We encourage the user to include references that will allow other
+        users to help verify the statement.</p>
     </div>
   </div>
+</div>
 
-  <div class="card my-3">
-    <div class="card-header">
-      <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-          href="#HowTo01" aria-controls="HowTo01">
-        <img src="{% static 'core/img/expand.svg' %}" height='13'>
-        &nbsp
-        Is this Verifiable?
-      </a>
-    </div>
-    <div class="collapse" id="HowTo01">
-      <div class="card card-body">
-        <p>Statements must be composed without implication. For example the
-           statement "The idiot Trump claims he is a genius" makes the additional
-           implication that Trump is an idiot. It should instead be composed as
-           "Trump claims he is a genius".</p>
-      </div>
+<div class="card my-3">
+  <div class="card-header">
+    <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo01" aria-controls="HowTo01">
+      <img src="{% static 'core/img/expand.svg' %}" height='13'>
+      &nbsp
+      Is this Verifiable?
+    </a>
+  </div>
+  <div class="collapse" id="HowTo01">
+    <div class="card card-body">
+      <p>Statements must be composed without implication. For example the
+        statement "The idiot Trump claims he is a genius" makes the additional
+        implication that Trump is an idiot. It should instead be composed as
+        "Trump claims he is a genius".</p>
     </div>
   </div>
+</div>
 
-  {% include "theories/markdown_how2.html" %}
+{% include "theories/markdown_how2.html" %}
