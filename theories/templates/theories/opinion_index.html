@@ -1,5 +1,8 @@
 <!DOCTYPE html>
 
+{% extends 'base.html' %}
+
+
 {% comment %}
      __      __    __               ___
     /  \    /  \__|  | _ __        /   \
@@ -14,8 +17,7 @@ LICENSE file in the root directory of this source tree.
 
 {% endcomment %}
 
-
-  {% extends 'base.html' %} {% load static %} {% load extra %} {% load rules %} {% block header %}{% endblock %}
+  {% load static %} {% load extra %} {% load rules %} {% block header %}{% endblock %}
   {% block content %} <!-- Title -->
   <h2 style=" margin-bottom:-0.1ex">
     {{ theory }}

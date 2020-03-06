@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+
 {% comment %}
      __      __    __               ___
     /  \    /  \__|  | _ __        /   \
@@ -12,8 +15,7 @@ LICENSE file in the root directory of this source tree.
 
 {% endcomment %}
 
-
-  {% extends 'base.html' %} {% load static %} {% load extra %} {% load rules %} {% block header %} <!-- Carousel -->
+  {% load static %} {% load extra %} {% load rules %} {% block header %} <!-- Carousel -->
   <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
     <ol class="carousel-indicators">
       <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>

@@ -1,3 +1,6 @@
+{% extends 'base.html' %}
+
+
 {% comment %}
      __      __    __               ___
     /  \    /  \__|  | _ __        /   \
@@ -12,8 +15,7 @@ LICENSE file in the root directory of this source tree.
 
 {% endcomment %}
 
-
-  {% extends 'base.html' %} {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
+  {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
   {% block header %}{% endblock %} {% block content %} <!-- Title -->
   <h3><br>{{ theory }}</h3>
   {% with SubTheoryTab=True %}
