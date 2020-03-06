@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @brief      A managment script for cleaning up the database
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -23,17 +22,16 @@ from django.template.defaultfilters import slugify
 
 from theories.models import Category, TheoryNode
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 RE_PUNCTUATOIN = r'\s*[\.!?]\s*$'
 
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
 # blahs
+
 
 class Command(BaseCommand):
     """Runs a series of scripts to clean up the database."""

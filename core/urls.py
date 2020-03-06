@@ -12,14 +12,12 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 from django.conf.urls import url
 from django.urls import path
 from core.views import *
-
 
 # *******************************************************************************
 # urls

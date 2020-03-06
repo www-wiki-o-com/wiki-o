@@ -95,9 +95,7 @@ TEMPLATES = [
         },
     },
 ]
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'url_tools.context_processors.current_url',
-)
+TEMPLATE_CONTEXT_PROCESSORS = ('url_tools.context_processors.current_url',)
 CRISPY_TEMPLATE_PACK = 'bootstrap4'
 
 AUTHENTICATION_BACKENDS = [
@@ -113,39 +111,40 @@ ROOT_URLCONF = 'wiki_o.urls'
 ROOT_HOSTCONF = 'wiki_o.hosts'
 WSGI_APPLICATION = 'wiki_o.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 DATABASES = {
     'default': {
-        'ENGINE':   'django.db.backends.postgresql',
-        'NAME':     'wiki_o',
-        'USER':      os.environ['PGUSER'],
-        'PASSWORD':  os.environ['PGPASSWORD'],
-        'HOST':     'localhost',
-        'PORT':     '',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'wiki_o',
+        'USER': os.environ['PGUSER'],
+        'PASSWORD': os.environ['PGPASSWORD'],
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
-
 
 # Password Validation
 # https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator', },
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator', },
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
 ]
 ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'
 
 STATICFILES_DIRS = ()
 
-CACHES = {
-    'default': {
-        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
-    }
-}
-
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',}}
 
 # Search Engine
 HAYSTACK_CONNECTIONS = {
@@ -154,11 +153,8 @@ HAYSTACK_CONNECTIONS = {
     },
 }
 
-
 # Activity Stream Config
-ACTSTREAM_SETTINGS = {
-}
-
+ACTSTREAM_SETTINGS = {}
 
 # AllAuth Config
 ACCOUNT_USERNAME_MIN_LENGTH = 3
@@ -168,7 +164,6 @@ ACCOUNT_EMAIL_REQUIRED = False
 ACCOUNT_EMAIL_VERIFICATION = "none"
 ACCOUNT_LOGIN_ON_EMAIL_CONFIRMATION = False
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
 LANGUAGE_CODE = 'en-us'
@@ -177,28 +172,23 @@ USE_I18N = True
 USE_L10N = True
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
-
 # Fixtures
 PROJECT_ROOT = os.path.dirname(os.path.realpath(__file__))
 FIXTURE_DIRS = (os.path.join(PROJECT_ROOT, 'fixtures'),)
 
-
 # Unit Test Environment
 if 'test' in sys.argv:
-    PASSWORD_HASHERS = (
-        'django.contrib.auth.hashers.MD5PasswordHasher',
-    )
+    PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
     DATABASES = {
         'default': {
-            'ENGINE':     'django.db.backends.sqlite3',
-            'NAME':       'test_database',
-            'TEST_NAME':  'test_database',
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'test_database',
+            'TEST_NAME': 'test_database',
         }
     }
     DEBUG = False

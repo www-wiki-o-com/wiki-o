@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -83,6 +82,7 @@ def offset_xy(x, y, offset):
 #
 #
 # *******************************************************************************
+
 
 class ShapeBase():
     """Base class for all shapes."""
@@ -192,8 +192,15 @@ class Circle(ShapeBase):
 class Rectangle(ShapeBase):
     """A class for drawing rectangles."""
 
-    def __init__(self, x01, y01, x02, y02, colour=Colour.NONE, stroke_colour=Colour.BLACK,
-                 stroke_width=2.0, hatch=False):
+    def __init__(self,
+                 x01,
+                 y01,
+                 x02,
+                 y02,
+                 colour=Colour.NONE,
+                 stroke_colour=Colour.BLACK,
+                 stroke_width=2.0,
+                 hatch=False):
         """The constructor for the Rectangle class.
 
         Args:
@@ -234,7 +241,7 @@ class Rectangle(ShapeBase):
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
-        svg = '<rect x="%d" y="%d" width="%d" height="%d"' % (x01, y01, x02-x01, y02-y01)
+        svg = '<rect x="%d" y="%d" width="%d" height="%d"' % (x01, y01, x02 - x01, y02 - y01)
         if self.hatch:
             svg += ' style="fill: url(#hatch)"'
         else:
@@ -246,7 +253,14 @@ class Rectangle(ShapeBase):
 class Wedge(ShapeBase):
     """A class for drawing wedges (used for the pie-charts)."""
 
-    def __init__(self, x, y, theta01, theta02, radius=100, c_offset=0.0, explode=0.0,
+    def __init__(self,
+                 x,
+                 y,
+                 theta01,
+                 theta02,
+                 radius=100,
+                 c_offset=0.0,
+                 explode=0.0,
                  colour=Colour.BLACK):
         """The constructor for the Wedge class.
 
@@ -284,7 +298,7 @@ class Wedge(ShapeBase):
         r = self.radius
         theta01 = math.radians(self.theta01)
         theta02 = math.radians(self.theta02)
-        dt = (theta02 + theta01)/2
+        dt = (theta02 + theta01) / 2
         large_arc_flag = int(self.theta02 - self.theta01 > 180)
 
         dx00, dy00 = offset_xy(self.x, self.y, offset)
@@ -301,11 +315,11 @@ class Wedge(ShapeBase):
         dx02, dy02 = offset_xy(1.0 * dr02 * math.cos(dt), 1.0 * dr02 * math.sin(dt), offset)
 
         svg = '<path fill="%s" stroke="black" stroke-width="2.0"' % self.colour
-        svg += ' d="M %0.2f,%0.2f' % (dx00+dx01+dx02, dy00+dy01+dy02)
-        svg += ' L %0.2f,%0.2f' % (x01+dx00+dx01, y01+dy00+dy01)
-        svg += ' A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f' % (r, r, large_arc_flag, x02+dx00+dx01,
-                                                      y02+dy00+dy01)
-        svg += ' L %0.2f,%0.2f Z"/>' % (dx00+dx01+dx02, dy00+dy01+dy02)
+        svg += ' d="M %0.2f,%0.2f' % (dx00 + dx01 + dx02, dy00 + dy01 + dy02)
+        svg += ' L %0.2f,%0.2f' % (x01 + dx00 + dx01, y01 + dy00 + dy01)
+        svg += ' A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f' % (r, r, large_arc_flag, x02 + dx00 + dx01,
+                                                      y02 + dy00 + dy01)
+        svg += ' L %0.2f,%0.2f Z"/>' % (dx00 + dx01 + dx02, dy00 + dy01 + dy02)
         return svg
 
 
@@ -382,23 +396,23 @@ class Arrow(ShapeBase):
         """
         x01, y01 = offset_xy(self.x01, self.y01, offset)
         x02, y02 = offset_xy(self.x02, self.y02, offset)
-        h = self.stroke_width*3
+        h = self.stroke_width * 3
 
         svg = '<path fill="none" stroke="%s"' % self.colour
         svg += ' stroke-width="%0.2f"' % self.stroke_width
         svg += ' d="M %0.2f,%0.2f' % (x01, y01)
         svg += ' L %0.2f,%0.2f' % (x01, y01)
         if x02 > x01:
-            svg += ' L %0.2f,%0.2f Z"/>' % (x02-h, y02)
+            svg += ' L %0.2f,%0.2f Z"/>' % (x02 - h, y02)
             svg += '<path fill="%s" stroke="none"' % (self.colour)
-            svg += ' d=M %0.2f,%0.2f' % (x02-2*h, y02-h)
-            svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02-h, y02, x02-2*h, y02+h)
+            svg += ' d=M %0.2f,%0.2f' % (x02 - 2 * h, y02 - h)
+            svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02 - h, y02, x02 - 2 * h, y02 + h)
             svg += ' L %0.2f,%0.2f' % (x02, y02)
         else:
-            svg += ' L %0.2f,%0.2f Z"/>' % (x02+h, y02)
+            svg += ' L %0.2f,%0.2f Z"/>' % (x02 + h, y02)
             svg += '<path fill="%s" stroke="none"' % (self.colour)
-            svg += ' d=M %0.2f,%0.2f' % (x02+2*h, y02-h)
-            svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02+h, y02, x02+2*h, y02+h)
+            svg += ' d=M %0.2f,%0.2f' % (x02 + 2 * h, y02 - h)
+            svg += ' Q %0.2f,%0.2f,%0.2f,%02.f' % (x02 + h, y02, x02 + 2 * h, y02 + h)
             svg += ' L %0.2f,%0.2f' % (x02, y02)
         svg += ' Z"/>'
         return svg

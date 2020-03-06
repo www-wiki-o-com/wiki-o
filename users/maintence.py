@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -22,16 +21,15 @@ from django.contrib.contenttypes.models import ContentType
 
 from users.models import User
 
-
 # *******************************************************************************
 # Defines and Globals
 # *******************************************************************************
 LOGGER = logging.getLogger(__name__)
 
-
 # *******************************************************************************
 # Methods
 # *******************************************************************************
+
 
 def create_groups_and_permissions():
     """Create the set of groups and permissions used by Wiki-O.
@@ -43,20 +41,19 @@ def create_groups_and_permissions():
         for y in ['opinion']:
             name = '%s_%s' % (x, y)
             content_type = ContentType.objects.get(app_label='theories', model=y)
-            perm, created = Permission.objects.get_or_create(
-                content_type=content_type, codename=name)
+            perm, created = Permission.objects.get_or_create(content_type=content_type,
+                                                             codename=name)
             group.permissions.add(perm)
             if created:
                 LOGGER.info('Created %s permissions.', perm)
     for level in range(1, 5):
-        group, created = Group.objects.get_or_create(
-            name='user level: %d' % level)
+        group, created = Group.objects.get_or_create(name='user level: %d' % level)
         for x in ['change', 'add', 'delete', 'view']:
             for y in ['category', 'theorynode', 'opinion']:
                 name = '%s_%s' % (x, y)
                 content_type = ContentType.objects.get(app_label='theories', model=y)
-                perm, created = Permission.objects.get_or_create(
-                    content_type=content_type, codename=name)
+                perm, created = Permission.objects.get_or_create(content_type=content_type,
+                                                                 codename=name)
                 group.permissions.add(perm)
                 if created:
                     LOGGER.info('Created %s permissions.', perm)

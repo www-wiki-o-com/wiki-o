@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -30,11 +29,9 @@ class MyUserAdmin(UserAdmin):
     """
 
     list_display = ['username', 'email', 'hidden']
-    add_fieldsets = UserAdmin.add_fieldsets + (
-        (None, {
-            'fields': ('hidden'),
-        }),
-    )
+    add_fieldsets = UserAdmin.add_fieldsets + ((None, {
+        'fields': ('hidden'),
+    }),)
 
     def __str__(self):
         """Returns the user's handle.

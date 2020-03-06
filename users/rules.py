@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -26,10 +25,10 @@ from django.dispatch import receiver
 from .models import *
 from theories.models import *
 
-
 # *******************************************************************************
 # Promotions/Demotions
 # *******************************************************************************
+
 
 # ******************************
 # Automatically add new users to level: 0
@@ -46,12 +45,11 @@ def post_save_user_signal_handler(sender, instance, created, **kwargs):
 # Permissions
 # *******************************************************************************
 
-
 # *******************************************************************************
 # predicates
-  # https://github.com/dfunckt/django-rule
-  # https://cheat.readthedocs.io/en/latest/django/permissions.html
-  # https://stackoverflow.com/questions/41821921/model-field-level-permission-and-field-value-level-permission-in-django-and-drf
+# https://github.com/dfunckt/django-rule
+# https://cheat.readthedocs.io/en/latest/django/permissions.html
+# https://stackoverflow.com/questions/41821921/model-field-level-permission-and-field-value-level-permission-in-django-and-drf
 # *******************************************************************************
 has_level00 = rules.is_group_member('user level: 0')
 has_level01 = rules.is_group_member('user level: 1')
@@ -78,6 +76,7 @@ def can_report(user, obj):
                 return True
     return False
 
+
 # ******************************
 #
 # ******************************
@@ -89,6 +88,7 @@ def can_vote(user, obj):
         elif has_level04(user):
             return True
     return False
+
 
 # ******************************
 #

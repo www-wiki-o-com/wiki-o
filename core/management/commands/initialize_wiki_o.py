@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -21,11 +20,9 @@ from django.contrib.sites.models import Site
 from users.maintence import create_groups_and_permissions
 from theories.utils import create_categories
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-
 
 # *******************************************************************************
 # Methods

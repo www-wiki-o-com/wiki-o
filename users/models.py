@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -33,7 +32,6 @@ from model_utils import Choices
 from users.utils import get_group
 from core.utils import get_or_none
 
-
 # *******************************************************************************
 # Classes
 #
@@ -45,6 +43,7 @@ from core.utils import get_or_none
 #
 #
 # *******************************************************************************
+
 
 class User(AbstractUser):
     """User model.
@@ -92,10 +91,10 @@ class User(AbstractUser):
 
     hidden = models.BooleanField(default=False)
     use_wizard = models.BooleanField(default=True)
-    utilized = models.ManyToManyField(
-        'theories.TheoryNode', related_name='users', blank=True)
-    contributions = models.ManyToManyField(
-        'theories.TheoryNode', related_name='collaborators', blank=True)
+    utilized = models.ManyToManyField('theories.TheoryNode', related_name='users', blank=True)
+    contributions = models.ManyToManyField('theories.TheoryNode',
+                                           related_name='collaborators',
+                                           blank=True)
 
     @classmethod
     def get_system_user(cls, create=True):
@@ -323,16 +322,13 @@ class User(AbstractUser):
         # filter by type
         if hard:
             violations |= self.violations.filter(
-                Q(status=Violation.STATUS.ACCEPTED) |
-                Q(status=-Violation.STATUS.ACCEPTED)
-            )
+                Q(status=Violation.STATUS.ACCEPTED) | Q(status=-Violation.STATUS.ACCEPTED))
         if soft:
             exclude = []
             for violation in self.violations.filter(status__lt=110):
                 if violation.get_poll_winner() != Violation.STATUS.ACCEPTED:
                     exclude.append(violation.id)
-            violations |= self.violations.filter(
-                status__lt=110).exclude(id__in=exclude)
+            violations |= self.violations.filter(status__lt=110).exclude(id__in=exclude)
 
         # filter by date
         if recent and expired:
@@ -372,9 +368,11 @@ class User(AbstractUser):
         """
         if self.count_strikes(soft=True) > 0:
             return False
-        if self.get_level() == 1 and self.get_account_age() >= 10 and self.get_num_contributions() >= 10:
+        if self.get_level(
+        ) == 1 and self.get_account_age() >= 10 and self.get_num_contributions() >= 10:
             return True
-        if self.get_level() == 2 and self.get_account_age() >= 100 and self.get_num_contributions() >= 100:
+        if self.get_level(
+        ) == 2 and self.get_account_age() >= 100 and self.get_num_contributions() >= 100:
             return True
         return False
 
@@ -390,7 +388,7 @@ class User(AbstractUser):
         # setup
         user_levels = self.get_levels()
         if new_level is None:
-            new_level = max(4, user_levels[-1]+1)
+            new_level = max(4, user_levels[-1] + 1)
         group_level = get_group(new_level)
         self.groups.add(group_level)
 
@@ -416,7 +414,7 @@ class User(AbstractUser):
         # setup
         user_levels = self.get_levels()
         if new_level is None:
-            new_level = max(0, user_levels[-1]-1)
+            new_level = max(0, user_levels[-1] - 1)
         group_level = get_group(new_level)
         self.groups.add(group_level)
 
@@ -476,11 +474,9 @@ class Violation(models.Model):
         (125, "Unnecessarily added or removed evidence."),
         (130, "Performed unnecessary action."),
         (135, "Missclassified evidence."),
-
         (210, "Spamming the comments and/or reports."),
         (215, "Voted with an ulterior agenda."),
         (220, "Unnecessarily overrode the poll."),
-
         (850, "Acted adversarially."),
     )
     THEORY_OFFENCES = Choices(
@@ -503,9 +499,7 @@ class Violation(models.Model):
         (215, "Voted with an ulterior agenda."),
         (220, "Unnecessarily overrode the poll (only applies to level 4 users)."),
     )
-    FORUM_OFFENCES = Choices(
-        (850, "Acted adversarially."),
-    )
+    FORUM_OFFENCES = Choices((850, "Acted adversarially."),)
 
     # Django database attributes
     offender = models.ForeignKey(User, related_name='violations', on_delete=models.CASCADE)
@@ -559,15 +553,9 @@ class Violation(models.Model):
         """
         violations = cls.objects.none()
         if opened:
-            violations |= cls.objects.filter(
-                Q(status__lt=110) &
-                Q(status__gt=-110)
-            )
+            violations |= cls.objects.filter(Q(status__lt=110) & Q(status__gt=-110))
         if closed:
-            violations |= violations.filter(
-                Q(status__gte=110) |
-                Q(status__lte=-110)
-            )
+            violations |= violations.filter(Q(status__gte=110) | Q(status__lte=-110))
         return violations
 
     def save(self, *args, **kwargs):
@@ -741,8 +729,12 @@ class Violation(models.Model):
         else:
             today = datetime.datetime.today()
             end = self.pub_date + datetime.timedelta(days=10)
-            end = datetime.datetime(
-                year=end.year, month=end.month, day=end.day, hour=23, minute=59, second=59)
+            end = datetime.datetime(year=end.year,
+                                    month=end.month,
+                                    day=end.day,
+                                    hour=23,
+                                    minute=59,
+                                    second=59)
             return today > end
 
     def is_polling(self):
@@ -850,15 +842,14 @@ class ViolationFeedback(models.Model):
         (140, "REJECT", ("Reject")),
     )
 
-    ACTIONS02 = Choices(
-        (0, "NO_ACTION", ("----")),
-    )
+    ACTIONS02 = Choices((0, "NO_ACTION", ("----")),)
 
     # Django model attributes
-    user = models.ForeignKey(
-        User, related_name='violation_feedback', on_delete=models.SET_NULL, null=True)
-    violation = models.ForeignKey(
-        Violation, related_name='feedback', on_delete=models.CASCADE)
+    user = models.ForeignKey(User,
+                             related_name='violation_feedback',
+                             on_delete=models.SET_NULL,
+                             null=True)
+    violation = models.ForeignKey(Violation, related_name='feedback', on_delete=models.CASCADE)
     action = models.SmallIntegerField(choices=ACTIONS01, default=0)
     comment = models.CharField(max_length=750, blank=True)
     timestamp = models.DateTimeField()
@@ -994,10 +985,11 @@ class ViolationVote(models.Model):
     """
 
     # Django model attributes
-    user = models.ForeignKey(
-        User, related_name='violation_votes', on_delete=models.SET_NULL, null=True)
-    violation = models.ForeignKey(
-        Violation, related_name='votes', on_delete=models.CASCADE)
+    user = models.ForeignKey(User,
+                             related_name='violation_votes',
+                             on_delete=models.SET_NULL,
+                             null=True)
+    violation = models.ForeignKey(Violation, related_name='votes', on_delete=models.CASCADE)
     action = models.SmallIntegerField(choices=Violation.VOTES00, default=0)
 
     class Meta:

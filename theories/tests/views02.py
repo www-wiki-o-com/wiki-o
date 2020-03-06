@@ -12,11 +12,10 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from . views00 import *
+from .views00 import *
 
 
 # ************************************************************
@@ -35,8 +34,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # ******************************
     def setUp(self):
         # create user(s)
-        self.user = create_test_user(
-            username='testuser', password='1234', level=0)
+        self.user = create_test_user(username='testuser', password='1234', level=0)
         self.client.login(username='testuser', password='1234')
 
         # create data
@@ -57,9 +55,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_index(self):
-        super().test_get_index(
-            override=True,
-        )
+        super().test_get_index(override=True,)
 
     # ******************************
     # Get - Level00User
@@ -74,9 +70,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_activity(self):
-        super().test_get_activity(
-            override=True,
-        )
+        super().test_get_activity(override=True,)
 
     # ******************************
     # Get - Level00User
@@ -91,9 +85,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_theory_detail(self):
-        super().test_get_theory_detail(
-            override=True,
-        )
+        super().test_get_theory_detail(override=True,)
 
     # ******************************
     # Get - Level00User
@@ -135,9 +127,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_theory_activity(self):
-        super().test_get_theory_activity(
-            override=True,
-        )
+        super().test_get_theory_activity(override=True,)
 
     # ******************************
     # Get - Level00User
@@ -161,7 +151,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_theory_inherit(self):
-        pass # TODO
+        pass  # TODO
         # super().test_get_theory_inherit(
         #     override=True,
         #     code=403,
@@ -171,9 +161,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_evidence_detail(self):
-        super().test_get_evidence_detail(
-            override=True,
-        )
+        super().test_get_evidence_detail(override=True,)
 
     # ******************************
     # Get - Level00User
@@ -206,81 +194,61 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Get - Level00User
     # ******************************
     def test_get_evidence_activity(self):
-        super().test_get_evidence_activity(
-            override=True,
-        )
+        super().test_get_evidence_activity(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_opinion_demo(self):
-        super().test_get_opinion_demo(
-            override=True,
-        )
+        super().test_get_opinion_demo(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_opinion_detail(self):
-        super().test_get_opinion_detail(
-            override=True,
-        )
+        super().test_get_opinion_detail(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_my_opinion(self):
-        super().test_get_my_opinion(
-            override=True,
-        )
+        super().test_get_my_opinion(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_opinion_edit(self):
-        super().test_get_opinion_edit(
-            override=True,
-        )
+        super().test_get_opinion_edit(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_opinion_slug(self):
-        super().test_get_opinion_slug(
-            override=True,
-        )
+        super().test_get_opinion_slug(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_user_vs_user(self):
-        super().test_get_user_vs_user(
-            override=True,
-        )
+        super().test_get_user_vs_user(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_user_vs_slug(self):
-        super().test_get_user_vs_slug(
-            override=True,
-        )
+        super().test_get_user_vs_slug(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_slug_vs_user(self):
-        super().test_get_slug_vs_user(
-            override=True,
-        )
+        super().test_get_slug_vs_user(override=True,)
 
     # ******************************
     # Get - Level00User
     # ******************************
     def test_get_slug_vs_slug(self):
-        super().test_get_slug_vs_slug(
-            override=True,
-        )
+        super().test_get_slug_vs_slug(override=True,)
 
     # ******************************
     # Post - Level00User
@@ -376,7 +344,7 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Post - Level00User
     # ******************************
     def test_post_theory_inherit(self):
-        pass # TODO
+        pass  # TODO
         # super().test_post_theory_inherit(
         #     override=True,
         #     code=403,
@@ -517,70 +485,52 @@ class Level00UserViews(TestCase, ViewsTestBase):
     # Post - Level00User
     # ******************************
     def test_post_opinion_new(self):
-        super().test_post_opinion_new(
-            override=True,
-        )
+        super().test_post_opinion_new(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_opinion_edit(self):
-        super().test_post_opinion_edit(
-            override=True,
-        )
+        super().test_post_opinion_edit(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_delete_my_opinion(self):
-        super().test_post_delete_my_opinion(
-            override=True,
-        )
+        super().test_post_delete_my_opinion(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_delete_bobs_opinion(self):
-        super().test_post_delete_bobs_opinion(
-            override=True,
-        )
+        super().test_post_delete_bobs_opinion(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_opinion_copy(self):
-        super().test_post_opinion_copy(
-            override=True,
-        )
+        super().test_post_opinion_copy(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_hide_my_opinion(self):
-        super().test_post_hide_my_opinion(
-            override=True,
-        )
+        super().test_post_hide_my_opinion(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_hide_bobs_opinion(self):
-        super().test_post_hide_bobs_opinion(
-            override=True,
-        )
+        super().test_post_hide_bobs_opinion(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_reveal_my_opinion(self):
-        super().test_post_reveal_my_opinion(
-            override=True,
-        )
+        super().test_post_reveal_my_opinion(override=True,)
 
     # ******************************
     # Post - Level00User
     # ******************************
     def test_post_reveal_bobs_opinion(self):
-        super().test_post_reveal_bobs_opinion(
-            override=True,
-        )
+        super().test_post_reveal_bobs_opinion(override=True,)

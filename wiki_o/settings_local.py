@@ -14,15 +14,12 @@ A web service for sharing opinions and avoiding arguments
 
 from .settings_base import *
 
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
-
 
 # Host Config
 ALLOWED_HOSTS = ['localhost', 'admin.localhost', '127.0.0.1']
 INTERNAL_IPS = ['localhost']
-
 
 # Application definition
 INSTALLED_APPS = [
@@ -66,7 +63,6 @@ INSTALLED_APPS = [
     'debug_toolbar',
 ]
 
-
 MIDDLEWARE = [
     'django_hosts.middleware.HostsRequestMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -79,4 +75,3 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django_hosts.middleware.HostsResponseMiddleware',
 ]
-

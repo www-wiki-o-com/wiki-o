@@ -12,11 +12,10 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from . views00 import *
+from .views00 import *
 
 
 # ************************************************************
@@ -40,9 +39,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_index(self):
-        super().test_get_index(
-            override=True,
-        )
+        super().test_get_index(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -57,9 +54,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_activity(self):
-        super().test_get_activity(
-            override=True,
-        )
+        super().test_get_activity(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -75,9 +70,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_theory_detail(self):
-        super().test_get_theory_detail(
-            override=True,
-        )
+        super().test_get_theory_detail(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -123,9 +116,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_theory_activity(self):
-        super().test_get_theory_activity(
-            override=True,
-        )
+        super().test_get_theory_activity(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -151,7 +142,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_theory_inherit(self):
-        pass # TODO
+        pass  # TODO
         # super().test_get_theory_inherit(
         #     override=True,
         #     code=302,
@@ -162,9 +153,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_evidence_detail(self):
-        super().test_get_evidence_detail(
-            override=True,
-        )
+        super().test_get_evidence_detail(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -200,25 +189,19 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_evidence_activity(self):
-        super().test_get_evidence_activity(
-            override=True,
-        )
+        super().test_get_evidence_activity(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_opinion_demo(self):
-        super().test_get_opinion_demo(
-            override=True,
-        )
+        super().test_get_opinion_demo(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_opinion_detail(self):
-        super().test_get_opinion_detail(
-            override=True,
-        )
+        super().test_get_opinion_detail(override=True,)
 
     # ******************************
     # Get - AnonymousUser
@@ -244,41 +227,31 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Get - AnonymousUser
     # ******************************
     def test_get_opinion_slug(self):
-        super().test_get_opinion_slug(
-            override=True,
-        )
+        super().test_get_opinion_slug(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_user_vs_user(self):
-        super().test_get_user_vs_user(
-            override=True,
-        )
+        super().test_get_user_vs_user(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_user_vs_slug(self):
-        super().test_get_user_vs_slug(
-            override=True,
-        )
+        super().test_get_user_vs_slug(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_slug_vs_user(self):
-        super().test_get_slug_vs_user(
-            override=True,
-        )
+        super().test_get_slug_vs_user(override=True,)
 
     # ******************************
     # Get - AnonymousUser
     # ******************************
     def test_get_slug_vs_slug(self):
-        super().test_get_slug_vs_slug(
-            override=True,
-        )
+        super().test_get_slug_vs_slug(override=True,)
 
     # ******************************
     # Post - AnonymousUser
@@ -383,7 +356,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Post - AnonymousUser
     # ******************************
     def test_post_theory_inherit(self):
-        pass # TODO
+        pass  # TODO
         # super().test_post_theory_inherit(
         #     override=True,
         #     code=302,
@@ -561,9 +534,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Post - AnonymousUser
     # ******************************
     def test_post_delete_bobs_opinion(self):
-        super().test_post_delete_bobs_opinion(
-            override=True,
-        )
+        super().test_post_delete_bobs_opinion(override=True,)
 
     # ******************************
     # Post - AnonymousUser
@@ -589,9 +560,7 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Post - AnonymousUser
     # ******************************
     def test_post_hide_bobs_opinion(self):
-        super().test_post_hide_bobs_opinion(
-            override=True,
-        )
+        super().test_post_hide_bobs_opinion(override=True,)
 
     # ******************************
     # Post - AnonymousUser
@@ -607,6 +576,4 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # Post - AnonymousUser
     # ******************************
     def test_post_reveal_bobs_opinion(self):
-        super().test_post_reveal_bobs_opinion(
-            override=True,
-        )
+        super().test_post_reveal_bobs_opinion(override=True,)

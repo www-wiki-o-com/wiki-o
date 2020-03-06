@@ -12,13 +12,11 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 import inspect
 import logging
-
 
 # *******************************************************************************
 # Defines
@@ -26,10 +24,10 @@ import logging
 DEBUG = False
 LOGGER = logging.getLogger('django')
 
-
 # *******************************************************************************
 # Models
 # *******************************************************************************
+
 
 class TheoryPointerBase():
     """Abstract manager for accessing and agregating the theory's points.
@@ -69,8 +67,9 @@ class TheoryPointerBase():
         if self.theory.is_evidence():
             curframe = inspect.currentframe()
             calframe = inspect.getouterframes(curframe, 2)
-            LOGGER.error('TheoryPointerBase.check_data_for_errors: is pointing at evidence (%d). '
-                         'Problem method: TheoryPointerBase.%s', self.theory.pk, calframe[1][3])
+            LOGGER.error(
+                'TheoryPointerBase.check_data_for_errors: is pointing at evidence (%d). '
+                'Problem method: TheoryPointerBase.%s', self.theory.pk, calframe[1][3])
 
     def __str__(self):
         """Pass-through for theory."""
@@ -119,8 +118,12 @@ class TheoryPointerBase():
         if self.saved_point_distribution is not None:
             return self.saved_point_distribution
         total_points = 0.0
-        distribution = {'true_facts': 0.0, 'true_other': 0.0,
-                        'false_facts': 0.0, 'false_other': 0.0}
+        distribution = {
+            'true_facts': 0.0,
+            'true_other': 0.0,
+            'false_facts': 0.0,
+            'false_other': 0.0
+        }
         for evidence_node in self.get_flat_nodes():
             if evidence_node.is_verifiable():
                 distribution['true_facts'] += evidence_node.true_points()

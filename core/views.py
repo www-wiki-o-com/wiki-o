@@ -35,6 +35,7 @@ class AlphaView(generic.ListView):
         """Return nothing."""
         return None
 
+
 # ************************************************************
 #
 # ************************************************************
@@ -47,6 +48,7 @@ class HelpView(generic.ListView):
     def get_queryset(self):
         """Return nothing."""
         return None
+
 
 # ************************************************************
 #
@@ -61,6 +63,7 @@ class PolicyView(generic.ListView):
         """Return nothing."""
         return None
 
+
 # ************************************************************
 #
 # ************************************************************
@@ -73,6 +76,7 @@ class TermsView(generic.ListView):
     def get_queryset(self):
         """Return nothing."""
         return None
+
 
 # ************************************************************
 #
@@ -97,8 +101,7 @@ def ContactView(request):
     user = request.user
 
     # Render
-    context = {
-    }
+    context = {}
     return render(
         request,
         'core/contact.html',

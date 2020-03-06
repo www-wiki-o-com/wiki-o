@@ -114,8 +114,7 @@ def interpret_log_text(log, log_text, extra=''):
     for start_index, end_index, nested_depth in get_brace_indices(log_text):
         if log_text[start_index] == '«' and log_text[end_index] == '»':
             result += log_text[prev_index:start_index]
-            url, name = log_text[start_index + 1:end_index].strip().split(
-                ' ', 1)
+            url, name = log_text[start_index + 1:end_index].strip().split(' ', 1)
             name = name.strip()
 
             # url
@@ -143,8 +142,7 @@ def interpret_log_text(log, log_text, extra=''):
                 url += extra
             # redirect to mark notification as read
             if isinstance(log, Notification):
-                mark_as_read_url = reverse('notifications:mark_as_read',
-                                           kwargs={'slug': log.slug})
+                mark_as_read_url = reverse('notifications:mark_as_read', kwargs={'slug': log.slug})
                 url = mark_as_read_url + '?next=' + url
 
             # link
@@ -485,8 +483,7 @@ class CustomRendererForDetails(SaferHtmlRenderer):
         if self.check_url(link):
             link = self.rewrite_url(link)
             if len(title) > 0:
-                return '<a href="%s" title="%s">%s</a>' % (link, content,
-                                                           title)
+                return '<a href="%s" title="%s">%s</a>' % (link, content, title)
             return '<a href="%s">%s</a>' % (link, content)
         # Bib 'links'.
         if content == '#':
@@ -515,8 +512,7 @@ class CustomRendererForDetails(SaferHtmlRenderer):
         if self.check_url(link):
             link = self.rewrite_url(link)
             if len(title) > 0 and len(alt) > 0:
-                return '<a href="%s" title="%s" alt="%s">image(%s)</a>' % (
-                    link, title, alt, title)
+                return '<a href="%s" title="%s" alt="%s">image(%s)</a>' % (link, title, alt, title)
             elif len(title) > 0:
                 return '<a href="%s">image(%s)</a>' % (link, title)
             else:
@@ -532,9 +528,8 @@ class CustomRendererForDetails(SaferHtmlRenderer):
         Returns:
             [type]: [description]
         """
-        return (
-            '<table class="table table-sm" style="width:90%;"  align="center">\n'
-            + content + '\n</table>')
+        return ('<table class="table table-sm" style="width:90%;"  align="center">\n' + content +
+                '\n</table>')
 
 
 def render_details(raw_content):

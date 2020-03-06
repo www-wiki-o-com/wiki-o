@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @brief      A managment script for restoring the database
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -24,11 +23,9 @@ import psycopg2
 
 from django.core.management.base import BaseCommand
 
-
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-
 
 # *******************************************************************************
 # Methods
@@ -91,8 +88,8 @@ class Command(BaseCommand):
         # Update the database.
         user = os.environ.get('PGUSER')
         password = os.environ.get('PGPASSWORD')
-        with psycopg2.connect(host="localhost", database="postgres",
-                              user=user, password=password) as conn:
+        with psycopg2.connect(host="localhost", database="postgres", user=user,
+                              password=password) as conn:
             with conn.cursor() as cur:
                 conn.autocommit = True
                 # Break all connections to the database.

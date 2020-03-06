@@ -19,7 +19,6 @@ from django.urls import path
 from users.views import private_profile_view, public_profile_view, notifications_view
 from users.views import violation_index_view, violation_resolve_view
 
-
 # *******************************************************************************
 # urls
 # *******************************************************************************

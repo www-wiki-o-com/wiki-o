@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -23,7 +22,6 @@ from theories.models import NodePointerBase, Opinion
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
 from theories.utils import get_demo_opinion
-
 
 # *******************************************************************************
 # Diagrams
@@ -120,25 +118,37 @@ class OpinionVennDiagram():
         # If the intersection set is empty, fix the rings in place.
         r = self.config['radius']
         if len(self.intersection_set) == 0:
-            self.true_ring = Ring(-0.85*r, 0.0, r, x_max=-0.35*r)
-            self.false_ring = Ring(0.85*r, 0.0, r, x_min=0.35*r)
+            self.true_ring = Ring(-0.85 * r, 0.0, r, x_max=-0.35 * r)
+            self.false_ring = Ring(0.85 * r, 0.0, r, x_min=0.35 * r)
         # Otherwise, overlap the rings.
         else:
-            self.true_ring = Ring(-0.75*r, 0.0, r, x_max=-0.35*r)
-            self.false_ring = Ring(0.75*r, 0.0, r, x_min=0.35*r)
+            self.true_ring = Ring(-0.75 * r, 0.0, r, x_max=-0.35 * r)
+            self.false_ring = Ring(0.75 * r, 0.0, r, x_min=0.35 * r)
 
     def create_ledgend(self):
         """Create legend text."""
         self.text = []
         r = self.config['radius']
         boarder = self.boarder
-        self.text.append(Text('True', x=self.true_ring.x, y=self.true_ring.y - 1.0*13/12*r,
-                              size=40, colour=Colour.BLACK, bold=True))
-        self.text.append(Text('False', x=self.false_ring.x, y=self.true_ring.y - 1.0*13/12*r,
-                              size=40, colour=Colour.RED, bold=True))
+        self.text.append(
+            Text('True',
+                 x=self.true_ring.x,
+                 y=self.true_ring.y - 1.0 * 13 / 12 * r,
+                 size=40,
+                 colour=Colour.BLACK,
+                 bold=True))
+        self.text.append(
+            Text('False',
+                 x=self.false_ring.x,
+                 y=self.true_ring.y - 1.0 * 13 / 12 * r,
+                 size=40,
+                 colour=Colour.RED,
+                 bold=True))
         if self.bottom_text is not None:
-            self.text.append(Text(self.bottom_text, x=(self.true_ring.x + self.false_ring.x)/2,
-                                  y=0.95*r + boarder['bottom']))
+            self.text.append(
+                Text(self.bottom_text,
+                     x=(self.true_ring.x + self.false_ring.x) / 2,
+                     y=0.95 * r + boarder['bottom']))
 
     def create_shapes(self):
         """Create the evidence and sub-theory shapes (within the true and false sets)."""
@@ -164,8 +174,8 @@ class OpinionVennDiagram():
         for node in self.intersection_set:
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
-            x = (self.true_ring.x + self.false_ring.x)/2 + r * math.cos(theta)
-            y = (self.true_ring.y + self.false_ring.y)/2 + r * math.sin(theta)
+            x = (self.true_ring.x + self.false_ring.x) / 2 + r * math.cos(theta)
+            y = (self.true_ring.y + self.false_ring.y) / 2 + r * math.sin(theta)
             area = self.config['shape_area'] * node.total_points()
             if node.is_theory():
                 self.intersection_shapes.append(SubtheoryShape(node, x, y, area))
@@ -224,13 +234,13 @@ class OpinionVennDiagram():
         self.in_boundry_shapes = []
         self.in_boundry_shapes.append(Wall(None, y_max))
         self.in_boundry_shapes.append(Wall(None, y_min))
-        self.in_boundry_shapes.append(Ring((x_min + x_max)/2, self.true_ring.y, x_width/2))
+        self.in_boundry_shapes.append(Ring((x_min + x_max) / 2, self.true_ring.y, x_width / 2))
 
         # Construct a circle to avoid the middle of the figure and the true and false text
         # (only applies to shapes outside the two rings).
-        x02 = (self.true_ring.x + self.false_ring.x)/2
+        x02 = (self.true_ring.x + self.false_ring.x) / 2
         y02 = self.true_ring.y
-        r02 = (self.false_ring.x - self.true_ring.x)/2 + 1*r
+        r02 = (self.false_ring.x - self.true_ring.x) / 2 + 1 * r
         self.out_boundry_shapes = [Ring(x02, y02, r02)]
 
     def fix_overlap01(self):
@@ -238,24 +248,42 @@ class OpinionVennDiagram():
         # Setup
         shapes = []
         if len(self.intersection_shapes) > 0:
-            shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
-                           'out': self.true_shapes+[self.false_ring]})
-            shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
-                           'out': self.false_shapes+[self.true_ring]})
-            shapes.append({'prop': self.intersection_shapes,
-                           'in': [self.true_ring, self.false_ring],
-                           'out': self.intersection_shapes})
-            shapes.append({'prop': [self.true_ring],
-                           'in': self.true_shapes + self.intersection_shapes,
-                           'out': self.false_shapes})
-            shapes.append({'prop': [self.false_ring],
-                           'in': self.false_shapes + self.intersection_shapes,
-                           'out': self.true_shapes})
+            shapes.append({
+                'prop': self.true_shapes,
+                'in': [self.true_ring],
+                'out': self.true_shapes + [self.false_ring]
+            })
+            shapes.append({
+                'prop': self.false_shapes,
+                'in': [self.false_ring],
+                'out': self.false_shapes + [self.true_ring]
+            })
+            shapes.append({
+                'prop': self.intersection_shapes,
+                'in': [self.true_ring, self.false_ring],
+                'out': self.intersection_shapes
+            })
+            shapes.append({
+                'prop': [self.true_ring],
+                'in': self.true_shapes + self.intersection_shapes,
+                'out': self.false_shapes
+            })
+            shapes.append({
+                'prop': [self.false_ring],
+                'in': self.false_shapes + self.intersection_shapes,
+                'out': self.true_shapes
+            })
         else:
-            shapes.append({'prop': self.true_shapes, 'in': [self.true_ring],
-                           'out': self.true_shapes+[self.false_ring]})
-            shapes.append({'prop': self.false_shapes, 'in': [self.false_ring],
-                           'out': self.false_shapes+[self.true_ring]})
+            shapes.append({
+                'prop': self.true_shapes,
+                'in': [self.true_ring],
+                'out': self.true_shapes + [self.false_ring]
+            })
+            shapes.append({
+                'prop': self.false_shapes,
+                'in': [self.false_ring],
+                'out': self.false_shapes + [self.true_ring]
+            })
 
         # Propagate (self organize)
         self.propagate(shapes)
@@ -263,8 +291,11 @@ class OpinionVennDiagram():
     def fix_overlap02(self):
         """Move the outside shapes around to avoid overlap."""
         # Setup
-        shapes = [{'prop': self.outside_shapes, 'in': self.in_boundry_shapes,
-                   'out': self.out_boundry_shapes + self.outside_shapes}]
+        shapes = [{
+            'prop': self.outside_shapes,
+            'in': self.in_boundry_shapes,
+            'out': self.out_boundry_shapes + self.outside_shapes
+        }]
         for shape in [self.true_ring, self.false_ring]:
             shape.reset_spring_constant()
 
@@ -383,9 +414,11 @@ class OpinionVennDiagram():
         # Setup
         width = 1200
         r = self.config['radius']
-        height = (2.0*r + self.boarder['top'] + self.boarder['bottom'])
-        offset = {'x': width/2 - (self.true_ring.x + self.false_ring.x)/2,
-                  'y': self.boarder['top'] + r - self.true_ring.y}
+        height = (2.0 * r + self.boarder['top'] + self.boarder['bottom'])
+        offset = {
+            'x': width / 2 - (self.true_ring.x + self.false_ring.x) / 2,
+            'y': self.boarder['top'] + r - self.true_ring.y
+        }
 
         # Construct frame.
         svg = '<center><svg baseProfile="full" version="1.1" viewBox="0 0 %d %d">' % (width, height)
@@ -513,7 +546,10 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
 class DemoVennDiagram(OpinionVennDiagram):
     """A class for drawing demo Venn-diagrams (fake data)."""
 
-    def __init__(self, true_set_size=10, intersection_set_size=10, false_set_size=10,
+    def __init__(self,
+                 true_set_size=10,
+                 intersection_set_size=10,
+                 false_set_size=10,
                  outside_set_size=10):
         """The constructor for the DemoVennDiagram class.
 
@@ -586,13 +622,13 @@ class DemoVennDiagram(OpinionVennDiagram):
         # normalize points to create the weights
         for node in opinion.saved_nodes:
             if total_true_points > 0:
-                node.saved_true_points = (
-                    node.true_points() / total_true_points) * opinion.true_points()
+                node.saved_true_points = (node.true_points() /
+                                          total_true_points) * opinion.true_points()
             else:
                 node.saved_true_points = 0.0
             if total_false_points > 0:
-                node.saved_false_points = (
-                    node.false_points() / total_false_points) * opinion.false_points()
+                node.saved_false_points = (node.false_points() /
+                                           total_false_points) * opinion.false_points()
             else:
                 node.saved_false_points = 0.0
 
@@ -605,7 +641,6 @@ class DemoVennDiagram(OpinionVennDiagram):
             str: Blank
         """
         return ''
-
 
 
 # *******************************************************************************

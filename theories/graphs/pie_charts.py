@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -20,7 +19,6 @@ import random
 
 from theories.graphs.shapes import offset_xy
 from theories.graphs.shapes import Colour, Circle, Wedge, Text, Rectangle
-
 
 # *******************************************************************************
 # Diagrams
@@ -37,7 +35,7 @@ class PieChart():
     """A class for drawing pie-charts."""
 
     # Constants
-    DEFAULT_CONFIG = {'radius':100, 'c_offset':4, 'gap':4}
+    DEFAULT_CONFIG = {'radius': 100, 'c_offset': 4, 'gap': 4}
     DEFAULT_BOARDER = {'top': 30, 'bottom': 30, 'left': 400, 'right': 400}
 
     def __init__(self, data, config=None, boarder=None):
@@ -74,8 +72,8 @@ class PieChart():
 
         # Construct
         self.create_graph()
-        self.create_ledgend(-3*r, 0, true_text, Colour.BLACK)
-        self.create_ledgend(3*r, 0, false_text, Colour.RED)
+        self.create_ledgend(-3 * r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(3 * r, 0, false_text, Colour.RED)
 
     def create_graph(self, data=None, offset=None):
         """Create the actual pie-chart using wedges.
@@ -115,9 +113,9 @@ class PieChart():
         # as our offset (the midpoint of the true data will be the top). Additionally, we add a gap
         # in between the wedges for astetics.
         if data['true_facts'] + data['true_other'] > 0:
-            theta00 = 180.0 - 360.0*(data['true_facts'] + data['true_other'])/2 + gap/2
+            theta00 = 180.0 - 360.0 * (data['true_facts'] + data['true_other']) / 2 + gap / 2
         else:
-            theta00 = 180.0 - gap/2
+            theta00 = 180.0 - gap / 2
 
         # Construct the true_other wedge
         theta01 = theta00 + num_degs * data['true_other']
@@ -183,18 +181,23 @@ class PieChart():
 
         # Construct the facts ledgend
         x01, y01 = (x - 60, y)
-        self.shapes.append(Text('Facts', x=x01, y=y01-2*length, colour=colour, bold=True))
-        self.shapes.append(Rectangle(x01-length, y01-length, x01+length, y01+length, colour=colour))
+        self.shapes.append(Text('Facts', x=x01, y=y01 - 2 * length, colour=colour, bold=True))
+        self.shapes.append(
+            Rectangle(x01 - length, y01 - length, x01 + length, y01 + length, colour=colour))
 
         # Construct the other ledgend
         x01, y01 = (x + 60, y)
-        self.shapes.append(Text('Other', x=x01, y=y01-2*length, colour=colour, bold=True))
-        self.shapes.append(Rectangle(x01-length, y01-length, x01+length, y01+length,
-                                     colour=Colour.get_transparent_colour(Colour, colour)))
+        self.shapes.append(Text('Other', x=x01, y=y01 - 2 * length, colour=colour, bold=True))
+        self.shapes.append(
+            Rectangle(x01 - length,
+                      y01 - length,
+                      x01 + length,
+                      y01 + length,
+                      colour=Colour.get_transparent_colour(Colour, colour)))
 
         # Add the points text
         if points_text is not None:
-            self.shapes.append(Text(points_text, x=x, y=y+r, size=40, colour=colour, bold=True))
+            self.shapes.append(Text(points_text, x=x, y=y + r, size=40, colour=colour, bold=True))
 
     def get_svg(self):
         """Output the svg code for the diagram.
@@ -206,12 +209,12 @@ class PieChart():
         r = self.config['radius']
         boarder = self.boarder
         offset = {'x': 0, 'y': 0}
-        width = (2.0*r + boarder['left'] + boarder['right'])
-        height = (2.0*r + boarder['top'] + boarder['bottom'])
+        width = (2.0 * r + boarder['left'] + boarder['right'])
+        height = (2.0 * r + boarder['top'] + boarder['bottom'])
 
         # SVG
         svg = '<center><svg baseProfile="full" version="1.1"'
-        svg += ' viewBox="%d %d' % (-width/2 + offset['x'], -height/2 + offset['y'])
+        svg += ' viewBox="%d %d' % (-width / 2 + offset['x'], -height / 2 + offset['y'])
         svg += ' %d %d">' % (width, height)
         for shape in self.shapes:
             svg += shape.get_svg()
@@ -280,13 +283,13 @@ class OpinionPieChart(PieChart):
                       <th style="border-right:2px solid #000;"/>
                       <th> %d </th>
                       <th> %d </th>
-                   </tr>""" % (round(100*data['true_facts']), round(100*data['false_facts']))
+                   </tr>""" % (round(100 * data['true_facts']), round(100 * data['false_facts']))
         text += """<tr>
                       <th>Other</th>
                       <th style="border-right:2px solid #000;"/>
                       <th> %d </th>
                       <th> %d </th>
-                   </tr>""" % (round(100*data['true_other']), round(100*data['false_other']))
+                   </tr>""" % (round(100 * data['true_other']), round(100 * data['false_other']))
         text += '</table>'
         text += '</div>'
         text += '</center>'
@@ -320,8 +323,8 @@ class OpinionComparisionPieChart(OpinionPieChart):
         data02 = self.opinion02.get_point_distribution()
         self.create_graph(data01, offset={'x': -125, 'y': 0})
         self.create_graph(data02, offset={'x': 125, 'y': 0})
-        self.create_ledgend(-4*r, 0, true_text, Colour.BLACK)
-        self.create_ledgend(4*r, 0, false_text, Colour.RED)
+        self.create_ledgend(-4 * r, 0, true_text, Colour.BLACK)
+        self.create_ledgend(4 * r, 0, false_text, Colour.RED)
 
     def get_caption(self):
         """Output caption text for diagram.
@@ -344,7 +347,7 @@ class DemoPieChart(PieChart):
         """Create a demo pie-chart with fake data."""
         points = [random.random() for i in range(4)]
         total_points = sum(points)
-        points = [x/total_points for x in points]
+        points = [x / total_points for x in points]
         data = {
             'true_facts': points[0],
             'true_other': points[1],

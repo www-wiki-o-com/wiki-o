@@ -12,7 +12,6 @@ A web service for sharing opinions and avoiding arguments
 @authors    Frank Imeson
 """
 
-
 # *******************************************************************************
 # Imports
 # *******************************************************************************
@@ -33,7 +32,6 @@ from theories.test_utils import get_or_create_subtheory, get_or_create_evidence,
 from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_groups_and_permissions, create_test_user
 from theories.views import *
-
 
 # *******************************************************************************
 # Defines
@@ -106,8 +104,7 @@ class CategoryTests(TestCase):
         self.assertEqual(self.category.url(), '/theories/all/')
 
     def test_activity_url(self):
-        self.assertEqual(self.category.activity_url(),
-                         '/theories/all/activity/')
+        self.assertEqual(self.category.activity_url(), '/theories/all/activity/')
 
     def test_get_theories(self):
         self.assertIn(self.theory, self.category.get_theories())
@@ -115,13 +112,11 @@ class CategoryTests(TestCase):
     def test_update_activity_logs(self):
         verb = "Yo Bob, what's up? Check out this theory yo."
 
-        self.category.update_activity_logs(
-            self.user, verb, action_object=self.theory)
+        self.category.update_activity_logs(self.user, verb, action_object=self.theory)
         self.assertEqual(self.category.target_actions.count(), 1)
         self.assertEqual(self.bob.notifications.count(), 1)
 
-        self.category.update_activity_logs(
-            self.user, verb, action_object=self.theory)
+        self.category.update_activity_logs(self.user, verb, action_object=self.theory)
         self.assertEqual(self.category.target_actions.count(), 1)
         self.assertEqual(self.bob.notifications.count(), 1)
 
@@ -133,8 +128,7 @@ class CategoryTests(TestCase):
         notification.timestamp -= datetime.timedelta(seconds=36000)
         notification.save()
 
-        self.category.update_activity_logs(
-            self.user, verb, action_object=self.theory)
+        self.category.update_activity_logs(self.user, verb, action_object=self.theory)
         self.assertEqual(self.category.target_actions.count(), 2)
         self.assertEqual(self.bob.notifications.count(), 2)
 
@@ -168,17 +162,18 @@ class TheoryNodeTests(TestCase):
         # create data
         self.category = Category.get('All')
         self.theory = create_test_theory(created_by=self.user, backup=True)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
         self.intuition = TheoryNode.get_intuition_node()
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         for stats in self.theory.get_all_stats():
             if stats.opinion_is_member(self.opinion):
                 stats.add_opinion(self.opinion, save=False)
@@ -200,8 +195,7 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.theory.get_true_statement(), self.theory.title01)
 
     def test_get_false_statement(self):
-        self.assertEqual(self.theory.get_false_statement(),
-                         self.theory.__str__(0, 1))
+        self.assertEqual(self.theory.get_false_statement(), self.theory.__str__(0, 1))
 
     def test_get_title(self):
         self.assertEqual(self.evidence.get_title(), self.evidence.title01)
@@ -312,8 +306,7 @@ class TheoryNodeTests(TestCase):
         self.assertEqual(self.evidence.get_revisions().count(), 1)
 
     def test_add_node(self):
-        new = TheoryNode.objects.create(
-            title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
+        new = TheoryNode.objects.create(title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
 
         result = self.evidence.add_node(new)
         self.assertFalse(result)
@@ -325,8 +318,7 @@ class TheoryNodeTests(TestCase):
         self.assertIn(new, self.theory.flat_nodes.all())
 
     def test_add_nodes(self):
-        new = TheoryNode.objects.create(
-            title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
+        new = TheoryNode.objects.create(title01='new', node_type=TheoryNode.TYPE.EVIDENCE)
         result = self.evidence.add_nodes([new])
         self.assertFalse(result)
 
@@ -680,7 +672,7 @@ class TheoryNodeTests(TestCase):
         response = self.client.get(self.theory.url())
         self.theory.refresh_from_db()
         hit_count = HitCount.objects.get_for_object(self.theory)
-        self.assertEqual(hit_count.hits, old_hit_count.hits+1)
+        self.assertEqual(hit_count.hits, old_hit_count.hits + 1)
         self.assertTrue(self.theory.rank > old_rank)
 
     def test_update_activity_logs01(self):
@@ -853,14 +845,16 @@ class OpinionTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
         self.intuition = self.theory.get_intuition_node()
 
     def test_str(self):
@@ -871,9 +865,7 @@ class OpinionTests(TestCase):
             self.assertEqual(opinion.__str__(), self.theory.get_false_statement())
 
     def test_get_evidence_nodes(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node01 = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -888,9 +880,7 @@ class OpinionTests(TestCase):
         self.assertNotIn(opinion_node02, evidence)
 
     def test_get_subtheory_nodes(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node01 = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -949,8 +939,7 @@ class OpinionTests(TestCase):
         # blah
         self.user.hidden = False
         opinion.anonymous = False
-        self.assertEqual(opinion.get_owner_long(),
-                         self.user.__str__(print_fullname=True))
+        self.assertEqual(opinion.get_owner_long(), self.user.__str__(print_fullname=True))
 
         # blah
         self.user.hidden = True
@@ -978,9 +967,7 @@ class OpinionTests(TestCase):
 
     def test_get_node(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1001,9 +988,7 @@ class OpinionTests(TestCase):
 
     def test_get_node_cached(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1025,9 +1010,7 @@ class OpinionTests(TestCase):
 
     def test_cache(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1040,9 +1023,7 @@ class OpinionTests(TestCase):
 
     def test_get_nodes(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node01 = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1070,9 +1051,7 @@ class OpinionTests(TestCase):
 
     def test_get_flat_node(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1093,9 +1072,7 @@ class OpinionTests(TestCase):
 
     def test_get_flat_nodes(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node01 = opinion.nodes.create(
             theory_node=self.fact,
             ft_input=100,
@@ -1108,9 +1085,7 @@ class OpinionTests(TestCase):
             theory_node=self.subtheory,
             ft_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(
-            user=self.user,
-        )
+        child_opinion = self.subtheory.opinions.create(user=self.user,)
         opinion_node04 = child_opinion.nodes.create(
             theory_node=self.evidence,
             tt_input=100,
@@ -1140,9 +1115,7 @@ class OpinionTests(TestCase):
 
     def test_get_subtheory_nodes(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.nodes.create(
             theory_node=self.fact,
             ft_input=100,
@@ -1167,9 +1140,7 @@ class OpinionTests(TestCase):
 
     def test_get_evidence_nodes(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.nodes.create(
             theory_node=self.fact,
             ft_input=100,
@@ -1194,9 +1165,7 @@ class OpinionTests(TestCase):
 
     def test_get_parent_nodes(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=80,
@@ -1215,9 +1184,7 @@ class OpinionTests(TestCase):
         self.assertIn(opinion_node, parent_nodes)
 
     def test_update_points00(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion.update_points()
         intuition = opinion.get_intuition_node()
         self.assertEqual(intuition.true_points(), 0.0)
@@ -1266,12 +1233,8 @@ class OpinionTests(TestCase):
 
     def test_update_points04(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
-        opinion_node = opinion.nodes.create(
-            theory_node=self.fact,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
+        opinion_node = opinion.nodes.create(theory_node=self.fact,)
         opinion.update_points()
 
         # blah
@@ -1279,9 +1242,7 @@ class OpinionTests(TestCase):
         self.assertNotIn(opinion_node, nodes)
 
     def test_update_points_fact01(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1297,9 +1258,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.0)
 
     def test_update_points_fact02(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tf_input=100,
@@ -1315,9 +1274,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 1.0)
 
     def test_update_points_fact03(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=100,
@@ -1374,9 +1331,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.75)
 
     def test_update_points_subtheory01(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=100,
@@ -1392,9 +1347,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.0)
 
     def test_update_points_subtheory02(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tf_input=100,
@@ -1410,16 +1363,12 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 1.0)
 
     def test_update_points_subtheory10(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(
-            user=self.user,
-        )
+        child_opinion = self.subtheory.opinions.create(user=self.user,)
         child_opinion.update_points()
         opinion.update_points()
         opinion_node.refresh_from_db()
@@ -1432,16 +1381,12 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.0)
 
     def test_update_points_subtheory11(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tf_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(
-            user=self.user,
-        )
+        child_opinion = self.subtheory.opinions.create(user=self.user,)
         child_opinion.update_points()
         opinion.update_points()
         opinion_node.refresh_from_db()
@@ -1454,16 +1399,12 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 1.0)
 
     def test_update_points_subtheory20(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             ft_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(
-            user=self.user,
-        )
+        child_opinion = self.subtheory.opinions.create(user=self.user,)
         child_node = child_opinion.nodes.create(
             theory_node=self.evidence,
             tt_input=100,
@@ -1481,16 +1422,12 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.0)
 
     def test_update_points_subtheory21(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(
-            user=self.user,
-        )
+        child_opinion = self.subtheory.opinions.create(user=self.user,)
         child_node = child_opinion.nodes.create(
             theory_node=self.evidence,
             tt_input=100,
@@ -1508,9 +1445,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.0)
 
     def test_update_points_subtheory22(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=80,
@@ -1531,8 +1466,7 @@ class OpinionTests(TestCase):
         opinion_node.refresh_from_db()
         child_node.refresh_from_db()
 
-        flat_intuition = child_opinion.get_flat_node(
-            theory_node=self.intuition)
+        flat_intuition = child_opinion.get_flat_node(theory_node=self.intuition)
         self.assertEqual(child_opinion.true_points(), 0.8)
         self.assertEqual(child_opinion.false_points(), 0.2)
         self.assertEqual(flat_intuition.true_points(), 0.0)
@@ -1552,9 +1486,7 @@ class OpinionTests(TestCase):
         self.assertEqual(opinion.false_points(), 0.2)
 
     def test_update_points_subtheory23(self):
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=80,
@@ -1575,8 +1507,7 @@ class OpinionTests(TestCase):
         opinion_node.refresh_from_db()
         child_node.refresh_from_db()
 
-        flat_intuition = child_opinion.get_flat_node(
-            theory_node=self.intuition)
+        flat_intuition = child_opinion.get_flat_node(theory_node=self.intuition)
         self.assertEqual(child_opinion.true_points(), 0.8)
         self.assertEqual(child_opinion.false_points(), 0.2)
         self.assertEqual(flat_intuition.true_points(), 0.0)
@@ -1646,33 +1577,25 @@ class OpinionTests(TestCase):
 
         # blah
         copied_opinion = opinion.copy(self.user)
-        copied_node = copied_opinion.get_nodes().get(
-            theory_node=opinion_node.theory_node)
-        copied_child = get_or_none(
-            self.subtheory.get_opinions(), user=self.user)
+        copied_node = copied_opinion.get_nodes().get(theory_node=opinion_node.theory_node)
+        copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
         self.assertEqual(copied_opinion.true_points(), opinion.true_points())
         self.assertEqual(copied_node.tt_input, opinion_node.tt_input)
         self.assertEqual(copied_node.ff_input, opinion_node.ff_input)
-        self.assertNotEqual(copied_child.true_points(),
-                            child_opinion.true_points())
+        self.assertNotEqual(copied_child.true_points(), child_opinion.true_points())
 
         # blah
         copied_opinion = opinion.copy(self.user, recursive=True)
-        copied_node = copied_opinion.get_nodes().get(
-            theory_node=opinion_node.theory_node)
-        copied_child = get_or_none(
-            self.subtheory.get_opinions(), user=self.user)
+        copied_node = copied_opinion.get_nodes().get(theory_node=opinion_node.theory_node)
+        copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
         self.assertEqual(copied_opinion.true_points(), opinion.true_points())
         self.assertEqual(copied_node.tt_input, opinion_node.tt_input)
         self.assertEqual(copied_node.ff_input, opinion_node.ff_input)
-        self.assertEqual(copied_child.true_points(),
-                         child_opinion.true_points())
+        self.assertEqual(copied_child.true_points(), child_opinion.true_points())
 
     def test_true_points(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=80,
@@ -1698,9 +1621,7 @@ class OpinionTests(TestCase):
 
     def test_false_points(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.user,
-        )
+        opinion = self.theory.opinions.create(user=self.user,)
         opinion_node = opinion.nodes.create(
             theory_node=self.subtheory,
             tt_input=80,
@@ -1754,7 +1675,11 @@ class OpinionTests(TestCase):
         assert hit_count.hits == 0
 
         # blah
-        url = reverse('theories:opinion-detail', kwargs={'pk':opinion.theory.pk, 'slug': opinion.pk})
+        url = reverse('theories:opinion-detail',
+                      kwargs={
+                          'pk': opinion.theory.pk,
+                          'slug': opinion.pk
+                      })
         self.client.get(url)
         hit_count = HitCount.objects.get_for_object(opinion)
         self.assertEqual(hit_count.hits, 1)
@@ -1800,18 +1725,18 @@ class OpinionNodeTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
-        self.sub_opinion = create_test_opinion(
-            theory=self.subtheory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
+        self.sub_opinion = create_test_opinion(theory=self.subtheory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.opinion_node = self.opinion.get_node(self.fact)
 
@@ -1910,16 +1835,17 @@ class StatsTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
 
     def test_str(self):
@@ -2015,9 +1941,7 @@ class StatsTests(TestCase):
 
     def test_add_opinion(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.bob,
-        )
+        opinion = self.theory.opinions.create(user=self.bob,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=20,
@@ -2078,9 +2002,7 @@ class StatsTests(TestCase):
 
     def test_total_points(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.bob,
-        )
+        opinion = self.theory.opinions.create(user=self.bob,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=20,
@@ -2095,9 +2017,7 @@ class StatsTests(TestCase):
 
     def test_true_points(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.bob,
-        )
+        opinion = self.theory.opinions.create(user=self.bob,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=20,
@@ -2112,9 +2032,7 @@ class StatsTests(TestCase):
 
     def test_false_points(self):
         # setup
-        opinion = self.theory.opinions.create(
-            user=self.bob,
-        )
+        opinion = self.theory.opinions.create(user=self.bob,)
         opinion_node = opinion.nodes.create(
             theory_node=self.fact,
             tt_input=20,
@@ -2186,16 +2104,17 @@ class StatsNodeTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_node(self.fact)
 
@@ -2262,16 +2181,17 @@ class StatsFlatNodeTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
@@ -2329,16 +2249,17 @@ class TheoryPointerBaseTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
@@ -2411,16 +2332,17 @@ class NodePointerBaseTests(TestCase):
 
         # create data
         self.theory = create_test_theory(created_by=self.user)
-        self.subtheory = create_test_subtheory(
-            parent_theory=self.theory, created_by=self.user)
-        self.evidence = create_test_evidence(
-            parent_theory=self.subtheory, created_by=self.user)
-        self.fact = create_test_evidence(
-            parent_theory=self.theory, title='Fact', fact=True, created_by=self.user)
-        self.fiction = create_test_evidence(
-            parent_theory=self.theory, title='Fiction', fact=False, created_by=self.user)
-        self.opinion = create_test_opinion(
-            theory=self.theory, user=self.user, nodes=True)
+        self.subtheory = create_test_subtheory(parent_theory=self.theory, created_by=self.user)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory, created_by=self.user)
+        self.fact = create_test_evidence(parent_theory=self.theory,
+                                         title='Fact',
+                                         fact=True,
+                                         created_by=self.user)
+        self.fiction = create_test_evidence(parent_theory=self.theory,
+                                            title='Fiction',
+                                            fact=False,
+                                            created_by=self.user)
+        self.opinion = create_test_opinion(theory=self.theory, user=self.user, nodes=True)
         self.stats = self.theory.get_stats(Stats.TYPE.ALL)
         self.stats_node = self.stats.get_flat_node(self.fact)
 
