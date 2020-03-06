@@ -23,15 +23,17 @@ from django.urls import reverse
 from django.contrib import auth
 from django.shortcuts import get_object_or_404, render, redirect
 from django.utils import timezone
-from actstream.actions import follow
 
-from theories.models import *
-from theories.forms import *
+from actstream.actions import follow
+from hitcount.models import HitCount
+
+from theories.models import Category, TheoryNode, Opinion, Stats
+from theories.models import OpinionNode, StatsNode, StatsFlatNode
 from theories.utils import create_categories, create_reserved_nodes
 from theories.test_utils import get_or_create_subtheory, get_or_create_evidence, create_test_opinion
 from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_groups_and_permissions, create_test_user
-from theories.views import *
+from core.utils import get_or_none
 
 # *******************************************************************************
 # Defines
@@ -58,6 +60,7 @@ class CategoryTests(TestCase):
         create_groups_and_permissions()
         create_reserved_nodes()
         create_categories()
+        TheoryNode.update_intuition_node()
 
         # Create user(s)
         self.bob = create_test_user(username='bob', password='1234')

@@ -30,7 +30,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from model_utils import Choices
 from users.utils import get_group
-from core.utils import get_or_none
+from core.utils import timezone_today, get_or_none
 
 # *******************************************************************************
 # Classes
@@ -224,7 +224,7 @@ class User(AbstractUser):
         """
         if self.birth_date is not None and self.birth_date_visible:
             born = self.birth_date
-            today = datetime.date.today()
+            today = timezone_today()
             return today.year - born.year - ((today.month, today.day) < (born.month, born.day))
         return 'N/A'
 
@@ -334,10 +334,10 @@ class User(AbstractUser):
         if recent and expired:
             pass
         elif recent:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__gte=date00)
         elif expired:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__lt=date00)
 
         # done
@@ -510,8 +510,8 @@ class Violation(models.Model):
     content = GenericForeignKey('content_type', 'object_id')
 
     status = models.SmallIntegerField(choices=STATUS)
-    pub_date = models.DateTimeField()
-    modified_date = models.DateTimeField()
+    pub_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(models.SET_NULL, blank=True, null=True)
 
     # Cache attributes
     saved_count = None
@@ -565,8 +565,6 @@ class Violation(models.Model):
             [type]: [description]
         """
         self.modified_date = timezone.now()
-        if self.pk is None:
-            self.pub_date = timezone.now()
         super().save(*args, **kwargs)
         return self
 
@@ -727,7 +725,7 @@ class Violation(models.Model):
         if self.is_closed():
             return True
         else:
-            today = datetime.datetime.today()
+            today = timezone_today(timezone=timezone.utc)
             end = self.pub_date + datetime.timedelta(days=10)
             end = datetime.datetime(year=end.year,
                                     month=end.month,

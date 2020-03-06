@@ -18,12 +18,14 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 import re
 import enum
+import datetime
 
-from actstream import action
-from actstream.models import Action
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.http import urlencode
+
+from actstream import action
+from actstream.models import Action
 from notifications.signals import notify
 
 # *******************************************************************************
@@ -42,6 +44,11 @@ class LogDiffResult(enum.Enum):
 # *******************************************************************************
 # General methods
 # *******************************************************************************
+
+
+def timezone_today():
+    now = timezone.now()
+    return datetime.date(now.year, now.month, now.day)
 
 
 def string_to_list(input_string, braces='[]'):

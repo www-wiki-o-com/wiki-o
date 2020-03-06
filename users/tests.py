@@ -15,8 +15,6 @@ A web service for sharing opinions and avoiding arguments
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import datetime
-
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib import auth
@@ -24,7 +22,7 @@ from notifications.signals import notify
 
 from theories.utils import *
 from users.maintence import create_test_user
-from core.utils import get_form_data
+from core.utils import timezone_today, get_form_data
 
 # *******************************************************************************
 # Defines
@@ -258,7 +256,7 @@ class UserViews(TestCase):
         post_data = {
             'username': 'Bobarinio',
             'fullname_visible': True,
-            'birth_date': datetime.date.today()
+            'birth_date': timezone_today()
         }
         self.verify_post_response(test_url, None, post_data, 302)
         self.user.refresh_from_db()

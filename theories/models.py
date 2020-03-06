@@ -231,7 +231,7 @@ class TheoryNode(models.Model):
     )
 
     # Variables
-    INTUITION_PK = 1
+    INTUITION_PK = -1
     node_type = models.SmallIntegerField(choices=TYPE)
     title00 = models.CharField(max_length=255, blank=True, null=True)
     title01 = models.CharField(max_length=255, unique=True)
@@ -439,7 +439,6 @@ class TheoryNode(models.Model):
             self.modified_date = timezone.now()
             if self.pk is None:
                 self.created_by = user
-                self.pub_date = timezone.now()
         super().save(*args, **kwargs)
         if self.is_theory():
             Stats.initialize(self)
@@ -837,6 +836,11 @@ class TheoryNode(models.Model):
         return False
 
     @classmethod
+    def update_intuition_node(cls, create=True):
+        if cls.INTUITION_PK < 0:
+            cls.get_intuition_node(create=True)
+
+    @classmethod
     def get_intuition_node(cls, create=True):
         """Creates and returns an intuition node."""
         # assume intuition_pk is known
@@ -848,10 +852,8 @@ class TheoryNode(models.Model):
             intuition_node = None
         # get or create
         if create and intuition_node is None:
-            intuition_node, created = cls.objects.get_or_create(
-                node_type=cls.TYPE.EVIDENCE,
-                title01='Intuition',
-            )
+            intuition_node, created = cls.objects.get_or_create(node_type=cls.TYPE.EVIDENCE,
+                                                                title01='Intuition')
             cls.INTUITION_PK = intuition_node.pk
         # blah
         return intuition_node
@@ -1166,10 +1168,10 @@ class TheoryNode(models.Model):
         if recent and expired:
             pass
         elif recent:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__gte=date00)
         elif expired:
-            date00 = datetime.date.today() - datetime.timedelta(days=100)
+            date00 = timezone.now() - datetime.timedelta(days=100)
             violations = violations.filter(pub_date__lt=date00)
 
         # done

@@ -67,7 +67,7 @@ class Command(BaseCommand):
         # Auto construct the archive name.
         archive_path = options['archive_path']
         if archive_path is None:
-            date = datetime.now().strftime('%Y.%m.%d')
+            date = timezone.now().strftime('%Y.%m.%d')
             site = options['site']
             if site is None:
                 site = socket.getfqdn()
