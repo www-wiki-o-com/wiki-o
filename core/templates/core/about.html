@@ -18,129 +18,135 @@ A web service for sharing opinions and avoiding arguments
 {% load extra %}
 
 {% block content %}
-  <div class="row">
+<div class="row">
 
-    <div class="col-lg-8">
+  <div class="col-lg-8">
 
-      <div class="card my-3">
-        <h5 class="card-header">About Wiki-O</h5>
-        <div class="card-body">
-          <p> Wiki-O is a platform for users to express their opinions and learn
+    <div class="card my-3">
+      <h5 class="card-header">About Wiki-O</h5>
+      <div class="card-body">
+        <p> Wiki-O is a platform for users to express their opinions and learn
           about other opinions, all while avoiding argumentments. This is
           achieved by cutting of direct communication between the users and
           instead having them visually share the set of evidence and theories
           their opinion is based on. </p>
 
-          <p> This website provides a comprehensive set of tools for visualizing
+        <p> This website provides a comprehensive set of tools for visualizing
           opinions such as venn-diagrams, histograms, and pie charts. In this
           way for any given topic we can quickly and efficently interpret
           opinions as one-sided, contraversial, baseless, and so on.</p>
-        </div>
       </div>
-
-      <div class="card my-3">
-        <h5 class="card-header">Wiki-O Trivia</h5>
-        <div class="card-body">
-          <ul>
-            <li> Wiki-O was named after <a href =
-                 "https://en.wikipedia.org/wiki/Riki-Oh:_The_Story_of_Ricky"> Riki-Oh
-                 </a>, the famous eastern philosopher that left no argument unsettled.
-                 </li>
-            <li> Riki-Oh was the man. </li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="card my-3">
-        <h5 class="card-header">Our Team</h5>
-        <div class="card-body">
-          <br/>
-
-          <div class="row">
-            <div class="col-3 text-center">
-              <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/frank_imeson.jpg' %}" alt="">
-            </div>
-            <div class="col-0.5"/></div>
-            <div class="col-8 text-justify align-self-center">
-              <h5>Frank Imeson: Inventor/Developer</h5>
-              <p> I had this idea of how to share opinions without arguments and
-                  here we are now. Currently, I'm the only developer and so I
-                  need help, please! </p>
-
-              <p> So far all potential positions are volunteer... sorry. </p>
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-3 text-center">
-              <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
-            </div>
-            <div class="col-0.5"/></div>
-            <div class="col-8 text-justify align-self-center">
-              <h5>Co-Developer</h5>
-              We need another experienced web designer that is proficient in
-              Django and has experience following coding guidelines.
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-3 text-center">
-              <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
-            </div>
-            <div class="col-0.5"/></div>
-            <div class="col-8 text-justify align-self-center">
-              <h5>Webmaster</h5>
-              We need an experienced webmaster to manage server side resources
-              and software to make sure that the website is secure and
-              accessible.
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-3 text-center">
-              <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
-            </div>
-            <div class="col-0.5"/></div>
-            <div class="col-8 text-justify align-self-center">
-              <h5>Promoter</h5>
-              We need someone experienced to consult with and or manage the
-              promotion side of Wiki-O.
-            </div>
-          </div>
-
-          <div class="row">
-            <div class="col-3 text-center">
-              <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
-            </div>
-            <div class="col-0.5"/></div>
-            <div class="col-8 text-justify align-self-center">
-              <h5>User Liaison</h5>
-              We need someone to review user feedback, interface with the users,
-              report bugs, and be a part of the design team for the user
-              interface.
-            </div>
-          </div>
-
-        </div>
-      </div>
-
     </div>
 
-    <!-- Sidebar Widgets Column -->
-    <div class="col-lg-4">
+    <div class="card my-3">
+      <h5 class="card-header">Wiki-O Trivia</h5>
+      <div class="card-body">
+        <ul>
+          <li> Wiki-O was named after <a href="https://en.wikipedia.org/wiki/Riki-Oh:_The_Story_of_Ricky"> Riki-Oh
+            </a>, the famous eastern philosopher that left no argument unsettled.
+          </li>
+          <li> Riki-Oh was the man. </li>
+        </ul>
+      </div>
+    </div>
 
-      <!-- Riki-Oh Widget -->
-      <div class="card my-3">
-        <h5 class="card-header text-center">Riki-Oh</h5>
-        <div class="card-body">
-          <img src="{% static 'core/img/profiles/riki-oh.jpg' %}" class="img-fluid" alt="Responsive image">
-          <h6 style="padding-top:1ex"> Our light to guide us through the darkness. </h6>
+    <div class="card my-3">
+      <h5 class="card-header">Our Team</h5>
+      <div class="card-body">
+        <br />
+
+        <div class="row">
+          <div class="col-3 text-center">
+            <img class="rounded-circle img-fluid d-block mx-auto"
+              src="{% static 'core/img/profiles/frank_imeson.jpg' %}" alt="">
+          </div>
+          <div class="col-0.5" />
+        </div>
+        <div class="col-8 text-justify align-self-center">
+          <h5>Frank Imeson: Inventor/Developer</h5>
+          <p> I had this idea of how to share opinions without arguments and
+            here we are now. Currently, I'm the only developer and so I
+            need help, please! </p>
+
+          <p> So far all potential positions are volunteer... sorry. </p>
         </div>
       </div>
 
-    </div>  <!-- end row -->
-  </div>  <!-- /.container -->
+      <div class="row">
+        <div class="col-3 text-center">
+          <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}"
+            alt="">
+        </div>
+        <div class="col-0.5" />
+      </div>
+      <div class="col-8 text-justify align-self-center">
+        <h5>Co-Developer</h5>
+        We need another experienced web designer that is proficient in
+        Django and has experience following coding guidelines.
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-3 text-center">
+        <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}"
+          alt="">
+      </div>
+      <div class="col-0.5" />
+    </div>
+    <div class="col-8 text-justify align-self-center">
+      <h5>Webmaster</h5>
+      We need an experienced webmaster to manage server side resources
+      and software to make sure that the website is secure and
+      accessible.
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-3 text-center">
+      <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
+    </div>
+    <div class="col-0.5" />
+  </div>
+  <div class="col-8 text-justify align-self-center">
+    <h5>Promoter</h5>
+    We need someone experienced to consult with and or manage the
+    promotion side of Wiki-O.
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-3 text-center">
+    <img class="rounded-circle img-fluid d-block mx-auto" src="{% static 'core/img/profiles/anonymous.jpg' %}" alt="">
+  </div>
+  <div class="col-0.5" />
+</div>
+<div class="col-8 text-justify align-self-center">
+  <h5>User Liaison</h5>
+  We need someone to review user feedback, interface with the users,
+  report bugs, and be a part of the design team for the user
+  interface.
+</div>
+</div>
+
+</div>
+</div>
+
+</div>
+
+<!-- Sidebar Widgets Column -->
+<div class="col-lg-4">
+
+  <!-- Riki-Oh Widget -->
+  <div class="card my-3">
+    <h5 class="card-header text-center">Riki-Oh</h5>
+    <div class="card-body">
+      <img src="{% static 'core/img/profiles/riki-oh.jpg' %}" class="img-fluid" alt="Responsive image">
+      <h6 style="padding-top:1ex"> Our light to guide us through the darkness. </h6>
+    </div>
+  </div>
+
+</div> <!-- end row -->
+</div> <!-- /.container -->
 
 
 {% endblock %}
-

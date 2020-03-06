@@ -53,6 +53,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
+        print("Cleaning up the categories.")
 
         # Clean up categories.
         if options['categories']:

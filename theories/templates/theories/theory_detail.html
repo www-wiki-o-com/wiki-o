@@ -24,212 +24,223 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
 
-  <!-- Title -->
-  <h2 style="margin-bottom:0ex; padding-bottom:0ex">
-    {% if theory.is_deleted %}
-      <strike>{{ theory }}</strike>
-    {% else %}
-      {{ theory }}
-    {% endif %}
-  </h2>
+<!-- Title -->
+<h2 style="margin-bottom:0ex; padding-bottom:0ex">
+  {% if theory.is_deleted %}
+  <strike>{{ theory }}</strike>
+  {% else %}
+  {{ theory }}
+  {% endif %}
+</h2>
 
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
-      <div class="my-3"> <!-- Main Card -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
+    <div class="my-3">
+      <!-- Main Card -->
 
-        <!-- Details -->
-        <div style="text-align: justify">{{  theory.details|long_details }}</div>
+      <!-- Details -->
+      <div style="text-align: justify">{{  theory.details|long_details }}</div>
 
-        <!-- Nodes -->
-        {% if theory_nodes %}
-          <!-- Heading -->
-          <h4> Evidence: </h4>
-          <table style="margin-left: 1em">
-              <thead>
-                <tr>
-                  <td width="17"/>
-                  <td width="17"/>
-                  <td/>
-                </tr>
-              </thead>
-            <tbody align="left" valign="top">
-                {% for node in theory_nodes %}
-                  <tr>
-                    <!-- Link -->
-                    <td> {% include "include/link.html" with x=node %} </td>
-                    <!-- Info -->
-                    <td> {% include "include/info.html" with x=node %} </td>
-                    <!-- Description -->
-                    <td style="padding-left:5px;">
-                      <a class="plain" href="{{ node.url|add:params.get_next }}">
-                      {% if node.is_deleted %}
-                        <strike>{{ node }}</strike>
-                      {% else %}
-                        {{ node }}
-                      {% endif %}
-                      </a>
-                    </td>
-                  </tr>
-                {% endfor %}
-            </tbody>
-          </table>
-          {% include "include/paginator.html" with list=theory_nodes %}
-        {% else %}
-          No evidence.
-        {% endif %}
-        {% if prev %}
-          <a href="{{ prev }}">Go to parent theory.</a>
-        {% endif %}
+      <!-- Nodes -->
+      {% if theory_nodes %}
+      <!-- Heading -->
+      <h4> Evidence: </h4>
+      <table style="margin-left: 1em">
+        <thead>
+          <tr>
+            <td width="17" />
+            <td width="17" />
+            <td />
+          </tr>
+        </thead>
+        <tbody align="left" valign="top">
+          {% for node in theory_nodes %}
+          <tr>
+            <!-- Link -->
+            <td> {% include "include/link.html" with x=node %} </td>
+            <!-- Info -->
+            <td> {% include "include/info.html" with x=node %} </td>
+            <!-- Description -->
+            <td style="padding-left:5px;">
+              <a class="plain" href="{{ node.url|add:params.get_next }}">
+                {% if node.is_deleted %}
+                <strike>{{ node }}</strike>
+                {% else %}
+                {{ node }}
+                {% endif %}
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% include "include/paginator.html" with list=theory_nodes %}
+      {% else %}
+      No evidence.
+      {% endif %}
+      {% if prev %}
+      <a href="{{ prev }}">Go to parent theory.</a>
+      {% endif %}
 
-      </div> <!-- end card -->
-    </div> <!-- end column -->
-    <div class="col-lg-4"> <!-- Sidebar Column -->
+    </div> <!-- end card -->
+  </div> <!-- end column -->
+  <div class="col-lg-4">
+    <!-- Sidebar Column -->
 
-      <!-- Actions -->
-      <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0">
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
 
-            <!-- Edit -->
-            {% has_perm 'theories.change_theorynode' user theory as can_edit %}
-            {% if can_edit %}
-              <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
-            {% endif %}
+          <!-- Edit -->
+          {% has_perm 'theories.change_theorynode' user theory as can_edit %}
+          {% if can_edit %}
+          <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
+          {% endif %}
 
-            <li><a href="{% url 'theories:opinion-index' theory.pk 'all' %}">Browse Opinions</a></li>
+          <li><a href="{% url 'theories:opinion-index' theory.pk 'all' %}">Browse Opinions</a></li>
 
-            <!-- Activity -->
-            <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> View Activity Log </a></li>
+          <!-- Activity -->
+          <li><a href="{% url_extra 'theories:theory-activity' theory.id extra=params %}"> View Activity Log </a></li>
 
-            <!-- Report -->
-            <li><a href="{% url_extra 'theories:theory-report' theory.id extra=params %}"> Report a Violation </a></li>
+          <!-- Report -->
+          <li><a href="{% url_extra 'theories:theory-report' theory.id extra=params %}"> Report a Violation </a></li>
 
+        </ul>
+      </div>
+    </div>
+
+    <!-- Opinions -->
+    <div class="card my-3">
+      <h5 class="card-header">
+        Opinions
+      </h5>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+          <!-- My Opinion -->
+          {% if user.is_authenticated %}
+          <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
+          {% endif %}
+          <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />
+          <!-- Opinion Groups -->
+          <li><a href="{{ opinions.supporters.url|add:params }}">Supporters <div class="float-right">
+                {{ opinions.supporters.opinions.count }}</div></a></li>
+          <li><a href="{{ opinions.moderates.url|add:params }}">Moderates <div class="float-right">
+                {{ opinions.moderates.opinions.count }}</a></li>
+          <li><a href="{{ opinions.opposers.url|add:params }}">Opposers <div class="float-right">
+                {{ opinions.opposers.opinions.count }}</a></li>
+          <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />
+          <li><a href="{{ opinions.all.url|add:params }}">Everyone <div class="float-right">
+                {{ opinions.all.opinions.count }}</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Parent -->
+    <div class="card my-3">
+      <h5 class="card-header">Parent Theories</h5>
+      <div class="card-body">
+        <div class="row">
+          <ul>
+            {% for x in parent_theories %}
+            <li><a href="{{ x.url }}">{{ x }}</a></li>
+            {% endfor %}
           </ul>
         </div>
       </div>
+    </div>
 
-      <!-- Opinions -->
-      <div class="card my-3">
-        <h5 class="card-header">
-          Opinions
-        </h5>
-        <div class="card-body">
-          <ul class="list-unstyled mb-0">
-            <!-- My Opinion -->
-            {% if user.is_authenticated %}
-              <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
-            {% endif %}
-            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
-            <!-- Opinion Groups -->
-            <li><a href="{{ opinions.supporters.url|add:params }}">Supporters <div class="float-right">{{ opinions.supporters.opinions.count }}</div></a></li>
-            <li><a href="{{ opinions.moderates.url|add:params }}">Moderates <div class="float-right">{{ opinions.moderates.opinions.count }}</a></li>
-            <li><a href="{{ opinions.opposers.url|add:params }}">Opposers <div class="float-right">{{ opinions.opposers.opinions.count }}</a></li>
-            <hr style="margin-top:0.5ex; margin-bottom:0.5ex;"/>
-            <li><a href="{{ opinions.all.url|add:params }}">Everyone <div class="float-right">{{ opinions.all.opinions.count }}</a></li>
-          </ul>
-        </div>
-      </div>
-
-      <!-- Parent -->
-      <div class="card my-3">
-        <h5 class="card-header">Parent Theories</h5>
-        <div class="card-body">
-          <div class="row">
-            <ul>
-              {% for x in parent_theories %}
-                <li><a href="{{ x.url }}">{{ x }}</a></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      </div>
-
-      <!-- Social Media -->
-      <div class="card my-3">
-        <h5 class="card-header">Social Media</h5>
-        <div class="card-body">
-          {% with request.build_absolute_uri as share_url %}
-          <div class="row">
-            <ul>
-              <li><a href="https://www.facebook.com/dialog/feed?app_id=416673199079931&display=popup&link={{ share_url }}">
+    <!-- Social Media -->
+    <div class="card my-3">
+      <h5 class="card-header">Social Media</h5>
+      <div class="card-body">
+        {% with request.build_absolute_uri as share_url %}
+        <div class="row">
+          <ul>
+            <li><a
+                href="https://www.facebook.com/dialog/feed?app_id=416673199079931&display=popup&link={{ share_url }}">
                 Share on Facebook
               </a></li>
-            </ul>
-          </div>
-          {% endwith %}
+          </ul>
         </div>
+        {% endwith %}
       </div>
+    </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
 
 
 {% block extra_modals %}
 
-  <!-- Delete -->
-  <div class="modal" id="del_modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
+<!-- Delete -->
+<div class="modal" id="del_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
 
-        <!-- Header -->
-        <div class="modal-header">
-          <h4 class="modal-title">Please confirm</h4>
-          <button type="button" class="close" data-dismiss="modal">&times;</button>
-        </div>
+      <!-- Header -->
+      <div class="modal-header">
+        <h4 class="modal-title">Please confirm</h4>
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+      </div>
 
-        <!-- body -->
-        <div class="modal-body">
-          {% if params.path %}
-            Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
-            <b>remove</b> to remove from parent theory or <b>delete</b> to
-            remove from all theories.
-          {% else %}
-            Are you sure you want to delete "{{ theory }}"?
-          {% endif %}
-        </div>
+      <!-- body -->
+      <div class="modal-body">
+        {% if params.path %}
+        Are you sure you want to delete &ldquo;{{ theory }}&rdquo;? Choose
+        <b>remove</b> to remove from parent theory or <b>delete</b> to
+        remove from all theories.
+        {% else %}
+        Are you sure you want to delete "{{ theory }}"?
+        {% endif %}
+      </div>
 
-        <!-- footer -->
-        <div class="modal-footer">
+      <!-- footer -->
+      <div class="modal-footer">
 
-          <!-- remove edge -->
-          {% if params.path %}
-            {% has_perm 'theories.delete_edge' user theory as can_remove %}
-            <form action="{% url_extra 'theories:theory-remove' theory.id extra=params %}" method="post">
-              {% csrf_token %}
-              <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled {% endif %}>
-            </form>
-          {% endif %}
+        <!-- remove edge -->
+        {% if params.path %}
+        {% has_perm 'theories.delete_edge' user theory as can_remove %}
+        <form action="{% url_extra 'theories:theory-remove' theory.id extra=params %}" method="post">
+          {% csrf_token %}
+          <input type="submit" class="btn btn-danger" name="remove" value="Remove" {% if not can_remove %} disabled
+            {% endif %}>
+        </form>
+        {% endif %}
 
-          <!-- full delete -->
-          {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
-          <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
-            {% csrf_token %}
-            <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled {% endif %}>
-          </form>
+        <!-- full delete -->
+        {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+        <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
+          {% csrf_token %}
+          <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled
+            {% endif %}>
+        </form>
 
-          <!-- cancel -->
-          <button type="button" class="btn" data-dismiss="modal">No</button>
-
-        </div>
+        <!-- cancel -->
+        <button type="button" class="btn" data-dismiss="modal">No</button>
 
       </div>
+
     </div>
   </div>
+</div>
 
 {% endblock extra_modals %}
 
 
 {% block extra_js %}
-  <script>
-    function HideElement(id) {
-      var div = document.getElementById(id);
-      if (div.style.display === 'none') {
-        div.style.display = 'block';
-      } else {
-        div.style.display = 'none';
-      }
+<script>
+  function HideElement(id) {
+    var div = document.getElementById(id);
+    if (div.style.display === 'none') {
+      div.style.display = 'block';
+    } else {
+      div.style.display = 'none';
     }
-  </script>
+  }
+</script>
 {% endblock extra_js %}

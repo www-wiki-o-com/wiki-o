@@ -23,77 +23,76 @@ A web service for sharing opinions and avoiding arguments
     <!-- Edit Evidence -->
     {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
     {% if can_edit %}
-      <li class="nav-item">
-        {% if EvidenceTab %}
-          <a class="nav-link active">
-            Edit
-          </a>
-        {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}">
-            Edit
-          </a>
-        {% endif %}
-      </li>
+    <li class="nav-item">
+      {% if EvidenceTab %}
+      <a class="nav-link active">
+        Edit
+      </a>
+      {% else %}
+      <a class="nav-link" href="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}">
+        Edit
+      </a>
+      {% endif %}
+    </li>
     {% endif %}
 
     <!-- Merge -->
     {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
     {% if can_merge %}
-      <li class="nav-item">
-        {% if MergeTab %}
-          <a class="nav-link active">
-            Merge
-          </a>
-        {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-merge' evidence.id extra=params %}">
-            Merge
-          </a>
-        {% endif %}
-      </li>
+    <li class="nav-item">
+      {% if MergeTab %}
+      <a class="nav-link active">
+        Merge
+      </a>
+      {% else %}
+      <a class="nav-link" href="{% url_extra 'theories:evidence-merge' evidence.id extra=params %}">
+        Merge
+      </a>
+      {% endif %}
+    </li>
     {% endif %}
 
     <!-- Restore -->
     {% has_perm 'theories.restore_theorynode' user evidence as can_restore %}
     {% if evidence.get_revisions %}
-      <li class="nav-item">
-        {% if RestoreTab %}
-          <a class="nav-link active">
-            Restore
-          </a>
-        {% else %}
-          <a class="nav-link" href="{% url_extra 'theories:evidence-restore' evidence.id extra=params %}">
-            Restore
-          </a>
-        {% endif %}
-      </li>
+    <li class="nav-item">
+      {% if RestoreTab %}
+      <a class="nav-link active">
+        Restore
+      </a>
+      {% else %}
+      <a class="nav-link" href="{% url_extra 'theories:evidence-restore' evidence.id extra=params %}">
+        Restore
+      </a>
+      {% endif %}
+    </li>
     {% endif %}
 
     <!-- Activity -->
     <li class="nav-item">
       {% if ActivityTab %}
-        <a class="nav-link active">
-          Activity
-        </a>
+      <a class="nav-link active">
+        Activity
+      </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:evidence-activity' evidence.id extra=params %}">
-          Activity
-        </a>
+      <a class="nav-link" href="{% url_extra 'theories:evidence-activity' evidence.id extra=params %}">
+        Activity
+      </a>
       {% endif %}
     </li>
 
     <!-- Report -->
     <li class="nav-item">
       {% if ReportTab %}
-        <a class="nav-link active">
-          Report
-        </a>
+      <a class="nav-link active">
+        Report
+      </a>
       {% else %}
-        <a class="nav-link" href="{% url_extra 'theories:evidence-report' evidence.id extra=params %}">
-          Report
-        </a>
+      <a class="nav-link" href="{% url_extra 'theories:evidence-report' evidence.id extra=params %}">
+        Report
+      </a>
       {% endif %}
     </li>
 
   </ul>
 </div>
-

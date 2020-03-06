@@ -14,34 +14,34 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% if list.paginator.num_pages > 1 %}
-  <div class="pagination">
-    <span class="step-links">
-      <!-- prev -->
-      {% if list.has_previous %}
-        <a href="?page=1">&laquo;</a>
-        <a href="?page={{ list.previous_page_number }}">prev</a>
+<div class="pagination">
+  <span class="step-links">
+    <!-- prev -->
+    {% if list.has_previous %}
+    <a href="?page=1">&laquo;</a>
+    <a href="?page={{ list.previous_page_number }}">prev</a>
+    {% else %}
+    &laquo;
+    prev
+    {% endif %}
+    <!-- pages -->
+    <span class="pages">
+      {% for x in list.page_list %}
+      {% if x == list.number %}
+      {{ x }}
       {% else %}
-        &laquo;
-        prev
+      <a href="?page={{ x }}">{{ x }}</a>
       {% endif %}
-      <!-- pages -->
-      <span class="pages">
-        {% for x in list.page_list %}
-          {% if x == list.number %}
-            {{ x }}
-          {% else %}
-            <a href="?page={{ x }}">{{ x }}</a>
-          {% endif %}
-        {% endfor %}
-      </span>
-      <!-- next -->
-      {% if list.has_next %}
-        <a href="?page={{ list.next_page_number }}">next</a>
-        <a href="?page={{ list.paginator.num_pages }}">&raquo;</a>
-      {% else %}
-        next
-        &raquo;
-      {% endif %}
+      {% endfor %}
     </span>
-  </div>
+    <!-- next -->
+    {% if list.has_next %}
+    <a href="?page={{ list.next_page_number }}">next</a>
+    <a href="?page={{ list.paginator.num_pages }}">&raquo;</a>
+    {% else %}
+    next
+    &raquo;
+    {% endif %}
+  </span>
+</div>
 {% endif %}

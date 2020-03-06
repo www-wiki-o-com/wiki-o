@@ -23,67 +23,68 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
 
-  <!-- Title -->
-  <h3><br>{{ theory }}</h3>
-  {% include "theories/theory_edit_tabs.html" with EvidenceTab=True %}
+<!-- Title -->
+<h3><br>{{ theory }}</h3>
+{% include "theories/theory_edit_tabs.html" with EvidenceTab=True %}
 
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:theory-edit-evidence' theory.id extra=params %}" method="post">
-        {% csrf_token %}
-        {{ formset.management_form }}
-        {% for form in formset %}
-          <div class="card my-3">
-            <div class="card-header">
-              <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-                 href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
-                <img src="{% static 'core/img/expand.svg' %}" height='13'>
-                &nbsp
-                {% if form.instance.id %}
-                  {{ form.instance }}
-                {% else %}
-                  New
-                {% endif %}
-              </a>
-            </div>
-            <div class="collapse" id="form{{forloop.counter}}">
-              <div class="card card-body">
-                {{ form|crispy }}
-              </div>
-            </div>
-          </div>
-        {% endfor %}
-        {% include "include/paginator.html" with list=evidence_nodes %}
-
-        <!-- Buttons -->
-        <center>
-          <!-- Back -->
-          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
-
-          <!-- Save -->
-          {% has_perm 'theories.add_theorynode' user as can_add %}
-          <input type="submit" name="save" value="Save" {% if not can_add %} disabled {% endif %}>
-        </center>
-      </form>
-
-      <br>
-      {% include "theories/evidence_how2.html" %}
-
-    </div> <!-- end column -->
-    <div class="col-md-4"> <!-- Sidebar Column -->
-
-      <!-- Actions -->
+    <form action="{% url_extra 'theories:theory-edit-evidence' theory.id extra=params %}" method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      {% for form in formset %}
       <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="mb-0">
-          </ul>
+        <div class="card-header">
+          <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
+            aria-controls="form{{forloop.counter}}">
+            <img src="{% static 'core/img/expand.svg' %}" height='13'>
+            &nbsp
+            {% if form.instance.id %}
+            {{ form.instance }}
+            {% else %}
+            New
+            {% endif %}
+          </a>
+        </div>
+        <div class="collapse" id="form{{forloop.counter}}">
+          <div class="card card-body">
+            {{ form|crispy }}
+          </div>
         </div>
       </div>
+      {% endfor %}
+      {% include "include/paginator.html" with list=evidence_nodes %}
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+      <!-- Buttons -->
+      <center>
+        <!-- Back -->
+        <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+
+        <!-- Save -->
+        {% has_perm 'theories.add_theorynode' user as can_add %}
+        <input type="submit" name="save" value="Save" {% if not can_add %} disabled {% endif %}>
+      </center>
+    </form>
+
+    <br>
+    {% include "theories/evidence_how2.html" %}
+
+  </div> <!-- end column -->
+  <div class="col-md-4">
+    <!-- Sidebar Column -->
+
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="mb-0">
+        </ul>
+      </div>
+    </div>
+
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
-
-

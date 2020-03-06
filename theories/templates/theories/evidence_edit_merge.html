@@ -23,120 +23,123 @@ A web service for sharing opinions and avoiding arguments
 {% block header %}{% endblock %}
 {% block content %}
 
-  <!-- Title -->
-  <h3><br>{{ evidence }}</h3>
-  {% with MergeTab=True %}
-    {% include "theories/evidence_edit_tabs.html" %}
-  {% endwith %}
+<!-- Title -->
+<h3><br>{{ evidence }}</h3>
+{% with MergeTab=True %}
+{% include "theories/evidence_edit_tabs.html" %}
+{% endwith %}
 
-  <div class="row"> <!-- Row -->
-    <div class="col-lg-8"> <!-- Main Column -->
+<div class="row">
+  <!-- Row -->
+  <div class="col-lg-8">
+    <!-- Main Column -->
 
-      <form action="{% url_extra 'theories:evidence-merge' evidence.id extra=params %}" method="post">
-        {% csrf_token %}
-        {{ formset.management_form }}
-        <div class="card my-3">
-          <h5 class="card-header">
-            Merge:
-          </h5>
-          <div class="card card-body">
-            <table>
-              <!-- errors -->
-              {% include "include/formset_errors.html" with formset=formset %}
-              <tbody align="left" valign="top">
-                {% for form in formset %}
-                  <tr>
-                    {{ form.id }}
-                    <td style="text-align:center">{{ form.select }}</td>
-                    <td/>
-                    <td>{{ form.instance }}</td>
-                  </tr>
-                {% endfor %}
-                <td><br></td>
-              </tbody>
-            </table>
-          </div>
+    <form action="{% url_extra 'theories:evidence-merge' evidence.id extra=params %}" method="post">
+      {% csrf_token %}
+      {{ formset.management_form }}
+      <div class="card my-3">
+        <h5 class="card-header">
+          Merge:
+        </h5>
+        <div class="card card-body">
+          <table>
+            <!-- errors -->
+            {% include "include/formset_errors.html" with formset=formset %}
+            <tbody align="left" valign="top">
+              {% for form in formset %}
+              <tr>
+                {{ form.id }}
+                <td style="text-align:center">{{ form.select }}</td>
+                <td />
+                <td>{{ form.instance }}</td>
+              </tr>
+              {% endfor %}
+              <td><br></td>
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <!-- Buttons -->
-        <center>
+      <!-- Buttons -->
+      <center>
 
-          <!-- Back -->
-          <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
+        <!-- Back -->
+        <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
-          <!-- Merge -->
-          {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
-          <button type="button" data-toggle="modal" data-target="#merge_modal" {% if not can_merge %} disabled {% endif %}>
-            Merge
-          </button>
+        <!-- Merge -->
+        {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
+        <button type="button" data-toggle="modal" data-target="#merge_modal" {% if not can_merge %} disabled
+          {% endif %}>
+          Merge
+        </button>
 
-        </center>
+      </center>
 
 
-        <!-- Merge Modal -->
-        <div class="modal" id="merge_modal">
-          <div class="modal-dialog">
-            <div class="modal-content">
+      <!-- Merge Modal -->
+      <div class="modal" id="merge_modal">
+        <div class="modal-dialog">
+          <div class="modal-content">
 
-              <!-- Header -->
-              <div class="modal-header">
-                <h4 class="modal-title">Please confirm</h4>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-              </div>
-
-              <!-- body -->
-              <div class="modal-body">
-                This is an irreversible procedure that effects user opinions.
-                <b>Manually merge the information</b> from the merged evidence
-                before this step and <b>ensure</b> the merged nodes are all
-                <b>equivent</b> to &ldquo;{{ evidence }}&rdquo;
-              </div>
-
-              <!-- footer -->
-              <div class="modal-footer">
-                {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
-                <input type="submit" class="btn btn-danger" name="merge" value="Yes" {% if not can_merge %} disabled {% endif %}>
-                <button type="button" class="btn" data-dismiss="modal">No</button>
-              </div>
-
+            <!-- Header -->
+            <div class="modal-header">
+              <h4 class="modal-title">Please confirm</h4>
+              <button type="button" class="close" data-dismiss="modal">&times;</button>
             </div>
-          </div>
-        </div>
 
-      </form>
+            <!-- body -->
+            <div class="modal-body">
+              This is an irreversible procedure that effects user opinions.
+              <b>Manually merge the information</b> from the merged evidence
+              before this step and <b>ensure</b> the merged nodes are all
+              <b>equivent</b> to &ldquo;{{ evidence }}&rdquo;
+            </div>
 
-    </div> <!-- end column -->
-    <div class="col-md-4"> <!-- Sidebar Column -->
+            <!-- footer -->
+            <div class="modal-footer">
+              {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
+              <input type="submit" class="btn btn-danger" name="merge" value="Yes" {% if not can_merge %} disabled
+                {% endif %}>
+              <button type="button" class="btn" data-dismiss="modal">No</button>
+            </div>
 
-      <!-- Actions -->
-      <div class="card my-3">
-        <h5 class="card-header">Actions</h5>
-        <div class="card-body">
-          <ul class="mb-0">
-          </ul>
-        </div>
-      </div>
-
-      <!-- Search -->
-      <div class="card my-3">
-        <h5 class="card-header">Search</h5>
-        <div class="card-body">
-          <div class="input-group">
-            <input type="text" class="form-control" placeholder="Search for...">
-            <span class="input-group-btn">
-              <button class="btn btn-secondary" type="button">Go!</button>
-            </span>
           </div>
         </div>
       </div>
 
-    </div> <!-- end column-->
-  </div> <!-- end row -->
+    </form>
+
+  </div> <!-- end column -->
+  <div class="col-md-4">
+    <!-- Sidebar Column -->
+
+    <!-- Actions -->
+    <div class="card my-3">
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="mb-0">
+        </ul>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card my-3">
+      <h5 class="card-header">Search</h5>
+      <div class="card-body">
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Search for...">
+          <span class="input-group-btn">
+            <button class="btn btn-secondary" type="button">Go!</button>
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- end column-->
+</div> <!-- end row -->
 {% endblock %}
 
 
 
 {% block extra_modals %}
 {% endblock %}
-
-

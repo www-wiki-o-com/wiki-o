@@ -14,12 +14,9 @@ A web service for sharing opinions and avoiding arguments
 
 
 {% if formset.errors %}
-  {% for error in formset.errors %}
-    <div class="alert alert-danger">
-      <strong>{{ error|escape }}</strong>
-    </div>
-  {% endfor %}
+{% for error in formset.errors %}
+<div class="alert alert-danger">
+  <strong>{{ error|escape }}</strong>
+</div>
+{% endfor %}
 {% endif %}
-
-
-

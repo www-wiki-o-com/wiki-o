@@ -24,28 +24,23 @@ A web service for sharing opinions and avoiding arguments
 {% block nav_right %}{% endblock %}
 
 {% block content %}
-  <div class="row">
-    <div class="col-lg-8">
-      <div class="card my-3">
-        <h5 class="card-header">Logout</h5>
-        <div class="card-body">
-          <p>{% trans 'Are you sure you want to sign out?' %}</p>
-          <form method="post" action="{% url 'account_logout' %}">
-            {% csrf_token %}
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
-            {% endif %}
-            <center>
-              <button type="submit"> Logout </button>
-            </center>
-          </form>
-        </div>
+<div class="row">
+  <div class="col-lg-8">
+    <div class="card my-3">
+      <h5 class="card-header">Logout</h5>
+      <div class="card-body">
+        <p>{% trans 'Are you sure you want to sign out?' %}</p>
+        <form method="post" action="{% url 'account_logout' %}">
+          {% csrf_token %}
+          {% if redirect_field_value %}
+          <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+          {% endif %}
+          <center>
+            <button type="submit"> Logout </button>
+          </center>
+        </form>
       </div>
     </div>
-  </div> <!-- end row -->
+  </div>
+</div> <!-- end row -->
 {% endblock %}
-
-
-
-
-

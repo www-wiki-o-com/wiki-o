@@ -20,139 +20,148 @@ A web service for sharing opinions and avoiding arguments
 <!DOCTYPE html>
 <html lang="en">
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <meta http-equiv="X-UA-Compatible" content=="IE=edge"/>
-    <title>Wiki-O: {% block sub_title %}{% endblock sub_title %}</title>
-    {% block head %}
-    {% endblock head %}
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <!--    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="">
+  <meta name="author" content="">
+  <meta http-equiv="X-UA-Compatible" content=="IE=edge" />
+  <title>Wiki-O: {% block sub_title %}{% endblock sub_title %}</title>
+  {% block head %}
+  {% endblock head %}
 
-    {% block css %}
-      <!-- Bootstrap core CSS -->
-      <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-      <link href="{% static 'core/css/custom.css' %}" rel="stylesheet">
-      <link href="{% static 'core/css/style.css' %}" rel="stylesheet">
+  {% block css %}
+  <!-- Bootstrap core CSS -->
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link href="{% static 'core/css/custom.css' %}" rel="stylesheet">
+  <link href="{% static 'core/css/style.css' %}" rel="stylesheet">
 
-      <!-- Amsify Plugin -->
-      <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <!-- Amsify Plugin -->
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
-      <!-- Basic Style for Tags Input -->
-      <link rel="stylesheet" type="text/css" href="{% static 'vendor/css/amsify.suggestags.css' %}">
+  <!-- Basic Style for Tags Input -->
+  <link rel="stylesheet" type="text/css" href="{% static 'vendor/css/amsify.suggestags.css' %}">
 
-      <!-- Local -->
-      <!--<link href="{% static 'core/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">-->
-    {% endblock css %}
-    {% block extra_css %}
-    {% endblock extra_css %}
+  <!-- Local -->
+  <!--<link href="{% static 'core/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">-->
+  {% endblock css %}
+  {% block extra_css %}
+  {% endblock extra_css %}
 
-    {% block head_js %}
-      <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
-    {% endblock head_js %}
-    {% block extra_head_js %}
-    {% endblock extra_head_js %}
-  </head>
+  {% block head_js %}
+  <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+  {% endblock head_js %}
+  {% block extra_head_js %}
+  {% endblock extra_head_js %}
+</head>
 
-  <body>
+<body>
 
-    <!-- Navigation -->
-    <nav id="navbar" class="navbar fixed-top navbar-expand navbar-light bg-white fixed-top">
-      <div class="container">
-        <a href="{%url 'theories:index' %}">
-          <img id="logo" class="img-responsive navbar-brand" src="{% static 'core/img/logo.svg' %}">
-        </a>
-        {% block nav_right %}
-          <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-          </button>
-          <div class="collapse navbar-collapse" id="navbarResponsive">
-            <ul class="navbar-nav ml-auto">
-              {% if request.user.is_anonymous %}
-                <li class="nav-item">
-                  <a class="nav-link" href="/accounts/login/?next={{request.path}}">Login</a>
-                </li>
-              {% else %}
-                <li class="nav-item dropdown pull-left">
-                  <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {% notifications_unread as unread_count %}
-                    {% if unread_count %}
-                      <svg viewBox="-12 -12 24 24" width="15" height="15">
-                        <circle cx="0" cy="0" r="11.284" fill="red" stroke="none">
-                        </circle>
-                        <text text-anchor="middle" x="0" y="7.5" font-size="22" font-family="FreeSerif" font-weight="bold" fill="white">{{ unread_count }}</text>
-                      </svg>
-                    {% endif %}
-                    {{ request.user }}
-                  </a>
-                  <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
-                    <a class="dropdown-item" href="{% url 'users:profile-edit' %}">Profile</a>
-                    <a class="dropdown-item" href="{% url 'users:profile-detail' request.user.id %}">My Opinions</a>
-                    <a class="dropdown-item" href="{% url 'users:notifications' %}">Notifications</a>
-                    <a class="dropdown-item" href="/accounts/logout/?next={{request.path}}" style="text-decoration: none">Logout</a>
-                  </div>
-                </li>
-              {% endif %}
-            </ul>
-          </div>
-        {% endblock nav_right %}
-      </div>
-    </nav>
-
-    <!-- Header -->
-    <header>
-      {% block header %}
-      {% endblock header%}
-    </header>
-
-    <!-- Content -->
+  <!-- Navigation -->
+  <nav id="navbar" class="navbar fixed-top navbar-expand navbar-light bg-white fixed-top">
     <div class="container">
-      {% block content %}
-      {% endblock content %}
-    </div>
-
-    <!-- Footer -->
-    <footer class="py-5 bg-white">
-      <div class="container">
-        <p class="m-0 text-center text-black">
-            <a href="{% url 'core:about' %}"> About Wiki-O </a>
-            &nbsp&nbsp
-            <a href="{% url 'core:policy' %}"> Privacy Policy </a>
-            &nbsp&nbsp
-            <a href="{% url 'core:terms' %}"> Terms & Conditions </a>
-            &nbsp&nbsp
-            <a href="{% url 'core:contact' %}"> Contact Us </a>
-            &nbsp&nbsp
-            <a href="feedback.wiki-o.com"> Feedback </a>
-            &nbsp&nbsp
-            <a href="{% url 'core:help' %}"> Help </a>
-        </p>
-        <p class="m-0 text-center text-black">Copyright &copy; Wiki-O 2018</p>
+      <a href="{%url 'theories:index' %}">
+        <img id="logo" class="img-responsive navbar-brand" src="{% static 'core/img/logo.svg' %}">
+      </a>
+      {% block nav_right %}
+      <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
+        data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
+        aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          {% if request.user.is_anonymous %}
+          <li class="nav-item">
+            <a class="nav-link" href="/accounts/login/?next={{request.path}}">Login</a>
+          </li>
+          {% else %}
+          <li class="nav-item dropdown pull-left">
+            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownBlog" data-toggle="dropdown"
+              aria-haspopup="true" aria-expanded="false">
+              {% notifications_unread as unread_count %}
+              {% if unread_count %}
+              <svg viewBox="-12 -12 24 24" width="15" height="15">
+                <circle cx="0" cy="0" r="11.284" fill="red" stroke="none">
+                </circle>
+                <text text-anchor="middle" x="0" y="7.5" font-size="22" font-family="FreeSerif" font-weight="bold"
+                  fill="white">{{ unread_count }}</text>
+              </svg>
+              {% endif %}
+              {{ request.user }}
+            </a>
+            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownBlog">
+              <a class="dropdown-item" href="{% url 'users:profile-edit' %}">Profile</a>
+              <a class="dropdown-item" href="{% url 'users:profile-detail' request.user.id %}">My Opinions</a>
+              <a class="dropdown-item" href="{% url 'users:notifications' %}">Notifications</a>
+              <a class="dropdown-item" href="/accounts/logout/?next={{request.path}}"
+                style="text-decoration: none">Logout</a>
+            </div>
+          </li>
+          {% endif %}
+        </ul>
       </div>
-    </footer>
+      {% endblock nav_right %}
+    </div>
+  </nav>
 
-    {% block modals %}
-    {% endblock modals %}
-    {% block extra_modals %}
-    {% endblock extra_modals %}
+  <!-- Header -->
+  <header>
+    {% block header %}
+    {% endblock header%}
+  </header>
 
-    {% block js %}
-      <!-- Bootstrap core JavaScript -->
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
-      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <!-- Content -->
+  <div class="container">
+    {% block content %}
+    {% endblock content %}
+  </div>
 
-      <!-- Amsify Plugin -->
-      <script type="text/javascript" src="{% static 'vendor/js/jquery.amsify.suggestags.js' %}"></script>
+  <!-- Footer -->
+  <footer class="py-5 bg-white">
+    <div class="container">
+      <p class="m-0 text-center text-black">
+        <a href="{% url 'core:about' %}"> About Wiki-O </a>
+        &nbsp&nbsp
+        <a href="{% url 'core:policy' %}"> Privacy Policy </a>
+        &nbsp&nbsp
+        <a href="{% url 'core:terms' %}"> Terms & Conditions </a>
+        &nbsp&nbsp
+        <a href="{% url 'core:contact' %}"> Contact Us </a>
+        &nbsp&nbsp
+        <a href="feedback.wiki-o.com"> Feedback </a>
+        &nbsp&nbsp
+        <a href="{% url 'core:help' %}"> Help </a>
+      </p>
+      <p class="m-0 text-center text-black">Copyright &copy; Wiki-O 2018</p>
+    </div>
+  </footer>
 
-      <!--local-->
-<!--      <script src="{% static 'core/vendor/jquery/jquery.min.js' %}"></script>-->
-<!--      <script src="{% static 'core/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>-->
+  {% block modals %}
+  {% endblock modals %}
+  {% block extra_modals %}
+  {% endblock extra_modals %}
 
-      <!--
+  {% block js %}
+  <!-- Bootstrap core JavaScript -->
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous">
+  </script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Amsify Plugin -->
+  <script type="text/javascript" src="{% static 'vendor/js/jquery.amsify.suggestags.js' %}"></script>
+
+  <!--local-->
+  <!--      <script src="{% static 'core/vendor/jquery/jquery.min.js' %}"></script>-->
+  <!--      <script src="{% static 'core/vendor/bootstrap/js/bootstrap.bundle.min.js' %}"></script>-->
+
+  <!--
       <script>
         // Dynamic navbar size
         window.onload   = function() {navbarFunction()};
@@ -180,8 +189,9 @@ A web service for sharing opinions and avoiding arguments
         }
       </script>
       -->
-    {% endblock js %}
-    {% block extra_js %}
-    {% endblock extra_js %}
-  </body>
+  {% endblock js %}
+  {% block extra_js %}
+  {% endblock extra_js %}
+</body>
+
 </html>

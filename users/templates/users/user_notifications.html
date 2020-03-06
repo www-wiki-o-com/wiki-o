@@ -23,278 +23,294 @@ A web service for sharing opinions and avoiding arguments
 
 {% block header %}{% endblock %}
 {% block content %}
-  <form action="{% url_extra 'users:notifications' extra=params %}" method="post">
-    {% csrf_token %}
-    {{ formset01.management_form }}
-    {{ formset02.management_form }}
+<form action="{% url_extra 'users:notifications' extra=params %}" method="post">
+  {% csrf_token %}
+  {{ formset01.management_form }}
+  {{ formset02.management_form }}
 
-    <!-- Content -->
-    <div class="row"> <!-- Row -->
-      <div class="col-lg-8"> <!-- Main Column -->
+  <!-- Content -->
+  <div class="row">
+    <!-- Row -->
+    <div class="col-lg-8">
+      <!-- Main Column -->
 
-        <!-- Notifications -->
-        <div class="card my-3">
-          <h5 class="card-header"> Notifications ({{ user }}): </h5>
-          <div class="card-body text-justify">
-            {% if formset01.errors %}
-              {{ formset01.errors }}
-            {% endif %}
-            <table width="100%">
-              <thead>
-                <tr>
-                  <!-- select -->
-                  <td style="width:25px">
-                    <span id="CHECK_ALL" style="display:inline">
-                      <a onclick="CheckAll(); {% for form in formset01 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_all.svg' %}" height='12'>
-                      </a>
-                    </span>
-                    <span id="CHECK_NONE" style="display:none">
-                      <a onclick="CheckNone(); {% for form in formset01 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_none.svg' %}" height='12'>
-                      </a>
-                    </span>
-                  </td>
-                  <!-- verb/subject -->
-                  <td style="width:auto">
-                    Description
-                  </td>
-                  <td style="width:1.5%"/>
-                  <!-- datetime -->
-                  <td style="width:90px" align="right">
+      <!-- Notifications -->
+      <div class="card my-3">
+        <h5 class="card-header"> Notifications ({{ user }}): </h5>
+        <div class="card-body text-justify">
+          {% if formset01.errors %}
+          {{ formset01.errors }}
+          {% endif %}
+          <table width="100%">
+            <thead>
+              <tr>
+                <!-- select -->
+                <td style="width:25px">
+                  <span id="CHECK_ALL" style="display:inline">
+                    <a
+                      onclick="CheckAll(); {% for form in formset01 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_all.svg' %}" height='12'>
+                    </a>
+                  </span>
+                  <span id="CHECK_NONE" style="display:none">
+                    <a
+                      onclick="CheckNone(); {% for form in formset01 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_none.svg' %}" height='12'>
+                    </a>
+                  </span>
+                </td>
+                <!-- verb/subject -->
+                <td style="width:auto">
+                  Description
+                </td>
+                <td style="width:1.5%" />
+                <!-- datetime -->
+                <td style="width:90px" align="right">
+                  {% if request.GET.abs %}
+                  D/M/Y
+                  {% else %}
+                  Time Since
+                  {% endif %}
+                </td>
+              </tr>
+            </thead>
+            <tr style="border-top:2px solid #000;">
+              <td />
+              <td />
+              <td />
+              <td />
+            </tr>
+            <tbody align="left" valign="top">
+              {% for form in formset01 %}
+              {{ form.id }}
+              {% with form.instance as notification %}
+              <tr>
+                <!-- select -->
+                <td>
+                  {{ form.select }}
+                </td>
+                <!-- verb/subject -->
+                <td>
+                  <!-- verb -->
+                  {{ notification|get_verb }}
+                  <!-- description -->
+                  {% if notification.description %}
+                  <div style="margin-left:20px">
+                    {{ notification|get_description }}
+                  </div>
+                  {% endif %}
+                </td>
+                <td />
+                <!-- datetime -->
+                <td align="right">
+                  {% if notification.unread %} <strong> {% endif %}
                     {% if request.GET.abs %}
-                      D/M/Y
+                    {{ notification.timestamp|date:"d/m/y" }}
                     {% else %}
-                      Time Since
+                    {{ notification.timestamp|timepassed }}
                     {% endif %}
-                  </td>
-                </tr>
-              </thead>
-              <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/> </tr>
-              <tbody align="left" valign="top">
-                {% for form in formset01 %}
-                  {{ form.id }}
-                  {% with form.instance as notification %}
-                    <tr>
-                      <!-- select -->
-                      <td>
-                        {{ form.select }}
-                      </td>
-                      <!-- verb/subject -->
-                      <td>
-                        <!-- verb -->
-                        {{ notification|get_verb }}
-                        <!-- description -->
-                        {% if notification.description %}
-                          <div style="margin-left:20px">
-                            {{ notification|get_description }}
-                          </div>
-                        {% endif %}
-                      </td>
-                      <td/>
-                      <!-- datetime -->
-                      <td align="right">
-                        {% if notification.unread %} <strong> {% endif %}
-                        {% if request.GET.abs %}
-                          {{ notification.timestamp|date:"d/m/y" }}
-                        {% else %}
-                          {{ notification.timestamp|timepassed }}
-                        {% endif %}
-                        {% if notification.unread %} </strong> {% endif %}
-                      </td>
-                    </tr>
-                  {% endwith %}
-                {% endfor %}
-              </tbody>
-            </table>
-            {% include "include/paginator.html" with list=notifications %}
-          </div>
+                    {% if notification.unread %} </strong> {% endif %}
+                </td>
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+          {% include "include/paginator.html" with list=notifications %}
         </div>
+      </div>
 
-        <!-- Feedback -->
-        <div class="card my-3">
-          <h5 class="card-header"> User Feedback ({{ user }}): </h5>
-          <div class="card-body text-justify">
-            <table width="100%">
-              <thead>
-                <tr>
-                  <!-- select -->
-                  <td style="width:25px">
-                    <span id="CHECK_ALL" style="display:inline">
-                      <a onclick="CheckAll(); {% for form in formset02 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_all.svg' %}" height='12'>
-                      </a>
-                    </span>
-                    <span id="CHECK_NONE" style="display:none">
-                      <a onclick="CheckNone(); {% for form in formset02 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
-                        <img src="{% static 'core/img/check_none.svg' %}" height='12'>
-                      </a>
-                    </span>
-                  </td>
-                  <!-- verb/subject -->
-                  <td style="width:auto">
-                    Description
-                  </td>
-                  <td style="width:1.5%"/>
-                  <!-- datetime -->
-                  <td style="width:90px" align="right">
+      <!-- Feedback -->
+      <div class="card my-3">
+        <h5 class="card-header"> User Feedback ({{ user }}): </h5>
+        <div class="card-body text-justify">
+          <table width="100%">
+            <thead>
+              <tr>
+                <!-- select -->
+                <td style="width:25px">
+                  <span id="CHECK_ALL" style="display:inline">
+                    <a
+                      onclick="CheckAll(); {% for form in formset02 %} CheckAll('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_all.svg' %}" height='12'>
+                    </a>
+                  </span>
+                  <span id="CHECK_NONE" style="display:none">
+                    <a
+                      onclick="CheckNone(); {% for form in formset02 %} CheckNone('{{ form.select.auto_id }}'); {% endfor %}">
+                      <img src="{% static 'core/img/check_none.svg' %}" height='12'>
+                    </a>
+                  </span>
+                </td>
+                <!-- verb/subject -->
+                <td style="width:auto">
+                  Description
+                </td>
+                <td style="width:1.5%" />
+                <!-- datetime -->
+                <td style="width:90px" align="right">
+                  {% if request.GET.abs %}
+                  D/M/Y
+                  {% else %}
+                  Time Since
+                  {% endif %}
+                </td>
+              </tr>
+            </thead>
+            <tr style="border-top:2px solid #000;">
+              <td />
+              <td />
+              <td />
+              <td />
+            </tr>
+            <tbody align="left" valign="top">
+              {% for form in formset02 %}
+              {{ form.id }}
+              {% with form.instance as feedback %}
+              <tr>
+                <!-- select -->
+                <td>
+                  {{ form.select }}
+                </td>
+                <td>
+                  <!-- verb -->
+                  <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
+                    href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
+                    {% if feedback.is_unread %}
+                    <strong> {{ feedback.get_type }}: {{ feedback.title }} </strong>
+                    {% else %}
+                    {{ feedback.get_type }}: {{ feedback.title }}
+                    {% endif %}
+                  </a>
+                  <!-- description -->
+                  <div id="form{{forloop.counter}}" class="collapse" style="margin-left:20px">
+                    Status: {{ feedback.get_status }}
+                    {% for contribution in feedback.get_contributions %}
+                    <div style="margin-left:20px">
+                      <p style="text-indent:-20px; margin:0; padding:0;">
+                        {% if contribution.has_action %}
+                        {{ contribution.timestamp|date:"d/m/y" }} - {{ contribution.get_action }}:
+                        {% else %}
+                        {{ contribution.timestamp|date:"d/m/y" }}:
+                        {% endif %}
+                        {{ contribution }}
+                      </p>
+                    </div>
+                    {% endfor %}
+                    <a href="{{ feedback.theory_node.url }}" target="_blank"> Go to content </a>
+                  </div>
+                </td>
+                <td />
+                <!-- datetime -->
+                <td align="right">
+                  {% if feedback.is_unread %} <strong> {% endif %}
                     {% if request.GET.abs %}
-                      D/M/Y
+                    {{ feedback.pub_date|date:"d/m/y" }}
                     {% else %}
-                      Time Since
+                    {{ feedback.pub_date|timepassed }}
                     {% endif %}
-                  </td>
-                </tr>
-              </thead>
-              <tr style="border-top:2px solid #000;"> <td/><td/><td/><td/> </tr>
-              <tbody align="left" valign="top">
-                {% for form in formset02 %}
-                  {{ form.id }}
-                  {% with form.instance as feedback %}
-                    <tr>
-                      <!-- select -->
-                      <td>
-                        {{ form.select }}
-                      </td>
-                      <td>
-                        <!-- verb -->
-                        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
-                           href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
-                          {% if feedback.is_unread %}
-                            <strong> {{ feedback.get_type }}: {{ feedback.title }} </strong>
-                          {% else %}
-                            {{ feedback.get_type }}: {{ feedback.title }}
-                          {% endif %}
-                        </a>
-                        <!-- description -->
-                        <div id="form{{forloop.counter}}" class="collapse" style="margin-left:20px">
-                          Status: {{ feedback.get_status }}
-                          {% for contribution in feedback.get_contributions %}
-                            <div style="margin-left:20px">
-                              <p style="text-indent:-20px; margin:0; padding:0;">
-                                {% if contribution.has_action %}
-                                  {{ contribution.timestamp|date:"d/m/y" }} - {{ contribution.get_action }}:
-                                {% else %}
-                                  {{ contribution.timestamp|date:"d/m/y" }}:
-                                {% endif %}
-                                {{ contribution }}
-                              </p>
-                            </div>
-                          {% endfor %}
-                          <a href="{{ feedback.theory_node.url }}" target="_blank"> Go to content </a>
-                        </div>
-                      </td>
-                      <td/>
-                      <!-- datetime -->
-                      <td align="right">
-                        {% if feedback.is_unread %} <strong> {% endif %}
-                        {% if request.GET.abs %}
-                          {{ feedback.pub_date|date:"d/m/y" }}
-                        {% else %}
-                          {{ feedback.pub_date|timepassed }}
-                        {% endif %}
-                        {% if feedback.is_unread %} </strong> {% endif %}
-                      </td>
-                    </tr>
-                  {% endwith %}
-                {% endfor %}
-              </tbody>
-            </table>
-<!--            {% include "include/paginator.html" with list=user_feedback %}-->
-          </div>
+                    {% if feedback.is_unread %} </strong> {% endif %}
+                </td>
+              </tr>
+              {% endwith %}
+              {% endfor %}
+            </tbody>
+          </table>
+          <!--            {% include "include/paginator.html" with list=user_feedback %}-->
         </div>
-      </div> <!-- end column -->
-      <div class="col-md-4"> <!-- Sidebar Column -->
+      </div>
+    </div> <!-- end column -->
+    <div class="col-md-4">
+      <!-- Sidebar Column -->
 
-        <!-- Actions -->
-        <div class="card my-3">
-          <h5 class="card-header"> Actions </h5>
-          <div class="card-body">
-            <ul class="list-unstyled mb-0">
+      <!-- Actions -->
+      <div class="card my-3">
+        <h5 class="card-header"> Actions </h5>
+        <div class="card-body">
+          <ul class="list-unstyled mb-0">
 
-              <!-- Mark for delete -->
-              <li><input class="plain" type="submit" name="action" value="Delete"></li>
+            <!-- Mark for delete -->
+            <li><input class="plain" type="submit" name="action" value="Delete"></li>
 
-              <!-- Mark as read -->
-              <li><input class="plain" type="submit" name="action" value="Mark as Read"></li>
+            <!-- Mark as read -->
+            <li><input class="plain" type="submit" name="action" value="Mark as Read"></li>
 
-              <!-- Mark as read -->
-              <li><input class="plain" type="submit" name="action" value="Mark as Un-Read"></li>
+            <!-- Mark as read -->
+            <li><input class="plain" type="submit" name="action" value="Mark as Un-Read"></li>
 
-              <!-- View All -->
-              {% if request.GET.date %}
-                <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
-              {% endif %}
+            <!-- View All -->
+            {% if request.GET.date %}
+            <li><a href="{% del_params request.get_full_path 'date' %}"> View All </a></li>
+            {% endif %}
 
-              <!-- ABS/REL Datetime -->
-              {% if request.GET.abs %}
-                <li><a href="{% del_params request.get_full_path 'abs' %}"> Switch to Relative Time </a></li>
-              {% else %}
-                <li><a href="{% add_params request.get_full_path abs='True' %}"> Switch to D/M/Y </a></li>
-              {% endif %}
-            </ul>
-          </div>
+            <!-- ABS/REL Datetime -->
+            {% if request.GET.abs %}
+            <li><a href="{% del_params request.get_full_path 'abs' %}"> Switch to Relative Time </a></li>
+            {% else %}
+            <li><a href="{% add_params request.get_full_path abs='True' %}"> Switch to D/M/Y </a></li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
 
-        <!-- Subscriptions -->
-        <div class="card my-3">
-          <h5 class="card-header"> Following </h5>
-          <div class="card-body">
-            <!-- Categories -->
-            {% if categories %}
-              Categories:
-              <ul class="list mb-0">
-                {% for category in categories %}
-                  <li> <a href="{{ category.activity_url }}">{{ category }}</a></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-            <!-- Theories -->
-            {% if theories %}
-              Theories:
-              <ul class="list mb-0">
-                {% for theory in theories %}
-                  <li> <a href="{{ theory.activity_url }}">{{ theory }}</a></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-            <!-- Opinions -->
-            {% if theories %}
-              Opinions:
-              <ul class="list mb-0">
-                {% for opinion in opinions %}
-                  <li> <a href="{{ opinion.url }}">{{ opinion.get_owner }} - {{ opinion }}</a></li>
-                {% endfor %}
-              </ul>
-            {% endif %}
-          </div>
+      <!-- Subscriptions -->
+      <div class="card my-3">
+        <h5 class="card-header"> Following </h5>
+        <div class="card-body">
+          <!-- Categories -->
+          {% if categories %}
+          Categories:
+          <ul class="list mb-0">
+            {% for category in categories %}
+            <li> <a href="{{ category.activity_url }}">{{ category }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <!-- Theories -->
+          {% if theories %}
+          Theories:
+          <ul class="list mb-0">
+            {% for theory in theories %}
+            <li> <a href="{{ theory.activity_url }}">{{ theory }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+          <!-- Opinions -->
+          {% if theories %}
+          Opinions:
+          <ul class="list mb-0">
+            {% for opinion in opinions %}
+            <li> <a href="{{ opinion.url }}">{{ opinion.get_owner }} - {{ opinion }}</a></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
         </div>
+      </div>
 
-      </div> <!-- end column-->
-    </div> <!-- end row -->
-  </form>
+    </div> <!-- end column-->
+  </div> <!-- end row -->
+</form>
 {% endblock %}
 
 
 {% block extra_js %}
-  <script>
-    function CheckAll(id) {
-        if (id == undefined) {
-            document.getElementById("CHECK_ALL").style.display  = "none";
-            document.getElementById("CHECK_NONE").style.display = "inline";
-        } else {
-            document.getElementById(id).checked = true;
-        }
+<script>
+  function CheckAll(id) {
+    if (id == undefined) {
+      document.getElementById("CHECK_ALL").style.display = "none";
+      document.getElementById("CHECK_NONE").style.display = "inline";
+    } else {
+      document.getElementById(id).checked = true;
     }
+  }
 
-    function CheckNone(id) {
-        if (id == undefined) {
-            document.getElementById("CHECK_ALL").style.display  = "inline";
-            document.getElementById("CHECK_NONE").style.display = "none";
-        } else {
-            document.getElementById(id).checked = false;
-        }
+  function CheckNone(id) {
+    if (id == undefined) {
+      document.getElementById("CHECK_ALL").style.display = "inline";
+      document.getElementById("CHECK_NONE").style.display = "none";
+    } else {
+      document.getElementById(id).checked = false;
     }
-  </script>
+  }
+</script>
 {% endblock extra_js %}
-
