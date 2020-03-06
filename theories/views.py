@@ -4,12 +4,10 @@
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/views.py
-@brief      A collection of app specific views
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.
 """
 
 # *******************************************************************************
@@ -87,8 +85,8 @@ NUM_ITEMS_PER_PAGE = 25
 
 
 def get_opinion_list(theory, current_user, exclude_list=[]):
-    """Generate a list of opinions based on the current user. The output is a
-       list of dictionary items: text, true_points, false_points, and url."""
+    """Generate a list of opinions based on the current user. The output is a list of dictionary
+       items: text, true_points, false_points, and url."""
 
     # setup
     opinion_list = []

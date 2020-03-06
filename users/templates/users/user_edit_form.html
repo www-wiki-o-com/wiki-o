@@ -1,25 +1,24 @@
+{% extends 'base.html' %}
+
+
+{% comment %}
 <!-- __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       users/templates/users/user_edit_form.html
-@brief      The edit form for user details
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.-->
+{% endcomment %}
 
 
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-
+{% load crispy_forms_tags %} {% load static %} {% load extra %}
 {% block content %}
-<!-- Title -->
+<!--
+  Title -->
 <h3><br>
   {{ user.get_fullname }}
 </h3>
