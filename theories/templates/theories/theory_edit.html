@@ -1,28 +1,23 @@
+{% extends 'base.html' %}
+
+
+{% comment %}
 <!-- __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/theory_edit.html
-@brief      The theory edit page
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.-->
+{% endcomment %}
 
 
-{% extends 'base.html' %}
-{% load crispy_forms_tags %}
-{% load static %}
-{% load extra %}
-{% load rules %}
-
-
+{% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %}
 {% block header %}{% endblock %}
 {% block content %}
-
 <!-- Title -->
 <h3><br>{{ theory }}</h3>
 {% if edit %}
@@ -270,10 +265,12 @@ A web service for sharing opinions and avoiding arguments
 <script>
   $(document).ready(function () {
     {
-      % comment %
+      %
+      comment %
     }
     Inital setup {
-      % endcomment %
+      %
+      endcomment %
     }
     categories = document.getElementById('category-suggestions').getAttribute('suggestions').split(',');
     category_tags = new AmsifySuggestags($('input[name="category_list_input"]'));
@@ -283,10 +280,12 @@ A web service for sharing opinions and avoiding arguments
     category_tags._init();
 
     {
-      % comment %
+      %
+      comment %
     }
     On Click {
-      % endcomment %
+      %
+      endcomment %
     }
     $('div[name="category-item-input"]').click(function () {
       category_tags.addTag($(this).attr("title"));

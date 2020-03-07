@@ -1,25 +1,21 @@
+{% extends 'base.html' %}
+
+
+{% comment %}
 <!-- __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       theories/templates/theories/opinion_detail.html
-@brief      The page for displaying an opinion's dependancies
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
--->
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.-->
+{% endcomment %}
 
 
-{% extends 'base.html' %}
-{% load static %}
-{% load extra %}
-{% load rules %}
-
-
-{% block header %}{% endblock %}
+{% load static %} {% load extra %} {% load rules %} {% block header %}{% endblock %}
 {% block content %}
 <!-- Title -->
 <h3 style="padding-top:1ex; margin-bottom:-0.25ex">
@@ -38,8 +34,10 @@ A web service for sharing opinions and avoiding arguments
       &ldquo;{{ opinion|remove_punctuation }}&rdquo; </font>
   </a>
 </h3>
-<small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they belong
-  to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %} side)</small>
+<small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they
+  belong
+  to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %}
+  side)</small>
 
 <div class="row">
   <!-- Row -->
@@ -168,7 +166,8 @@ A web service for sharing opinions and avoiding arguments
           <!-- Compare -->
           <li><a href="{{ compare_url }}"> Compare </a></li>
 
-          <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a></li>
+          <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a>
+          </li>
 
           <li><a href="{% url 'theories:opinion-index' opinion.theory.pk 'all' %}">Browse Opinions</a></li>
 
