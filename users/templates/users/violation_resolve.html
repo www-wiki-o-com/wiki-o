@@ -18,46 +18,6 @@ LICENSE.md file in the root directory of this source tree.-->
 {% load crispy_forms_tags %} {% load static %} {% load extra %} {% load rules %} {% load urls %}
 {% block content %}
 {% with violation.content_type.model as content_type %}
-<h3><br>Violation
-  {{ violation.pk }} </h3>
-<table style="margin-left:3ex; font-size: large;">
-  <thead>
-    <tr>
-      <th />
-      <th width="2.5%" />
-      <th />
-  </thead>
-  <tbody>
-    <tr>
-      <th> Content: </th>
-      <td />
-      {% if content_type == 'theorynode' %}
-      <td><a href="{{ violation.content.url }}"> {{ violation }} </a></td>
-      {% endif %}
-      {% if content_type == 'violation' %}
-      <td> Violation {{ violation.content.pk }} </a></td>
-      {% endif %}
-    </tr>
-    <tr>
-      <th> Offender: </th>
-      <td />
-      <td><a href="{{ violation.offender.url }}"> {{ violation.offender }} </a></td>
-    </tr>
-    <tr>
-      <th> Status: </th>
-      <td />
-      <td> {{ violation.get_status_str }} </td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- Title - Violation -->
-
-<!-- Title - Forum -->
-{% if content_type == 'forum' %}
-<h3><br>Resolve User Violation of Conduct on our <a href="{{ violation.content_url|add:params.get_next }}">Feedback
-    Forum</a> </h3>
-{% endif %}
 
 <div class="row">
   <!-- Row -->
@@ -65,6 +25,73 @@ LICENSE.md file in the root directory of this source tree.-->
     <!-- Main Column -->
 
     <!-- Violation -->
+    <div class="card my-3">
+      <h5 class="card-header">
+        {{ violation }}
+      </h5>
+      <div class="card card-body">
+        <table>
+          <col width="1.5%">
+          <col width="1.5%">
+          <col width="auto">
+          <tbody>
+            {% if content_type == 'theorynode' %}
+            <tr>
+              <td> Content: </td>
+              <td />
+              <td><a href="{{ violation.content.url }}"> {{ violation.content }} </a></td>
+            </tr>
+            <tr>
+              <td />
+              <td />
+              <td><a href="{{ violation.content.restore_url }}"> link to revisions </a></td>
+            </tr>
+            {% endif %}
+            {% if content_type == 'violation' %}
+            <tr>
+              <td> Content: </td>
+              <td />
+              <td> <a href="{{ violation.content.url }}">{{ violation.content }} </a>
+              </td>
+            </tr>
+            {% endif %}
+            <tr>
+              <td> Reporter: </td>
+              <td />
+              <td>
+                <a href="{{ violation.reporter.url }}"> {{ violation.reporter }} </a>
+                <a href="#" class="plain" data-toggle="tooltip" title="(New-Ignored-Reported)">
+                  ({{ violation.reporter.count_open_reports }}-{{ violation.reporter.count_ignored_reports }}-{{ violation.reporter.count_reported }})
+                </a>
+              </td>
+            </tr>
+            <tr>
+              <td> Offender: </td>
+              <td />
+              <td><a href="{{ violation.offender.url }}"> {{ violation.offender }} </a></td>
+            </tr>
+            <tr>
+              <td> Date: </td>
+              <td />
+              <td>{{ violation.pub_date|date:"d/m/y" }}</td>
+            </tr>
+          </tbody>
+        </table>
+        Other Violations:
+        <ul>
+          {% if user_violations %}
+          {% for x in user_violations %}
+          <li><a href="{{ x.url|add:params.get_next }}"> {{ x }} </a></li>
+          {% endfor %}
+          {% else %}
+          <li> None </li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+
+
+    <!-- Feedback -->
     <div class="card my-3">
       <h5 class="card-header">
         Feedback
@@ -96,7 +123,7 @@ LICENSE.md file in the root directory of this source tree.-->
             <td />
           </tr>
           <tbody align="left" valign="top">
-            {% for feedback in violation.get_feedback %}
+            {% for feedback in violation.feedback.all %}
             <tr>
               <!-- user -->
               <td>
@@ -130,9 +157,9 @@ LICENSE.md file in the root directory of this source tree.-->
               <!-- datetime -->
               <td align="right">
                 {% if request.GET.rel %}
-                {{ feedback.timestamp|timepassed }}
+                {{ feedback.pub_date|timepassed }}
                 {% else %}
-                {{ feedback.timestamp|date:"d/m/y" }}
+                {{ feedback.pub_date|date:"d/m/y" }}
                 {% endif %}
               </td>
             </tr>
@@ -158,98 +185,43 @@ LICENSE.md file in the root directory of this source tree.-->
       </div>
     </div>
 
-
-    <!-- TheoryNode -->
-    {% if content_type == 'theorynode' %}
-
-    <!-- Current Revision -->
     <div class="card my-3">
       <div class="card-header">
-        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
-          aria-controls="form{{forloop.counter}}">
+        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#HowTo00"
+          aria-controls="HowTo00">
           <img src="{% static 'core/img/expand.svg' %}" height='13'>
           &nbsp
-          {{ theorynode_form.instance.modified_date|date:"d/m/y" }} - Current Version
-          ({{ theorynode_form.instance.modified_by }})
+          How To Compose the Statement
         </a>
       </div>
-      <div class="collapse" id="form{{forloop.counter}}">
+      <div class="collapse" id="HowTo00">
         <div class="card card-body">
-          <form action="{% url_extra 'users:violation-resolve' violation.pk extra=params %}" method="post">
-            {% csrf_token %}
-            {{ theorynode_form|crispy }}
-            <input type="submit" name="save_theorynode" value="Save">
-          </form>
+          <p>The evidence is verifiable if and only if anyone with an unlimited
+            amount of resources could confirm the correctness of the statment. For
+            example, the statement "Trump is stupid" is not verifialbe but the
+            statment "Trump claims he is a genius" is verifiable.</p>
+
+          <p>We encourage the user to include references that will allow other
+            users to help verify the statement.</p>
         </div>
       </div>
     </div>
 
-    <!-- Revisions -->
-    {% for form in revision_formset %}
-    <div class="card my-3">
-      <div class="card-header">
-        <a class="plain" data-toggle="collapse" role="button" aria-expanded="false" href="#form{{forloop.counter}}"
-          aria-controls="form{{forloop.counter}}">
-          <img src="{% static 'core/img/expand.svg' %}" height='13'>
-          &nbsp
-          {{ form.instance.revision.date_created.date|date:"d/m/y" }} -
-          {{ form.instance.revision.comment }}
-          ({{ form.instance.revision.user }})
-        </a>
-      </div>
-      <div class="collapse" id="form{{forloop.counter}}">
-        <div class="card card-body">
-          {{ form|crispy }}
-        </div>
-      </div>
-    </div>
-    {% endfor %}
-
-    {% endif %}
-
-
-    <!-- Violation -->
-    {% if content_type == 'violation' %}
-    <a href="{{ violation.content.url|add:params.get_next }}">Visit resolution forum.</a><br>
-    {% endif %}
 
     <a href={{ prev }}>Go back to violations.</a>
 
   </div> <!-- end column -->
-  <div class="col-md-4">
+  <div class="col-md-12 col-lg-4">
     <!-- Sidebar Column -->
-
-    <!-- Actions -->
-    <div class="card my-3">
-      <h5 class="card-header">Actions</h5>
-      <div class="card-body">
-        <ul class="list-unstyled mb-0">
-
-          <!-- ABS/REL Datetime -->
-          {% if request.GET.rel %}
-          <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
-          {% else %}
-          <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
-          {% endif %}
-
-          <!-- Voters/Total Poll -->
-          {% if request.GET.voters %}
-          <li><a href="{% del_params request.get_full_path 'voters' %}"> Show Vote Total </a></li>
-          {% else %}
-          <li><a href="{% add_params request.get_full_path voters='True' %}"> Show Individual Votes </a></li>
-          {% endif %}
-
-          <!-- Report -->
-          <li><a data-target="#report_modal" data-toggle="modal" href="#report_modal"> Report a Violation </a></li>
-
-        </ul>
-      </div>
-    </div>
 
     <!-- Poll -->
     <div class="card my-3">
       <h5 class="card-header">
-        Poll Closes {{ violation.get_end_date|date:"M d, Y" }}
+        {% if violation.is_open %}
+        Poll Closes {{ violation.close_date|date:"F dS" }}
+        {% else %}
+        Poll Is Closed ({{ violation.close_date|date:"d/m/y" }})
+        {% endif %}
       </h5>
       <div class="card card-body">
 
@@ -271,7 +243,7 @@ LICENSE.md file in the root directory of this source tree.-->
               {% for vote in violation.votes.all %}
               <tr>
                 <td> {{ vote.user }} </td>
-                <td class="text-right"> {{ vote.get_vote_str }} </td>
+                <td class="text-right"> {{ vote }} </td>
                 {% endfor %}
             </tbody>
           </table>
@@ -281,12 +253,12 @@ LICENSE.md file in the root directory of this source tree.-->
         <center>
           <table style="text-align:center" width="90%">
             <thead>
-              <tr> {% for x in violation.get_poll_count %} <th>{{ x.2 }}</th> {% endfor %} </tr>
+              <tr> {% for x in violation.get_poll_votes %} <th>{{ x.2 }}</th> {% endfor %} </tr>
             </thead>
-            <tr style="border-top:2px solid #000;"> {% for x in violation.get_poll_count %}
+            <tr style="border-top:2px solid #000;"> {% for x in violation.get_poll_votes %}
               <td /> {% endfor %} </tr>
             <tbody>
-              <tr> {% for x in violation.get_poll_count %} <td> {{ x.0 }} </td> {% endfor %} </tr>
+              <tr> {% for x in violation.get_poll_votes %} <td> {{ x.0 }} </td> {% endfor %} </tr>
             </tbody>
           </table>
         </center>
@@ -315,16 +287,29 @@ LICENSE.md file in the root directory of this source tree.-->
       </div>
     </div>
 
-    <!-- User -->
+    <!-- Actions -->
     <div class="card my-3">
-      <h5 class="card-header">
-        Other Violations by {{ violation.offender }}
-      </h5>
-      <div class="card card-body">
-        <ul>
-          {% for x in user_violations %}
-          <li><a href="{{ x.url|add:params.get_next }}"> {{ x }} ({{ x.get_offence }}) </a></li>
-          {% endfor %}
+      <h5 class="card-header">Actions</h5>
+      <div class="card-body">
+        <ul class="list-unstyled mb-0">
+
+          <!-- ABS/REL Datetime -->
+          {% if request.GET.rel %}
+          <li><a href="{% del_params request.get_full_path 'rel' %}"> Switch to D/M/Y </a></li>
+          {% else %}
+          <li><a href="{% add_params request.get_full_path rel='True' %}"> Switch to Relative Time </a></li>
+          {% endif %}
+
+          <!-- Voters/Total Poll -->
+          {% if request.GET.voters %}
+          <li><a href="{% del_params request.get_full_path 'voters' %}"> Show Vote Total </a></li>
+          {% else %}
+          <li><a href="{% add_params request.get_full_path voters='True' %}"> Show Individual Votes </a></li>
+          {% endif %}
+
+          <!-- Report -->
+          <li><a data-target="#report_modal" data-toggle="modal" href="#report_modal"> Report a Violation </a></li>
+
         </ul>
       </div>
     </div>
@@ -353,6 +338,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
         <!-- body -->
         <div class="modal-body">
+          {% has_perm 'users.can_resolve_violation' user as can_resolve %}
           {{ feedback_form.comment|as_crispy_field }}
           {% if can_resolve %}
           {{ feedback_form.action|as_crispy_field }}
@@ -413,3 +399,20 @@ LICENSE.md file in the root directory of this source tree.-->
 </div>
 
 {% endblock extra_modals %}
+
+{% block extra_js %}
+{% comment %}
+Todo:
+* move to custom.js.
+* update tooltip style.
+* add help to violation form.
+* Move violation header to a card
+* move user's other violations to the first card
+* don't show revision histor, just provide a link
+{% endcomment %}
+<script>
+  $(document).ready(function () {
+    $('[data-toggle="tooltip"]').tooltip();
+  });
+</script>
+{% endblock %}

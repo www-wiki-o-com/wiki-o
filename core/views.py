@@ -15,16 +15,10 @@ from django.views import generic
 from django.views.generic.base import RedirectView
 
 
-# ************************************************************
-#
-# ************************************************************
 class IndexView(RedirectView):
     url = 'alpha'
 
 
-# ************************************************************
-#
-# ************************************************************
 class AlphaView(generic.ListView):
     template_name = 'core/alpha.html'
     context_object_name = 'alpha'
@@ -32,11 +26,6 @@ class AlphaView(generic.ListView):
     def get_queryset(self):
         """Return nothing."""
         return None
-
-
-# ************************************************************
-#
-# ************************************************************
 
 
 class HelpView(generic.ListView):
@@ -48,11 +37,6 @@ class HelpView(generic.ListView):
         return None
 
 
-# ************************************************************
-#
-# ************************************************************
-
-
 class PolicyView(generic.ListView):
     template_name = 'core/policy01.html'
     context_object_name = 'policy'
@@ -60,11 +44,6 @@ class PolicyView(generic.ListView):
     def get_queryset(self):
         """Return nothing."""
         return None
-
-
-# ************************************************************
-#
-# ************************************************************
 
 
 class TermsView(generic.ListView):
@@ -76,11 +55,6 @@ class TermsView(generic.ListView):
         return None
 
 
-# ************************************************************
-#
-# ************************************************************
-
-
 class AboutView(generic.ListView):
     template_name = 'core/about.html'
     context_object_name = 'about'
@@ -90,9 +64,6 @@ class AboutView(generic.ListView):
         return None
 
 
-# ************************************************************
-#
-# ************************************************************
 def ContactView(request):
 
     # Setup

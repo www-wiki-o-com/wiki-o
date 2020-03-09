@@ -15,6 +15,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import re
 import datetime
+import logging
 
 from django.db import models
 from django.urls import reverse
@@ -22,13 +23,24 @@ from django.contrib.auth.models import AbstractUser
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.fields import GenericRelation
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Q
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 
-from model_utils import Choices
-from users.utils import get_group
-from core.utils import timezone_today, get_or_none
+from users.utils import level_to_group
+from core.utils import Choices, timezone_today, get_or_none
+
+# *******************************************************************************
+# Defines
+# *******************************************************************************
+POLL_LENGTH = 10
+WARNING_EXPIRE_LENGTH = 10
+STRIKE_EXPIRE_LENGTH = 100
+LEVEL02_AGE_REQUIREMENT = 10
+LEVEL03_AGE_REQUIREMENT = 100
+LEVEL02_CONTRIBUTIONS_REQUIREMENT = 10
+LEVEL03_CONTRIBUTIONS_REQUIREMENT = 100
+
+LOGGER = logging.getLogger('django')
 
 # *******************************************************************************
 # Classes
@@ -44,35 +56,49 @@ from core.utils import timezone_today, get_or_none
 
 
 class User(AbstractUser):
-    """User model.
+    """Wiki-O's extended user model.
 
-    Attributes:
-        SYSTEM_USER_PK (int): [description]
+    Class attributes:
+        SYSTEM_USER_PK (int): A constant that keeps track of the system user's primary key. When
+            the system is brought up, the value is initialized to -1. On the first call to
+            get_system_user(), the "constant" is updated.
 
-        sex (CharField):
-        location (CharField):
-        religion (CharField):
-        politics (CharField):
-        fullname (CharField):
-        birth_date (CharField):
+    Inheritied model attributes:
+        username (CharField): The user's handle.
+        date_joined (DateField): The date the user joined.
 
-        sex_visible (BooleanField):
-        location_visible (BooleanField):
-        religion_visible (BooleanField):
-        politics_visible (BooleanField):
-        fullname_visible (BooleanField):
-        birth_date_visible (BooleanField):
+    Model attributes:
+        sex (CharField): An optional field for describing the user's sex.
+        location (CharField): An optional field for describing the user's location.
+        religion (CharField): An optional field for describing the user's religion.
+        politics (CharField): An optional field for describing the user's political alignment.
+        fullname (CharField): An optional field for describing the user's fullname.
+        birth_date (DateField): An optional datefield used to capture the user's birthdate.
 
-        hidden (BooleanField):
-        use_wizard (BooleanField):
-        utilized (TheoryNode):
-        contributions (TheoryNode):
+        hidden (BooleanField): A field for hiding or revealing the user's handle (username).
+        sex_visible (BooleanField): A field for hiding or revealing the user's sex.
+        location_visible (BooleanField): A field for hiding or revealing the user's location.
+        religion_visible (BooleanField): A field for hiding or revealing the user's religion.
+        politics_visible (BooleanField): A field for hiding or revealing the user's political
+            alignment.
+        fullname_visible (BooleanField): A field for hiding or revealing the user's fullname.
+        birth_date_visible (BooleanField): A field for hiding or revealing the user's birthdate.
+        use_wizard (BooleanField): A prefence field for the user's opinion editor.
+
+        utilized (QuerySet:TheoryNode): The set of theories that the user has formed an opinion on.
+        contributions (QuerySet:TheoryNode): The set of content that the user created or
+            collaborated on.
+
+    Related model attributes:
+        groups (Group): The set of permission groups the user belongs to (used for user level
+            access).
+        violations (QuerySet:Violation): The set of violations the user has been flagged for.
     """
 
-    # Defines
-    SYSTEM_USER_PK = 10
+    # Class attributes
+    SYSTEM_USER_PK = -1
 
-    # Model variables
+    # Model attributes
     sex = models.CharField(max_length=60, blank=True)
     location = models.CharField(max_length=60, blank=True)
     religion = models.CharField(max_length=60, blank=True)
@@ -80,6 +106,7 @@ class User(AbstractUser):
     fullname = models.CharField(max_length=60, blank=True)
     birth_date = models.DateField(null=True, blank=True)
 
+    hidden = models.BooleanField(default=False)
     sex_visible = models.BooleanField(default=False)
     location_visible = models.BooleanField(default=False)
     religion_visible = models.BooleanField(default=False)
@@ -87,7 +114,6 @@ class User(AbstractUser):
     fullname_visible = models.BooleanField(default=False)
     birth_date_visible = models.BooleanField(default=False)
 
-    hidden = models.BooleanField(default=False)
     use_wizard = models.BooleanField(default=True)
     utilized = models.ManyToManyField('theories.TheoryNode', related_name='users', blank=True)
     contributions = models.ManyToManyField('theories.TheoryNode',
@@ -139,30 +165,6 @@ class User(AbstractUser):
             return self.get_fullname()
         return self.get_username()
 
-    def is_hidden(self):
-        """A getter for the hidden attribute.
-
-        Returns:
-            bool: True if the user is hidden.
-        """
-        return self.hidden
-
-    def is_visible(self):
-        """A getter for the hidden attribute.
-
-        Returns:
-            bool: True if the user is not hidden.
-        """
-        return not self.hidden
-
-    def get_long(self):
-        """A getter for the user's fullname if visible, otherwise the user's handle.
-
-        Returns:
-            str: The user's fullname.
-        """
-        return self.__str__(print_fullname=True)
-
     def get_username(self):
         """Output user's handle.
 
@@ -181,22 +183,13 @@ class User(AbstractUser):
             return self.fullname
         return 'N/A'
 
-    def get_level(self):
-        """A getter for the user's level.
+    def get_long(self):
+        """A getter for the user's fullname if visible, otherwise the user's handle.
 
         Returns:
-            int: The user's level.
+            str: The user's fullname.
         """
-        levels = sorted([int(x['name'].split(' ')[-1]) for x in self.groups.values('name')])
-        return levels[-1]
-
-    def get_levels(self):
-        """A getter for the user's permission levels.
-
-        Returns:
-            list: An ordered list the user's levels.
-        """
-        return sorted([int(x['name'].split(' ')[-1]) for x in self.groups.values('name')])
+        return self.__str__(print_fullname=True)
 
     def get_absolute_url(self):
         """Return the url for viewing the user's profile.
@@ -213,6 +206,22 @@ class User(AbstractUser):
             str: The url.
         """
         return self.get_absolute_url()
+
+    def is_hidden(self):
+        """A getter for the hidden attribute.
+
+        Returns:
+            bool: True if the user is hidden.
+        """
+        return self.hidden
+
+    def is_visible(self):
+        """A getter for the hidden attribute.
+
+        Returns:
+            bool: True if the user is not hidden.
+        """
+        return not self.hidden
 
     def get_age(self):
         """Calculate age if not hidden.
@@ -266,25 +275,17 @@ class User(AbstractUser):
             return self.politics
         return 'N/A'
 
-    def num_contributions(self):
-        """A getter for the number of contributions by the user.
-
-        Returns:
-            int: The count.
-        """
-        return self.contributions.count()
-
-    def is_using(self, theory_node, recalculate=False):
-        """Todo
+    def is_using(self, theory_node, refresh=False):
+        """A query to see if the user has an opinion on the provided theory.
 
         Args:
-            theory_node ([type]): [description]
-            recalculate (bool, optional): [description]. Defaults to False.
+            theory_node (TheoryNode): A reference to the theory in question.
+            refresh (bool, optional): If true, refresh the database's cache. Defaults to False.
 
         Returns:
-            [type]: [description]
+            Bool: True, if the user has an opinion on the theory.
         """
-        if recalculate:
+        if refresh:
             if (self.opinions.filter(theory=self, deleted=False).exists() or
                     self.opinions.filter(nodes__theory_node=self).exists()):
                 self.utilized.add(theory_node)
@@ -293,225 +294,294 @@ class User(AbstractUser):
             return False
         return self.utilized.filter(id=theory_node.pk).exists()
 
-    def count_warnings(self):
-        """Todo
+    def get_violations(self, warnings=True, strikes=True, recent=True, expired=False):
+        """A getter for the user's violations.
 
-        Returns:
-            [type]: [description]
-        """
-        return self.violations.filter(status=Violation.STATUS.WARNING).count()
-
-    def get_violations(self, soft=True, hard=True, recent=True, expired=False):
-        """Todo
+        This method cannot be called without at least recent=True or expired=True.
 
         Args:
-            soft (bool, optional): [description]. Defaults to True.
-            hard (bool, optional): [description]. Defaults to True.
-            recent (bool, optional): [description]. Defaults to True.
-            expired (bool, optional): [description]. Defaults to False.
+            warnings (bool, optional): If true, include warnings. Defaults to True.
+            strikes (bool, optional): If true, include strikes. Defaults to True.
+            recent (bool, optional): If true, include matching violations within the last
+                STRIKE_EXPIRE_LENGTH days. Defaults to True.
+            expired (bool, optional): If true, include matching violations that have expired
+                (older than STRIKE_EXPIRE_LENGTH days). Defaults to False.
 
         Returns:
-            [type]: [description]
+            QuerySet:Violatoin: The set of violations.
         """
-        # setup
-        assert recent or expired
-        violations = Violation.objects.none()
+        return Violation.get_violations(content=self,
+                                        warnings=warnings,
+                                        strikes=strikes,
+                                        recent=recent,
+                                        expired=expired)
 
-        # filter by type
-        if hard:
-            violations |= self.violations.filter(
-                Q(status=Violation.STATUS.ACCEPTED) | Q(status=-Violation.STATUS.ACCEPTED))
-        if soft:
-            exclude = []
-            for violation in self.violations.filter(status__lt=110):
-                if violation.get_poll_winner() != Violation.STATUS.ACCEPTED:
-                    exclude.append(violation.id)
-            violations |= self.violations.filter(status__lt=110).exclude(id__in=exclude)
-
-        # filter by date
-        if recent and expired:
-            pass
-        elif recent:
-            date00 = timezone.now() - datetime.timedelta(days=100)
-            violations = violations.filter(pub_date__gte=date00)
-        elif expired:
-            date00 = timezone.now() - datetime.timedelta(days=100)
-            violations = violations.filter(pub_date__lt=date00)
-
-        # done
-        return violations
-
-    def count_strikes(self, soft=False, hard=True, recent=True, expired=False):
-        """Todo
+    def count_reported(self,
+                       ignored=False,
+                       is_open=True,
+                       is_closed=True,
+                       recent=True,
+                       expired=False):
+        """A getter for the number of violations the user reported.
 
         Args:
-            soft (bool, optional): [description]. Defaults to False.
-            hard (bool, optional): [description]. Defaults to True.
-            recent (bool, optional): [description]. Defaults to True.
-            expired (bool, optional): [description]. Defaults to False.
+            ignored (bool, optional): If true, count the set of ignored violations.
+                Defautls to False.
+            recent (bool, optional): If true, include the set of recent violations.
+                Defaults to True.
+            expired (bool, optional): If true, include the expired set of violations.
+                Defaults to True.
 
         Returns:
-            [type]: [description]
+            int: The count.
         """
-        return self.get_violations(soft=soft, hard=hard, recent=recent, expired=expired).count()
+        query_set = self.reported_violations.all()
+        if is_open and not is_closed:
+            query_set = query_set.filter(status__in=Violation.STATUS_OPEN.get_values())
+        elif is_closed and not is_open:
+            query_set = query_set.filter(status__in=Violation.STATUS_CLOSED.get_values())
+        if ignored:
+            query_set = self.reported_violations.filter(status=Violation.STATUS.IGNORED)
+        if recent and not expired:
+            expiry_date = timezone.now() - datetime.timedelta(days=STRIKE_EXPIRE_LENGTH)
+            query_set = query_set.filter(close_date__gte=expiry_date)
+        elif expired and not recent:
+            expiry_date = timezone.now() - datetime.timedelta(days=STRIKE_EXPIRE_LENGTH)
+            query_set = query_set.filter(close_date__lt=expiry_date)
+        return query_set.count()
+
+    def count_open_reports(self):
+        """A getter for the number of violations the user reported that are still open.
+
+        Returns:
+            int: The count.
+        """
+        return self.count_reported(is_open=True, is_closed=False)
+
+    def count_ignored_reports(self, recent=True, expired=False):
+        """A getter for the number of violations the user reported and that have been ignored.
+
+        Args:
+            recent (bool, optional): If true, include the set of recent violations.
+                Defaults to True.
+            expired (bool, optional): If true, include the expired set of violations.
+                Defaults to True.
+
+        Returns:
+            int: The count.
+        """
+        return self.count_reported(ignored=True, recent=recent, expired=expired)
+
+    def count_warnings(self, recent=True, expired=False):
+        """A getter for the number of warnings the user recieved.
+
+        Args:
+            recent (bool, optional): If true, include the set of recent violations.
+                Defaults to True.
+            expired (bool, optional): If true, include the expired set of violations.
+                Defaults to True.
+
+        Returns:
+            int: The count.
+        """
+        return self.get_violations(warnings=True, strikes=False, recent=recent,
+                                   expired=expired).count()
+
+    def count_strikes(self, recent=True, expired=False):
+        """A getter for the number of strikes the user has recieved.
+
+        Args:
+            recent (bool, optional): If true, include the set of recent violations.
+                Defaults to True.
+            expired (bool, optional): If true, include the expired set of violations.
+                Defaults to True.
+
+        Returns:
+            int: The count.
+        """
+        return self.get_violations(warnings=False, strikes=True, recent=recent,
+                                   expired=expired).count()
+
+    def get_account_age(self):
+        """A getter for the account's age.
+
+        Returns:
+            int: The account age in days.
+        """
+        age = timezone.now() - self.date_joined()
+        return age.days
+
+    def get_num_contributions(self):
+        """A getter for the number of contributions by the user.
+
+        Returns:
+            int: The count.
+        """
+        return self.contributions.count()
+
+    def get_level(self):
+        """A getter for the user's level.
+
+        Returns:
+            int: The user's level.
+        """
+        if len(self.get_levels()) > 0:
+            return self.get_levels()[-1]
+        else:
+            return -1
+
+    def get_levels(self):
+        """A getter for the user's permission levels.
+
+        The user groups are named "user level: #".
+
+        Returns:
+            list: An ordered list of the user's levels.
+        """
+        levels = []
+        for group in self.groups.values('name'):
+            group_name = group['name']
+            if re.match(r'^user level: \d+$', group_name):
+                levels.append(int(re.search(r'\d+', group_name).group()))
+        return sorted(levels)
 
     def is_up_for_promotion(self):
-        """Todo
+        """A getter for the user's promotion status.
 
         Returns:
-            [type]: [description]
-
-        Todo:
-            * Define get_account_age and get_num_contributions.
+            bool: True, if the user is up for promotion.
         """
-        if self.count_strikes(soft=True) > 0:
+        if self.count_warnings(recent=True, expired=False) > 0 or \
+            self.count_strikes(recent=True, expired=False) > 0:
             return False
-        if self.get_level(
-        ) == 1 and self.get_account_age() >= 10 and self.get_num_contributions() >= 10:
+        if self.get_level() == 1 and self.get_account_age() >= LEVEL02_AGE_REQUIREMENT \
+           and self.get_num_contributions() >= LEVEL02_CONTRIBUTIONS_REQUIREMENT:
             return True
-        if self.get_level(
-        ) == 2 and self.get_account_age() >= 100 and self.get_num_contributions() >= 100:
+        if self.get_level() == 2 and self.get_account_age() >= LEVEL03_AGE_REQUIREMENT \
+           and self.get_num_contributions() >= LEVEL03_CONTRIBUTIONS_REQUIREMENT:
             return True
         return False
 
     def promote(self, new_level=None):
-        """Todo
+        """Add the user to the next level group.
+
+        User permissions are handeled by user groups.
+        Note, there are actually 5 levels (0,1,2,3,4) but level 4 is only applied through the
+        admin interface.
 
         Args:
-            new_level ([type], optional): [description]. Defaults to None.
+            new_level (int, optional): If provided, the user is promoted the provided level
+                (primarily used for testing). Defaults to None.
 
         Returns:
-            [type]: [description]
+            int: The user's new level.
         """
-        # setup
-        user_levels = self.get_levels()
         if new_level is None:
-            new_level = max(4, user_levels[-1] + 1)
-        group_level = get_group(new_level)
-        self.groups.add(group_level)
+            new_level = min(3, self.get_level() + 1)
+        group = level_to_group(new_level)
+        self.groups.add(group)
 
     def is_up_for_demotion(self):
-        """Todo
+        """A getter for the user's demotion status.
 
         Returns:
-            [type]: [description]
+            bool: True, if the user is up for demotion.
         """
-        if self.count_strikes() >= 3:
+        if self.count_strikes(recent=True, expired=False) >= 3:
             return True
         return False
 
     def demote(self, new_level=None):
-        """Todo
+        """Demote the user.
 
         Args:
-            new_level ([type], optional): [description]. Defaults to None.
-
-        Returns:
-            [type]: [description]
+            new_level (int, optional): If provided, the user will be demoted to the provided level
+                (primarily used for testing). Defaults to None.
         """
-        # setup
-        user_levels = self.get_levels()
+        current_level = self.get_level()
         if new_level is None:
-            new_level = max(0, user_levels[-1] - 1)
-        group_level = get_group(new_level)
-        self.groups.add(group_level)
-
-        # drop level(s)
-        for level in user_levels:
-            if new_level < level:
-                group_level = get_group(level)
-                self.groups.remove(group_level)
+            new_level = max(0, current_level - 1)
+        while current_level > new_level:
+            group = level_to_group(current_level)
+            self.groups.remove(group)
+            current_level = self.get_level()
+        if current_level < new_level:
+            group = level_to_group(new_level)
+            self.groups.add(group)
 
 
 class Violation(models.Model):
-    """Todo
+    """A user violation.
+
+    This class is the container for the violation report, all viloation feedback from the users,
+    and the finial decision.
 
     Attributes:
-        models ([type]): [description]
+        saved_count (int or None): Cached count.
+
+    Class constants:
+        The class constants are used map predefined actions, intents, and offences to integers.
+        In the case that there are two Choices containers for the same field, one is for choosing
+        an action and the other for displaying the choice.
+
+    Model attributes:
+        offender (User): The user that was reported for the violation.
+        pub_date (DateTimeField): The date the user was reported.
+        modified_date (DateTimeField): The last time the violation was updated.
+        close_date (DateTimeField): The close/closed date of the poll.
+
+        content(GenericModel): The conent that the violoation was reported on.
+        object_id(int): The primary key/id of the content that the violation was reported for
+            (used by GenericModel).
+        content_type(ContentType): The type of the violated content (used by GenericModel).
+
+        status (STATUS): The status of the violation. A negative value indicates that the user
+            has not acknowledged the update.
+        read (Bool):
+
+    Related model attributes:
+        votes (ViolationVote): The set of user votes on the violation.
+        feedback (ViolationFeedback): The set of feedback on the violation.
+        violations (Violation): The set of resolution violations commited by the committee in
+            charge of this resolution.
     """
 
-    # Status (read is negative)
-    STATUS = Choices(
+    # Class constants
+    STATUS_OPEN = Choices(
         (100, "REPORTED", ("Pending")),
         (101, "POLLING", ("Polling")),
         (102, "PENDING", ("Pending")),
-        (110, "IGNORED", ("Ignored")),
-        (120, "WARNING", ("Warning")),
-        (130, "ACCEPTED", ("Accepted")),
-        (140, "REJECTED", ("Rejected")),
     )
+    STATUS_WARNINGS = Choices((120, "WARNING", ("Warning")),)
+    STATUS_STRIKES = Choices((130, "STRIKE", ("Strike")),)
+    STATUS_VIOLATIONS = STATUS_WARNINGS + STATUS_STRIKES
+    STATUS_CLOSED = Choices((110, "IGNORED", ("Ignored")),) + STATUS_VIOLATIONS
+    STATUS = STATUS_OPEN + STATUS_CLOSED
 
-    # Votes
-    VOTES00 = Choices(
-        (0, "NO_VOTE", ("----")),
-        (110, 'IGNORE', ('Ignore')),
-        (120, 'WARN', ('Warn')),
-        (130, 'ACCEPT', ('Accept')),
-        (140, 'REJECT', ('Reject')),
-    )
-    VOTES01 = Choices(
-        (110, 'IGNORE', ('Ignore')),
-        (120, 'WARN', ('Warn')),
-        (130, 'ACCEPT', ('Accept')),
-        (140, 'REJECT', ('Reject')),
-    )
+    # ********************************
+    # Model attributes
+    # ********************************
 
-    # Intent
-    INTENTIONS = Choices(
-        ("", "----"),
-        (10, "Unintentional"),
-        (20, "Careless"),
-        (30, "Adversarial"),
-    )
-
-    # Offences
-    OFFENCES = Choices(
-        (110, "Provided commentary."),
-        (115, "Provided non-Wiki-O content."),
-        (120, "Reverted sound content."),
-        (125, "Unnecessarily added or removed evidence."),
-        (130, "Performed unnecessary action."),
-        (135, "Missclassified evidence."),
-        (210, "Spamming the comments and/or reports."),
-        (215, "Voted with an ulterior agenda."),
-        (220, "Unnecessarily overrode the poll."),
-        (850, "Acted adversarially."),
-    )
-    THEORY_OFFENCES = Choices(
-        (110, "Provided commentary (leading, etc)."),
-        (115, "Provided non-Wiki-O content."),
-        (120, "Reverted sound content."),
-        (125, "Unnecessarily added or removed evidence."),
-        (130, "Performed unnecessary action (swap, convert, merge)."),
-    )
-    EVIDENCE_OFFENCES = Choices(
-        (110, "Provided commentary (leading, etc)."),
-        (115, "Provided non-Wiki-O content."),
-        (120, "Reverted sound content."),
-        (125, "Unnecessarily added or removed evidence."),
-        (130, "Performed unnecessary action (convert, merge)."),
-        (135, "Missclassified evidence (verifiable field)."),
-    )
-    RESOLUTION_OFFENCES = Choices(
-        (210, "Spamming the comments and/or reports."),
-        (215, "Voted with an ulterior agenda."),
-        (220, "Unnecessarily overrode the poll (only applies to level 4 users)."),
-    )
-    FORUM_OFFENCES = Choices((850, "Acted adversarially."),)
-
-    # Django database attributes
+    # The user that was reported for the violation.
     offender = models.ForeignKey(User, related_name='violations', on_delete=models.CASCADE)
-    violations = GenericRelation('Violation')
+    reporter = models.ForeignKey(User, related_name='reported_violations', on_delete=models.CASCADE)
+    pub_date = models.DateTimeField(auto_now_add=True)
+    modified_date = models.DateTimeField(models.SET_NULL, blank=True, null=True)
+    close_date = models.DateTimeField(models.SET_NULL, blank=True, null=True)
 
+    # The violated content.
     object_id = models.PositiveIntegerField()
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     content = GenericForeignKey('content_type', 'object_id')
 
-    status = models.SmallIntegerField(choices=STATUS)
-    pub_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(models.SET_NULL, blank=True, null=True)
+    # The current status of the violation.
+    status = models.SmallIntegerField(choices=STATUS, default=STATUS.REPORTED)
+    read = models.BooleanField(default=False)
 
-    # Cache attributes
+    # The set of violations against this violation/resolution.
+    violations = GenericRelation('Violation')
+
+    # Cache attributes.
     saved_count = None
 
     class Meta:
@@ -528,6 +598,9 @@ class Violation(models.Model):
         verbose_name = 'Violation'
         verbose_name_plural = 'Violations'
         ordering = ['-pub_date']
+
+        # The set of permissions to enter into the permissions table when creating this object.
+        # Add, change, delete, and view permissions are automatically created for each model.
         permissions = (
             ('can_vote_violation', 'Can vote.'),
             ('can_report_violation', 'Can report.'),
@@ -536,31 +609,81 @@ class Violation(models.Model):
         )
 
     @classmethod
-    def get_violations(cls, opened=True, closed=True):
-        """Todo
+    def get_violations(cls,
+                       content=None,
+                       is_open=True,
+                       is_closed=True,
+                       warnings=True,
+                       strikes=True,
+                       recent=True,
+                       expired=True):
+        """A getter for violations.
+
+        This method cannot be called without at least is_open=True or is_closed=True, at least
+        warnings or strikes, and at least recent=True or expired=True.
 
         Args:
-            opened (bool, optional): [description]. Defaults to True.
-            closed (bool, optional): [description]. Defaults to True.
+            is_open (bool, optional): If true, the result will include all open violations.
+                Defaults to True.
+            is_closed (bool, optional): If true, the result will include all closed violations.
+                Defaults to True.
+            warnings (bool, optional): If true, include the set of user warnings. Defaults to True.
+            strikes (bool, optional): If true, include the set of user stikes. Defaults to True.
+            recent (bool, optional): If true, include the set of recent violations.
+                Defaults to True.
+            expired (bool, optional): If true, include the expired set of violations.
+                Defaults to True.
 
         Returns:
-            [type]: [description]
-
-        Todo:
-            * Is not finished.
+            QuerySet:Violation: The set of violatoins.
         """
-        violations = cls.objects.none()
-        if opened:
-            violations |= cls.objects.filter(Q(status__lt=110) & Q(status__gt=-110))
-        if closed:
-            violations |= violations.filter(Q(status__gte=110) | Q(status__lte=-110))
-        return violations
+        # Preconditions.
+        assert is_open or is_closed
+        assert recent or expired
+
+        # Find all violations for the provided content.
+        if content is None:
+            query_set = cls.objects.all()
+        else:
+            content_type = ContentType.objects.get_for_model(content.__class__)
+            query_set = cls.objects.filter(object_id=content.id, content_type=content_type)
+
+        # Filter by status.
+        if is_open and not is_closed:
+            query_set &= query_set.filter(status__in=cls.STATUS_OPEN.get_values())
+        if is_closed and not is_open:
+            query_set &= query_set.filter(status__in=cls.STATUS_CLOSED.get_values())
+
+        # Filter by type.
+        if warnings:
+            warning_query_set = query_set.filter(status=Violation.STATUS.WARNING)
+            # Filter by date.
+            if recent and not expired:
+                expiry_date = timezone.now() - datetime.timedelta(days=WARNING_EXPIRE_LENGTH)
+                warning_query_set = warning_query_set.filter(close_date__gte=expiry_date)
+            elif expired and not recent:
+                expiry_date = timezone.now() - datetime.timedelta(days=WARNING_EXPIRE_LENGTH)
+                warning_query_set = warning_query_set.filter(close_date__lt=expiry_date)
+            query_set |= warning_query_set
+        if strikes:
+            stike_query_set = query_set.filter(status=Violation.STATUS.STRIKE)
+            # Filter by date.
+            if recent and not expired:
+                expiry_date = timezone.now() - datetime.timedelta(days=STRIKE_EXPIRE_LENGTH)
+                stike_query_set = stike_query_set.filter(close_date__gte=expiry_date)
+            elif expired and not recent:
+                expiry_date = timezone.now() - datetime.timedelta(days=STRIKE_EXPIRE_LENGTH)
+                stike_query_set = stike_query_set.filter(close_date__lt=expiry_date)
+            query_set |= stike_query_set
+
+        # Return
+        return query_set
 
     def save(self, *args, **kwargs):
-        """Todo
+        """Updates the modified_date.
 
         Returns:
-            [type]: [description]
+            Violation: A reference to the object (self).
         """
         self.modified_date = timezone.now()
         super().save(*args, **kwargs)
@@ -572,108 +695,72 @@ class Violation(models.Model):
         Returns:
             str: The violation's content.
         """
-        return self.content.__str__()
+        return "Violation #%d (%s)" % (self.id, self.get_status_str())
 
     def get_absolute_url(self):
-        """Todo
+        """A getter for the violation's url.
 
         Returns:
-            [type]: [description]
+            str: The url.
         """
-        return reverse('users:violation-resolve', args=[], kwargs={'pk': self.pk})
+        return reverse('users:violation-resolve', kwargs={'pk': self.pk})
 
     def url(self):
-        """Todo
+        """A getter for the violation's url.
 
         Returns:
-            [type]: [description]
+            str: The url.
         """
         return self.get_absolute_url()
 
-    def content_url(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.content_type.model == 'theorynode':
-            return self.content.url()
-        return None
-
     def get_status_str(self):
-        """Todo
+        """A getter for the violation's status.
 
         Returns:
-            [type]: [description]
+            str: The status.
         """
-        return self.STATUS[self.get_status()]
-
-    def is_unread(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        return self.status > 0
+        return self.STATUS[self.status]
 
     def is_read(self):
-        """Todo
+        """A getter for the read status.
 
         Returns:
-            [type]: [description]
+            bool: True if the status is read.
         """
-        return self.status < 0
+        return self.read
 
-    def get_status(self):
-        """Todo
+    def is_unread(self):
+        """A getter for the unread status.
 
         Returns:
-            [type]: [description]
+            bool: True the status is unread.
         """
-        return abs(self.status)
+        return not self.read
 
     def mark_as_read(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.is_unread():
-            self.status = -abs(self.status)
+        """Transition the status to read."""
+        if not self.read:
+            self.read = True
             self.save()
 
     def mark_as_unread(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.is_read():
-            self.status = abs(self.status)
+        """Transition the status to unread."""
+        if self.read:
+            self.read = False
             self.save()
 
-    def get_feedback(self):
-        """Todo
-
-        Args:
-            exclude ([type], optional): [description]. Defaults to None.
-
-        Returns:
-            [type]: [description]
-        """
-        return self.feedback.all()
-
     def get_feedback_users(self, exclude=None):
-        """Todo
+        """A getter for the set of users that provided feedback.
 
         Args:
-            exclude ([type], optional): [description]. Defaults to None.
+            exclude (list[User] or User, optional): If provided, the user(s) in exclude will not
+            have their feedback returned. Defaults to None.
 
         Returns:
-            [type]: [description]
+            QuerySet:User: The feedack.
         """
         users_pk = []
-        for x in self.get_feedback():
+        for x in self.feedback.all():
             users_pk.append(x.user.pk)
         users = User.objects.filter(pk__in=users_pk)
         if exclude is not None:
@@ -685,175 +772,250 @@ class Violation(models.Model):
             users = users.exclude(pk__in=exclude_pk)
         return users
 
-    def get_type(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        return 'Violation'
-
-    def get_poll_count(self, cache=True):
-        """Todo
+    def get_poll_votes(self, cache=True):
+        """A getter for the poll's votes.
 
         Args:
-            cache (bool, optional): [description]. Defaults to True.
+            cache (bool, optional): If true, store the count in cache. Defaults to True.
 
         Returns:
-            [type]: [description]
+            VOTE_OUTCOMES: The set of votes.
         """
-        # check cache first cache
+        # Return the cached result if present.
         if self.saved_count is not None:
             return self.saved_count
-        # count
+        # Get the count.
         count = []
-        for action_id, action in self.VOTES01:
-            count.append([self.votes.filter(action=action_id).count(), action_id, action])
-        # cache
+        for vote_id, vote in ViolationVote.VOTE_OUTCOMES:
+            count.append([self.votes.filter(vote=vote_id).count(), vote_id, vote])
+        # Save to cache.
         if cache:
             self.saved_count = count
         return count
 
     def poll_is_done(self):
-        """Todo
+        """A getter for the poll's status.
 
         Returns:
-            [type]: [description]
+            bool: True, if the poll is done.
         """
         if self.is_closed():
             return True
-        else:
-            today = timezone_today(timezone=timezone.utc)
-            end = self.pub_date + datetime.timedelta(days=10)
-            end = datetime.datetime(year=end.year,
-                                    month=end.month,
-                                    day=end.day,
-                                    hour=23,
-                                    minute=59,
-                                    second=59)
-            return today > end
+        return timezone.now() > self.close_date
 
-    def is_polling(self):
-        """Todo
+    def get_poll_outcome(self):
+        """A getter for the poll's tally.
 
         Returns:
-            [type]: [description]
+            STATUS: The vote with the most backing and if there is a tie, the vote with the most
+                severe outcome.
         """
-        return not self.poll_is_done()
-
-    def get_poll_winner(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        votes = self.get_poll_count()
-        for x in votes:
-            x[0] = -x[0]
-        votes = sorted(votes)
+        votes = sorted(self.get_poll_votes(), key=lambda x: [-x[0], x[1]])
         return votes[0][1]
 
-    def close_poll(self, user=None):
-        """Todo
+    def open_poll(self, user=None, log_feedback=True):
+        """A method for updating the poll.
 
         Args:
-            user ([type], optional): [description]. Defaults to None.
-
-        Returns:
-            [type]: [description]
-
-        Todo:
-            * Not finished.
-            * Write is_up_for_demotion().
-            * Write demote()
+            user (User, optional): If provided, the user will be applied to the feedback log.
+                Defaults to None.
+            log_feedback (bool, optional): If true, a feedback log will be created.
+                Defaults to True.
         """
-        # setup
+        # Setup
         if user is None:
             user = User.get_system_user()
-        # close
-        self.status = self.get_poll_winner()
+        # Update close date
+        end = timezone.now() + datetime.timedelta(days=POLL_LENGTH)
+        end = datetime.datetime(year=end.year,
+                                month=end.month,
+                                day=end.day,
+                                hour=23,
+                                minute=59,
+                                second=59,
+                                tzinfo=datetime.timezone.utc)
+        self.close_date = end
         self.save()
-        # document
-        self.feedback.create(
-            user=user,
-            action=ViolationFeedback.ACTIONS01.CLOSE_POLL,
-        )
-        self.feedback.create(
-            user=user,
-            action=self.status,
-        )
-        # offender demotion
-        if self.is_strike() and self.offender.is_up_for_demotion():
+        # Log feedback.
+        if log_feedback:
+            data = ViolationFeedback.pack_data(ViolationFeedback.OPEN_ACTION_CHOICES.OPEN_POLL)
+            self.feedback.create(
+                user=user,
+                data=data,
+            )
+
+    def close_poll(self, user=None, log_feedback=True):
+        """A method for updating the poll.
+
+        Args:
+            user (User, optional): If provided, the user will be applied to the feedback log.
+                Defaults to None.
+            log_feedback (bool, optional): If true, a feedback log will be created.
+                Defaults to True.
+
+        Returns:
+            STATUS: The result of the poll.
+        """
+        # Setup
+        if user is None:
+            user = User.get_system_user()
+        # Close
+        if self.is_open():
+            self.close_date = timezone.now()
+        self.status = self.get_poll_outcome()
+        LOGGER.info('Violation[%d].close_poll: poll_outcome %s', self.id, self.get_status_str())
+        self.save()
+        # Log feedback.
+        if log_feedback:
+            data = ViolationFeedback.pack_data(
+                action_key=ViolationFeedback.OPEN_ACTION_CHOICES.CLOSE_POLL,
+                comment='Outcome, %s' % self.get_status_str())
+            self.feedback.create(
+                user=user,
+                data=data,
+            )
+        # Demote
+        if self.status == Violation.STATUS.STRIKE and self.offender.is_up_for_demotion():
             self.offender.demote()
-        # done
+            LOGGER.info('Violation[%d].close_poll: demoted', self.id)
+        # Done
         return self.status
 
+    def override_status(self, status, user=None, log_feedback=False):
+        """A method for updating the poll.
+
+        Args:
+            status (STATUS): The status used to update the violation.
+            user (User, optional): If provided, the user will be applied to the feedback log.
+                Defaults to None.
+            log_feedback (bool, optional): If true, a feedback log will be created.
+                Defaults to True.
+        """
+        # Setup
+        if user is None:
+            user = User.get_system_user()
+        # Close
+        if self.is_open():
+            self.close_date = timezone.now()
+            data = ViolationFeedback.pack_data(
+                action_key=ViolationFeedback.OPEN_ACTION_CHOICES.CLOSE_POLL)
+            self.feedback.create(
+                user=user,
+                data=data,
+            )
+        self.status = status
+        LOGGER.info('Violation[%d].override_status: %s', self.id, self.get_status_str())
+        self.save()
+        # Log feedback.
+        if log_feedback:
+            data = ViolationFeedback.pack_data(action_key=status)
+            self.feedback.create(
+                user=user,
+                data=data,
+            )
+        # Demote
+        if self.status == Violation.STATUS.STRIKE and self.offender.is_up_for_demotion():
+            self.offender.demote()
+            LOGGER.info('Violation[%d].override_status: demoted', self.id)
+
     def is_open(self):
-        """Todo
+        """A getter fot the poll's status.
 
         Returns:
-            [type]: [description]
+            Bool: True if the poll is still open.
         """
-        return self.get_status() < 110
+        return self.status in self.STATUS_OPEN
 
     def is_closed(self):
-        """Todo
+        """A getter fot the poll's status.
 
         Returns:
-            [type]: [description]
+            Bool: True if the poll is closed.
         """
-        return self.get_status() >= 110
-
-    def is_strike(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.is_open():
-            return False
-        return abs(self.status) == Violation.STATUS.ACCEPTED
+        return not self.is_open()
 
 
 class ViolationFeedback(models.Model):
+    """A container for feedback on user violations.
 
-    ACTIONS00 = Choices(
+    Class constants:
+        The class constants are used map predefined actions, intents, and offences to integers.
+        In the case that there are two Choices containers for the same field, one is for choosing
+        an action and the other for displaying the choice.
+
+    Model attributes:
+        user (User): The user providing the feedback.
+        violation (Violation): A pointer to the violation.
+        pub_date (Datetime): The publication date of the feedback.
+        data (str): The container's feedback. The data contains feedback about the user's action,
+            the offender's intent, a list of the offender's offences, and the user's justfication.
+            The four fields are seperated by /'s characters.
+    """
+
+    # Class constants
+    ACTION_FEEDBACK = Choices(
         (0, "NO_ACTION", ("Comment")),
         (100, "REPORTED", ("Reported Violation")),
         (101, "OPENED_POLL", ("Opened Poll")),
         (102, "CLOSED_POLL", ("Closed Poll")),
-        (110, "IGNORED", ("Ignored")),
-        (120, "WARNING", ("Warning")),
-        (130, "ACCEPTED", ("Accepted")),
-        (140, "REJECTED", ("Rejected")),
+        (110, "IGNORED", ("Veto - Ignored")),
+        (120, "WARNING", ("Veto - Warning")),
+        (130, "STRIKE", ("Veto - Strike")),
     )
 
-    ACTIONS01 = Choices(
+    VETO_ACTION_CHOICES = Choices(
         (0, "NO_ACTION", ("----")),
-        (101, "OPEN_POLL", ("Open Poll")),
-        (102, "CLOSE_POLL", ("Close Poll")),
-        (110, "IGNORE", ("Ignore")),
-        (120, "WARN", ("Warn")),
-        (130, "ACCEPT", ("Accept")),
-        (140, "REJECT", ("Reject")),
+        (110, "IGNORE", ("Veto - Ignore")),
+        (120, "WARN", ("Veto - Warn")),
+        (130, "STRIKE", ("Veto - Strike")),
     )
 
-    ACTIONS02 = Choices((0, "NO_ACTION", ("----")),)
+    OPEN_ACTION_CHOICES = VETO_ACTION_CHOICES + Choices(
+        (102, "CLOSE_POLL", ("Close the poll and tally the vote")),)
 
-    # Django model attributes
+    CLOSED_ACTION_CHOICES = VETO_ACTION_CHOICES + Choices((101, "OPEN_POLL", ("Reopen the poll")),)
+
+    INTENTIONS = Choices(
+        ("", "----"),
+        (10, "Unintentional"),
+        (20, "Careless"),
+        (30, "Adversarial"),
+    )
+
+    THEORY_OFFENCES = Choices(
+        (110, "Provided commentary (leading, etc)."),
+        (115, "Provided non-Wiki-O content."),
+        (120, "Reverted sound content."),
+        (125, "Unnecessarily added or removed evidence."),
+        (130, "Performed unnecessary action (swap, convert, merge)."),
+    )
+
+    EVIDENCE_OFFENCES = THEORY_OFFENCES + Choices(
+        (135, "Missclassified evidence (verifiable field)."),)
+
+    RESOLUTION_OFFENCES = Choices(
+        (210, "Filed a violation without proper cause."),
+        (215, "Spamming the comments and/or reports."),
+        (220, "Voted with an ulterior agenda."),
+        (225, "Unnecessarily overrode the poll (only applies to level 4 users)."),
+    )
+
+    OFFENCE_CHOICES = THEORY_OFFENCES + EVIDENCE_OFFENCES + RESOLUTION_OFFENCES
+
+    # Model attributes
     user = models.ForeignKey(User,
                              related_name='violation_feedback',
                              on_delete=models.SET_NULL,
                              null=True)
     violation = models.ForeignKey(Violation, related_name='feedback', on_delete=models.CASCADE)
-    action = models.SmallIntegerField(choices=ACTIONS01, default=0)
-    comment = models.CharField(max_length=750, blank=True)
-    timestamp = models.DateTimeField()
+    data = models.CharField(max_length=750, blank=True)
+    pub_date = models.DateTimeField()
 
     # Cache attributes
-    saved_intent = None
+    saved_action_key = None
+    saved_intent_key = None
     saved_comment = None
-    saved_offences = None
+    saved_offence_keys = None
 
     class Meta:
         """Where the model options are defined.
@@ -868,7 +1030,29 @@ class ViolationFeedback(models.Model):
         db_table = 'users_violation_feedback'
         verbose_name = 'Violation Feedback'
         verbose_name_plural = 'Violation Feedback'
-        ordering = ['timestamp']
+        ordering = ['pub_date']
+
+    @classmethod
+    def pack_data(cls, action_key=0, intent_key=0, offence_keys=None, comment=''):
+        """Pack the input data into a string.
+
+        Args:
+            action_key (OPEN_ACTION_CHOICES, optional): The user's action (e.g. comment, close poll,
+                ...). Defaults to 0.
+            intent_key (INTENTIONS, optional): The intention as precieved by the user.
+                Defaults to 0.
+            offence_keys (OFFENCE_CHOICES, optional): A list of offences. Defaults to None.
+            comment (str, optional): The user's comment. Defaults to ''.
+
+        Returns:
+            str: The packed string.
+        """
+        action_key = str(action_key)
+        intent_key = str(intent_key)
+        if offence_keys is None:
+            offence_keys = ''
+        offence_keys = str(offence_keys).strip('[').strip(']').replace("'", '').replace(' ', '')
+        return '%s/%s/%s/%s' % (action_key, intent_key, offence_keys, comment)
 
     def __str__(self):
         """Returns violation's offender.
@@ -886,107 +1070,128 @@ class ViolationFeedback(models.Model):
         return s
 
     def save(self, *args, **kwargs):
-        """Todo
+        """Updates the pub_date.
 
         Returns:
-            [type]: [description]
+            ViolationFeedback: A reference to the object (self).
         """
-        self.timestamp = timezone.now()
+        self.pub_date = timezone.now()
         super().save(*args, **kwargs)
         return self
 
+    def unpack_data(self):
+        """A method for unpacking self.data.
+
+        The data string contains the feedback action, intent, offences, and a comment. The data
+        is separated by /'s.
+
+        Returns:
+            Bool: True if the data was properly unpacked.
+        """
+        # Setup
+        self.saved_action_key = 0
+        self.saved_intent_key = 0
+        self.saved_offence_keys = []
+        self.saved_comment = ''
+        x = self.data.split('/')
+        # Preconditions
+        if len(x) != 4:
+            return False
+        # Action
+        if re.match(r'^\d+$', x[0]):
+            self.saved_action_key = int(x[0])
+        # Intent
+        if re.match(r'^\d+$', x[1]):
+            self.saved_intent_key = int(x[1])
+        # Offences
+        self.saved_offence_keys = [int(x) for x in re.findall(r'\d+', x[2])]
+        # Comment
+        self.saved_comment = x[3]
+        # Done
+        return True
+
     def get_action(self):
-        """Todo
+        """A getter for the feedback action (comment, veto, ...).
 
         Returns:
-            [type]: [description]
+            str: The action.
         """
+        if self.saved_action_key is None:
+            self.unpack_data()
         try:
-            return self.ACTIONS00[self.action]
+            return self.ACTION_FEEDBACK[self.saved_action_key]
         except KeyError:
-            return 'Error'
+            return None
 
-    def get_comment(self, cache=True):
-        """Todo
-
-        Args:
-            cache (bool, optional): [description]. Defaults to True.
+    def get_intent(self):
+        """A getter for the percieved intent.
 
         Returns:
-            [type]: [description]
+            [str]: The intent.
         """
-        if cache and self.saved_comment is not None:
-            return self.saved_comment
+        if self.saved_intent_key is None:
+            self.unpack_data()
         try:
-            comment = self.comment.split('/', 2)[2]
-        except IndexError:
-            comment = ''
-        if cache:
-            self.saved_comment = comment
-        return comment
-
-    def get_intent(self, cache=True):
-        """Todo
-
-        Args:
-            cache (bool, optional): [description]. Defaults to True.
-
-        Returns:
-            [type]: [description]
-        """
-        if cache and self.saved_intent is not None:
-            return self.saved_intent
-        try:
-            intent = int(self.comment.split('/', 2)[0])
-            intent = Violation.INTENTIONS[intent]
-        except IndexError:
-            intent = ''
-        if cache:
-            self.saved_intent = intent
-        return intent
-
-    def get_offences(self, cache=True):
-        """Todo
-
-        Args:
-            cache (bool, optional): [description]. Defaults to True.
-
-        Returns:
-            [type]: [description]
-        """
-        if self.saved_offences is not None:
-            return self.saved_offences
-        try:
-            offences = self.comment.split('/', 2)[1]
-            offences = [int(x) for x in re.findall(r'\d+', offences)]
-            for i, x in enumerate(offences):
-                try:
-                    offences[i] = Violation.OFFENCES[x]
-                except KeyError:
-                    offences[i] = 'Error'
+            return self.INTENTIONS[self.saved_intent_key]
         except KeyError:
-            offences = None
-        if cache:
-            self.saved_offences = offences
+            return None
+
+    def get_offences(self):
+        """A getter for the list of offences.
+
+        Returns:
+            [str]: A list of offences.
+        """
+        offences = []
+        if self.saved_offence_keys is None:
+            self.unpack_data()
+        for offcence_key in self.saved_offence_keys:
+            try:
+                offences.append(ViolationFeedback.OFFENCE_CHOICES[offcence_key])
+            except KeyError:
+                offences.append('Error')
         return offences
+
+    def get_comment(self):
+        """A getter for the comment.
+
+        Returns:
+            str: The comment.
+        """
+        if self.saved_comment is None:
+            self.unpack_data()
+        return self.saved_comment
 
 
 class ViolationVote(models.Model):
-    """Todo
+    """A container for keeping track of user votes.
+
+    Class constants:
+        The class constants are used map predefined actions, intents, and offences to integers.
+        In the case that there are two Choices containers for the same field, one is for choosing
+        an action and the other for displaying the choice.
 
     Attributes:
-        user (User):
-        violation (Violation):
-        action (Violation.VOTES00):
+        user (User): The user making a vote on the violation.
+        violation (Violation): The violation linked to the vote.
+        vote (Violation.VOTES_CHOICES): The user's vote.
     """
 
-    # Django model attributes
+    # Class constants
+    VOTE_OUTCOMES = Choices(
+        (110, 'IGNORE', ('Ignore')),
+        (120, 'WARN', ('Warn')),
+        (130, 'STRIKE', ('Strike')),
+    )
+    VOTE_CHOICES = Choices((0, "NO_VOTE", ("----")),) + VOTE_OUTCOMES
+
+    # Model attributes
     user = models.ForeignKey(User,
                              related_name='violation_votes',
                              on_delete=models.SET_NULL,
                              null=True)
     violation = models.ForeignKey(Violation, related_name='votes', on_delete=models.CASCADE)
-    action = models.SmallIntegerField(choices=Violation.VOTES00, default=0)
+    vote = models.SmallIntegerField(choices=VOTE_CHOICES, default=0)
 
     class Meta:
         """Where the model options are defined.
@@ -1003,22 +1208,9 @@ class ViolationVote(models.Model):
         verbose_name_plural = 'Violation Votes'
 
     def __str__(self):
-        """Returns violation's offender.
+        """Converts the vote value to a human readable string.
 
         Returns:
-            str: The violation's offender.
+            string: The string.
         """
-        result = '%s: %s (%s)' % (
-            self.violation.__str__().strip('.'),
-            self.user,
-            self.violation.offender.__str__(),
-        )
-        return result
-
-    def get_vote_str(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        return Violation.VOTES00[self.action]
+        return self.VOTE_CHOICES[self.vote]

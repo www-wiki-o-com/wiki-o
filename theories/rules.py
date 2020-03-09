@@ -40,9 +40,6 @@ has_level03 = rules.is_group_member('user level: 3')
 has_level04 = rules.is_group_member('user level: 4')
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def is_author(user, obj):
     if user.is_authenticated:
@@ -54,9 +51,6 @@ def is_author(user, obj):
             return obj.revision.user == user
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def can_edit_title(user, obj=None):
     if isinstance(obj, TheoryNode) and user.is_authenticated:
@@ -74,9 +68,6 @@ def can_edit_title(user, obj=None):
     return False
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def can_edit_details(user, obj):
     if has_level00(user):
@@ -84,9 +75,6 @@ def can_edit_details(user, obj):
     return True
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def can_remove(user, obj):
     if isinstance(obj, TheoryNode) and user.is_authenticated:
@@ -104,9 +92,6 @@ def can_remove(user, obj):
     return False
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def can_delete(user, obj):
     if isinstance(obj, TheoryNode) and user.is_authenticated:
@@ -120,9 +105,6 @@ def can_delete(user, obj):
     return False
 
 
-# ******************************
-#
-# ******************************
 @rules.predicate
 def can_restore(user, obj):
     if has_level04(user):

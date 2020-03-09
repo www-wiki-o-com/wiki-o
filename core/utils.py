@@ -17,12 +17,14 @@ A web service for sharing opinions and avoiding arguments
 # Imports
 # *******************************************************************************
 import re
+import copy
 import enum
 import datetime
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.http import urlencode
+from model_utils import Choices as DjangoChoices
 
 from actstream import action
 from actstream.models import Action
@@ -47,6 +49,11 @@ class LogDiffResult(enum.Enum):
 
 
 def timezone_today():
+    """Get the current date and truncate the hours, min, seconds, ..."
+
+    Returns:
+        datetime: Today's date.
+    """
     now = timezone.now()
     return datetime.date(now.year, now.month, now.day)
 
@@ -578,3 +585,46 @@ class Parameters():
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         return value
+
+
+class Choices(DjangoChoices):
+    """An exention of model_utils.Choices
+
+    The extension allows for set addition between two Choice objects (excludes duplicates).
+    Additionally, there is one extra method to cleanly expose the database values (mainly used
+    for queries such as status__in=CHOICES.get_values()).
+
+    New attributes:
+        unique (Bool): If true, the addition between two Choice objects will act as set addition
+            with respect to _db_values.
+    """
+
+    unique = True
+
+    def __init__(self, *choices, unique=True):
+        super().__init__(*choices)
+        self.unique = unique
+
+    def __add__(self, other):
+        triples = copy.deepcopy(self._triples)
+        if isinstance(other, self.__class__):
+            other_values = other._db_values
+            other = other._triples
+        else:
+            other = list(other)
+            other_values = set()
+            for x in other:
+                other_values.add(x[0])
+        if self.unique:
+            for i, triple in reversed(list(enumerate(triples))):
+                if triple[0] in other_values:
+                    del triples[i]
+        return Choices(*(triples + other))
+
+    def get_values(self):
+        """A getter for the db values.
+
+        Returns:
+            [Generic]: A list of the db values.
+        """
+        return self._db_values
