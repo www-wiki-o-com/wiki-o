@@ -18,8 +18,7 @@ LICENSE.md file in the root directory of this source tree.-->
 {% load static %} {% load extra %} {% load activity_tags %} {% load notifications_tags %}
 {% load urls %} {% block header %}{% endblock %}
 {% block content %}
-<form
-  action="{% url_extra 'users:notifications' extra=params %}" method="post">
+<form action="{% url_extra 'users:notifications' extra=params %}" method="post">
   {% csrf_token %}
   {{ formset01.management_form }}
   {{ formset02.management_form }}
@@ -162,50 +161,57 @@ LICENSE.md file in the root directory of this source tree.-->
             <tbody align="left" valign="top">
               {% for form in formset02 %}
               {{ form.id }}
-              {% with form.instance as feedback %}
+              {% with form.instance as violation %}
               <tr>
                 <!-- select -->
                 <td>
                   {{ form.select }}
                 </td>
                 <td>
-                  <!-- verb -->
+                  <!-- Violation -->
                   <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                     href="#form{{forloop.counter}}" aria-controls="form{{forloop.counter}}">
-                    {% if feedback.is_unread %}
-                    <strong> {{ feedback.get_type }}: {{ feedback.title }} </strong>
+                    {% if violation.is_unread %}
+                    <strong> {{ violation }} </strong>
                     {% else %}
-                    {{ feedback.get_type }}: {{ feedback.title }}
+                    {{ violation }}
                     {% endif %}
                   </a>
-                  <!-- description -->
-                  <div id="form{{forloop.counter}}" class="collapse" style="margin-left:20px">
-                    Status: {{ feedback.get_status }}
-                    {% for contribution in feedback.get_contributions %}
-                    <div style="margin-left:20px">
-                      <p style="text-indent:-20px; margin:0; padding:0;">
-                        {% if contribution.has_action %}
-                        {{ contribution.timestamp|date:"d/m/y" }} - {{ contribution.get_action }}:
-                        {% else %}
-                        {{ contribution.timestamp|date:"d/m/y" }}:
-                        {% endif %}
-                        {{ contribution }}
-                      </p>
+                  <!-- Violation details -->
+                  <div id="form{{ forloop.counter }}" class="collapse" style="margin-left:20px">
+                    Content: <a href="{{ violation.content.url }}" class="plain" target="_blank">
+                      {{ violation.content }} </a>
+                    <br>
+                    Feedback:
+                    <div style="margin-left:2ex">
+                      {% for feedback in violation.feedback.all %}
+                      <div style="margin-left:20px">
+                        <p style="text-indent:-20px; margin:0; padding:0;">
+                          {% if feedback.get_action %}
+                          {{ feedback.pub_date|date:"d/m/y" }} - {{ feedback.get_action }}
+                          {% else %}
+                          {{ feedback.pub_date|date:"d/m/y" }}
+                          {% endif %}
+                          {% if feedback.get_comment %}
+                          : {{ feedback.get_comment }}
+                          {% endif %}
+                        </p>
+                      </div>
+                      {% endfor %}
                     </div>
-                    {% endfor %}
-                    <a href="{{ feedback.theory_node.url }}" target="_blank"> Go to content </a>
+                    <a href="{{ violation.url }}" target="_blank"> Visit poll </a>
                   </div>
                 </td>
                 <td />
-                <!-- datetime -->
+                <!-- Datetime -->
                 <td align="right">
-                  {% if feedback.is_unread %} <strong> {% endif %}
+                  {% if violation.is_unread %} <strong> {% endif %}
                     {% if request.GET.abs %}
-                    {{ feedback.pub_date|date:"d/m/y" }}
+                    {{ violation.pub_date|date:"d/m/y" }}
                     {% else %}
-                    {{ feedback.pub_date|timepassed }}
+                    {{ violation.pub_date|timepassed }}
                     {% endif %}
-                    {% if feedback.is_unread %} </strong> {% endif %}
+                    {% if violation.is_unread %} </strong> {% endif %}
                 </td>
               </tr>
               {% endwith %}
@@ -216,7 +222,7 @@ LICENSE.md file in the root directory of this source tree.-->
         </div>
       </div>
     </div> <!-- end column -->
-    <div class="col-md-4">
+    <div class="col-md-12 col-lg-4">
       <!-- Sidebar Column -->
 
       <!-- Actions -->

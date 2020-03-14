@@ -19,7 +19,7 @@ from actstream.models import Action
 from reversion.models import Version
 from notifications.models import Notification
 
-from users.models import User
+from users.models import User, Violation
 from theories.models import TheoryNode
 
 # *******************************************************************************
@@ -35,10 +35,43 @@ class Command(BaseCommand):
     """Updates permissions, categories, and site."""
     help = __doc__
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '--report01',
+            help='Change ownership of all theory nodes.',
+        )
+
+        parser.add_argument(
+            '--report02',
+            help='Change ownership of all violations.',
+        )
+
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
-        self.fix_modified_by()
+        if options['report01']:
+            self.report01(options['report01'])
+        if options['report02']:
+            self.report02(options['report02'])
         print('done')
+
+    def report01(self, username):
+        user = User.objects.get(username=username)
+        for theory_node in TheoryNode.objects.all():
+            theory_node.created_by = user
+            theory_node.modified_by = user
+            theory_node.save()
+        for version in Version.objects.all():
+            version.revision.user = user
+            version.revision.save()
+        for violation in Violation.objects.all():
+            violation.offender = user
+            violation.save()
+
+    def report02(self, username):
+        user = User.objects.get(username=username)
+        for violation in Violation.objects.all():
+            violation.offender = user
+            violation.save()
 
     def fix_modified_by(self):
         """Fixes the modified by field."""

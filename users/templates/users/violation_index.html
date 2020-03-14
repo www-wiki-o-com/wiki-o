@@ -102,7 +102,7 @@ LICENSE.md file in the root directory of this source tree.-->
                     <tbody>
 
                       <!-- feedback -->
-                      {% for feedback in violation.get_feedback %}
+                      {% for feedback in violation.feedback.all %}
                       <tr>
                         <td>
                           <div style="margin-left:10px; text-align:justify">
@@ -128,16 +128,11 @@ LICENSE.md file in the root directory of this source tree.-->
                       </tr>
                       {% endfor %}
 
-                      <!--                          <tr><th> Status: </th><th> {{ violation.get_status_str }} </th></tr>-->
-
                     </tbody>
                   </table>
 
 
 
-                  <!-- links -->
-                  <!--                      <a href="{{ violation.content_url }}" target="_blank"> Go to content </a>-->
-                  <!--                      <br>-->
                   <a href="{% url_extra 'users:violation-resolve' violation.pk extra=params %}"> Resolve </a>
                 </div>
               </td>
@@ -162,7 +157,7 @@ LICENSE.md file in the root directory of this source tree.-->
     </div>
 
   </div> <!-- end column -->
-  <div class="col-md-4">
+  <div class="col-md-12 col-lg-4">
     <!-- Sidebar Column -->
 
     <!-- Actions -->

@@ -23,101 +23,56 @@ from theories.models import Stats, StatsNode, StatsFlatNode
 # *******************************************************************************
 
 
-# ************************************************************
-#
-# ************************************************************
 class CategoryAdmin(admin.ModelAdmin):
     pass
 
 
-# ************************************************************
-#
-# ************************************************************
 @admin.register(TheoryNode)
 class TheoryNodeAdmin(VersionAdmin):
     pass
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionAdmin(admin.ModelAdmin):
 
-    # ******************************
-    #
-    # ******************************
     def get_list_display(self, request):
         return ('user', 'theory')
 
 
-# ************************************************************
-#
-# ************************************************************
 class OpinionNodeAdmin(admin.ModelAdmin):
 
-    # ******************************
-    #
-    # ******************************
     def get_user(self, obj):
         return obj.parent.user
 
     get_user.short_description = 'User'
 
-    # ******************************
-    #
-    # ******************************
     def get_list_display(self, request):
         return ('get_user', 'theory_node')
 
 
-# ************************************************************
-#
-# ************************************************************
 class StatsAdmin(admin.ModelAdmin):
 
-    # ******************************
-    #
-    # ******************************
     def get_list_display(self, request):
         return ('stats_type', 'theory')
 
 
-# ************************************************************
-#
-# ************************************************************
 class StatsNodeAdmin(admin.ModelAdmin):
 
-    # ******************************
-    #
-    # ******************************
     def get_owner(self, obj):
         return obj.parent.get_owner()
 
     get_owner.short_description = 'Type'
 
-    # ******************************
-    #
-    # ******************************
     def get_list_display(self, request):
         return ('get_owner', 'theory_node')
 
 
-# ************************************************************
-#
-# ************************************************************
 class StatsFlatNodeAdmin(admin.ModelAdmin):
 
-    # ******************************
-    #
-    # ******************************
     def get_owner(self, obj):
         return obj.parent.get_owner()
 
     get_owner.short_description = 'Type'
 
-    # ******************************
-    #
-    # ******************************
     def get_list_display(self, request):
         return ('get_owner', 'theory_node')
 

@@ -31,6 +31,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
-        for violation in Violation.get_violations(opened=True, closed=False):
+        for violation in Violation.get_violations(is_open=True, is_closed=False):
             if violation.poll_is_done():
                 violation.close_poll()

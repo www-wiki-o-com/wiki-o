@@ -355,9 +355,11 @@ class TheoryDetail(generic.DetailView):
     """A view for displaying theory details."""
     model = TheoryNode
     template_name = 'theories/theory_detail.html'
-    TheoryNode.update_intuition_node()
 
     def get_context_data(self, **kwargs):
+
+        # Preconditions
+        TheoryNode.update_intuition_node()
 
         # Setup
         theory = self.object
@@ -957,8 +959,8 @@ def TheoryReportView(request, pk):
     # Setup
     user = request.user
     theory = get_object_or_404(TheoryNode, pk=pk)
-    open_violations = theory.get_violations(opened=True, closed=False)
-    closed_violations = theory.get_violations(opened=False, closed=True)
+    open_violations = theory.get_violations(is_open=True, is_closed=False)
+    closed_violations = theory.get_violations(is_open=False, is_closed=True)
 
     # Navigation
     params = Parameters(request, pk=pk)

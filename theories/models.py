@@ -108,6 +108,7 @@ class Category(models.Model):
         """Save and automatically update the slug."""
         self.slug = slugify(self.title)
         super().save(*args, **kwargs)
+        return self
 
     @classmethod
     def get(cls, title, create=True):
@@ -217,6 +218,9 @@ class TheoryNode(models.Model):
         nodes (QuerySet:TheoryNode):
         flat_nodes (QuerySet:TheoryNode):
         violations (Violation):
+
+    Related model attributes:
+        users (QuerySet:User): The set of user's that formed an opinion on this theory.
     """
 
     TYPE = Choices(
@@ -347,6 +351,13 @@ class TheoryNode(models.Model):
             return reverse('theories:theory-activity', kwargs={'pk': self.pk})
         else:
             return reverse('theories:evidence-activity', kwargs={'pk': self.pk})
+
+    def restore_url(self):
+        """Returns the url for viewing the object's revisions."""
+        if self.is_theory():
+            return reverse('theories:theory-restore', kwargs={'pk': self.pk})
+        else:
+            return reverse('theories:evidence-restore', kwargs={'pk': self.pk})
 
     def tag_id(self):
         """Returns a unique id string used for html visibility tags."""
@@ -1103,8 +1114,7 @@ class TheoryNode(models.Model):
         return 0
         if user is None:
             return self.users.exclude(user=user).count()
-        else:
-            return self.users.count()
+        return self.users.count()
 
     def update_hits(self, request):
         hit_count = HitCount.objects.get_for_object(self)
@@ -1149,31 +1159,12 @@ class TheoryNode(models.Model):
                     log['recipient'] = follower
                     notify_if_unique(follower, log)
 
-    def get_violations(self, opened=True, closed=True, recent=True, expired=True):
-
-        # setup
-        assert recent or expired
-        assert opened or closed
-        violations = Violation.objects.none()
-
-        # filter by status
-        if opened:
-            violations |= self.violations.filter(Q(status__lt=110) & Q(status__gt=-110))
-        if closed:
-            violations |= self.violations.filter(Q(status__gte=110) | Q(status__lte=-110))
-
-        # filter by date
-        if recent and expired:
-            pass
-        elif recent:
-            date00 = timezone.now() - datetime.timedelta(days=100)
-            violations = violations.filter(pub_date__gte=date00)
-        elif expired:
-            date00 = timezone.now() - datetime.timedelta(days=100)
-            violations = violations.filter(pub_date__lt=date00)
-
-        # done
-        return violations
+    def get_violations(self, is_open=True, is_closed=True, recent=True, expired=True):
+        return Violation.get_violations(content=self,
+                                        is_open=is_open,
+                                        is_closed=is_closed,
+                                        recent=recent,
+                                        expired=expired)
 
 
 class Opinion(TheoryPointerBase, models.Model):

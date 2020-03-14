@@ -105,7 +105,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
   </div> <!-- end column -->
-  <div class="col-md-4">
+  <div class="col-md-12 col-lg-4">
     <!-- Sidebar Column -->
 
     <!-- User Details -->
@@ -165,18 +165,28 @@ LICENSE.md file in the root directory of this source tree.-->
         <table class="table table-borderless table-sm">
           <tr>
             <th> # of Contributions: </th>
-            <td class="text-left"> {{ user.num_contributions }} </td>
+            <td class="text-left"> {{ user.get_num_contributions }} </td>
           </tr>
+
+          <tr>
+            <th style="padding-left:3ex"> # Reported </th>
+            <td class="text-left"> {{ user.count_reported }} </td>
+          </tr>
+          <tr>
+            <th style="padding-left:3ex"> # Ignored </th>
+            <td class="text-left"> {{ user.count_ignored_reports }} </td>
+          </tr>
+
           <tr>
             <th> # of Strikes: </th>
             <td class="text-left"> </td>
           </tr>
           <tr>
-            <th style="padding-left:3ex"> Soft </th>
+            <th style="padding-left:3ex"> # of Warnings </th>
             <td class="text-left"> {{ num_soft_strikes }} </td>
           </tr>
           <tr>
-            <th style="padding-left:3ex"> Hard </th>
+            <th style="padding-left:3ex"> # of Strikes </th>
             <td class="text-left"> {{ num_hard_strikes }} </td>
           </tr>
           <tr>

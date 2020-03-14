@@ -16,15 +16,9 @@ LICENSE.md file in the root directory of this source tree.
 from django.apps import AppConfig
 
 
-# ************************************************************
-#
-# ************************************************************
 class TheoriesConfig(AppConfig):
     name = 'theories'
 
-    # ******************************
-    #
-    # ******************************
     def ready(self):
         from actstream import registry
         registry.register(self.get_model('Opinion'))

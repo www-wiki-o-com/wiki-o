@@ -76,8 +76,8 @@ def public_profile_view(request, pk):
         'current_user': current_user,
         'public_opinions': public_opinions,
         'private_opinions': private_opinions,
-        'num_soft_strikes': user.count_strikes(recent=True, expired=False, soft=True, hard=False),
-        'num_hard_strikes': user.count_strikes(recent=True, expired=False, soft=False, hard=True),
+        'num_soft_strikes': user.count_strikes(recent=True, expired=False),
+        'num_hard_strikes': user.count_strikes(recent=True, expired=False),
         'num_expired_strikes': user.count_strikes(recent=False, expired=True),
         'num_total_strikes': user.count_strikes(recent=True, expired=True),
         'prev_url': prev_url,
@@ -336,6 +336,8 @@ def violation_resolve_view(request, pk):
                 user.has_perm('users.can_comment_violation', violation):
             if feedback_form.is_valid():
                 feedback_form.save()
+            else:
+                print(340, feedback_form.errors)
             return redirect(next_url)
 
         # Display the theory node in contention.

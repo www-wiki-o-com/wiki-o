@@ -20,7 +20,7 @@ from django.contrib.auth.models import Group
 # *******************************************************************************
 
 
-def get_group(level):
+def level_to_group(level):
     """Get the user group corresponding to the level.
 
     Args:
