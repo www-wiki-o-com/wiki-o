@@ -20,6 +20,7 @@ from django.urls import reverse
 from django.contrib import auth
 from django.shortcuts import get_object_or_404, render, redirect
 
+from theories.converters import CONTENT_PK_CYPHER
 from theories.models import TheoryNode, Opinion, OpinionNode
 from theories.utils import create_categories, create_reserved_nodes
 from theories.test_utils import create_test_opinion
@@ -154,7 +155,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_index_category(self, override=False, category='all'):
-        test_url = reverse('theories:theories', kwargs={'cat': category})
+        test_url = reverse('theories:theories', kwargs={'category_slug': category})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -163,7 +164,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_activity(self, override=False):
-        test_url = reverse('theories:activity', kwargs={'cat': 'all'})
+        test_url = reverse('theories:activity', kwargs={'category_slug': 'all'})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -172,7 +173,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_create(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-create', kwargs={'cat': 'all'})
+        test_url = reverse('theories:theory-create', kwargs={'category_slug': 'all'})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -181,7 +182,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_detail(self, override=False):
-        test_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-detail', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -190,7 +191,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-edit', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -199,7 +200,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_merge(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-merge', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-merge', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -208,7 +209,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_backup(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-backup', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-backup', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -217,7 +218,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_restore(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-restore', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-restore', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -226,7 +227,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_activity(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-activity', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-activity', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -235,7 +236,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit_evidence(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-edit-evidence', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit-evidence',
+                           kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -244,7 +246,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_theory_edit_subtheories(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:theory-edit-subtheories', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit-subtheories',
+                           kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -266,7 +269,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_detail(self, override=False):
-        test_url = reverse('theories:evidence-detail', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-detail', kwargs={'theory_node_pk': self.evidence.pk})
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -275,7 +278,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_edit(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:evidence-edit', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-edit', kwargs={'theory_node_pk': self.evidence.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -284,8 +287,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_merge(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:evidence-merge', kwargs={'pk': self.evidence.pk
-                                                             }) + '?path=%d' % self.subtheory.pk
+        test_url = reverse('theories:evidence-merge', kwargs={'theory_node_pk':
+            self.evidence.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.subtheory.pk)
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -294,7 +297,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_restore(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:evidence-restore', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-restore', kwargs={'theory_node_pk': self.evidence.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -303,7 +306,8 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_evidence_activity(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:evidence-activity', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-activity',
+                           kwargs={'theory_node_pk': self.evidence.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -312,7 +316,11 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_demo(self, override=False):
-        test_url = reverse('theories:opinion-detail', kwargs={'pk': 0, 'slug': 'debug'})
+        test_url = reverse('theories:opinion-detail',
+                           kwargs={
+                               'theory_node_pk': 0,
+                               'opinion_slug': 'debug'
+                           })
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -323,8 +331,8 @@ class ViewsTestBase():
     def test_get_opinion_detail(self, override=False):
         test_url = reverse('theories:opinion-detail',
                            kwargs={
-                               'pk': self.bobs_opinion.theory.pk,
-                               'slug': self.bobs_opinion.pk
+                               'theory_node_pk': self.bobs_opinion.theory.pk,
+                               'opinion_pk': self.bobs_opinion.pk
                            })
         self.verify_get_response(test_url, code=200)
         # method must be overide
@@ -334,7 +342,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_my_opinion(self, override=False, redirect_url=None, code=302):
-        test_url = reverse('theories:get_my_opinion', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:get_my_opinion', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -343,7 +351,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_edit(self, override=False, redirect_url=None, code=200):
-        test_url = reverse('theories:opinion-edit', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:opinion-edit', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_get_response(test_url, redirect_url=redirect_url, code=code)
         # method must be overide
         self.assertTrue(override)
@@ -352,7 +360,11 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_slug(self, override=False):
-        test_url = reverse('theories:opinion-detail', kwargs={'pk': self.theory.pk, 'slug': 'all'})
+        test_url = reverse('theories:opinion-detail',
+                           kwargs={
+                               'theory_node_pk': self.theory.pk,
+                               'opinion_slug': 'all'
+                           })
         self.verify_get_response(test_url, code=200)
         # method must be overide
         self.assertTrue(override)
@@ -363,9 +375,9 @@ class ViewsTestBase():
     def test_get_user_vs_user(self, override=False):
         test_url = reverse('theories:opinion-compare',
                            kwargs={
-                               'pk': self.bobs_opinion.theory.pk,
-                               'slug01': self.bobs_opinion.get_slug(),
-                               'slug02': self.bobs_opinion.get_slug()
+                               'theory_node_pk': self.bobs_opinion.theory.pk,
+                               'opinion_pk01': self.bobs_opinion.pk,
+                               'opinion_pk02': self.bobs_opinion.pk
                            })
         self.verify_get_response(test_url, code=200)
         # method must be overide
@@ -377,9 +389,9 @@ class ViewsTestBase():
     def test_get_user_vs_slug(self, override=False):
         test_url = reverse('theories:opinion-compare',
                            kwargs={
-                               'pk': self.bobs_opinion.theory.pk,
-                               'slug01': self.bobs_opinion.get_slug(),
-                               'slug02': 'all'
+                               'theory_node_pk': self.bobs_opinion.theory.pk,
+                               'opinion_pk01': self.bobs_opinion.pk,
+                               'opinion_slug02': 'all'
                            })
         self.verify_get_response(test_url, code=200)
         # method must be overide
@@ -391,9 +403,9 @@ class ViewsTestBase():
     def test_get_slug_vs_user(self, override=False):
         test_url = reverse('theories:opinion-compare',
                            kwargs={
-                               'pk': self.bobs_opinion.theory.pk,
-                               'slug01': 'all',
-                               'slug02': self.bobs_opinion.get_slug()
+                               'theory_node_pk': self.bobs_opinion.theory.pk,
+                               'opinion_slug01': 'all',
+                               'opinion_pk02': self.bobs_opinion.pk
                            })
         self.verify_get_response(test_url, code=200)
         # method must be overide
@@ -405,9 +417,9 @@ class ViewsTestBase():
     def test_get_slug_vs_slug(self, override=False):
         test_url = reverse('theories:opinion-compare',
                            kwargs={
-                               'pk': self.theory.pk,
-                               'slug01': 'all',
-                               'slug02': 'all'
+                               'theory_node_pk': self.theory.pk,
+                               'opinion_slug01': 'all',
+                               'opinion_slug02': 'all'
                            })
         self.verify_get_response(test_url, code=200)
         # method must be overide
@@ -421,7 +433,7 @@ class ViewsTestBase():
     # ******************************
     def test_post_theory_create(self, override=False, redirect_url=None, code=302, created=True):
         # test response
-        test_url = reverse('theories:theory-create', kwargs={'cat': 'all'})
+        test_url = reverse('theories:theory-create', kwargs={'category_slug': 'all'})
         post_data = {'title01': 'New Title'}
         response = self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -432,7 +444,8 @@ class ViewsTestBase():
             self.assertIsNotNone(new_theory)
 
             # test redirect
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': new_theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': new_theory.pk})
             self.verify_redirect(response, redirect_url)
         else:
             # test changed did not occure
@@ -448,10 +461,11 @@ class ViewsTestBase():
     def test_post_theory_edit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
-        test_url = reverse('theories:theory-edit', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit', kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'title01': 'Edited Title'}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -471,10 +485,11 @@ class ViewsTestBase():
     def test_post_theory_merge(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
-        test_url = reverse('theories:theory-merge', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-merge', kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'form-0-select': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -493,11 +508,12 @@ class ViewsTestBase():
     def test_post_theory_backup(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
         old_date = self.theory.get_revisions().first().revision.date_created
 
         # test response
-        test_url = reverse('theories:theory-backup', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-backup', kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'form-0-select': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -521,10 +537,11 @@ class ViewsTestBase():
                                        modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
-        test_url = reverse('theories:theory-restore', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-restore', kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'form-0-delete': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -547,10 +564,12 @@ class ViewsTestBase():
                                        modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.subtheory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.subtheory.pk})
 
         # test response
-        test_url = reverse('theories:theory-edit-evidence', kwargs={'pk': self.subtheory.pk})
+        test_url = reverse('theories:theory-edit-evidence',
+                           kwargs={'theory_node_pk': self.subtheory.pk})
         post_data = {'form-0-title01': 'Edited Title'}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -574,10 +593,12 @@ class ViewsTestBase():
                                           modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
-        test_url = reverse('theories:theory-edit-subtheories', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit-subtheories',
+                           kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'form-0-title01': 'Edited Title'}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -601,10 +622,12 @@ class ViewsTestBase():
                                       created=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.subtheory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.subtheory.pk})
 
         # test response
-        test_url = reverse('theories:theory-edit-evidence', kwargs={'pk': self.subtheory.pk})
+        test_url = reverse('theories:theory-edit-evidence',
+                           kwargs={'theory_node_pk': self.subtheory.pk})
         post_data = {'form-1-title01': 'New Title'}
         response = self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -628,10 +651,12 @@ class ViewsTestBase():
                                          created=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
-        test_url = reverse('theories:theory-edit-subtheories', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-edit-subtheories',
+                           kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'form-1-title01': 'New Title'}
         response = self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -651,7 +676,8 @@ class ViewsTestBase():
     def test_post_theory_inherit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
 
         # test response
         test_url = reverse('theories:theory-inherit',
@@ -680,7 +706,7 @@ class ViewsTestBase():
             redirect_url = reverse('theories:index')
 
         # test response
-        test_url = reverse('theories:theory-delete', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:theory-delete', kwargs={'theory_node_pk': self.theory.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change
@@ -702,8 +728,8 @@ class ViewsTestBase():
                                    code=302,
                                    modified=True):
         # test response
-        test_url = reverse('theories:theory-convert', kwargs={'pk': self.subtheory.pk
-                                                             }) + '?path=%d' % self.theory.pk
+        test_url = reverse('theories:theory-convert', kwargs={'theory_node_pk':
+            self.subtheory.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.theory.pk)
         post_data = {'verifiable': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -726,8 +752,8 @@ class ViewsTestBase():
                                    code=302,
                                    modified=True):
         # test response
-        test_url = reverse('theories:theory-convert', kwargs={'pk': self.subtheory.pk
-                                                             }) + '?path=%d' % self.theory.pk
+        test_url = reverse('theories:theory-convert', kwargs={'theory_node_pk':
+            self.subtheory.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.theory.pk)
         post_data = {'verifiable': False}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -747,7 +773,8 @@ class ViewsTestBase():
     def test_post_theory_revert(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.theory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.theory.pk})
         self.theory.title01 = 'Changed'
         self.theory.save()
 
@@ -755,8 +782,8 @@ class ViewsTestBase():
         version = self.theory.get_revisions().first()
         test_url = reverse('theories:theory-revert',
                            kwargs={
-                               'pk': self.theory.pk,
-                               'vid': version.pk
+                               'theory_node_pk': self.theory.pk,
+                               'version_id': version.pk
                            })
         self.verify_post_response(test_url, redirect_url, None, code)
 
@@ -773,55 +800,14 @@ class ViewsTestBase():
     # ******************************
     # Post - ViewsTestBase
     # ******************************
-    def test_post_theory_add_to_home(self,
-                                     override=False,
-                                     redirect_url=None,
-                                     code=302,
-                                     modified=True):
-        # test response
-        test_url = reverse('theories:theory-add-to-home', kwargs={'pk': self.subtheory.pk})
-        self.verify_post_response(test_url, redirect_url, None, code)
-
-        # test change
-        if modified:
-            self.assertEqual(self.subtheory.categories.count(), 1)
-        else:
-            self.assertEqual(self.subtheory.categories.count(), 0)
-
-        # method must be overide
-        self.assertTrue(override)
-
-    # ******************************
-    # Post - ViewsTestBase
-    # ******************************
-    def test_post_theory_remove_from_home(self,
-                                          override=False,
-                                          redirect_url=None,
-                                          code=302,
-                                          modified=True):
-        # test response
-        test_url = reverse('theories:theory-remove-from-home', kwargs={'pk': self.theory.pk})
-        self.verify_post_response(test_url, redirect_url, None, code)
-
-        # test change
-        if modified:
-            self.assertEqual(self.theory.categories.count(), 0)
-        else:
-            self.assertEqual(self.theory.categories.count(), 1)
-
-        # method must be overide
-        self.assertTrue(override)
-
-    # ******************************
-    # Post - ViewsTestBase
-    # ******************************
     def test_post_evidence_edit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:evidence-detail', kwargs={'pk': self.evidence.pk})
+            redirect_url = reverse('theories:evidence-detail',
+                                   kwargs={'theory_node_pk': self.evidence.pk})
 
         # test response
-        test_url = reverse('theories:evidence-edit', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-edit', kwargs={'theory_node_pk': self.evidence.pk})
         post_data = {'title01': 'Edited Title'}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -841,11 +827,12 @@ class ViewsTestBase():
     def test_post_evidence_merge(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:evidence-detail', kwargs={'pk': self.fiction.pk})
+            redirect_url = reverse('theories:evidence-detail',
+                                   kwargs={'theory_node_pk': self.fiction.pk})
 
         # test response
-        test_url = reverse('theories:evidence-merge', kwargs={'pk': self.fiction.pk
-                                                             }) + '?path=%d' % self.theory.pk
+        test_url = reverse('theories:evidence-merge', kwargs={'theory_node_pk':
+            self.fiction.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.theory.pk)
         post_data = {'form-0-select': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -870,10 +857,11 @@ class ViewsTestBase():
                                          modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:evidence-detail', kwargs={'pk': self.evidence.pk})
+            redirect_url = reverse('theories:evidence-detail',
+                                   kwargs={'theory_node_pk': self.evidence.pk})
 
         # test response
-        test_url = reverse('theories:evidence-restore', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-restore', kwargs={'theory_node_pk': self.evidence.pk})
         post_data = {'form-0-delete': True}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -892,11 +880,12 @@ class ViewsTestBase():
     def test_post_evidence_delete(self, override=False, redirect_url=None, code=302, deleted=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:theory-detail', kwargs={'pk': self.subtheory.pk})
+            redirect_url = reverse('theories:theory-detail',
+                                   kwargs={'theory_node_pk': self.subtheory.pk})
 
         # test response
-        test_url = reverse('theories:evidence-delete', kwargs={'pk': self.evidence.pk
-                                                              }) + '?path=%d' % self.subtheory.pk
+        test_url = reverse('theories:evidence-delete', kwargs={'theory_node_pk':
+            self.evidence.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.subtheory.pk)
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -917,7 +906,7 @@ class ViewsTestBase():
         old_date = self.evidence.get_revisions().first().revision.date_created
 
         # test response
-        test_url = reverse('theories:evidence-backup', kwargs={'pk': self.evidence.pk})
+        test_url = reverse('theories:evidence-backup', kwargs={'theory_node_pk': self.evidence.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change
@@ -939,8 +928,8 @@ class ViewsTestBase():
                                    code=302,
                                    modified=True):
         # test response
-        test_url = reverse('theories:evidence-convert', kwargs={'pk': self.evidence.pk
-                                                               }) + '?path=%d' % self.subtheory.pk
+        test_url = reverse('theories:evidence-convert', kwargs={'theory_node_pk':
+            self.evidence.pk}) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.subtheory.pk)
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change
@@ -959,7 +948,8 @@ class ViewsTestBase():
     def test_post_evidence_revert(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:evidence-detail', kwargs={'pk': self.evidence.pk})
+            redirect_url = reverse('theories:evidence-detail',
+                                   kwargs={'theory_node_pk': self.evidence.pk})
         self.evidence.title01 = 'Changed'
         self.evidence.save()
 
@@ -967,9 +957,9 @@ class ViewsTestBase():
         version = self.evidence.get_revisions().first()
         test_url = reverse('theories:evidence-revert',
                            kwargs={
-                               'pk': self.evidence.pk,
-                               'vid': version.pk
-                           }) + '?path=%d' % self.subtheory.pk
+                               'theory_node_pk': self.evidence.pk,
+                               'version_id': version.pk
+                           }) + '?path=%s' % CONTENT_PK_CYPHER.to_url(self.subtheory.pk)
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change
@@ -987,7 +977,7 @@ class ViewsTestBase():
     # ******************************
     def test_post_opinion_new(self, override=False, redirect_url=None, code=302, modified=True):
         # test response
-        test_url = reverse('theories:opinion-edit', kwargs={'pk': self.subtheory.pk})
+        test_url = reverse('theories:opinion-edit', kwargs={'theory_node_pk': self.subtheory.pk})
         post_data = {'true_input': 100}
         response = self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -998,8 +988,8 @@ class ViewsTestBase():
             self.assertEqual(opinion.true_input, 100)
             redirect_url = reverse('theories:opinion-detail',
                                    kwargs={
-                                       'pk': opinion.theory.pk,
-                                       'slug': opinion.pk
+                                       'theory_node_pk': opinion.theory.pk,
+                                       'opinion_pk': opinion.pk
                                    })
             self.verify_redirect(response, redirect_url)
         else:
@@ -1016,12 +1006,12 @@ class ViewsTestBase():
         if redirect_url is None:
             redirect_url = reverse('theories:opinion-detail',
                                    kwargs={
-                                       'pk': self.my_opinion.theory.pk,
-                                       'slug': self.my_opinion.pk
+                                       'theory_node_pk': self.my_opinion.theory.pk,
+                                       'opinion_pk': self.my_opinion.pk
                                    })
 
         # test response
-        test_url = reverse('theories:opinion-edit', kwargs={'pk': self.theory.pk})
+        test_url = reverse('theories:opinion-edit', kwargs={'theory_node_pk': self.theory.pk})
         post_data = {'true_input': 100}
         self.verify_post_response(test_url, redirect_url, post_data, code)
 
@@ -1046,10 +1036,10 @@ class ViewsTestBase():
         # setup
         if redirect_url is None:
             redirect_url = reverse('theories:theory-detail',
-                                   kwargs={'pk': self.my_opinion.theory.pk})
+                                   kwargs={'theory_node_pk': self.my_opinion.theory.pk})
 
         # test response
-        test_url = reverse('theories:opinion-delete', kwargs={'pk': self.my_opinion.pk})
+        test_url = reverse('theories:opinion-delete', kwargs={'opinion_pk': self.my_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1073,10 +1063,10 @@ class ViewsTestBase():
         # setup
         if redirect_url is None:
             redirect_url = reverse('theories:theory-detail',
-                                   kwargs={'pk': self.bobs_opinion.theory.pk})
+                                   kwargs={'theory_node_pk': self.bobs_opinion.theory.pk})
 
         # test response
-        test_url = reverse('theories:opinion-delete', kwargs={'pk': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-delete', kwargs={'opinion_pk': self.bobs_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1097,14 +1087,14 @@ class ViewsTestBase():
         if redirect_url is None:
             redirect_url = reverse('theories:opinion-detail',
                                    kwargs={
-                                       'pk': self.my_opinion.theory.pk,
-                                       'slug': self.my_opinion.pk
+                                       'theory_node_pk': self.my_opinion.theory.pk,
+                                       'opinion_pk': self.my_opinion.pk
                                    })
         self.bobs_opinion.true_input = 1234
         self.bobs_opinion.save()
 
         # test response
-        test_url = reverse('theories:opinion-copy', kwargs={'pk': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-copy', kwargs={'opinion_pk': self.bobs_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1126,7 +1116,7 @@ class ViewsTestBase():
         self.my_opinion.save()
 
         # test response
-        test_url = reverse('theories:opinion-hide-user', kwargs={'pk': self.my_opinion.pk})
+        test_url = reverse('theories:opinion-hide-user', kwargs={'opinion_pk': self.my_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1152,7 +1142,8 @@ class ViewsTestBase():
         self.bobs_opinion.save()
 
         # test response
-        test_url = reverse('theories:opinion-hide-user', kwargs={'pk': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-hide-user',
+                           kwargs={'opinion_pk': self.bobs_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1178,7 +1169,8 @@ class ViewsTestBase():
         self.my_opinion.save()
 
         # test response
-        test_url = reverse('theories:opinion-reveal-user', kwargs={'pk': self.my_opinion.pk})
+        test_url = reverse('theories:opinion-reveal-user',
+                           kwargs={'opinion_pk': self.my_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
@@ -1204,7 +1196,8 @@ class ViewsTestBase():
         self.bobs_opinion.save()
 
         # test response
-        test_url = reverse('theories:opinion-reveal-user', kwargs={'pk': self.bobs_opinion.pk})
+        test_url = reverse('theories:opinion-reveal-user',
+                           kwargs={'opinion_pk': self.bobs_opinion.pk})
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured

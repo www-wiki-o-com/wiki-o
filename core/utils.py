@@ -1,16 +1,13 @@
-"""      __      __    __                  __
-        /  \    /  \__|  | _ __           /   \
-        \   \/\/   /  |  |/ /  |  ______ |  |  |
-         \        /|  |    <|  | /_____/ |  |  |
-          \__/\__/ |__|__|__\__|          \___/
+"""  __      __    __               ___
+    /  \    /  \__|  | _ __        /   \
+    \   \/\/   /  |  |/ /  |  __  |  |  |
+     \        /|  |    <|  | |__| |  |  |
+      \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/utils.py
-@brief      A collection of utility methods/classes
-@details
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.
 """
 
 # *******************************************************************************
@@ -451,7 +448,7 @@ class Parameters():
         if self.path == '':
             self.path = []
         else:
-            self.path = [int(x) for x in re.findall(r'\d+', self.path)]
+            self.path = self.path.split(',')
 
         # Flags
         self.flags = string_to_list(self.flags)

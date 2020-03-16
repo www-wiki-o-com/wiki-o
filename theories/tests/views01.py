@@ -405,26 +405,6 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # ******************************
     # Post - AnonymousUser
     # ******************************
-    def test_post_theory_add_to_home(self):
-        super().test_post_theory_add_to_home(
-            override=True,
-            code=302,
-            modified=False,
-        )
-
-    # ******************************
-    # Post - AnonymousUser
-    # ******************************
-    def test_post_theory_remove_from_home(self):
-        super().test_post_theory_remove_from_home(
-            override=True,
-            code=302,
-            modified=False,
-        )
-
-    # ******************************
-    # Post - AnonymousUser
-    # ******************************
     def test_post_evidence_edit(self):
         super().test_post_evidence_edit(
             override=True,

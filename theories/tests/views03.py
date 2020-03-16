@@ -356,26 +356,6 @@ class Level01aUserViews(TestCase, ViewsTestBase):
     # ******************************
     # Post - Level01aUser
     # ******************************
-    def test_post_theory_add_to_home(self):
-        super().test_post_theory_add_to_home(
-            override=True,
-            code=302,
-            modified=True,
-        )
-
-    # ******************************
-    # Post - Level01aUser
-    # ******************************
-    def test_post_theory_remove_from_home(self):
-        super().test_post_theory_remove_from_home(
-            override=True,
-            code=302,
-            modified=True,
-        )
-
-    # ******************************
-    # Post - Level01aUser
-    # ******************************
     def test_post_evidence_edit(self):
         super().test_post_evidence_edit(
             override=True,
