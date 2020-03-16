@@ -1678,8 +1678,8 @@ class OpinionTests(TestCase):
         # blah
         url = reverse('theories:opinion-detail',
                       kwargs={
-                          'pk': opinion.theory.pk,
-                          'slug': opinion.pk
+                          'theory_node_pk': opinion.theory.pk,
+                          'opinion_pk': opinion.pk
                       })
         self.client.get(url)
         hit_count = HitCount.objects.get_for_object(opinion)

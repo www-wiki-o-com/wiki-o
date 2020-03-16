@@ -530,7 +530,7 @@ class OpinionNodeForm(forms.ModelForm):
 
         # url
         if theory_node.is_theory():
-            self.url = reverse('theories:get_my_opinion', kwargs={'pk': theory_node.pk})
+            self.url = reverse('theories:get_my_opinion', kwargs={'theory_node_pk': theory_node.pk})
         else:
             self.url = None
 

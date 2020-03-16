@@ -151,7 +151,7 @@ class Category(models.Model):
         Returns:
             str: The url.
         """
-        return reverse('theories:theories', kwargs={'cat': self.slug})
+        return reverse('theories:theories', kwargs={'category_slug': self.slug})
 
     def url(self):
         """Return the url for viewing all theories within category.
@@ -167,7 +167,7 @@ class Category(models.Model):
         Returns:
             str: The url.
         """
-        return reverse('theories:activity', kwargs={'cat': self.slug})
+        return reverse('theories:activity', kwargs={'category_slug': self.slug})
 
     def count(self):
         return self.theories.count()
@@ -337,9 +337,8 @@ class TheoryNode(models.Model):
     def get_absolute_url(self):
         """Returns the url for viewing the object's details."""
         if self.is_theory():
-            return reverse('theories:theory-detail', kwargs={'pk': self.pk})
-        else:
-            return reverse('theories:evidence-detail', kwargs={'pk': self.pk})
+            return reverse('theories:theory-detail', kwargs={'theory_node_pk': self.pk})
+        return reverse('theories:evidence-detail', kwargs={'theory_node_pk': self.pk})
 
     def url(self):
         """Returns the url for viewing the object's details."""
@@ -348,16 +347,16 @@ class TheoryNode(models.Model):
     def activity_url(self):
         """Returns the action url for viewing the object's activity feed."""
         if self.is_theory():
-            return reverse('theories:theory-activity', kwargs={'pk': self.pk})
+            return reverse('theories:theory-activity', kwargs={'theory_node_pk': self.pk})
         else:
-            return reverse('theories:evidence-activity', kwargs={'pk': self.pk})
+            return reverse('theories:evidence-activity', kwargs={'theory_node_pk': self.pk})
 
     def restore_url(self):
         """Returns the url for viewing the object's revisions."""
         if self.is_theory():
-            return reverse('theories:theory-restore', kwargs={'pk': self.pk})
+            return reverse('theories:theory-restore', kwargs={'theory_node_pk': self.pk})
         else:
-            return reverse('theories:evidence-restore', kwargs={'pk': self.pk})
+            return reverse('theories:evidence-restore', kwargs={'theory_node_pk': self.pk})
 
     def tag_id(self):
         """Returns a unique id string used for html visibility tags."""
@@ -1173,7 +1172,6 @@ class Opinion(TheoryPointerBase, models.Model):
     Todo:
         * Remove all auto_now and auto_now_add.
     """
-
     user = models.ForeignKey(User, related_name='opinions', on_delete=models.CASCADE)
     theory = models.ForeignKey(TheoryNode, related_name='opinions', on_delete=models.CASCADE)
     pub_date = models.DateField(auto_now_add=True)
@@ -1212,9 +1210,6 @@ class Opinion(TheoryPointerBase, models.Model):
         else:
             return self.theory.get_false_statement()
 
-    def get_slug(self):
-        return str(self.pk)
-
     def delete(self):
         self.true_input = 0
         self.false_input = 0
@@ -1252,26 +1247,40 @@ class Opinion(TheoryPointerBase, models.Model):
 
     def edit_url(self):
         """Return url for editing this opinion."""
-        return reverse('theories:opinion-my-editor', kwargs={'pk': self.theory.pk})
+        return reverse('theories:opinion-my-editor', kwargs={'theory_node_pk': self.theory.pk})
 
     def compare_url(self, opinion02=None):
         """Return a default url for the compare view of this opinion."""
-        slug01 = self.get_slug()
         if opinion02 is None:
-            slug02 = 'all'
-        else:
-            slug02 = opinion02.get_slug()
-        url = reverse('theories:opinion-compare',
-                      kwargs={
-                          'pk': self.theory.pk,
-                          'slug01': slug01,
-                          'slug02': slug02
-                      })
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_pk01': self.pk,
+                              'opinion_slug02': 'all'
+                          })
+        elif isinstance(opinion02, Stats):
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_pk01': self.pk,
+                              'opinion_slug02': opinion02.get_slug()
+                          })
+        elif isinstance(opinion02, Opinion):
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_pk01': self.pk,
+                              'opinion_pk02': opinion02.pk
+                          })
         return url
 
     def get_absolute_url(self):
         """Return the url that views the details of this opinion."""
-        return reverse('theories:opinion-detail', kwargs={'pk': self.theory.pk, 'slug': self.pk})
+        return reverse('theories:opinion-detail',
+                       kwargs={
+                           'theory_node_pk': self.theory.pk,
+                           'opinion_pk': self.pk
+                       })
 
     def url(self):
         """Return the url that views the details of this opinion."""
@@ -2003,31 +2012,40 @@ class Stats(TheoryPointerBase, models.Model):
     def opinion_url(self):
         return reverse('theories:opinion-detail',
                        kwargs={
-                           'pk': self.get_node_pk(),
-                           'slug': self.get_slug()
+                           'theory_node_pk': self.get_node_pk(),
+                           'opinion_slug': self.get_slug()
                        })
 
     def opinions_url(self):
         return reverse("theories:opinion-index",
                        kwargs={
-                           'pk': self.theory.pk,
-                           'slug': self.get_slug()
+                           'theory_node_pk': self.theory.pk,
+                           'opinion_slug': self.get_slug()
                        })
 
     def compare_url(self, opinion02=None):
         """Return a url to compare this object with a default object (opinion-compare)."""
-        cls = self.__class__
-        slug01 = self.get_slug()
         if opinion02 is None:
-            slug02 = 'moderates'
-        else:
-            slug02 = opinion02.get_slug()
-        url = reverse('theories:opinion-compare',
-                      kwargs={
-                          'pk': self.theory.pk,
-                          'slug01': slug01,
-                          'slug02': slug02
-                      })
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_slug01': self.get_slug(),
+                              'opinion_slug02': 'moderates'
+                          })
+        elif isinstance(opinion02, Stats):
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_slug01': self.get_slug(),
+                              'opinion_slug02': opinion02.get_slug()
+                          })
+        elif isinstance(opinion02, Opinion):
+            url = reverse('theories:opinion-compare',
+                          kwargs={
+                              'theory_node_pk': self.theory.pk,
+                              'opinion_slug01': self.get_slug(),
+                              'opinion_pk02': opinion02.pk
+                          })
         return url
 
     def opinion_is_member(self, opinion):

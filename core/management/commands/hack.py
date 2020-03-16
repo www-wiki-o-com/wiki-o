@@ -13,14 +13,20 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import sys
+import time
+import random
+
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import Permission
 from actstream.models import Action
 from reversion.models import Version
 from notifications.models import Notification
 
+from wiki_o.env_vars import CONTENT_KEYS
 from users.models import User, Violation
 from theories.models import TheoryNode
+from core.converters import IntegerCypher
 
 # *******************************************************************************
 # Defines
@@ -46,12 +52,42 @@ class Command(BaseCommand):
             help='Change ownership of all violations.',
         )
 
+        parser.add_argument(
+            '--test01',
+            action='store_true',
+            help='Test cypher.',
+        )
+
+        parser.add_argument(
+            '--test02',
+            action='store_true',
+            help='Test cypher.',
+        )
+
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
         if options['report01']:
             self.report01(options['report01'])
         if options['report02']:
             self.report02(options['report02'])
+        if options['test01']:
+            bit_length = 24
+            cypher = IntegerCypher(bit_length=bit_length)
+            start = time.time()
+            for x00 in range(1000000):
+                x00 = random.randint(0, 2**bit_length - 1)
+                x01 = cypher.to_url(x00)
+                x02 = cypher.to_python(x01)
+                # print(x01)
+                if x00 != x02:
+                    print(
+                        "IntegerCypher: Error, plain text -> cypher -> plain text failed: %d, %b, %d"
+                        % (x00, x01, x02))
+            end = time.time()
+            print(end - start)
+        if options['test02']:
+            theory = TheoryNode.objects.get(pk=10)
+            print(theory.url())
         print('done')
 
     def report01(self, username):
