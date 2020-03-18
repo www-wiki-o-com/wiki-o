@@ -696,13 +696,22 @@ def TheoryInheritView(request, theory_node_pk01, theory_node_pk02):
     next = theory.url() + params
 
     # Setup cont'd
+    search_term = request.GET.get('search', '')
     path_theory_node_pks = [CONTENT_PK_CYPHER.to_python(x) for x in params.path] + [theory.pk]
     root_nodes = root_theory.get_nested_nodes().exclude(pk=TheoryNode.INTUITION_PK)
     root_nodes = root_nodes | TheoryNode.objects.filter(pk=root_theory.pk)
     candidates = root_nodes.exclude(pk__in=theory.get_nodes())
     candidates = candidates.exclude(pk__in=path_theory_node_pks)
+    if len(search_term) > 0:
+        filtered_candidates = candidates.filter(title01__icontains=search_term)
+        if filtered_candidates.count() > 0:
+            candidates = filtered_candidates
     exclude_other = root_nodes.values_list('pk', flat=True)
     other_theories = Category.get('All').get_theories().exclude(pk__in=exclude_other)
+    if len(search_term) > 0:
+        filtered_other_theories = other_theories.filter(title01__icontains=search_term)
+        if filtered_other_theories.count() > 0:
+            other_theories = filtered_other_theories
     InheritFormSet = modelformset_factory(TheoryNode, form=SelectTheoryNodeForm, extra=0)
 
     # Pagination
