@@ -14,6 +14,8 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 import logging
+
+from nose.tools import nottest
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
 
@@ -63,6 +65,7 @@ def create_groups_and_permissions(max_level=4):
     LOGGER.info('Created default group and permissions.')
 
 
+@nottest
 def create_test_user(username='bob', password='1234', level=None):
     """Create a test user.
 
