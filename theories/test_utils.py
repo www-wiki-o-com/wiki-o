@@ -15,6 +15,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import random
 
+from nose.tools import nottest
 from django.test import TestCase
 from actstream.actions import follow
 
@@ -79,6 +80,7 @@ def get_or_create_evidence(parent_theory, title, created_by=None, fact=False):
     return evidence
 
 
+@nottest
 def create_test_theory(title='Theory', created_by=None, backup=False):
     """
     Create a test theory using the input data.
@@ -94,6 +96,7 @@ def create_test_theory(title='Theory', created_by=None, backup=False):
     return theory
 
 
+@nottest
 def create_test_subtheory(parent_theory, title='Sub-Theory', created_by=None, backup=False):
     """
     Create a test sub-theory using the input data.
@@ -114,6 +117,7 @@ def create_test_subtheory(parent_theory, title='Sub-Theory', created_by=None, ba
     return subtheory
 
 
+@nottest
 def create_test_evidence(parent_theory,
                          title='Evidence',
                          fact=False,
@@ -139,6 +143,7 @@ def create_test_evidence(parent_theory,
     return evidence
 
 
+@nottest
 def create_test_opinion(theory, user, true_input=None, false_input=None, force=False, nodes=False):
     """
     Create an opinion using the input data.
