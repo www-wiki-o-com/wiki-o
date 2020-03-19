@@ -10,7 +10,25 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 -->
 
-# Wiki-O Documentation
+<p align="center">
+    <img
+    src="docs/images/logo.svg"
+    width="500px;">
+</p>
+<p align="center">
+    A web service for sharing opinions and avoiding arguments
+</p>
+<p align="center">
+    <a href="LICENSE.md">
+        <img alt="GPL v3" src="https://img.shields.io/badge/License-GPLv3-blue.svg" style="max-width:100%;"/>
+    </a>
+    <a href="https://travis-ci.com/github/www-wiki-o-com/www-wiki-o-com">
+        <img alt="Build Status" src="https://travis-ci.org/www-wiki-o-com/www-wiki-o-com.png?branch=master" style="max-width:100%;"/>
+    </a>
+    <a href="https://codecov.io/gh/www-wiki-o-com/www-wiki-o-com">
+        <img alt="Code Coverage" src="https://codecov.io/gh/www-wiki-o-com/www-wiki-o-com/branch/master/graph/badge.svg" style="max-width:100%;"/>
+    </a>
+</p>
 
 # Requirements
 
