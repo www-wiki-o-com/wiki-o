@@ -3,7 +3,7 @@ python:
   - "3.6"
 install:
   - pip install -r requirements.freeze
-  - pip install coverage
+  - pip install codecov
 script:
   - python manage.py test
   - codecov
