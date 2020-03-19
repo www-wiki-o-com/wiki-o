@@ -68,7 +68,7 @@ Step 1: Setup Database
 
 # Django
 
-Step 1: Migrate
+Step 1: Migrate test
 ::
 
     $ cd /home/django/www.wiki-o.com
