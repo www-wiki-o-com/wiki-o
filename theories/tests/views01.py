@@ -13,7 +13,8 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from .views00 import *
+from django.test import TestCase
+from theories.tests.views00 import ViewsTestBase
 
 
 # ************************************************************

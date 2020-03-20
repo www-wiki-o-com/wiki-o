@@ -352,6 +352,8 @@ def violation_resolve_view(request, pk):
                     theory_node = theorynode_form.save()
                     theory_node.update_activity_logs(user, verb=theorynode_form.get_verb())
                 return redirect(next_url)
+        else:
+            theorynode_form = None
 
     # Get request
     else:

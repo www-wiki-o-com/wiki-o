@@ -1,1 +1,5 @@
 *.pyc
+.coverage
+.vscode/
+static/
+docs/

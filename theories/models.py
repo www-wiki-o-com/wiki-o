@@ -1229,7 +1229,7 @@ class Opinion(TheoryPointerBase, models.Model):
         return self.true_points() > self.false_points()
 
     def is_false(self):
-        return not is_true()
+        return not self.is_true()
 
     def get_owner(self):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
@@ -1272,6 +1272,8 @@ class Opinion(TheoryPointerBase, models.Model):
                               'opinion_pk01': self.pk,
                               'opinion_pk02': opinion02.pk
                           })
+        else:
+            url = ''
         return url
 
     def get_absolute_url(self):
@@ -1975,7 +1977,7 @@ class Stats(TheoryPointerBase, models.Model):
             else:
                 self.altered = True
 
-            # nodes
+            # Update stats.
             for opinion_node in opinion.get_nodes():
                 stats_node = self.get_node(theory_node=opinion_node.theory_node)
                 stats_node.total_true_points -= opinion_node.true_points()
@@ -1985,15 +1987,15 @@ class Stats(TheoryPointerBase, models.Model):
                 else:
                     stats_node.altered = True
 
-            # flat_nodes
+            # Update flat stats.
             for flat_opinion_node in opinion.get_flat_nodes():
-                flat_stats_node = self.get_flat_node(theory_node=opinion_node.theory_node)
+                flat_stats_node = self.get_flat_node(theory_node=flat_opinion_node.theory_node)
                 flat_stats_node.total_true_points -= flat_opinion_node.true_points()
                 flat_stats_node.total_false_points -= flat_opinion_node.false_points()
                 if save:
-                    stats_node.save()
+                    flat_stats_node.save()
                 else:
-                    stats_node.altered = True
+                    flat_stats_node.altered = True
 
             # remove
             self.opinions.remove(opinion)
@@ -2046,6 +2048,8 @@ class Stats(TheoryPointerBase, models.Model):
                               'opinion_slug01': self.get_slug(),
                               'opinion_pk02': opinion02.pk
                           })
+        else:
+            url = ''
         return url
 
     def opinion_is_member(self, opinion):

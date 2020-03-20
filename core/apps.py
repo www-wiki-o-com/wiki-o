@@ -13,5 +13,6 @@ LICENSE.md file in the root directory of this source tree.
 from django.apps import AppConfig
 
 
-class HomeConfig(AppConfig):
+class CoreConfig(AppConfig):
+    """Core config class."""
     name = 'core'

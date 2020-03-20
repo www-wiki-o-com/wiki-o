@@ -417,6 +417,8 @@ class Wall(SpringShapeBase):
             else:
                 unit_y = -1.0
                 separation = self.y - shape02.y - shape02.r
+        else:
+            separation = 0
         return unit_x, unit_y, separation
 
     def propigate(self, dx, dy):

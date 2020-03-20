@@ -16,7 +16,7 @@ LICENSE.md file in the root directory of this source tree.
     width="500px;">
 </p>
 <p align="center">
-    A web service for sharing opinions and avoiding arguments
+    A web service for sharing opinions and avoiding arguments.
 </p>
 <p align="center">
     <a href="LICENSE.md">
@@ -28,6 +28,13 @@ LICENSE.md file in the root directory of this source tree.
     <a href="https://codecov.io/gh/www-wiki-o-com/www-wiki-o-com">
         <img alt="Code Coverage" src="https://codecov.io/gh/www-wiki-o-com/www-wiki-o-com/branch/master/graph/badge.svg" style="max-width:100%;"/>
     </a>
+    <!-- <a href="https://codeclimate.com/github/www-wiki-o-com/www-wiki-o-com/maintainability">
+        <img src="https://api.codeclimate.com/v1/badges/0262c54df6ffeaf33973/maintainability" />
+    </a> -->
+    <a href="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/?branch=master">
+        <img alt="Code Quality" src="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/badges/quality-score.png?b=master" />
+    </a>
+    <img src="https://img.shields.io/website?url=http%3A%2F%2Fwiki-o.com" />
 </p>
 
 # Requirements
