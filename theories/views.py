@@ -34,6 +34,7 @@ from django.utils.http import unquote
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.contrib.auth.models import Group, Permission
+from django.http import Http404
 
 import re
 import copy
@@ -1569,6 +1570,8 @@ def OpinionDetailView(request, theory_node_pk, opinion_pk=None, opinion_slug=Non
             theory = get_object_or_404(TheoryNode, pk=theory_node_pk)
             opinion = theory.get_stats(opinion_slug)
             opinion.cache()
+    else:
+        raise Http404("Opinion does not exist.")
 
     # Opinions
     opinions = {}
@@ -1725,14 +1728,14 @@ def OpinionCompareView(request,
     elif opinion_slug01 is not None:
         opinion01 = theory.get_stats(opinion_slug01)
     else:
-        get_object_or_404(Opinion, pk=-1)
+        raise Http404("Opinion does not exist.")
     # Opinion02
     if opinion_pk02 is not None:
         opinion02 = get_object_or_404(Opinion, pk=opinion_pk02)
     elif opinion_slug02 is not None:
         opinion02 = theory.get_stats(opinion_slug02)
     else:
-        get_object_or_404(Opinion, pk=-1)
+        raise Http404("Opinion does not exist.")
     # Compare list
     compare_list = get_compare_list(opinion01, current_user=user, exclude_list=exclude_list)
 

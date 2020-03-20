@@ -18,9 +18,9 @@ A web service for sharing opinions and avoiding arguments
 import os
 import re
 import socket
-
 from datetime import datetime
 
+from django.utils import timezone
 from django.core.management.base import BaseCommand
 
 # *******************************************************************************
