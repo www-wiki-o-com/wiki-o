@@ -10,9 +10,13 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
+# *******************************************************************************
+# Imports
+# *******************************************************************************
 from django.apps import AppConfig
 
 
 class CoreConfig(AppConfig):
-    """Core config class."""
+    """Class representing a Django application and its configuration."""
+
     name = 'core'

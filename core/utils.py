@@ -159,7 +159,7 @@ def stream_if_unique(target_actions, log, accept_time=21600):
 def notify_if_unique(follower, log, update_unread=True, accept_time=21600):
     """Checks if the input log(s) contents are different than the input parameters.
 
-    Example: notify_if_unique(follower, log={'sender':self.user, "Bob farts", self.theory})
+    Example: notify_if_unique(follower, log={'sender':self.user, "Bob farts", self.content})
 
     Args:
         follower (User): The user following the object.

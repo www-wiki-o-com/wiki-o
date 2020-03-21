@@ -48,9 +48,9 @@ class Level04UserViews(TestCase, ViewsTestBase):
         user = auth.get_user(self.client)
         self.assertTrue(user.is_authenticated)
         self.assertEqual(user, self.user)
-        self.assertTrue(user.has_perm('theories.add_theorynode'))
-        self.assertTrue(user.has_perm('theories.change_theorynode'))
-        self.assertTrue(user.has_perm('theories.delete_theorynode'))
+        self.assertTrue(user.has_perm('theories.add_content'))
+        self.assertTrue(user.has_perm('theories.change_content'))
+        self.assertTrue(user.has_perm('theories.delete_content'))
 
     # ******************************
     # Get - Level04User

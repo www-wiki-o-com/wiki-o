@@ -482,7 +482,7 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         self.outside_set = []
 
         # Construct a list of nodes.
-        theory = self.opinion01.theory
+        theory = self.opinion01.content
         if self.flat:
             nodes = theory.get_flat_nodes()
             get_node01 = self.opinion01.get_flat_node
@@ -493,23 +493,23 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
             get_node02 = self.opinion02.get_node
 
         # Populate the sets (create dummy nodes to customize weight and colour).
-        for theory_node in nodes:
+        for node in nodes:
 
             # Get or create node01
-            points_node01 = get_node01(theory_node=theory_node)
+            points_node01 = get_node01(content=node)
             if points_node01 is None:
                 points_node01 = NodePointerBase.create(
                     parent=self.opinion01,
-                    theory_node=theory_node,
+                    content=node,
                     true_points=0.0,
                     false_points=0.0,
                 )
             # Get or create node02
-            points_node02 = get_node02(theory_node=theory_node)
+            points_node02 = get_node02(content=node)
             if points_node02 is None:
                 points_node02 = NodePointerBase.create(
                     parent=self.opinion02,
-                    theory_node=theory_node,
+                    content=node,
                     true_points=0.0,
                     false_points=0.0,
                 )
@@ -563,8 +563,8 @@ class DemoVennDiagram(OpinionVennDiagram):
         random.seed(seed)
 
         opinion = get_demo_opinion()
-        theory = opinion.theory
-        theory_nodes = theory.get_nodes()
+        theory = opinion.content
+        content_nodes = theory.get_nodes()
 
         opinion.saved_true_points = opinion.true_points()
         opinion.saved_false_points = opinion.false_points()
@@ -576,7 +576,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         for i in range(random.randint(1, true_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
-                theory_node=random.choice(theory_nodes),
+                content=random.choice(content_nodes),
                 true_points=random.randint(1, 100),
                 false_points=random.randint(1, 10),
             )
@@ -587,7 +587,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         for i in range(random.randint(1, intersection_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
-                theory_node=random.choice(theory_nodes),
+                content=random.choice(content_nodes),
                 true_points=random.randint(1, 10),
                 false_points=random.randint(1, 10),
             )
@@ -598,7 +598,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         for i in range(random.randint(1, false_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
-                theory_node=random.choice(theory_nodes),
+                content=random.choice(content_nodes),
                 true_points=random.randint(1, 10),
                 false_points=random.randint(1, 100),
             )
@@ -609,7 +609,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         for i in range(random.randint(1, outside_set_size)):
             new_node = NodePointerBase.create(
                 parent=opinion,
-                theory_node=random.choice(theory_nodes),
+                content=random.choice(content_nodes),
                 true_points=random.randint(1, 5),
                 false_points=random.randint(1, 5),
             )

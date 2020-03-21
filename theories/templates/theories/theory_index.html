@@ -112,7 +112,7 @@ LICENSE.md file in the root directory of this source tree.-->
       <div class="card-body">
         <ul class="list-unstyled mb-0">
           <!-- Create Theory -->
-          {% has_perm 'theories.add_theorynode' user as can_add %}
+          {% has_perm 'theories.add_content' user as can_add %}
           {% if can_add %}
           <li><a href="{% url 'theories:theory-create' category.slug %}">Create a Theory</a></li>
           {% endif %}

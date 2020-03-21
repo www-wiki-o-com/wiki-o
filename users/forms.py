@@ -170,7 +170,7 @@ class ReportViolationForm(forms.ModelForm):
         # Populate choices
         self.fields['offender'].choices = [('', '----')]
         exclude = [User.get_system_user(), self.user]
-        if self.content.__class__.__name__ == 'TheoryNode':
+        if self.content.__class__.__name__ == 'Content':
             self.fields['offender'].choices += \
                 [(x.pk, x.username) for x in self.content.get_collaborators(exclude=exclude)]
             if self.content.is_theory():
@@ -288,7 +288,7 @@ class ResolveViolationForm(forms.ModelForm):
             self.fields['action'].choices = ViolationFeedback.CLOSED_ACTION_CHOICES
         # Offences
         content = self.violation.content
-        if content.__class__.__name__ == 'TheoryNode':
+        if content.__class__.__name__ == 'Content':
             if content.is_theory():
                 self.fields['offences'].choices = ViolationFeedback.THEORY_OFFENCES
             else:

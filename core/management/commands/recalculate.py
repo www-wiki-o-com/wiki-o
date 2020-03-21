@@ -16,7 +16,7 @@ A web service for sharing opinions and avoiding arguments
 # Imports
 # *******************************************************************************
 from django.core.management.base import BaseCommand
-from theories.models import TheoryNode
+from theories.models import Content
 
 # *******************************************************************************
 # Defines
@@ -42,9 +42,9 @@ class Command(BaseCommand):
         """The method that is run when the commandline is invoked."""
 
         if options['primary_keys']:
-            thoeries = TheoryNode.objects.filter(pk__in=options['primary_keys'])
+            thoeries = Content.objects.filter(pk__in=options['primary_keys'])
         else:
-            thoeries = TheoryNode.objects.all()
+            thoeries = Content.objects.all()
 
         # Recalculate stats.
         for theory in thoeries:

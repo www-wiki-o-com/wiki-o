@@ -19,7 +19,7 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import post_save
 
 from users.models import User, Violation
-from theories.models import TheoryNode
+from theories.models import Content
 
 # *******************************************************************************
 # Promotions/Demotions
@@ -61,7 +61,7 @@ HAS_LEVEL04 = rules.is_group_member('user level: 4')
 @rules.predicate
 def can_report(user, obj):
     if user.is_authenticated:
-        if isinstance(obj, TheoryNode):
+        if isinstance(obj, Content):
             if HAS_LEVEL00(user):
                 return False
             return True

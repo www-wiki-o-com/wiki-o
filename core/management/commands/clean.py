@@ -20,7 +20,7 @@ import re
 from django.core.management.base import BaseCommand
 from django.template.defaultfilters import slugify
 
-from theories.models import Category, TheoryNode
+from theories.models import Category, Content
 
 # *******************************************************************************
 # Defines
@@ -68,15 +68,15 @@ class Command(BaseCommand):
                     category.title = re.sub(RE_PUNCTUATOIN, '', category.title)
                     category.slug = slugify(category.title)
                     category.save()
-            for theory_node in TheoryNode.objects.all():
+            for content in Content.objects.all():
                 save = False
-                if theory_node.title00 and re.search(RE_PUNCTUATOIN, theory_node.title00):
-                    theory_node.title00 = re.sub(RE_PUNCTUATOIN, '', theory_node.title00)
+                if content.title00 and re.search(RE_PUNCTUATOIN, content.title00):
+                    content.title00 = re.sub(RE_PUNCTUATOIN, '', content.title00)
                     save = True
-                if theory_node.title01 and re.search(RE_PUNCTUATOIN, theory_node.title01):
-                    theory_node.title01 = re.sub(RE_PUNCTUATOIN, '', theory_node.title01)
+                if content.title01 and re.search(RE_PUNCTUATOIN, content.title01):
+                    content.title01 = re.sub(RE_PUNCTUATOIN, '', content.title01)
                     save = True
                 if save:
-                    theory_node.save()
+                    content.save()
 
         print("Done")

@@ -25,7 +25,7 @@ from notifications.models import Notification
 
 from wiki_o.env_vars import CONTENT_KEYS
 from users.models import User, Violation
-from theories.models import TheoryNode
+from theories.models import Content
 from core.converters import IntegerCypher
 
 # *******************************************************************************
@@ -86,16 +86,16 @@ class Command(BaseCommand):
             end = time.time()
             print(end - start)
         if options['test02']:
-            theory = TheoryNode.objects.get(pk=10)
+            theory = Content.objects.get(pk=10)
             print(theory.url())
         print('done')
 
     def report01(self, username):
         user = User.objects.get(username=username)
-        for theory_node in TheoryNode.objects.all():
-            theory_node.created_by = user
-            theory_node.modified_by = user
-            theory_node.save()
+        for content in Content.objects.all():
+            content.created_by = user
+            content.modified_by = user
+            content.save()
         for version in Version.objects.all():
             version.revision.user = user
             version.revision.save()
@@ -112,9 +112,9 @@ class Command(BaseCommand):
     def fix_modified_by(self):
         """Fixes the modified by field."""
         system = User.objects.get(username='system')
-        for theory_node in TheoryNode.objects.all():
-            theory_node.modified_by = system
-            theory_node.save()
+        for content in Content.objects.all():
+            content.modified_by = system
+            content.save()
 
     def fix_permissions(self):
         """Fixes the set of permissions."""
@@ -127,9 +127,9 @@ class Command(BaseCommand):
     def fix_ownerships(self):
         """Fixes any objects with broken ownership."""
         fcimeson = User.objects.get(username='fcimeson')
-        for theory_node in TheoryNode.objects.filter(created_by__isnull=True):
-            theory_node.created_by = fcimeson
-            theory_node.save()
+        for content in Content.objects.filter(created_by__isnull=True):
+            content.created_by = fcimeson
+            content.save()
 
     def delete_revisions(self):
         """Delete's all revisions."""

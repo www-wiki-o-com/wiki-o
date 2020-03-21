@@ -230,8 +230,8 @@ class OpinionBarGraph(BarGraph):
             opinion (OpinionNode): The users opinion.
         """
         self.opinion = opinion
-        self.theory = opinion.theory
-        self.opinions = self.theory.get_opinions()
+        self.content = opinion.content
+        self.opinions = self.content.get_opinions()
 
         bins = min(24, max(6, 6 * (math.floor(self.opinions.count() / 18) - 1)))
         data00 = [0.5 - x.true_points() for x in self.opinions]
@@ -313,8 +313,8 @@ class OpinionNodeBarGraph(BarGraph):
             opinion_node (OpinionNode): The user's opinion.
         """
         self.opinion_node = opinion_node
-        self.theory_node = opinion_node.theory_node
-        self.opinion_nodes = self.theory_node.opinion_nodes.all()
+        self.content = opinion_node.content
+        self.opinion_nodes = self.content.opinion_nodes.all()
 
         bins = min(24, max(6, 6 * (math.floor(self.opinion_nodes.count() / 18) - 1)))
         data00 = [0.5 - x['true_points'] for x in self.opinion_nodes.values('true_points')]

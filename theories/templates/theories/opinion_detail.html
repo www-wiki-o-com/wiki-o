@@ -169,7 +169,7 @@ LICENSE.md file in the root directory of this source tree.-->
           <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a>
           </li>
 
-          <li><a href="{% url 'theories:opinion-index' opinion.theory.pk 'all' %}">Browse Opinions</a></li>
+          <li><a href="{% url 'theories:opinion-index' opinion.content.pk 'all' %}">Browse Opinions</a></li>
 
         </ul>
       </div>

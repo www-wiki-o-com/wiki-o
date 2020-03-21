@@ -61,7 +61,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
           <!-- Delete -->
           {% if edit %}
-          {% has_perm 'theories.delete_theorynode' user theory as can_del %}
+          {% has_perm 'theories.delete_content' user theory as can_del %}
           <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_del %} disabled {% endif %}>
             Delete
           </button>
@@ -69,7 +69,7 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
 
           <!-- Save -->
-          {% has_perm 'theories.change_theorynode' user theory as can_change %}
+          {% has_perm 'theories.change_content' user theory as can_change %}
           <input accesskey="s" type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
         </center>
       </form>
@@ -92,7 +92,7 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
 
           <!-- Convert to Evidence -->
-          {% has_perm 'theories.convert_theorynode' user theory as can_convert %}
+          {% has_perm 'theories.convert_content' user theory as can_convert %}
           {% if can_convert %}
           <li><a data-target="#convert_modal" data-toggle="modal" href="#convert_modal"> Convert to Evidence </a></li>
           {% endif %}
@@ -191,7 +191,7 @@ LICENSE.md file in the root directory of this source tree.-->
         </div>
 
         <!-- footer -->
-        {% has_perm 'theories.convert_theorynode' user theory as can_convert %}
+        {% has_perm 'theories.convert_content' user theory as can_convert %}
         <div class="modal-footer">
           <input type="submit" class="btn btn-danger" name="convert" value="Yes" {% if not can_convert %} disabled
             {% endif %}>
@@ -241,7 +241,7 @@ LICENSE.md file in the root directory of this source tree.-->
         {% endif %}
 
         <!-- full delete -->
-        {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+        {% has_perm 'theories.delete_content' user theory as can_delete %}
         <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled

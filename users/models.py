@@ -85,8 +85,8 @@ class User(AbstractUser):
         birth_date_visible (BooleanField): A field for hiding or revealing the user's birthdate.
         use_wizard (BooleanField): A prefence field for the user's opinion editor.
 
-        utilized (QuerySet:TheoryNode): The set of theories that the user has formed an opinion on.
-        contributions (QuerySet:TheoryNode): The set of content that the user created or
+        utilized (QuerySet:Content): The set of theories that the user has formed an opinion on.
+        contributions (QuerySet:Content): The set of content that the user created or
             collaborated on.
 
     Related model attributes:
@@ -115,8 +115,8 @@ class User(AbstractUser):
     birth_date_visible = models.BooleanField(default=False)
 
     use_wizard = models.BooleanField(default=True)
-    utilized = models.ManyToManyField('theories.TheoryNode', related_name='users', blank=True)
-    contributions = models.ManyToManyField('theories.TheoryNode',
+    utilized = models.ManyToManyField('theories.Content', related_name='users', blank=True)
+    contributions = models.ManyToManyField('theories.Content',
                                            related_name='collaborators',
                                            blank=True)
 
@@ -275,24 +275,24 @@ class User(AbstractUser):
             return self.politics
         return 'N/A'
 
-    def is_using(self, theory_node, refresh=False):
+    def is_using(self, content, refresh=False):
         """A query to see if the user has an opinion on the provided theory.
 
         Args:
-            theory_node (TheoryNode): A reference to the theory in question.
+            content (Content): A reference to the theory in question.
             refresh (bool, optional): If true, refresh the database's cache. Defaults to False.
 
         Returns:
             Bool: True, if the user has an opinion on the theory.
         """
         if refresh:
-            if (self.opinions.filter(theory=self, deleted=False).exists() or
-                    self.opinions.filter(nodes__theory_node=self).exists()):
-                self.utilized.add(theory_node)
+            if (self.opinions.filter(content=self, deleted=False).exists() or
+                    self.opinions.filter(nodes__content=self).exists()):
+                self.utilized.add(content)
                 return True
-            self.utilized.remove(theory_node)
+            self.utilized.remove(content)
             return False
-        return self.utilized.filter(id=theory_node.pk).exists()
+        return self.utilized.filter(id=content.pk).exists()
 
     def get_violations(self, warnings=True, strikes=True, recent=True, expired=False):
         """A getter for the user's violations.

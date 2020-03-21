@@ -63,7 +63,7 @@ LICENSE.md file in the root directory of this source tree.-->
         <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
         <!-- Merge -->
-        {% has_perm 'theories.merge_theorynode' user theory as can_merge %}
+        {% has_perm 'theories.merge_content' user theory as can_merge %}
         <button type="button" data-toggle="modal" data-target="#merge_modal" {% if not can_merge %} disabled
           {% endif %}>
           Merge
@@ -93,7 +93,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
             <!-- footer -->
             <div class="modal-footer">
-              {% has_perm 'theories.merge_theorynode' user theory as can_merge %}
+              {% has_perm 'theories.merge_content' user theory as can_merge %}
               <input type="submit" class="btn btn-danger" name="merge" value="Yes" {% if not can_merge %} disabled
                 {% endif %}>
               <button type="button" class="btn" data-dismiss="modal">No</button>

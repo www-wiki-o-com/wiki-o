@@ -21,7 +21,7 @@ from django.forms import TextInput
 from django.contrib.auth.models import AnonymousUser
 from reversion.models import Version
 
-from theories.models import Category, TheoryNode, Opinion, OpinionNode
+from theories.models import Category, Content, Opinion, OpinionNode
 from core.utils import string_to_list, get_or_none
 
 # *******************************************************************************
@@ -64,7 +64,7 @@ class TheoryForm(forms.ModelForm):
     """Theory form.
 
     This form is used to create and edit theories and sub-theories. The form class itself will
-    take care of updating the TheoryNode and its related fields, which includes the categories.
+    take care of updating the Content and its related fields, which includes the categories.
 
     Attributes:
         user (User): The current user requesting the changes.
@@ -92,7 +92,7 @@ class TheoryForm(forms.ModelForm):
         placeholder_text += '  - Evidence or theories that go towards proving or disproving the theory should\n'
         placeholder_text += '    be provided as evidence, not details.'
 
-        model = TheoryNode
+        model = Content
         fields = ('title01', 'title00', 'details')
         labels = {
             'title01': 'True Statement',
@@ -203,7 +203,7 @@ class TheoryForm(forms.ModelForm):
         theory = super().save(commit=False)
 
         # Populate data
-        theory.node_type = TheoryNode.TYPE.THEORY
+        theory.node_type = Content.TYPE.THEORY
         if created and self.user is not None:
             theory.created_by = self.user
 
@@ -259,7 +259,7 @@ class EvidenceForm(forms.ModelForm):
         placeholder_text += '      a) non-verifiable or\n'
         placeholder_text += '      b) a sub-theory.'
 
-        model = TheoryNode
+        model = Content
         fields = ('title01', 'details', 'verifiable')
         labels = {
             'title01': 'Statement',
@@ -302,7 +302,7 @@ class EvidenceForm(forms.ModelForm):
         self.fields['verifiable'].required = False
 
         # intial data
-        if self.instance.pk and self.instance.node_type == TheoryNode.TYPE.FACT:
+        if self.instance.pk and self.instance.node_type == Content.TYPE.FACT:
             self.fields['verifiable'].initial = True
 
         # permissions
@@ -342,7 +342,7 @@ class EvidenceForm(forms.ModelForm):
         elif self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('verifiable')
         else:
-            return self.instance.node_type == TheoryNode.TYPE.FACT
+            return self.instance.node_type == Content.TYPE.FACT
 
     def get_verb(self):
         return self.action_verb
@@ -355,9 +355,9 @@ class EvidenceForm(forms.ModelForm):
 
         # populate data
         if self.cleaned_data['verifiable']:
-            evidence.node_type = TheoryNode.TYPE.FACT
+            evidence.node_type = Content.TYPE.FACT
         else:
-            evidence.node_type = TheoryNode.TYPE.EVIDENCE
+            evidence.node_type = Content.TYPE.EVIDENCE
         if created and self.user is not None:
             self.created_by = self.user
 
@@ -380,7 +380,7 @@ class EvidenceForm(forms.ModelForm):
         return evidence
 
 
-class SelectTheoryNodeForm(forms.ModelForm):
+class SelectContentForm(forms.ModelForm):
     """A form for slecting theory nodes."""
 
     # non-model fields
@@ -388,7 +388,7 @@ class SelectTheoryNodeForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
-        model = TheoryNode
+        model = Content
         fields = ('select',)
 
     def __init__(self, *args, **kwargs):
@@ -522,15 +522,15 @@ class OpinionNodeForm(forms.ModelForm):
         # initial data
         self.refresh_parent = False
         if self.instance.id is None and 'initial' in kwargs.keys():
-            self.instance.theory_node = kwargs['initial']['theory_node']
+            self.instance.content = kwargs['initial']['content']
             self.instance.parent = kwargs['initial']['parent']
             if self.instance.parent.id is None:
                 self.refresh_parent = True
-        theory_node = self.instance.theory_node
+        content = self.instance.content
 
         # url
-        if theory_node.is_theory():
-            self.url = reverse('theories:get_my_opinion', kwargs={'theory_node_pk': theory_node.pk})
+        if content.is_theory():
+            self.url = reverse('theories:get_my_opinion', kwargs={'content_pk': content.pk})
         else:
             self.url = None
 
@@ -579,14 +579,14 @@ class OpinionNodeForm(forms.ModelForm):
             self.fields['select_contradict'].widget = forms.HiddenInput()
 
         # setup initial display
-        if theory_node.is_subtheory():
+        if content.is_subtheory():
             if self.instance.id is not None:
                 if self.instance.ft_input + self.instance.ff_input > 0:
                     self.display_true = False
                 else:
                     self.display_true = True
             else:
-                opinion_root = get_or_none(theory_node.opinions.all(), user=self.user)
+                opinion_root = get_or_none(content.opinions.all(), user=self.user)
                 if opinion_root is None or opinion_root.is_true():
                     self.display_true = True
                 else:
@@ -719,7 +719,7 @@ class EvidenceRevisionForm(forms.ModelForm):
         self.fields['title01'].initial = self.instance.field_dict['title01']
         self.fields['details'].initial = self.instance.field_dict['details']
         self.fields['verifiable'].initial = self.instance.field_dict[
-            'node_type'] == TheoryNode.TYPE.FACT
+            'node_type'] == Content.TYPE.FACT
 
         # config
         self.fields['delete'].required = False

@@ -15,7 +15,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 from django.contrib import admin
 from reversion.admin import VersionAdmin
-from theories.models import Category, TheoryNode, Opinion, OpinionNode
+from theories.models import Category, Content, Opinion, OpinionNode
 from theories.models import Stats, StatsNode, StatsFlatNode
 
 # *******************************************************************************
@@ -27,8 +27,8 @@ class CategoryAdmin(admin.ModelAdmin):
     pass
 
 
-@admin.register(TheoryNode)
-class TheoryNodeAdmin(VersionAdmin):
+@admin.register(Content)
+class ContentAdmin(VersionAdmin):
     pass
 
 
@@ -46,7 +46,7 @@ class OpinionNodeAdmin(admin.ModelAdmin):
     get_user.short_description = 'User'
 
     def get_list_display(self, request):
-        return ('get_user', 'theory_node')
+        return ('get_user', 'content')
 
 
 class StatsAdmin(admin.ModelAdmin):
@@ -63,7 +63,7 @@ class StatsNodeAdmin(admin.ModelAdmin):
     get_owner.short_description = 'Type'
 
     def get_list_display(self, request):
-        return ('get_owner', 'theory_node')
+        return ('get_owner', 'content')
 
 
 class StatsFlatNodeAdmin(admin.ModelAdmin):
@@ -74,13 +74,13 @@ class StatsFlatNodeAdmin(admin.ModelAdmin):
     get_owner.short_description = 'Type'
 
     def get_list_display(self, request):
-        return ('get_owner', 'theory_node')
+        return ('get_owner', 'content')
 
 
 # *******************************************************************************
 # register
 # *******************************************************************************
-#admin.site.register(TheoryNode, TheoryNodeAdmin)
+#admin.site.register(Content, ContentAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Opinion, OpinionAdmin)
 admin.site.register(OpinionNode, OpinionNodeAdmin)

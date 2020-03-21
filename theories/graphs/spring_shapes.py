@@ -227,7 +227,7 @@ class EvidenceShape(SpringShapeBase):
         x = self.x - length / 2
         y = self.y - length / 2
         x, y = offset_xy(x, y, offset)
-        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
+        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.content.url()
         svg += '<rect x="%d" y="%d"' % (x, y)
         svg += ' width="%d" height="%d"' % (length, length)
         svg += ' fill="%s" stroke-width="0">' % colour
@@ -295,7 +295,7 @@ class SubtheoryShape(SpringShapeBase):
             colour = Colour.BLACK
         else:
             colour = Colour.RED
-        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
+        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.content.url()
         svg += '<circle'
         svg += ' cx="%d" cy="%d" r="%d"' % (x, y, r)
         svg += ' fill="%s" stroke-width="0">' % colour

@@ -58,7 +58,7 @@ LICENSE.md file in the root directory of this source tree.-->
             {{ form.verifiable|as_crispy_field }}
 
             <!-- Restore -->
-            {% has_perm 'theories.restore_theorynode' user evidence as can_restore %}
+            {% has_perm 'theories.restore_content' user evidence as can_restore %}
             {% if can_restore %}
             <a data-target="#restore_modal{{ forloop.counter }}" data-toggle="modal"
               data-whatever="{{ forloop.counter }}" href="#restore_modal">
@@ -130,7 +130,7 @@ LICENSE.md file in the root directory of this source tree.-->
         </div>
 
         <!-- footer -->
-        {% has_perm 'theories.restore_theorynode' user evidence as can_restore %}
+        {% has_perm 'theories.restore_content' user evidence as can_restore %}
         <div class="modal-footer">
           <input type="submit" class="btn btn-danger" name="restore" value="Yes" {% if not can_restore %} disabled
             {% endif %}>

@@ -62,13 +62,13 @@ LICENSE.md file in the root directory of this source tree.-->
               <!-- Swap Expand/Cycle -->
               <th width="20" id=TF_SWAP style="display:table-cell; text-align:center;">
                 <a
-                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
+                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
                   <img src="{% static 'core/img/expand.svg' %}" height='12'>
                 </a>
               </th>
               <th width="20" id=TF_EXP style="display:none; text-align:center;">
                 <a
-                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.theory_node.is_subtheory %} ExpandCycleSwap('{{ x.instance.theory_node.tag_id }}'); {% endif %}{% endfor %}">
+                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
                   <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                 </a>
               </th>
@@ -112,23 +112,23 @@ LICENSE.md file in the root directory of this source tree.-->
               {% endfor %}
               {{form.id}}
 
-              {% with theory_node=form.instance.theory_node %}
+              {% with content=form.instance.content %}
 
               <!-- Evidence -->
-              {% if theory_node.is_evidence %}
+              {% if content.is_evidence %}
 
               <tr>
                 <!-- Link -->
-                <td> {% include "include/link.html" with x=theory_node %} </td>
+                <td> {% include "include/link.html" with x=content %} </td>
 
                 <!-- Info -->
-                <td> {% include "include/info.html" with x=theory_node %} </td>
+                <td> {% include "include/info.html" with x=content %} </td>
 
                 <!-- Swap True/False -->
                 <td />
 
                 <!-- Description -->
-                <td style="text-align:left; padding-left:5px"> {{ theory_node.get_title }} </td>
+                <td style="text-align:left; padding-left:5px"> {{ content.get_title }} </td>
 
                 <!-- True Points -->
                 <td> {{ form.tt_input }} {{ form.ft_input.as_hidden }} </td>
@@ -145,37 +145,37 @@ LICENSE.md file in the root directory of this source tree.-->
 
               <!-- True Row -->
               {% if form.display_true %}
-              <tr id={{ theory_node.tag_id }}T style="display:table-row">
+              <tr id={{ content.tag_id }}T style="display:table-row">
                 {% else %}
-              <tr id={{ theory_node.tag_id }}T style="display:none">
+              <tr id={{ content.tag_id }}T style="display:none">
                 {% endif %}
 
                 <!-- Link -->
-                <td> {% include "include/link.html" with x=theory_node %} </td>
+                <td> {% include "include/link.html" with x=content %} </td>
 
                 <!-- Info -->
-                <td> {% include "include/info.html" with x=theory_node %} </td>
+                <td> {% include "include/info.html" with x=content %} </td>
 
                 <!-- Swap True/False -->
-                <td id={{ theory_node.tag_id }}TS style="display:table-cell; text-align:center;">
-                  {% if theory_node.is_subtheory %}
-                  <a onclick="TFSwap('{{ theory_node.tag_id }}')">
+                <td id={{ content.tag_id }}TS style="display:table-cell; text-align:center;">
+                  {% if content.is_subtheory %}
+                  <a onclick="TFSwap('{{ content.tag_id }}')">
                     <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                   </a>
                   {% endif %}
                 </td>
                 <!-- Expand True/False -->
-                <td id={{ theory_node.tag_id }}TC style="display:none; text-align:center;">
-                  {% if theory_node.is_subtheory %}
-                  <a onclick="TFExpand('{{ theory_node.tag_id }}')">
+                <td id={{ content.tag_id }}TC style="display:none; text-align:center;">
+                  {% if content.is_subtheory %}
+                  <a onclick="TFExpand('{{ content.tag_id }}')">
                     <img src="{% static 'core/img/collapse.svg' %}" height='12'>
                   </a>
                   {% endif %}
                 </td>
                 <!-- Collapse True/False -->
-                <td id={{ theory_node.tag_id }}TX style="display:none; text-align:center;">
-                  {% if theory_node.is_subtheory %}
-                  <a onclick="TFExpand('{{ theory_node.tag_id }}')">
+                <td id={{ content.tag_id }}TX style="display:none; text-align:center;">
+                  {% if content.is_subtheory %}
+                  <a onclick="TFExpand('{{ content.tag_id }}')">
                     <img src="{% static 'core/img/expand.svg' %}" height='12'>
                   </a>
                   {% endif %}
@@ -185,10 +185,10 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td style="text-align:left; padding-left:5px">
                   {% if form.url %}
                   <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
-                    {{ theory_node.get_true_statement }}
+                    {{ content.get_true_statement }}
                   </a>
                   {% else %}
-                  {{ theory_node.get_true_statement }}
+                  {{ content.get_true_statement }}
                   {% endif %}
                 </td>
 
@@ -204,41 +204,41 @@ LICENSE.md file in the root directory of this source tree.-->
 
               <!-- False Row -->
               {% if form.display_true %}
-              <tr id={{ theory_node.tag_id }}F style="display:none">
+              <tr id={{ content.tag_id }}F style="display:none">
                 {% else %}
-              <tr id={{ theory_node.tag_id }}F style="display:table-row">
+              <tr id={{ content.tag_id }}F style="display:table-row">
                 {% endif %}
 
                 <!-- Link -->
-                <td id={{ theory_node.tag_id }}FL0 style="display:table-cell; text-align:right">
-                  {% include "include/link.html" with x=theory_node %}
+                <td id={{ content.tag_id }}FL0 style="display:table-cell; text-align:right">
+                  {% include "include/link.html" with x=content %}
                 </td>
-                <td id={{ theory_node.tag_id }}FL1 style="display:none" />
+                <td id={{ content.tag_id }}FL1 style="display:none" />
 
                 <!-- Info -->
-                <td id={{ theory_node.tag_id }}FL2 style="display:table-cell; text-align:right">
-                  {% include "include/info.html" with x=theory_node %}
+                <td id={{ content.tag_id }}FL2 style="display:table-cell; text-align:right">
+                  {% include "include/info.html" with x=content %}
                 </td>
-                <td id={{ theory_node.tag_id }}FL3 style="display:none" />
+                <td id={{ content.tag_id }}FL3 style="display:none" />
 
                 <!-- Swap True/False -->
-                <td id={{ theory_node.tag_id }}FS style="display:table-cell; text-align:center;">
-                  {% if theory_node.is_subtheory %}
-                  <a onclick="TFSwap('{{ theory_node.tag_id }}')">
+                <td id={{ content.tag_id }}FS style="display:table-cell; text-align:center;">
+                  {% if content.is_subtheory %}
+                  <a onclick="TFSwap('{{ content.tag_id }}')">
                     <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                   </a>
                   {% endif %}
                 </td>
-                <td id={{ theory_node.tag_id }}FX style="display:none; text-align:center;" />
+                <td id={{ content.tag_id }}FX style="display:none; text-align:center;" />
 
                 <!-- Description -->
                 <td style="text-align:left; padding-left:5px">
                   {% if form.url %}
                   <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
-                    <font color="red"> {{ theory_node.get_false_statement }} </font>
+                    <font color="red"> {{ content.get_false_statement }} </font>
                   </a>
                   {% else %}
-                  <font color="red"> {{ theory_node.getfalse_title }} </font>
+                  <font color="red"> {{ content.getfalse_title }} </font>
                   {% endif %}
                 </td>
 
