@@ -15,8 +15,8 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 from django.contrib import admin
 from reversion.admin import VersionAdmin
-from theories.models import Category, Content, Opinion, OpinionNode
-from theories.models import Stats, StatsNode, StatsFlatNode
+from theories.models import Category, Content, Opinion, OpinionDependency
+from theories.models import Stats, StatsDependency, StatsFlatDependency
 
 # *******************************************************************************
 # Classes
@@ -38,7 +38,7 @@ class OpinionAdmin(admin.ModelAdmin):
         return ('user', 'theory')
 
 
-class OpinionNodeAdmin(admin.ModelAdmin):
+class OpinionDependencyAdmin(admin.ModelAdmin):
 
     def get_user(self, obj):
         return obj.parent.user
@@ -55,7 +55,7 @@ class StatsAdmin(admin.ModelAdmin):
         return ('stats_type', 'theory')
 
 
-class StatsNodeAdmin(admin.ModelAdmin):
+class StatsDependencyAdmin(admin.ModelAdmin):
 
     def get_owner(self, obj):
         return obj.parent.get_owner()
@@ -66,7 +66,7 @@ class StatsNodeAdmin(admin.ModelAdmin):
         return ('get_owner', 'content')
 
 
-class StatsFlatNodeAdmin(admin.ModelAdmin):
+class StatsFlatDependencyAdmin(admin.ModelAdmin):
 
     def get_owner(self, obj):
         return obj.parent.get_owner()
@@ -83,7 +83,7 @@ class StatsFlatNodeAdmin(admin.ModelAdmin):
 #admin.site.register(Content, ContentAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Opinion, OpinionAdmin)
-admin.site.register(OpinionNode, OpinionNodeAdmin)
+admin.site.register(OpinionDependency, OpinionDependencyAdmin)
 admin.site.register(Stats, StatsAdmin)
-admin.site.register(StatsNode, StatsNodeAdmin)
-admin.site.register(StatsFlatNode, StatsFlatNodeAdmin)
+admin.site.register(StatsDependency, StatsDependencyAdmin)
+admin.site.register(StatsFlatDependency, StatsFlatDependencyAdmin)

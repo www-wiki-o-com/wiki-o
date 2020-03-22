@@ -227,7 +227,7 @@ class OpinionBarGraph(BarGraph):
         """Create a bar graph for visualizing the point distribution awarded to a theory.
 
         Args:
-            opinion (OpinionNode): The users opinion.
+            opinion (Opinion): The users opinion.
         """
         self.opinion = opinion
         self.content = opinion.content
@@ -248,7 +248,7 @@ class OpinionBarGraph(BarGraph):
         """Create the hidden shapes that highlight opinion.
 
         Args:
-            opinion (OpinionNode, optional): The user's opinion. Defaults to None.
+            opinion (Opinion, optional): The user's opinion. Defaults to None.
             tag_id (str, optional): The html tag to enable/disable visability (hide).
                 Defaults to 'user01'.
         """
@@ -303,30 +303,6 @@ class OpinionBarGraph(BarGraph):
         return text
 
 
-class OpinionNodeBarGraph(BarGraph):
-    """A class for drawing opinion-node bar graphs."""
-
-    def __init__(self, opinion_node):
-        """Create a bar graph for visualizing the point distribution awarded to an opinion_node.
-
-        Args:
-            opinion_node (OpinionNode): The user's opinion.
-        """
-        self.opinion_node = opinion_node
-        self.content = opinion_node.content
-        self.opinion_nodes = self.content.opinion_nodes.all()
-
-        bins = min(24, max(6, 6 * (math.floor(self.opinion_nodes.count() / 18) - 1)))
-        data00 = [0.5 - x['true_points'] for x in self.opinion_nodes.values('true_points')]
-        data01 = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))
-        super().__init__(data01)
-
-    def construct(self):
-        """Construct the diagram."""
-        self.create_graph()
-        self.create_ledgend()
-
-
 class OpinionComparisionBarGraph(OpinionBarGraph):
     """A class for drawing comparison bar graphs (two highlight opinions)."""
 
@@ -334,8 +310,8 @@ class OpinionComparisionBarGraph(OpinionBarGraph):
         """Constructor for the OpinionComparisionBarGraph class.
 
         Args:
-            opinion01 (OpinionNode): User01's opinion.
-            opinion02 (OpinionNode): User02's opinion.
+            opinion01 (Opinion): User01's opinion.
+            opinion02 (Opinion): User02's opinion.
         """
         self.opinion01 = opinion01
         self.opinion02 = opinion02

@@ -287,7 +287,7 @@ class User(AbstractUser):
         """
         if refresh:
             if (self.opinions.filter(content=self, deleted=False).exists() or
-                    self.opinions.filter(nodes__content=self).exists()):
+                    self.opinions.filter(dependencies__content=self).exists()):
                 self.utilized.add(content)
                 return True
             self.utilized.remove(content)

@@ -21,8 +21,8 @@ from django.contrib import auth
 from django.shortcuts import get_object_or_404, render, redirect
 
 from theories.converters import CONTENT_PK_CYPHER
-from theories.models import Content, Opinion, OpinionNode
-from theories.utils import create_categories, create_reserved_nodes
+from theories.models import Content, Opinion, OpinionDependency
+from theories.utils import create_categories, create_reserved_dependencies
 from theories.test_utils import create_test_opinion
 from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_test_user
@@ -57,10 +57,10 @@ class ViewsTestBase():
     # ******************************
     def create_data(self, user=None, created_by=None):
         # setup
-        create_reserved_nodes()
+        create_reserved_dependencies()
         create_categories()
         random.seed(0)
-        Content.update_intuition_node()
+        Content.update_intuition()
 
         # create user(s)
         self.bob = create_test_user(username='bob', password='1234')
@@ -71,15 +71,15 @@ class ViewsTestBase():
 
         # theory
         self.content = create_test_theory(created_by=created_by, backup=True)
-        self.subtheory = create_test_subtheory(parent_content=self.content, created_by=created_by)
-        self.evidence = create_test_evidence(parent_content=self.subtheory,
+        self.subtheory = create_test_subtheory(parent_theory=self.content, created_by=created_by)
+        self.evidence = create_test_evidence(parent_theory=self.subtheory,
                                              created_by=created_by,
                                              backup=True)
-        self.fact = create_test_evidence(parent_content=self.content,
+        self.fact = create_test_evidence(parent_theory=self.content,
                                          title='Fact',
                                          fact=True,
                                          created_by=created_by)
-        self.fiction = create_test_evidence(parent_content=self.content,
+        self.fiction = create_test_evidence(parent_theory=self.content,
                                             title='Fiction',
                                             fact=False,
                                             created_by=created_by)
@@ -490,9 +490,9 @@ class ViewsTestBase():
 
         # test change
         if modified:
-            self.assertNotIn(self.subtheory, self.content.get_nodes())
+            self.assertNotIn(self.subtheory, self.content.get_dependencies())
         else:
-            self.assertIn(self.subtheory, self.content.get_nodes())
+            self.assertIn(self.subtheory, self.content.get_dependencies())
 
         # method must be overide
         self.assertTrue(override)
@@ -680,9 +680,9 @@ class ViewsTestBase():
 
         # test change
         if modified:
-            self.assertIn(self.evidence, self.content.get_nodes())
+            self.assertIn(self.evidence, self.content.get_dependencies())
         else:
-            self.assertNotIn(self.evidence, self.content.get_nodes())
+            self.assertNotIn(self.evidence, self.content.get_dependencies())
 
         # method must be overide
         self.assertTrue(override)
@@ -726,9 +726,9 @@ class ViewsTestBase():
         # test change
         self.subtheory.refresh_from_db()
         if modified:
-            self.assertEqual(self.subtheory.node_type, Content.TYPE.FACT)
+            self.assertEqual(self.subtheory.content_type, Content.TYPE.FACT)
         else:
-            self.assertEqual(self.subtheory.node_type, Content.TYPE.THEORY)
+            self.assertEqual(self.subtheory.content_type, Content.TYPE.THEORY)
 
         # method must be overide
         self.assertTrue(override)
@@ -750,9 +750,9 @@ class ViewsTestBase():
         # test change
         self.subtheory.refresh_from_db()
         if modified:
-            self.assertEqual(self.subtheory.node_type, Content.TYPE.EVIDENCE)
+            self.assertEqual(self.subtheory.content_type, Content.TYPE.EVIDENCE)
         else:
-            self.assertEqual(self.subtheory.node_type, Content.TYPE.THEORY)
+            self.assertEqual(self.subtheory.content_type, Content.TYPE.THEORY)
 
         # method must be overide
         self.assertTrue(override)
@@ -827,11 +827,11 @@ class ViewsTestBase():
 
         # test change
         if modified:
-            self.assertNotIn(self.evidence, self.subtheory.get_nodes())
-            self.assertIn(self.fiction, self.subtheory.get_nodes())
+            self.assertNotIn(self.evidence, self.subtheory.get_dependencies())
+            self.assertIn(self.fiction, self.subtheory.get_dependencies())
         else:
-            self.assertIn(self.evidence, self.subtheory.get_nodes())
-            self.assertNotIn(self.fiction, self.subtheory.get_nodes())
+            self.assertIn(self.evidence, self.subtheory.get_dependencies())
+            self.assertNotIn(self.fiction, self.subtheory.get_dependencies())
 
         # method must be overide
         self.assertTrue(override)
@@ -924,9 +924,9 @@ class ViewsTestBase():
         # test change
         self.evidence.refresh_from_db()
         if modified:
-            self.assertEqual(self.evidence.node_type, Content.TYPE.THEORY)
+            self.assertEqual(self.evidence.content_type, Content.TYPE.THEORY)
         else:
-            self.assertEqual(self.evidence.node_type, Content.TYPE.EVIDENCE)
+            self.assertEqual(self.evidence.content_type, Content.TYPE.EVIDENCE)
 
         # method must be overide
         self.assertTrue(override)

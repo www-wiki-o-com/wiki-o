@@ -64,10 +64,10 @@ LICENSE.md file in the root directory of this source tree.-->
       <div class="card-body text-justify">
         {{ evidence_diagram|safe }}
         {{ evidence_text|safe }}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.unaccounted    title="Unaccounted for evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.contradicting  title="Contradicting evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.controversial  title="Controversial evidence" %}
-        {% include "theories/opinion_detail_table.html" with node_list=evidence.collaborative  title="Collaborative evidence" %}
+        {% include "theories/opinion_detail_table.html" with dependency_list=evidence.unaccounted    title="Unaccounted for evidence" %}
+        {% include "theories/opinion_detail_table.html" with dependency_list=evidence.contradicting  title="Contradicting evidence" %}
+        {% include "theories/opinion_detail_table.html" with dependency_list=evidence.controversial  title="Controversial evidence" %}
+        {% include "theories/opinion_detail_table.html" with dependency_list=evidence.collaborative  title="Collaborative evidence" %}
       </div>
     </div>
 

@@ -183,22 +183,16 @@ FIXTURE_DIRS = (os.path.join(PROJECT_ROOT, 'fixtures'),)
 # Unit Test Environment
 if 'test' in sys.argv:
     PASSWORD_HASHERS = ('django.contrib.auth.hashers.MD5PasswordHasher',)
-    # DATABASES = {
-    #     'default': {
-    #         'ENGINE': 'django.db.backends.postgresql',
-    #         # 'ENGINE': 'django.db.backends.sqlite3',
-    #         'NAME': 'test_database',
-    #         'TEST_NAME': 'test_database',
-    #     }
-    # }
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': 'test_database',
+            'TEST_NAME': 'test_database',
+        }
+    }
     DEBUG = False
     TEMPLATE_DEBUG = False
 
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
-# Tell nose to measure coverage on the 'foo' and 'bar' apps
-#NOSE_ARGS = [
-#    '--with-coverage',
-#    '--cover-package=core,theories,users',
-#]

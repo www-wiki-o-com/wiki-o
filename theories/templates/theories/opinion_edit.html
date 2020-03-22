@@ -36,10 +36,10 @@ LICENSE.md file in the root directory of this source tree.-->
 
     <form action="{% url_extra 'theories:opinion-edit' theory.id extra=params %}" method="post">
       {% csrf_token %}
-      {{ node_formset.management_form }}
+      {{ dependency_formset.management_form }}
       <!-- errors -->
       {% include "include/form_errors.html"    with form=opinion_form %}
-      {% include "include/formset_errors.html" with formset=node_formset %}
+      {% include "include/formset_errors.html" with formset=dependency_formset %}
       <!-- hidden fields -->
       {% for hidden in opinion_form.hidden_fields %}
       {{ hidden }}
@@ -62,13 +62,13 @@ LICENSE.md file in the root directory of this source tree.-->
               <!-- Swap Expand/Cycle -->
               <th width="20" id=TF_SWAP style="display:table-cell; text-align:center;">
                 <a
-                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
+                  onclick="ExpandCycleSwap(); {% for x in dependency_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
                   <img src="{% static 'core/img/expand.svg' %}" height='12'>
                 </a>
               </th>
               <th width="20" id=TF_EXP style="display:none; text-align:center;">
                 <a
-                  onclick="ExpandCycleSwap(); {% for x in node_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
+                  onclick="ExpandCycleSwap(); {% for x in dependency_formset %}{% if x.instance.content.is_subtheory %} ExpandCycleSwap('{{ x.instance.content.tag_id }}'); {% endif %}{% endfor %}">
                   <img src="{% static 'core/img/cycle.svg' %}" height='12'>
                 </a>
               </th>
@@ -103,8 +103,8 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td />
               </tr>
 
-              <!-- Opinion Nodes-->
-              {% for form in node_formset %}
+              <!-- Opinion Dependencys-->
+              {% for form in dependency_formset %}
 
               <!-- Hidden Fields -->
               {% for hidden in form.hidden_fields %}

@@ -49,9 +49,9 @@ from actstream.actions import is_following
 from notifications.signals import notify
 
 from theories.converters import CONTENT_PK_CYPHER
-from theories.models import Category, Content, Opinion, OpinionNode, Stats
+from theories.models import Category, Content, Opinion, OpinionDependency, Stats
 from theories.forms import TheoryForm, EvidenceForm, OpinionForm
-from theories.forms import SelectContentForm, OpinionNodeForm
+from theories.forms import SelectDependencyForm, OpinionDependencyForm
 from theories.forms import TheoryRevisionForm, EvidenceRevisionForm
 from theories.graphs.pie_charts import OpinionPieChart
 from theories.graphs.pie_charts import OpinionComparisionPieChart
@@ -318,13 +318,13 @@ def TheoryIndexView(request, category_slug=None):
 def TheoryDetail(request, content_pk):
     """A view for displaying theory details."""
     # Preconditions
-    Content.update_intuition_node()
+    Content.update_intuition()
 
     # Setup
     theory = get_object_or_404(Content, pk=content_pk)
     deleted = theory.is_deleted()
-    parent_theories = theory.get_parent_nodes(deleted=deleted)
-    content_nodes = theory.get_nodes(deleted=deleted).exclude(pk=Content.INTUITION_PK)
+    parent_theories = theory.get_parent_theories(deleted=deleted)
+    theory_dependencies = theory.get_dependencies(deleted=deleted).exclude(pk=Content.INTUITION_PK)
 
     opinions = {}
     opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
@@ -334,9 +334,9 @@ def TheoryDetail(request, content_pk):
 
     # Pagination
     page = request.GET.get('page')
-    paginator = Paginator(content_nodes, NUM_ITEMS_PER_PAGE)
-    content_nodes = paginator.get_page(page)
-    content_nodes.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
+    paginator = Paginator(theory_dependencies, NUM_ITEMS_PER_PAGE)
+    theory_dependencies = paginator.get_page(page)
+    theory_dependencies.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(theory.pk))
@@ -353,7 +353,7 @@ def TheoryDetail(request, content_pk):
     # Context
     context = {
         'theory': theory,
-        'content_nodes': content_nodes,
+        'theory_dependencies': theory_dependencies,
         'parent_theories': parent_theories,
         'opinions': opinions,
         'prev': prev,
@@ -481,14 +481,14 @@ def TheoryEditEvidenceView(request, content_pk):
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
-    evidences = theory.get_evidence_nodes()
+    evidence_list = theory.get_theory_evidence()
     EvidenceFormSet = modelformset_factory(Content, form=EvidenceForm, extra=3)
 
     # Pagination
     page = request.GET.get('page')
-    paginator = Paginator(evidences, NUM_ITEMS_PER_PAGE)
-    evidences = paginator.get_page(page)
-    evidences.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
+    paginator = Paginator(evidence_list, NUM_ITEMS_PER_PAGE)
+    evidence_list = paginator.get_page(page)
+    evidence_list.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
@@ -505,15 +505,15 @@ def TheoryEditEvidenceView(request, content_pk):
     # Post request
     if request.method == 'POST':
         formset = EvidenceFormSet(request.POST,
-                                  queryset=evidences.object_list,
+                                  queryset=evidence_list.object_list,
                                   form_kwargs={'user': user})
         if formset.is_valid():
             for form in formset:
                 if form.has_changed():
                     # save
                     evidence = form.save()
-                    # update nodes
-                    theory.add_node(evidence)
+                    # update dependencies
+                    theory.add_dependency(evidence)
                     # activity log
                     evidence.update_activity_logs(user, form.get_verb())
             return redirect(prev)
@@ -522,14 +522,14 @@ def TheoryEditEvidenceView(request, content_pk):
 
     # Get request
     else:
-        formset = EvidenceFormSet(queryset=evidences.object_list, form_kwargs={'user': user})
+        formset = EvidenceFormSet(queryset=evidence_list.object_list, form_kwargs={'user': user})
 
     # Render
     context = {
         'root_theory': root_theory,
         'theory': theory,
         'formset': formset,
-        'evidences': evidences,
+        'evidence_list': evidence_list,
         'prev': prev,
         'params': params,
     }
@@ -548,14 +548,14 @@ def TheoryEditSubtheoriesView(request, content_pk):
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
-    subtheories = theory.get_subtheory_nodes()
+    subtheory_list = theory.get_theory_subtheories()
     SubTheoryFormSet = modelformset_factory(Content, form=TheoryForm, extra=3)
 
     # Pagination
     page = request.GET.get('page')
-    paginator = Paginator(subtheories, NUM_ITEMS_PER_PAGE)
-    subtheories = paginator.get_page(page)
-    subtheories.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
+    paginator = Paginator(subtheory_list, NUM_ITEMS_PER_PAGE)
+    subtheory_list = paginator.get_page(page)
+    subtheory_list.page_list = get_page_list(paginator.num_pages, page, MAX_NUM_PAGES)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
@@ -572,15 +572,15 @@ def TheoryEditSubtheoriesView(request, content_pk):
     # Post request
     if request.method == 'POST':
         formset = SubTheoryFormSet(request.POST,
-                                   queryset=subtheories.object_list,
+                                   queryset=subtheory_list.object_list,
                                    form_kwargs={'user': user})
         if formset.is_valid():
             for form in formset:
                 if form.has_changed():
                     # save
                     subtheory = form.save()
-                    # update nodes
-                    theory.add_node(subtheory)
+                    # update dependencies
+                    theory.add_dependency(subtheory)
                     # activity log
                     subtheory.update_activity_logs(user, verb=form.get_verb())
             return redirect(next)
@@ -589,14 +589,14 @@ def TheoryEditSubtheoriesView(request, content_pk):
 
     # Get request
     else:
-        formset = SubTheoryFormSet(queryset=subtheories.object_list, form_kwargs={'user': user})
+        formset = SubTheoryFormSet(queryset=subtheory_list.object_list, form_kwargs={'user': user})
 
     # Render
     context = {
         'root_theory': root_theory,
         'theory': theory,
         'formset': formset,
-        'subtheories': subtheories,
+        'subtheory_list': subtheory_list,
         'prev': prev,
         'params': params,
     }
@@ -634,9 +634,9 @@ def TheoryMergeView(request, content_pk):
         root_theory = theory
 
     # Setup cont'd
-    candidates = parent_theory.get_nested_subtheory_nodes().filter(
-        node_type=theory.node_type).exclude(pk=theory.pk)
-    MergeFormSet = modelformset_factory(Content, form=SelectContentForm, extra=0)
+    candidates = parent_theory.get_nested_subtheory_dependencies().filter(
+        content_type=theory.content_type).exclude(pk=theory.pk)
+    MergeFormSet = modelformset_factory(Content, form=SelectDependencyForm, extra=0)
 
     # Pagination
     page = request.GET.get('page')
@@ -699,21 +699,22 @@ def TheoryInheritView(request, content_pk01, content_pk02):
     # Setup cont'd
     search_term = request.GET.get('search', '')
     path_content_pks = [CONTENT_PK_CYPHER.to_python(x) for x in params.path] + [theory.pk]
-    root_nodes = root_theory.get_nested_nodes().exclude(pk=Content.INTUITION_PK)
-    root_nodes = root_nodes | Content.objects.filter(pk=root_theory.pk)
-    candidates = root_nodes.exclude(pk__in=theory.get_nodes())
+    root_theory_dependencies = root_theory.get_nested_dependencies().exclude(
+        pk=Content.INTUITION_PK)
+    root_theory_dependencies = root_theory_dependencies | Content.objects.filter(pk=root_theory.pk)
+    candidates = root_theory_dependencies.exclude(pk__in=theory.get_dependencies())
     candidates = candidates.exclude(pk__in=path_content_pks)
     if len(search_term) > 0:
         filtered_candidates = candidates.filter(title01__icontains=search_term)
         if filtered_candidates.count() > 0:
             candidates = filtered_candidates
-    exclude_other = root_nodes.values_list('pk', flat=True)
+    exclude_other = root_theory_dependencies.values_list('pk', flat=True)
     other_theories = Category.get('All').get_theories().exclude(pk__in=exclude_other)
     if len(search_term) > 0:
         filtered_other_theories = other_theories.filter(title01__icontains=search_term)
         if filtered_other_theories.count() > 0:
             other_theories = filtered_other_theories
-    InheritFormSet = modelformset_factory(Content, form=SelectContentForm, extra=0)
+    InheritFormSet = modelformset_factory(Content, form=SelectDependencyForm, extra=0)
 
     # Pagination
     page = request.GET.get('page')
@@ -727,13 +728,13 @@ def TheoryInheritView(request, content_pk01, content_pk02):
         if formset.is_valid():
             for form in formset:
                 if form.cleaned_data['select']:
-                    node = form.instance
+                    dependency = form.instance
                     # inherit
-                    theory.add_node(node)
+                    theory.add_dependency(dependency)
                     # activity log
                     theory.update_activity_logs(user,
                                                 verb='Inherited <# object.url {{ object }} #>',
-                                                action_object=node)
+                                                action_object=dependency)
             return redirect(next)
 
     # Get request
@@ -828,14 +829,14 @@ def TheoryRestoreView(request, content_pk):
 @login_required
 @permission_required('theories.backup_content', raise_exception=True)
 def TheoryBackupView(request, content_pk):
-    """A method for taking a snap-shot (backup) of a theory node."""
+    """A method for taking a snap-shot (backup) of a theory dependency."""
 
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
-    candidates = Content.objects.filter(pk=theory.pk) | theory.get_nested_nodes()
+    candidates = Content.objects.filter(pk=theory.pk) | theory.get_nested_dependencies()
     candidates = candidates.exclude(pk=Content.INTUITION_PK)
-    BackupFormSet = modelformset_factory(Content, form=SelectContentForm, extra=0)
+    BackupFormSet = modelformset_factory(Content, form=SelectDependencyForm, extra=0)
 
     # Pagination
     page = request.GET.get('page')
@@ -1005,7 +1006,7 @@ def EvidenceDetail(request, content_pk):
 
     # Setup
     evidence = get_object_or_404(Content, pk=content_pk)
-    parent_theories = evidence.get_parent_nodes()
+    parent_theories = evidence.get_parent_theories()
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
@@ -1103,9 +1104,9 @@ def EvidenceMergeView(request, content_pk):
         return redirect('theories:index')
 
     # Setup cont'd
-    candidates = parent_theory.get_flat_nodes().filter(node_type=evidence.node_type)
+    candidates = parent_theory.get_flat_dependencies().filter(content_type=evidence.content_type)
     candidates = candidates.exclude(pk=evidence.pk).exclude(pk=Content.INTUITION_PK)
-    MergeFormSet = modelformset_factory(Content, form=SelectContentForm, extra=0)
+    MergeFormSet = modelformset_factory(Content, form=SelectDependencyForm, extra=0)
 
     # Pagination
     page = request.GET.get('page')
@@ -1295,7 +1296,7 @@ def EvidenceActivityView(request, content_pk):
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
 def ContentRemove(request, content_pk):
-    """A redirect for deleting theory node edges (removing from parents)."""
+    """A redirect for deleting theory dependency edges (removing from parents)."""
 
     # Setup
     user = request.user
@@ -1313,12 +1314,12 @@ def ContentRemove(request, content_pk):
 
     # Post request
     if request.method == 'POST':
-        parent_theory.remove_node(content, user)
+        parent_theory.remove_dependency(content, user)
         parent_theory.update_activity_logs(user,
                                            verb='Removed <# object.url {{ object }} #>',
                                            action_object=content)
         # cleanup abandoned theory
-        if content.parent_nodes.count() == 0 and not content.is_root():
+        if content.parents.count() == 0 and not content.is_root():
             content.delete(user)
             content.update_activity_logs(user, verb='Deleted.')
         return redirect(next)
@@ -1332,7 +1333,7 @@ def ContentRemove(request, content_pk):
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
 def ContentDelete(request, content_pk):
-    """A redirect for deleting theory nodes."""
+    """A redirect for deleting theory dependencies."""
 
     # Setup
     user = request.user
@@ -1363,7 +1364,7 @@ def ContentDelete(request, content_pk):
 @login_required
 @permission_required('theories.backup_content', raise_exception=True)
 def BackupContent(request, content_pk):
-    """A method for taking a snap-shot (backup) of a theory node."""
+    """A method for taking a snap-shot (backup) of a theory dependency."""
 
     # Setup
     user = request.user
@@ -1388,7 +1389,7 @@ def BackupContent(request, content_pk):
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
 def RevertContent(request, content_pk, version_id):
-    """A method for restoring a theory-node snap-shot (backup)."""
+    """A method for restoring a theory-dependency snap-shot (backup)."""
 
     # Setup
     user = request.user
@@ -1593,7 +1594,7 @@ def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
 
     # parent opinions
     parent_opinions = []
-    for parent_theory in theory.get_parent_nodes():
+    for parent_theory in theory.get_parent_theories():
         if isinstance(opinion, Opinion):
             parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
             if parent_opinion is not None and parent_opinion.is_anonymous() == opinion.is_anonymous(
@@ -1664,11 +1665,11 @@ def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
                 'contradicting': evidence_diagram.get_contradicting_evidence(sort_list=True),
                 'unaccounted': evidence_diagram.get_unaccounted_evidence(sort_list=True),
             }
-            for node in theory.get_nodes().exclude(pk=Content.INTUITION_PK):
-                if node not in evidence['collaborative'] and node not in evidence['controversial'] and \
-                   node not in evidence['contradicting'] and node not in evidence['unaccounted']:
+            for dependency in theory.get_dependencies().exclude(pk=Content.INTUITION_PK):
+                if dependency not in evidence['collaborative'] and dependency not in evidence['controversial'] and \
+                   dependency not in evidence['contradicting'] and dependency not in evidence['unaccounted']:
                     pass
-                    # evidence['unaccounted'].append(node)
+                    # evidence['unaccounted'].append(dependency)
 
     # Render
     context = {
@@ -1828,38 +1829,39 @@ def OpinionEditView(request, content_pk, wizard=False):
     # Setup cont'd
     if opinion is None:
         opinion = Opinion(user=user, content=theory)
-        opinion_nodes = OpinionNode.objects.none()
-        content_nodes = theory.get_nodes()
+        opinion_dependencies = OpinionDependency.objects.none()
+        theory_dependencies = theory.get_dependencies()
     else:
-        opinion_nodes = opinion.get_nodes()
-        content_nodes = theory.get_nodes().exclude(id__in=opinion_nodes.values('content'))
+        opinion_dependencies = opinion.get_dependencies()
+        theory_dependencies = theory.get_dependencies().exclude(
+            id__in=opinion_dependencies.values('content'))
 
     # Formset
-    initial = [{'content': x, 'parent': opinion} for x in content_nodes]
-    OpinionNodeFormSet = modelformset_factory(OpinionNode,
-                                              form=OpinionNodeForm,
-                                              extra=content_nodes.count())
+    initial = [{'content': x, 'parent': opinion} for x in theory_dependencies]
+    OpinionDependencyFormSet = modelformset_factory(OpinionDependency,
+                                                    form=OpinionDependencyForm,
+                                                    extra=theory_dependencies.count())
 
     # Post request
     if request.method == 'POST':
 
         # setup
         opinion_form = OpinionForm(request.POST, instance=opinion, wizard=wizard)
-        node_formset = OpinionNodeFormSet(request.POST,
-                                          queryset=opinion_nodes,
-                                          initial=initial,
-                                          form_kwargs={
-                                              'user': user,
-                                              'wizard': wizard
-                                          })
+        dependency_formset = OpinionDependencyFormSet(request.POST,
+                                                      queryset=opinion_dependencies,
+                                                      initial=initial,
+                                                      form_kwargs={
+                                                          'user': user,
+                                                          'wizard': wizard
+                                                      })
 
         # utilization
         utilization_before = {theory: user.is_using(theory)}
-        for content in content_nodes:
+        for content in theory_dependencies:
             utilization_before[content] = user.is_using(content)
 
         # parse
-        if opinion_form.is_valid() and node_formset.is_valid():
+        if opinion_form.is_valid() and dependency_formset.is_valid():
 
             # remove opinion from stats
             if opinion_form.instance.id is not None:
@@ -1870,9 +1872,9 @@ def OpinionEditView(request, content_pk, wizard=False):
                 opinion = opinion_form.save()
 
             # save altered dependencies
-            for opinion_node_form in node_formset:
-                if opinion_node_form.has_changed():
-                    opinion_node = opinion_node_form.save()
+            for opinion_dependency_form in dependency_formset:
+                if opinion_dependency_form.has_changed():
+                    opinion_dependency = opinion_dependency_form.save()
 
             # update points
             opinion.update_points()
@@ -1892,17 +1894,17 @@ def OpinionEditView(request, content_pk, wizard=False):
             return redirect(opinion.url() + params)
         else:
             print(2200, opinion_form.errors)
-            print(2201, node_formset.errors)
+            print(2201, dependency_formset.errors)
 
     # Get request
     else:
         opinion_form = OpinionForm(instance=opinion, wizard=wizard)
-        node_formset = OpinionNodeFormSet(queryset=opinion_nodes,
-                                          initial=initial,
-                                          form_kwargs={
-                                              'user': user,
-                                              'wizard': wizard
-                                          })
+        dependency_formset = OpinionDependencyFormSet(queryset=opinion_dependencies,
+                                                      initial=initial,
+                                                      form_kwargs={
+                                                          'user': user,
+                                                          'wizard': wizard
+                                                      })
 
     # Render
     if wizard:
@@ -1913,7 +1915,7 @@ def OpinionEditView(request, content_pk, wizard=False):
         'theory': theory,
         'opinion': opinion,
         'opinion_form': opinion_form,
-        'node_formset': node_formset,
+        'dependency_formset': dependency_formset,
         'prev': prev,
         'params': params,
     }

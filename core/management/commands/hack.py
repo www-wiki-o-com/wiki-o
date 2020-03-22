@@ -44,7 +44,7 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         parser.add_argument(
             '--report01',
-            help='Change ownership of all theory nodes.',
+            help='Change ownership of all theory dependencies.',
         )
 
         parser.add_argument(
@@ -119,7 +119,7 @@ class Command(BaseCommand):
     def fix_permissions(self):
         """Fixes the set of permissions."""
         for permission in Permission.objects.all():
-            if str(permission.content_type) == 'Theory Node':
+            if str(permission.content_type) == 'Content':
                 if permission.codename in ['add_edges', 'delete_edges']:
                     print('delete', permission.codename)
                     permission.delete()

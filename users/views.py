@@ -340,15 +340,24 @@ def violation_resolve_view(request, pk):
                 print(340, feedback_form.errors)
             return redirect(next_url)
 
-        # Display the theory node in contention.
+        # Display the content in contention.
         if content is not None:
-            content_form = TheoryForm(request.POST, instance=content, user=user, prefix='content')
-            if 'save_content' in request.POST.keys() and \
-                    user.has_perm('theories.change_content', content):
-                if content_form.is_valid():
-                    content = content_form.save()
-                    content.update_activity_logs(user, verb=content_form.get_verb())
-                return redirect(next_url)
+            if content.is_theory():
+                content_form = TheoryForm(request.POST, instance=content, user=user, prefix='content')
+                if 'save_content' in request.POST.keys() and \
+                        user.has_perm('theories.change_content', content):
+                    if content_form.is_valid():
+                        content = content_form.save()
+                        content.update_activity_logs(user, verb=content_form.get_verb())
+                    return redirect(next_url)
+            elif content.is_evidence():
+                content_form = EvidenceForm(request.POST, instance=content, user=user, prefix='content')
+                if 'save_content' in request.POST.keys() and \
+                        user.has_perm('theories.change_content', content):
+                    if content_form.is_valid():
+                        content = content_form.save()
+                        content.update_activity_logs(user, verb=content_form.get_verb())
+                    return redirect(next_url)
         else:
             content_form = None
 

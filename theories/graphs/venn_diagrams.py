@@ -16,7 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 import math
 import random
 
-from theories.models import NodePointerBase, Opinion
+from theories.models import DependencyPointerBase, Opinion
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
 from theories.utils import get_demo_opinion
@@ -40,7 +40,7 @@ class OpinionVennDiagram():
     DEFAULT_BOARDER = {'top': 60, 'bottom': 30, 'left': 100, 'right': 100}
 
     def __init__(self, opinion, flat=False, bottom_text=None, config=None, boarder=None):
-        """Create a Venn-diagram that visualizes the opinion's nodes."""
+        """Create a Venn-diagram that visualizes the opinion's dependencies."""
         self.opinion = opinion
         self.flat = flat
         self.bottom_text = bottom_text
@@ -88,28 +88,28 @@ class OpinionVennDiagram():
         return ''
 
     def calc_membership(self):
-        """Group opinion nodes into: true, false, true & false, and neither."""
+        """Group opinion dependencies into: true, false, true & false, and neither."""
         # Setup
         self.true_set = []
         self.false_set = []
         self.outside_set = []
         self.intersection_set = []
         if self.flat:
-            nodes = self.opinion.get_flat_nodes()
+            dependencies = self.opinion.get_flat_dependencies()
         else:
-            nodes = self.opinion.get_nodes()
+            dependencies = self.opinion.get_dependencies()
 
         # Populate membership
-        for node in nodes:
-            if node.total_points() < 0.01:
-                if node.total_points() > 0:
-                    self.outside_set.append(node)
-            elif node.true_ratio() >= 0.66:
-                self.true_set.append(node)
-            elif node.false_ratio() >= 0.66:
-                self.false_set.append(node)
+        for dependency in dependencies:
+            if dependency.total_points() < 0.01:
+                if dependency.total_points() > 0:
+                    self.outside_set.append(dependency)
+            elif dependency.true_ratio() >= 0.66:
+                self.true_set.append(dependency)
+            elif dependency.false_ratio() >= 0.66:
+                self.false_set.append(dependency)
             else:
-                self.intersection_set.append(node)
+                self.intersection_set.append(dependency)
 
     def create_rings(self):
         """Create the true and false rings."""
@@ -156,42 +156,42 @@ class OpinionVennDiagram():
 
         # Create the set of true shapes (randomly place the shape inside the true ring)
         self.true_shapes = []
-        for node in self.true_set:
+        for dependency in self.true_set:
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.true_ring.x + r * math.cos(theta)
             y = self.true_ring.y + r * math.sin(theta)
-            area = self.config['shape_area'] * node.total_points()
-            if node.is_theory():
-                self.true_shapes.append(SubtheoryShape(node, x, y, area))
-            elif node.is_evidence():
-                self.true_shapes.append(EvidenceShape(node, x, y, area))
+            area = self.config['shape_area'] * dependency.total_points()
+            if dependency.is_theory():
+                self.true_shapes.append(SubtheoryShape(dependency, x, y, area))
+            elif dependency.is_evidence():
+                self.true_shapes.append(EvidenceShape(dependency, x, y, area))
 
         # Create the set of shapes in the intersection (randomly place in the intersection)
         self.intersection_shapes = []
-        for node in self.intersection_set:
+        for dependency in self.intersection_set:
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = (self.true_ring.x + self.false_ring.x) / 2 + r * math.cos(theta)
             y = (self.true_ring.y + self.false_ring.y) / 2 + r * math.sin(theta)
-            area = self.config['shape_area'] * node.total_points()
-            if node.is_theory():
-                self.intersection_shapes.append(SubtheoryShape(node, x, y, area))
-            elif node.is_evidence():
-                self.intersection_shapes.append(EvidenceShape(node, x, y, area))
+            area = self.config['shape_area'] * dependency.total_points()
+            if dependency.is_theory():
+                self.intersection_shapes.append(SubtheoryShape(dependency, x, y, area))
+            elif dependency.is_evidence():
+                self.intersection_shapes.append(EvidenceShape(dependency, x, y, area))
 
         # Create the set of false shapes (randomly place the shape inside the false ring)
         self.false_shapes = []
-        for node in self.false_set:
+        for dependency in self.false_set:
             r = math.sqrt(random.random()) * r
             theta = math.radians(random.randint(0, 360))
             x = self.false_ring.x + r * math.cos(theta)
             y = self.false_ring.y + r * math.sin(theta)
-            area = self.config['shape_area'] * node.total_points()
-            if node.is_theory():
-                self.false_shapes.append(SubtheoryShape(node, x, y, area))
-            elif node.is_evidence():
-                self.false_shapes.append(EvidenceShape(node, x, y, area))
+            area = self.config['shape_area'] * dependency.total_points()
+            if dependency.is_theory():
+                self.false_shapes.append(SubtheoryShape(dependency, x, y, area))
+            elif dependency.is_evidence():
+                self.false_shapes.append(EvidenceShape(dependency, x, y, area))
 
     def create_outside_shapes(self):
         """Create evidence and sub-theory shapes that falls outside of the true and false sets."""
@@ -208,14 +208,14 @@ class OpinionVennDiagram():
         # Create the shapes outside both the true and false rings (radomly place them inside the
         # frame, the springs will push them outside of the rings).
         self.outside_shapes = []
-        for node in self.outside_set:
+        for dependency in self.outside_set:
             x = random.random() * x_width + x_min
             y = random.random() * y_width + y_min
-            area = self.config['shape_area'] * node.total_points()
-            if node.is_theory():
-                self.outside_shapes.append(SubtheoryShape(node, x, y, area))
-            elif node.is_evidence():
-                self.outside_shapes.append(EvidenceShape(node, x, y, area))
+            area = self.config['shape_area'] * dependency.total_points()
+            if dependency.is_theory():
+                self.outside_shapes.append(SubtheoryShape(dependency, x, y, area))
+            elif dependency.is_evidence():
+                self.outside_shapes.append(EvidenceShape(dependency, x, y, area))
 
     def create_boundary_shapes(self):
         """Create boundary shapes to confine the shapes to the view port."""
@@ -459,9 +459,9 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         """Constructor for the OpinionComparisionVennDiagram class.
 
         Args:
-            opinion01 (OpinionNode): The base opinion, used to decide the evidence/sub-theory
+            opinion01 (OpinionDependencyBase): The base opinion, used to decide the evidence/sub-theory
                 locatoin (the true ring, the false ring, the intersection, or the outside).
-            opinion02 (OpinionNode): The comparision opinion, used to decide the size and colour
+            opinion02 (OpinionDependencyBase): The comparision opinion, used to decide the size and colour
                 of each shape.
             flat (bool, optional): If true, the sub-theories are flattend. Defaults to False.
             bottom_text ([type], optional): Mainly used for debug statements. Defaults to None.
@@ -474,59 +474,59 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         super().__init__(opinion01, flat, bottom_text)
 
     def calc_membership(self):
-        """Group opinion nodes into: true, false, true & false, and neither."""
+        """Group opinion dependencies into: true, false, true & false, and neither."""
         # Setup
         self.true_set = []
         self.intersection_set = []
         self.false_set = []
         self.outside_set = []
 
-        # Construct a list of nodes.
+        # Construct a list of dependencies.
         theory = self.opinion01.content
         if self.flat:
-            nodes = theory.get_flat_nodes()
-            get_node01 = self.opinion01.get_flat_node
-            get_node02 = self.opinion02.get_flat_node
+            dependencies = theory.get_flat_dependencies()
+            get_dependency01 = self.opinion01.get_flat_dependency
+            get_dependency02 = self.opinion02.get_flat_dependency
         else:
-            nodes = theory.get_nodes()
-            get_node01 = self.opinion01.get_node
-            get_node02 = self.opinion02.get_node
+            dependencies = theory.get_dependencies()
+            get_dependency01 = self.opinion01.get_dependency
+            get_dependency02 = self.opinion02.get_dependency
 
-        # Populate the sets (create dummy nodes to customize weight and colour).
-        for node in nodes:
+        # Populate the sets (create dummy dependencies to customize weight and colour).
+        for dependency in dependencies:
 
-            # Get or create node01
-            points_node01 = get_node01(content=node)
-            if points_node01 is None:
-                points_node01 = NodePointerBase.create(
+            # Get or create dependency01
+            points_dependency01 = get_dependency01(content=dependency)
+            if points_dependency01 is None:
+                points_dependency01 = DependencyPointerBase.create(
                     parent=self.opinion01,
-                    content=node,
+                    content=dependency,
                     true_points=0.0,
                     false_points=0.0,
                 )
-            # Get or create node02
-            points_node02 = get_node02(content=node)
-            if points_node02 is None:
-                points_node02 = NodePointerBase.create(
+            # Get or create dependency02
+            points_dependency02 = get_dependency02(content=dependency)
+            if points_dependency02 is None:
+                points_dependency02 = DependencyPointerBase.create(
                     parent=self.opinion02,
-                    content=node,
+                    content=dependency,
                     true_points=0.0,
                     false_points=0.0,
                 )
 
-            # Assign nodes to sets
-            if points_node01.total_points() < 0.01:
-                if points_node02.total_points() > 0:
-                    self.outside_set.append(points_node02)
-            elif points_node01.true_ratio() >= 0.66:
-                if points_node02.total_points() > 0:
-                    self.true_set.append(points_node02)
-            elif points_node01.false_ratio() >= 0.66:
-                if points_node02.total_points() > 0:
-                    self.false_set.append(points_node02)
+            # Assign dependencies to sets
+            if points_dependency01.total_points() < 0.01:
+                if points_dependency02.total_points() > 0:
+                    self.outside_set.append(points_dependency02)
+            elif points_dependency01.true_ratio() >= 0.66:
+                if points_dependency02.total_points() > 0:
+                    self.true_set.append(points_dependency02)
+            elif points_dependency01.false_ratio() >= 0.66:
+                if points_dependency02.total_points() > 0:
+                    self.false_set.append(points_dependency02)
             else:
-                if points_node02.total_points() > 0:
-                    self.intersection_set.append(points_node02)
+                if points_dependency02.total_points() > 0:
+                    self.intersection_set.append(points_dependency02)
 
     def get_caption(self):
         """Output caption text for diagram.
@@ -552,7 +552,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         """The constructor for the DemoVennDiagram class.
 
         Args:
-            true_set_size (int, optional): The number of random true OpinionNodes to be generated.
+            true_set_size (int, optional): The number of random true opinion dependencies to be generated.
                 Defaults to 10.
             intersection_set_size (int, optional): [description]. Defaults to 10.
             false_set_size (int, optional): [description]. Defaults to 10.
@@ -564,71 +564,71 @@ class DemoVennDiagram(OpinionVennDiagram):
 
         opinion = get_demo_opinion()
         theory = opinion.content
-        content_nodes = theory.get_nodes()
+        theory_dependencies = theory.get_dependencies()
 
         opinion.saved_true_points = opinion.true_points()
         opinion.saved_false_points = opinion.false_points()
 
         total_true_points = 0
         total_false_points = 0
-        opinion.saved_nodes = []
+        opinion.saved_dependencies = []
 
         for i in range(random.randint(1, true_set_size)):
-            new_node = NodePointerBase.create(
+            new_dependency = DependencyPointerBase.create(
                 parent=opinion,
-                content=random.choice(content_nodes),
+                content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 100),
                 false_points=random.randint(1, 10),
             )
-            opinion.saved_nodes.append(new_node)
-            total_true_points += new_node.true_points()
-            total_false_points += new_node.false_points()
+            opinion.saved_dependencies.append(new_dependency)
+            total_true_points += new_dependency.true_points()
+            total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, intersection_set_size)):
-            new_node = NodePointerBase.create(
+            new_dependency = DependencyPointerBase.create(
                 parent=opinion,
-                content=random.choice(content_nodes),
+                content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 10),
                 false_points=random.randint(1, 10),
             )
-            opinion.saved_nodes.append(new_node)
-            total_true_points += new_node.true_points()
-            total_false_points += new_node.false_points()
+            opinion.saved_dependencies.append(new_dependency)
+            total_true_points += new_dependency.true_points()
+            total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, false_set_size)):
-            new_node = NodePointerBase.create(
+            new_dependency = DependencyPointerBase.create(
                 parent=opinion,
-                content=random.choice(content_nodes),
+                content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 10),
                 false_points=random.randint(1, 100),
             )
-            opinion.saved_nodes.append(new_node)
-            total_true_points += new_node.true_points()
-            total_false_points += new_node.false_points()
+            opinion.saved_dependencies.append(new_dependency)
+            total_true_points += new_dependency.true_points()
+            total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, outside_set_size)):
-            new_node = NodePointerBase.create(
+            new_dependency = DependencyPointerBase.create(
                 parent=opinion,
-                content=random.choice(content_nodes),
+                content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 5),
                 false_points=random.randint(1, 5),
             )
-            opinion.saved_nodes.append(new_node)
-            total_true_points += new_node.true_points()
-            total_false_points += new_node.false_points()
+            opinion.saved_dependencies.append(new_dependency)
+            total_true_points += new_dependency.true_points()
+            total_false_points += new_dependency.false_points()
 
         # normalize points to create the weights
-        for node in opinion.saved_nodes:
+        for dependency in opinion.saved_dependencies:
             if total_true_points > 0:
-                node.saved_true_points = (node.true_points() /
-                                          total_true_points) * opinion.true_points()
+                dependency.saved_true_points = (dependency.true_points() /
+                                                total_true_points) * opinion.true_points()
             else:
-                node.saved_true_points = 0.0
+                dependency.saved_true_points = 0.0
             if total_false_points > 0:
-                node.saved_false_points = (node.false_points() /
-                                           total_false_points) * opinion.false_points()
+                dependency.saved_false_points = (dependency.false_points() /
+                                                 total_false_points) * opinion.false_points()
             else:
-                node.saved_false_points = 0.0
+                dependency.saved_false_points = 0.0
 
         super().__init__(opinion, bottom_text=str(seed))
 

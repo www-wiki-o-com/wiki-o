@@ -34,7 +34,7 @@ class PointerBase():
         the database.
 
     Attributes:
-        content (Content): The theory node.
+        content (Content): The theory dependency.
         saved_true_points (float): Cache for the true points.
         saved_false_points (float): Cache for the fasle points.
     """
@@ -59,7 +59,7 @@ class PointerBase():
         """Pass-through for content."""
         return self.content.__str__()
 
-    def get_node_pk(self):
+    def get_dependency_pk(self):
         """Returns content.pk."""
         return self.content.pk
 
@@ -102,16 +102,16 @@ class TheoryPointerBase():
         saved_true_points (float): Cache for the true points.
         saved_false_points (float): Cache for the fasle points.
         saved_opinions (QuerySet:Opinion): Cache for the theory's opinions.
-        saved_nodes (QuerySet:Content): Cache for the the theory's nodes.
-        saved_flat_nodes (QuerySet:Content): Cache for the theory's flat nodes.
+        saved_dependencies (QuerySet:Content): Cache for the the theory's dependencies.
+        saved_flat_dependencies (QuerySet:Content): Cache for the theory's flat dependencies.
         saved_point_distribution (list[float]): Cache for the theory's point distribution.
     """
     content = None
     saved_true_points = None
     saved_false_points = None
     saved_opinions = None
-    saved_nodes = None
-    saved_flat_nodes = None
+    saved_dependencies = None
+    saved_flat_dependencies = None
     saved_point_distribution = None
     altered = False
 
@@ -145,22 +145,22 @@ class TheoryPointerBase():
         LOGGER.error('TheoryPointerBase.compare_url: There is no url for an abstract object (%s).',
                      str(self))
 
-    def get_node_pk(self):
+    def get_dependency_pk(self):
         """Returns theory.pk."""
         return self.content.pk
 
-    def get_nodes(self):
-        """Return a set of saved nodes."""
+    def get_dependencies(self):
+        """Return a set of saved dependencies."""
         self.check_data_for_errors()
-        if self.saved_nodes is not None:
-            return self.saved_nodes
+        if self.saved_dependencies is not None:
+            return self.saved_dependencies
         return []
 
-    def get_flat_nodes(self):
-        """Return a set of saved nodes."""
+    def get_flat_dependencies(self):
+        """Return a set of saved dependencies."""
         self.check_data_for_errors()
-        if self.saved_flat_nodes is not None:
-            return self.saved_flat_nodes
+        if self.saved_flat_dependencies is not None:
+            return self.saved_flat_dependencies
         return []
 
     def get_opinions(self):
@@ -186,7 +186,7 @@ class TheoryPointerBase():
             'false_facts': 0.0,
             'false_other': 0.0
         }
-        for evidence in self.get_flat_nodes():
+        for evidence in self.get_flat_dependencies():
             if evidence.is_verifiable():
                 distribution['true_facts'] += evidence.true_points()
                 distribution['false_facts'] += evidence.false_points()
@@ -230,8 +230,8 @@ class TheoryPointerBase():
         return self.true_points(), self.true_points()
 
 
-class NodePointerBase(PointerBase):
-    """Abstract manager for passing through methods to linked content_nodes.
+class DependencyPointerBase(PointerBase):
+    """Abstract manager for passing through methods to linked theory_dependencies.
 
     Todo:
         * Move to seperate file.
@@ -262,7 +262,7 @@ class NodePointerBase(PointerBase):
         return self.content.about()
 
     def url(self):
-        """Return a url pointing to content's root (not node)."""
+        """Return a url pointing to content's root (not dependency)."""
         return None
 
     def is_theory(self):
@@ -290,7 +290,7 @@ class NodePointerBase(PointerBase):
         return self.true_points() + self.false_points()
 
     def true_percent(self):
-        """Calculate the percentage awarded to true with respect all parent nodes.
+        """Calculate the percentage awarded to true with respect all parent dependencies.
 
         The true and true points are flipped when necessary.
         """
@@ -299,7 +299,7 @@ class NodePointerBase(PointerBase):
         return 0.0
 
     def false_percent(self):
-        """Calculate the percentage awarded to false with respect all parent nodes.
+        """Calculate the percentage awarded to false with respect all parent dependencies.
 
         The true and false points are flipped when necessary.
         """

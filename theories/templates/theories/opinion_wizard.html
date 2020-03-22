@@ -33,7 +33,7 @@ LICENSE.md file in the root directory of this source tree.-->
 <form action="{% url_extra 'theories:opinion-wizard' theory.id extra=params %}" method="post">
   {% csrf_token %}
   {{ opinion_form.id }}
-  {{ node_formset.management_form }}
+  {{ dependency_formset.management_form }}
 
   <!-- Step 1 -->
   <div class="row">
@@ -70,7 +70,7 @@ LICENSE.md file in the root directory of this source tree.-->
         </h6>
         <div class="card card-body">
           <!-- errors -->
-          {% include "include/formset_errors.html" with formset=node_formset %}
+          {% include "include/formset_errors.html" with formset=dependency_formset %}
           <table class="table-hover">
             <thead style="text-align:center" valign="bottom">
               <th width="40" />
@@ -90,7 +90,7 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td />
                 <td />
               </tr>
-              {% for x in node_formset %}
+              {% for x in dependency_formset %}
               {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="01" %}
               {% endfor %}
             </tbody>
@@ -109,7 +109,7 @@ LICENSE.md file in the root directory of this source tree.-->
         0-3.
         </h6>
         <div class="card card-body">
-          {% include "include/formset_errors.html" with formset=node_formset %}
+          {% include "include/formset_errors.html" with formset=dependency_formset %}
           <table class="table-hover">
             <thead style="text-align:center" valign="bottom">
               <th width="40" />
@@ -129,7 +129,7 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td />
                 <td />
               </tr>
-              {% for x in node_formset %}
+              {% for x in dependency_formset %}
               {% include "theories/opinion_wizard_row.html" with form=x ID_POSTFIX="02" %}
               {% endfor %}
             </tbody>
