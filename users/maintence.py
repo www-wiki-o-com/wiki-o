@@ -40,7 +40,7 @@ def create_groups_and_permissions(max_level=4):
 
     # Create the user level groups.
     for level in range(max_level + 1):
-        group, created = Group.objects.get_or_create(name='user level: %d' % level)
+        _group, created = Group.objects.get_or_create(name='user level: %d' % level)
         if created:
             LOGGER.info('Created user level: %d.', level)
 

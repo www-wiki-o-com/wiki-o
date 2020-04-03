@@ -192,11 +192,11 @@ class ContentTests(TestCase):
         dependency01.delete()
         self.assertEqual(str(dependency01), 'Test01 (deleted)')
 
-    def test_get_true_statement(self):
-        self.assertEqual(self.content.get_true_statement(), self.content.title01)
+    def test_true_statement(self):
+        self.assertEqual(self.content.true_statement(), self.content.title01)
 
-    def test_get_false_statement(self):
-        self.assertEqual(self.content.get_false_statement(), self.content.__str__(0, 1))
+    def test_false_statement(self):
+        self.assertEqual(self.content.false_statement(), self.content.__str__(0, 1))
 
     def test_get_title(self):
         self.assertEqual(self.evidence.get_title(), self.evidence.title01)
@@ -336,14 +336,14 @@ class ContentTests(TestCase):
         self.assertIn(self.fiction, dependencies)
         self.assertNotIn(self.subtheory, dependencies)
         self.assertEqual(dependencies.count(), 2)
-        self.assertIsNone(self.content.saved_dependencies)
+        self.assertIsNone(self.content.get_saved_dependencies())
 
         dependencies = self.content.get_dependencies(deleted=True)
         self.assertIn(self.fact, dependencies)
         self.assertIn(self.fiction, dependencies)
         self.assertIn(self.subtheory, dependencies)
         self.assertEqual(dependencies.count(), 3)
-        self.assertIsNone(self.content.saved_dependencies)
+        self.assertIsNone(self.content.get_saved_dependencies())
 
     def test_get_dependencies02(self):
 
@@ -352,14 +352,14 @@ class ContentTests(TestCase):
         self.assertIn(self.fiction, dependencies)
         self.assertIn(self.subtheory, dependencies)
         self.assertEqual(dependencies.count(), 3)
-        self.assertEqual(self.content.saved_dependencies, dependencies)
+        self.assertEqual(self.content.get_saved_dependencies(), dependencies)
 
         dependencies = self.content.get_dependencies(cache=True)
         self.assertIn(self.fact, dependencies)
         self.assertIn(self.fiction, dependencies)
         self.assertIn(self.subtheory, dependencies)
         self.assertEqual(dependencies.count(), 3)
-        self.assertEqual(self.content.saved_dependencies, dependencies)
+        self.assertEqual(self.content.get_saved_dependencies(), dependencies)
 
     def test_get_flat_dependencies(self):
 
@@ -372,7 +372,7 @@ class ContentTests(TestCase):
         self.assertIn(self.evidence, dependencies)
         self.assertIn(self.intuition, dependencies)
         self.assertEqual(dependencies.count(), 4)
-        self.assertIsNone(self.content.saved_flat_dependencies)
+        self.assertIsNone(self.content.get_saved_flat_dependencies())
 
         self.subtheory.delete()
 
@@ -381,14 +381,14 @@ class ContentTests(TestCase):
         self.assertIn(self.fiction, dependencies)
         self.assertIn(self.intuition, dependencies)
         self.assertEqual(dependencies.count(), 3)
-        self.assertIsNone(self.content.saved_flat_dependencies)
+        self.assertIsNone(self.content.get_saved_flat_dependencies())
 
         dependencies = self.content.get_flat_dependencies(cache=True)
         self.assertIn(self.fact, dependencies)
         self.assertIn(self.fiction, dependencies)
         self.assertIn(self.intuition, dependencies)
         self.assertEqual(dependencies.count(), 3)
-        self.assertIsNotNone(self.content.saved_flat_dependencies)
+        self.assertIsNotNone(self.content.get_saved_flat_dependencies())
 
         dependencies = self.content.get_flat_dependencies(deleted=True)
         self.assertIn(self.fact, dependencies)
@@ -397,7 +397,7 @@ class ContentTests(TestCase):
         self.assertIn(self.intuition, dependencies)
         self.assertEqual(dependencies.count(), 4)
         self.assertNotIn(self.evidence, self.content.dependencies.all())
-        self.assertIsNotNone(self.content.saved_flat_dependencies)
+        self.assertIsNotNone(self.content.get_saved_flat_dependencies())
 
     def test_get_theory_evidence(self):
 
@@ -566,15 +566,15 @@ class ContentTests(TestCase):
 
         opinions = self.content.get_opinions()
         self.assertEqual(opinions.count(), 1)
-        self.assertIsNone(self.content.saved_opinions)
+        self.assertIsNone(self.content.get_saved_opinions())
 
         opinions = self.content.get_opinions(cache=True)
         self.assertEqual(opinions.count(), 1)
-        self.assertEqual(self.content.saved_opinions, opinions)
+        self.assertEqual(self.content.get_saved_opinions(), opinions)
 
         opinions = self.content.get_opinions(cache=True)
         self.assertEqual(opinions.count(), 1)
-        self.assertEqual(self.content.saved_opinions, opinions)
+        self.assertEqual(self.content.get_saved_opinions(), opinions)
 
     def test_get_revisions(self):
         revisions = self.content.get_revisions()
@@ -612,8 +612,8 @@ class ContentTests(TestCase):
         self.assertEqual(dependencies.count(), 1)
 
     def test_cache(self):
-        assert self.content.saved_dependencies is None
-        assert self.content.saved_flat_dependencies is None
+        assert self.content.get_saved_dependencies() is None
+        assert self.content.get_saved_flat_dependencies() is None
         assert self.content.saved_stats is None
 
         result = self.evidence.cache()
@@ -621,20 +621,20 @@ class ContentTests(TestCase):
 
         result = self.content.cache(dependencies=True, flat_dependencies=False, stats=False)
         self.assertTrue(result)
-        self.assertIsNotNone(self.content.saved_dependencies)
-        self.assertIsNone(self.content.saved_flat_dependencies)
+        self.assertIsNotNone(self.content.get_saved_dependencies())
+        self.assertIsNone(self.content.get_saved_flat_dependencies())
         self.assertIsNone(self.content.saved_stats)
 
         result = self.content.cache(dependencies=False, flat_dependencies=True, stats=False)
         self.assertTrue(result)
-        self.assertIsNotNone(self.content.saved_dependencies)
-        self.assertIsNotNone(self.content.saved_flat_dependencies)
+        self.assertIsNotNone(self.content.get_saved_dependencies())
+        self.assertIsNotNone(self.content.get_saved_flat_dependencies())
         self.assertIsNone(self.content.saved_stats)
 
         result = self.content.cache(dependencies=False, flat_dependencies=False, stats=True)
         self.assertTrue(result)
-        self.assertIsNotNone(self.content.saved_dependencies)
-        self.assertIsNotNone(self.content.saved_flat_dependencies)
+        self.assertIsNotNone(self.content.get_saved_dependencies())
+        self.assertIsNotNone(self.content.get_saved_flat_dependencies())
         self.assertIsNotNone(self.content.saved_stats)
 
     def test_get_stats(self):
@@ -861,9 +861,9 @@ class OpinionTests(TestCase):
     def test_str(self):
         opinion = self.content.opinions.create(user=self.user)
         if opinion.is_true():
-            self.assertEqual(opinion.__str__(), self.content.get_true_statement())
+            self.assertEqual(opinion.__str__(), self.content.true_statement())
         else:
-            self.assertEqual(opinion.__str__(), self.content.get_false_statement())
+            self.assertEqual(opinion.__str__(), self.content.false_statement())
 
     def test_get_theory_evidence(self):
         opinion = self.content.opinions.create(user=self.user,)
@@ -899,22 +899,22 @@ class OpinionTests(TestCase):
         # setup
         opinion = self.content.opinions.create(user=self.user)
 
-        # blah
+        # Blah
         self.user.hidden = False
         opinion.anonymous = False
         self.assertFalse(opinion.is_anonymous())
 
-        # blah
+        # Blah
         self.user.hidden = False
         opinion.anonymous = True
         self.assertTrue(opinion.is_anonymous())
 
-        # blah
+        # Blah
         self.user.hidden = True
         opinion.anonymous = False
         self.assertTrue(opinion.is_anonymous())
 
-        # blah
+        # Blah
         self.user.hidden = True
         opinion.anonymous = True
         self.assertTrue(opinion.is_anonymous())
@@ -923,12 +923,12 @@ class OpinionTests(TestCase):
         # setup
         opinion = self.content.opinions.create(user=self.user)
 
-        # blah
+        # Blah
         self.user.hidden = False
         opinion.anonymous = False
         self.assertEqual(opinion.get_owner(), self.user.__str__())
 
-        # blah
+        # Blah
         self.user.hidden = True
         opinion.anonymous = True
         self.assertEqual(opinion.get_owner(), 'Anonymous')
@@ -937,12 +937,12 @@ class OpinionTests(TestCase):
         # setup
         opinion = self.content.opinions.create(user=self.user)
 
-        # blah
+        # Blah
         self.user.hidden = False
         opinion.anonymous = False
         self.assertEqual(opinion.get_owner_long(), self.user.__str__(print_fullname=True))
 
-        # blah
+        # Blah
         self.user.hidden = True
         opinion.anonymous = True
         self.assertEqual(opinion.get_owner_long(), 'Anonymous')
@@ -973,17 +973,17 @@ class OpinionTests(TestCase):
             content=self.fact,
             tt_input=100,
         )
-        assert opinion.saved_dependencies is None
+        assert opinion.get_saved_dependencies() is None
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fact)
         self.assertIsNotNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fiction)
         self.assertIsNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fiction, create=True)
         self.assertIsNotNone(opinion_dependency)
 
@@ -994,18 +994,18 @@ class OpinionTests(TestCase):
             content=self.fact,
             tt_input=100,
         )
-        assert opinion.saved_dependencies is None
+        assert opinion.get_saved_dependencies() is None
         opinion.cache()
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fact)
         self.assertIsNotNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fiction)
         self.assertIsNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_dependency(self.fiction, create=True)
         self.assertIsNotNone(opinion_dependency)
 
@@ -1016,11 +1016,11 @@ class OpinionTests(TestCase):
             content=self.fact,
             tt_input=100,
         )
-        assert opinion.saved_dependencies is None
+        assert opinion.get_saved_dependencies() is None
         opinion.cache()
 
-        self.assertEqual(opinion.saved_dependencies.count(), 1)
-        self.assertIn(opinion_dependency, opinion.saved_dependencies)
+        self.assertEqual(opinion.get_saved_dependencies().count(), 1)
+        self.assertIn(opinion_dependency, opinion.get_saved_dependencies())
 
     def test_get_dependencies(self):
         # setup
@@ -1034,18 +1034,18 @@ class OpinionTests(TestCase):
             tt_input=100,
         )
         self.fiction.delete()
-        assert opinion.saved_dependencies is None
+        assert opinion.get_saved_dependencies() is None
 
-        # blah
+        # Blah
         dependencies = opinion.get_dependencies()
         self.assertEqual(dependencies.count(), 2)
         self.assertIn(opinion_dependency01, dependencies)
         self.assertIn(opinion_dependency02, dependencies)
 
-        # blah
+        # Blah
         dependencies = opinion.get_dependencies(cache=True)
-        self.assertIsNotNone(opinion.saved_dependencies)
-        self.assertEqual(dependencies, opinion.saved_dependencies)
+        self.assertIsNotNone(opinion.get_saved_dependencies())
+        self.assertEqual(dependencies, opinion.get_saved_dependencies())
         self.assertEqual(dependencies.count(), 2)
         self.assertIn(opinion_dependency01, dependencies)
         self.assertIn(opinion_dependency02, dependencies)
@@ -1057,17 +1057,22 @@ class OpinionTests(TestCase):
             content=self.fact,
             tt_input=100,
         )
-        assert opinion.saved_flat_dependencies is None
+        assert opinion.get_saved_flat_dependencies() is None
 
-        # blah
+        # Blah
+        opinion_dependency01 = opinion.get_flat_dependency(self.fact)
+        opinion_dependency02 = opinion.get_flat_dependency(self.fact)
+        self.assertEqual(opinion_dependency01, opinion_dependency02)
+
+        # Blah
         opinion_dependency = opinion.get_flat_dependency(self.fact)
         self.assertIsNotNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_flat_dependency(self.fiction, create=False)
         self.assertIsNone(opinion_dependency)
 
-        # blah
+        # Blah
         opinion_dependency = opinion.get_flat_dependency(self.fiction, create=True)
         self.assertIsNotNone(opinion_dependency)
 
@@ -1093,7 +1098,7 @@ class OpinionTests(TestCase):
         )
         self.fiction.delete()
 
-        # blah
+        # Blah
         flat_dependencies = opinion.get_flat_dependencies()
         self.assertEqual(flat_dependencies.count(), 4)
         self.assertIsNotNone(flat_dependencies.get(self.intuition.pk))
@@ -1105,11 +1110,11 @@ class OpinionTests(TestCase):
     def test_get_intuition(self):
         opinion = self.content.opinions.create(user=self.user)
 
-        # blah
+        # Blah
         dependency = opinion.get_intuition(create=False)
         self.assertIsNone(dependency)
 
-        # blah
+        # Blah
         dependency = opinion.get_intuition(create=True)
         self.assertIsNotNone(dependency)
         self.assertEqual(dependency.content, self.intuition)
@@ -1126,15 +1131,15 @@ class OpinionTests(TestCase):
             ft_input=100,
         )
 
-        # blah
+        # Blah
         dependencies = opinion.get_theory_subtheories()
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.subtheory)
 
-        # blah
+        # Blah
         self.subtheory.delete()
 
-        # blah
+        # Blah
         dependencies = opinion.get_theory_subtheories()
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.subtheory)
@@ -1151,15 +1156,15 @@ class OpinionTests(TestCase):
             ft_input=100,
         )
 
-        # blah
+        # Blah
         dependencies = opinion.get_theory_evidence()
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.fact)
 
-        # blah
+        # Blah
         self.subtheory.delete()
 
-        # blah
+        # Blah
         dependencies = opinion.get_theory_evidence()
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.fact)
@@ -1179,7 +1184,7 @@ class OpinionTests(TestCase):
             force=True,
         )
 
-        # blah
+        # Blah
         parents = child_opinion.get_parent_opinions()
         self.assertEqual(parents.count(), 1)
         self.assertIn(opinion_dependency, parents)
@@ -1238,7 +1243,7 @@ class OpinionTests(TestCase):
         opinion_dependency = opinion.dependencies.create(content=self.fact,)
         opinion.update_points()
 
-        # blah
+        # Blah
         dependencies = opinion.get_dependencies()
         self.assertNotIn(opinion_dependency, dependencies)
 
@@ -1576,7 +1581,7 @@ class OpinionTests(TestCase):
         opinion.update_points()
         child_opinion.update_points()
 
-        # blah
+        # Blah
         copied_opinion = opinion.copy(self.user)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
@@ -1586,7 +1591,7 @@ class OpinionTests(TestCase):
         self.assertEqual(copied_dependency.ff_input, opinion_dependency.ff_input)
         self.assertNotEqual(copied_child.true_points(), child_opinion.true_points())
 
-        # blah
+        # Blah
         copied_opinion = opinion.copy(self.user, recursive=True)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
@@ -1606,7 +1611,7 @@ class OpinionTests(TestCase):
         )
         opinion.update_points()
 
-        # blah
+        # Blah
         self.assertEqual(opinion.true_points(), 0.8)
 
         # coverage test
@@ -1632,7 +1637,7 @@ class OpinionTests(TestCase):
         )
         opinion.update_points()
 
-        # blah
+        # Blah
         self.assertEqual(opinion.false_points(), 0.2)
 
         # coverage test
@@ -1663,7 +1668,7 @@ class OpinionTests(TestCase):
         opinion.update_points()
         opinion.swap_true_false()
 
-        # blah
+        # Blah
         self.assertEqual(opinion.true_input, 20)
         self.assertEqual(opinion.false_input, 80)
         self.assertEqual(opinion.true_points(), 0.2)
@@ -1677,7 +1682,7 @@ class OpinionTests(TestCase):
         hit_count = HitCount.objects.get_for_object(opinion)
         assert hit_count.hits == 0
 
-        # blah
+        # Blah
         url = reverse('theories:opinion-detail',
                       kwargs={
                           'content_pk': opinion.content.pk,
@@ -1694,7 +1699,7 @@ class OpinionTests(TestCase):
         assert self.bob.notifications.count() == 0
         assert opinion.target_actions.count() == 0
 
-        # blah
+        # Blah
         verb = "Modified."
         opinion.update_activity_logs(self.user, verb)
         self.assertEqual(opinion.target_actions.count(), 1)
@@ -1746,29 +1751,29 @@ class OpinionDependencyTests(TestCase):
         self.opinion_dependency = self.opinion.get_dependency(self.fact)
 
     def test_get_absolute_url(self):
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.fact)
         self.assertIsNone(opinion_dependency.get_absolute_url())
 
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.subtheory)
         self.assertIsNotNone(opinion_dependency.get_absolute_url())
 
     def test_url(self):
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.fact)
         self.assertIsNone(opinion_dependency.get_absolute_url())
 
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.subtheory)
         self.assertIsNotNone(opinion_dependency.get_absolute_url())
 
     def test_get_root(self):
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.fact)
         self.assertIsNone(opinion_dependency.get_root())
 
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.subtheory)
         self.assertEqual(opinion_dependency.get_root(), self.sub_opinion)
 
@@ -1798,16 +1803,16 @@ class OpinionDependencyTests(TestCase):
 
     def test_is_deleted(self):
 
-        # blah
+        # Blah
         opinion_dependency = self.opinion.get_dependency(self.fact)
         self.assertFalse(opinion_dependency.is_deleted())
 
-        # blah
+        # Blah
         self.fact.delete()
         opinion_dependency = self.opinion.get_dependency(self.fact)
         self.assertTrue(opinion_dependency.is_deleted())
 
-        # blah
+        # Blah
         self.content.remove_dependency(self.fiction)
         opinion_dependency = self.opinion.get_dependency(self.fiction)
         self.assertTrue(opinion_dependency.is_deleted())
@@ -1861,7 +1866,7 @@ class StatsTests(TestCase):
             stats.delete()
         assert self.content.stats.count() == 0
 
-        # blah
+        # Blah
         Stats.initialize(self.content)
         stats = self.content.get_all_stats()
         self.assertEqual(stats.count(), 4)
@@ -1873,7 +1878,7 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.get_slug(), 'all')
 
     def test_get_owner(self):
-        # blah
+        # Blah
         self.assertEqual(self.stats.get_owner(), 'Everyone')
 
         # coverage
@@ -1881,7 +1886,7 @@ class StatsTests(TestCase):
             stats.get_owner()
 
     def test_get_owner_long(self):
-        # blah
+        # Blah
         self.assertEqual(self.stats.get_owner_long(), 'Everyone')
 
         # coverage
@@ -1889,7 +1894,7 @@ class StatsTests(TestCase):
             stats.get_owner_long()
 
     def test_point_range(self):
-        # blah
+        # Blah
         self.assertEqual(self.stats.get_point_range(), (0.0, 1.0))
 
         # coverage
@@ -1897,52 +1902,57 @@ class StatsTests(TestCase):
             stats.get_point_range()
 
     def test_get_dependency(self):
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.fact)
         self.assertIsNotNone(stats_dependency)
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.evidence, create=False)
         self.assertIsNone(stats_dependency)
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.evidence, create=True)
         self.assertIsNotNone(stats_dependency)
 
     def test_get_dependencies(self):
-        # blah
+        # Blah
         dependencies = self.stats.get_dependencies(cache=False)
         self.assertEqual(dependencies.count(), 4)
-        self.assertIsNone(self.stats.saved_dependencies)
+        self.assertIsNone(self.stats.get_saved_dependencies())
 
-        # blah
+        # Blah
         dependencies = self.stats.get_dependencies(cache=True)
         self.assertEqual(dependencies.count(), 4)
-        self.assertIsNotNone(self.stats.saved_dependencies)
+        self.assertIsNotNone(self.stats.get_saved_dependencies())
 
     def test_get_flat_dependency(self):
-        # blah
+        # Blah
         stats_dependency = self.stats.get_flat_dependency(self.fact)
         self.assertIsNotNone(stats_dependency)
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_flat_dependency(self.evidence, create=False)
         self.assertIsNone(stats_dependency)
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_flat_dependency(self.evidence, create=True)
         self.assertIsNotNone(stats_dependency)
 
+        # Blah
+        stats_dependency01 = self.stats.get_flat_dependency(self.evidence, create=True)
+        stats_dependency02 = self.stats.get_flat_dependency(self.evidence, create=True)
+        self.assertEqual(stats_dependency01, stats_dependency02)
+
     def test_get_flat_dependencies(self):
-        # blah
+        # Blah
         dependencies = self.stats.get_flat_dependencies(cache=False)
         self.assertEqual(dependencies.count(), 3)
-        self.assertIsNone(self.stats.saved_flat_dependencies)
+        self.assertIsNone(self.stats.get_saved_flat_dependencies())
 
-        # blah
+        # Blah
         dependencies = self.stats.get_flat_dependencies(cache=True)
         self.assertEqual(dependencies.count(), 3)
-        self.assertIsNotNone(self.stats.saved_flat_dependencies)
+        self.assertIsNotNone(self.stats.get_saved_flat_dependencies())
 
     def test_add_opinion(self):
         # setup
@@ -1956,7 +1966,7 @@ class StatsTests(TestCase):
         opinion.update_points()
         assert self.stats.opinions.count() == 0
 
-        # blah
+        # Blah
         self.stats.add_opinion(opinion)
         self.assertEqual(self.stats.opinions.count(), 1)
 
@@ -1968,20 +1978,20 @@ class StatsTests(TestCase):
         # ToDo: more
 
     def test_cache(self):
-        assert self.stats.saved_dependencies is None
-        assert self.stats.saved_flat_dependencies is None
+        assert self.stats.get_saved_dependencies() is None
+        assert self.stats.get_saved_flat_dependencies() is None
 
-        # blah
+        # Blah
         self.stats.cache(lazy=True)
-        self.assertEqual(self.stats.saved_dependencies.count(), 0)
-        self.assertEqual(self.stats.saved_flat_dependencies.count(), 0)
+        self.assertEqual(self.stats.get_saved_dependencies().count(), 0)
+        self.assertEqual(self.stats.get_saved_flat_dependencies().count(), 0)
 
-        # blah
+        # Blah
         self.stats.saved_dependencies = None
         self.stats.saved_flat_dependencies = None
         self.stats.cache(lazy=False)
-        self.assertEqual(self.stats.saved_dependencies.count(), 4)
-        self.assertEqual(self.stats.saved_flat_dependencies.count(), 3)
+        self.assertEqual(self.stats.get_saved_dependencies().count(), 4)
+        self.assertEqual(self.stats.get_saved_flat_dependencies().count(), 3)
 
     def test_save_changes(self):
         # setup
@@ -1990,13 +2000,13 @@ class StatsTests(TestCase):
         assert true_points > 0
         assert false_points > 0
 
-        # blah
+        # Blah
         self.stats.reset(save=False)
         self.stats.refresh_from_db()
         self.assertEqual(self.stats.true_points(), true_points)
         self.assertEqual(self.stats.false_points(), false_points)
 
-        # blah
+        # Blah
         self.stats.reset(save=False)
         self.stats.save_changes()
         self.stats.refresh_from_db()
@@ -2017,7 +2027,7 @@ class StatsTests(TestCase):
         opinion.update_points()
         self.stats.add_opinion(opinion)
 
-        # blah
+        # Blah
         self.assertEqual(self.stats.total_points(), 1.0)
 
     def test_true_points(self):
@@ -2032,7 +2042,7 @@ class StatsTests(TestCase):
         opinion.update_points()
         self.stats.add_opinion(opinion)
 
-        # blah
+        # Blah
         self.assertEqual(self.stats.true_points(), 0.20)
 
     def test_false_points(self):
@@ -2047,7 +2057,7 @@ class StatsTests(TestCase):
         opinion.update_points()
         self.stats.add_opinion(opinion)
 
-        # blah
+        # Blah
         self.assertEqual(self.stats.false_points(), 0.80)
 
     def test_swap_true_false(self):
@@ -2056,7 +2066,7 @@ class StatsTests(TestCase):
         false_points = self.stats.false_points()
         assert true_points != false_points
 
-        # blah
+        # Blah
         self.stats.swap_true_false()
         self.assertEqual(self.stats.true_points(), false_points)
         self.assertEqual(self.stats.false_points(), true_points)
@@ -2124,20 +2134,20 @@ class StatsDependencyTests(TestCase):
         self.stats_dependency = self.stats.get_dependency(self.fact)
 
     def test_url(self):
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.fact)
         self.assertIsNone(stats_dependency.url())
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.subtheory)
         self.assertIsNotNone(stats_dependency.url())
 
     def test_get_root(self):
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.fact)
         self.assertIsNone(stats_dependency.get_root())
 
-        # blah
+        # Blah
         stats_dependency = self.stats.get_dependency(self.subtheory)
         self.assertIsNotNone(stats_dependency.get_root())
 
@@ -2229,7 +2239,7 @@ class StatsFlatDependencyTests(TestCase):
 
 
 # ************************************************************
-# TheoryPointerBaseTests
+# OpinionBaseTests
 #
 #
 #
@@ -2238,7 +2248,7 @@ class StatsFlatDependencyTests(TestCase):
 #
 #
 # ************************************************************
-class TheoryPointerBaseTests(TestCase):
+class OpinionBaseTests(TestCase):
 
     def setUp(self):
 
@@ -2283,9 +2293,6 @@ class TheoryPointerBaseTests(TestCase):
     def test_compare_url(self):
         pass
 
-    def test_get_dependency_pk(self):
-        pass
-
     def test_get_dependencies(self):
         pass
 
@@ -2312,7 +2319,7 @@ class TheoryPointerBaseTests(TestCase):
 
 
 # ************************************************************
-# DependencyPointerBaseTests
+# OpinionDependencyBaseTests
 #
 #
 #
@@ -2321,7 +2328,7 @@ class TheoryPointerBaseTests(TestCase):
 #
 #
 # ************************************************************
-class DependencyPointerBaseTests(TestCase):
+class OpinionDependencyBaseTests(TestCase):
 
     def setUp(self):
 
@@ -2357,13 +2364,10 @@ class DependencyPointerBaseTests(TestCase):
     def test_str(self):
         pass
 
-    def test_get_true_statement(self):
+    def test_true_statement(self):
         pass
 
-    def test_get_false_statement(self):
-        pass
-
-    def test_get_dependency_pk(self):
+    def test_false_statement(self):
         pass
 
     def test_tag_id(self):

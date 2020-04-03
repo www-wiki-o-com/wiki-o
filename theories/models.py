@@ -42,7 +42,8 @@ from users.models import User, Violation
 from core.utils import QuerySetDict
 from core.utils import get_or_none, get_first_or_none
 from core.utils import stream_if_unique, notify_if_unique
-from theories.abstract_models import TheoryPointerBase, DependencyPointerBase
+from theories.abstract_models import SavedOpinions, SavedDependencies
+from theories.abstract_models import OpinionBase, OpinionDependencyBase
 
 # *******************************************************************************
 # Defines
@@ -200,7 +201,7 @@ class Category(models.Model):
 
 
 @reversion.register(fields=['content_type', 'title00', 'title01', 'details'])
-class Content(models.Model):
+class Content(SavedOpinions, SavedDependencies, models.Model):
     """A container for theory, evidence, and sub-theory data.
 
     Attributes:
@@ -268,10 +269,7 @@ class Content(models.Model):
 
     # Cache attributes
     saved_stats = None
-    saved_dependencies = None
-    saved_flat_dependencies = None
     saved_parents = None
-    saved_opinions = None
 
     class Meta:
         """Where the model options are defined.
@@ -305,9 +303,9 @@ class Content(models.Model):
         if self.is_evidence():
             s = self.title01
         elif true_points >= false_points:
-            s = self.get_true_statement()
+            s = self.true_statement()
         else:
-            s = self.get_false_statement()
+            s = self.false_statement()
         if self.is_deleted():
             s += ' (deleted)'
         return s
@@ -319,11 +317,11 @@ class Content(models.Model):
         self.assert_evidence()
         return self.title01
 
-    def get_true_statement(self):
+    def true_statement(self):
         self.assert_theory()
         return self.title01
 
-    def get_false_statement(self):
+    def false_statement(self):
         self.assert_theory()
         if self.title00 is None or self.title00 == '':
             return '%s, is false.' % self.title01.strip('.')
@@ -384,15 +382,15 @@ class Content(models.Model):
         return abs(self.content_type) == self.TYPE.FACT or abs(
             self.content_type) == self.TYPE.EVIDENCE
 
-    def is_fact(self):
-        """Returns true if dependency is factual evidence (verifiable)."""
-        self.assert_evidence()
-        return self.is_verifiable()
-
     def is_verifiable(self):
         """Returns true if dependency is factual evidence (verifiable)."""
         self.assert_evidence()
         return abs(self.content_type) == self.TYPE.FACT
+
+    def is_fact(self):
+        """Returns true if dependency is factual evidence (verifiable)."""
+        self.assert_evidence()
+        return self.is_verifiable()
 
     def assert_theory(self, check_dependencies=False):
         if self.is_evidence():
@@ -867,65 +865,64 @@ class Content(models.Model):
             intuition = None
         # get or create
         if create and intuition is None:
-            intuition, created = cls.objects.get_or_create(content_type=cls.TYPE.EVIDENCE,
-                                                           title01='Intuition')
+            intuition, _created = cls.objects.get_or_create(content_type=cls.TYPE.EVIDENCE,
+                                                            title01='Intuition')
             cls.INTUITION_PK = intuition.pk
-        # blah
+        # Blah
         return intuition
 
     def get_dependencies(self, deleted=False, cache=False):
         """Returns a query set of the theory's dependencies (use cache if available)."""
-        # error checking
+        # Error checking.
         if not self.assert_theory():
             return None
-        # get non-deleted dependencies
-        if self.saved_dependencies is not None:
-            dependencies = self.saved_dependencies
-        elif cache:
-            self.saved_dependencies = self.dependencies.filter(content_type__gt=0)
-            list(self.saved_dependencies)
-            dependencies = self.saved_dependencies
-        else:
+        # Get cached dependencies.
+        dependencies = self.get_saved_dependencies()
+        if dependencies is None:
             dependencies = self.dependencies.filter(content_type__gt=0)
-        # get deleted dependencies
+            if cache:
+                self.save_dependencies(dependencies)
+        # Get deleted dependencies.
         if deleted:
             dependencies |= self.dependencies.filter(content_type__lt=0)
         return dependencies
 
     def get_flat_dependencies(self, deleted=False, cache=False, distinct=True):
-        """Returns a query set of the theory's flat dependencies/nested evidence (use cache if available)."""
-        # error checking
+        """Returns a query set of the theory's flat evidence.
+
+        theory's flat dependencies/nested evidence (use cache if available).
+        """
+        # Error checking.
         if not self.assert_theory():
             return None
-        # non-deleted dependencies
-        if self.saved_flat_dependencies is not None:
-            flat_dependencies = self.saved_flat_dependencies
-        elif cache:
-            self.saved_flat_dependencies = self.flat_dependencies.filter(
-                Q(content_type=self.TYPE.FACT) | Q(content_type=self.TYPE.EVIDENCE))
-            list(self.saved_flat_dependencies)
-            flat_dependencies = self.saved_flat_dependencies
-        else:
+        # Check cache first.
+        flat_dependencies = self.get_saved_flat_dependencies()
+        if flat_dependencies is None:
             flat_dependencies = self.flat_dependencies.filter(
                 Q(content_type=self.TYPE.FACT) | Q(content_type=self.TYPE.EVIDENCE))
-        # get deleted dependencies
+            if cache:
+                self.save_flat_dependencies(flat_dependencies)
+        # Deleted dependencies.
         if deleted:
-            # recursively build up dependencies
+            # Recursively build up dependencies.
             flat_dependencies |= self.dependencies.filter(
                 Q(content_type=-self.TYPE.FACT) | Q(content_type=-self.TYPE.EVIDENCE))
             for theory_dependency in self.dependencies.filter(content_type=-self.TYPE.THEORY):
                 flat_dependencies |= theory_dependency.get_flat_dependencies(deleted=True,
                                                                              distinct=False)
-            if distinct:
-                flat_dependencies = flat_dependencies.distinct()
+        # Remove redundency.
+        if distinct:
+            flat_dependencies = flat_dependencies.distinct()
         return flat_dependencies
 
     def get_nested_dependencies(self, deleted=False, distinct=True):
-        """Returns a query set of the theory's flat dependencies/nested evidence (use cache if available)."""
-        # error checking
+        """Returns a query set of the theory's flat dependencies (evidence and subthories).
+
+        """
+        # Error checking.
         if not self.assert_theory():
             return None
-        # blah
+        # Get dependencies.
         dependencies = self.flat_dependencies.filter(content_type__gt=0)
         if deleted:
             dependencies |= self.dependencies.filter(content_type__lt=0)
@@ -941,7 +938,7 @@ class Content(models.Model):
         # error checking
         if not self.assert_theory():
             return None
-        # blah
+        # Blah
         dependencies = self.flat_dependencies.filter(content_type=self.TYPE.THEORY)
         if deleted:
             dependencies |= self.dependencies.filter(content_type=-self.TYPE.THEORY)
@@ -957,7 +954,7 @@ class Content(models.Model):
         # error checking
         if not self.assert_theory():
             return None
-        # blah
+        # Blah
         dependencies = self.get_dependencies().filter(
             Q(content_type=self.TYPE.FACT) | Q(content_type=self.TYPE.EVIDENCE))
         if deleted:
@@ -970,7 +967,7 @@ class Content(models.Model):
         # error checking
         if not self.assert_theory():
             return None
-        # blah
+        # Blah
         dependencies = self.get_dependencies().filter(content_type=self.TYPE.THEORY)
         if deleted:
             dependencies |= self.dependencies.filter(content_type=-self.TYPE.THEORY)
@@ -1005,15 +1002,14 @@ class Content(models.Model):
 
     def get_opinions(self, cache=False, exclude=None):
         """Return a list opinions pertaining to theory."""
-        # error checking
-        self.assert_theory()
-        # queryset
-        opinions = self.opinions.filter(deleted=False)
-        if self.saved_opinions is not None:
-            opinions = self.saved_opinions
-        elif cache:
-            self.saved_opinions = opinions
-            list(opinions)
+        # Error checking.
+        # self.assert_theory()
+        # Check cache.
+        opinions = self.get_saved_opinions()
+        if opinions is None:
+            opinions = self.opinions.filter(deleted=False)
+            if cache:
+                self.save_opinions(opinions)
         if exclude is not None:
             opinions = opinions.exclude(user=exclude)
         return opinions
@@ -1022,7 +1018,7 @@ class Content(models.Model):
         """Return a list opinions pertaining to theory."""
         opinion_dependencies = self.opinion_dependencies.filter(parent__deleted=False)
         if self.saved_opinion_dependencies is not None:
-            opinions = self.saved_opinion_dependencies
+            opinion_dependencies = self.saved_opinion_dependencies
         elif cache:
             self.saved_opinion_dependencies = opinion_dependencies
             list(opinion_dependencies)
@@ -1172,7 +1168,7 @@ class Content(models.Model):
                                         expired=expired)
 
 
-class Opinion(TheoryPointerBase, models.Model):
+class Opinion(OpinionBase, models.Model):
     """A container for user opinion data.
 
     Todo:
@@ -1212,9 +1208,14 @@ class Opinion(TheoryPointerBase, models.Model):
     def __str__(self):
         """String method for OpinionDependency."""
         if self.is_true():
-            return self.content.get_true_statement()
+            return self.content.true_statement()
         else:
-            return self.content.get_false_statement()
+            return self.content.false_statement()
+
+    def get_flat_dependency(self, content, create=True):
+        # return super(OpinionBase, self).get_flat_dependency(content, create)
+        print(1217, content, create)
+        return super().get_flat_dependency(content, create)
 
     def delete(self):
         self.true_input = 0
@@ -1230,12 +1231,6 @@ class Opinion(TheoryPointerBase, models.Model):
 
     def is_anonymous(self):
         return self.anonymous or self.user.is_hidden()
-
-    def is_true(self):
-        return self.true_points() > self.false_points()
-
-    def is_false(self):
-        return not self.is_true()
 
     def get_owner(self):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
@@ -1294,88 +1289,43 @@ class Opinion(TheoryPointerBase, models.Model):
         """Return the url that views the details of this opinion."""
         return self.get_absolute_url()
 
-    def get_dependency(self, content, create=False):
-        """Return the opinion_dependency for the corresponding content input."""
-
-        # check saved dependencies first
-        opinion_dependency = None
-        if self.saved_dependencies is not None:
-            opinion_dependency = get_or_none(self.saved_dependencies, content=content)
-
-        # make db query
-        if opinion_dependency is None:
-            if create:
-                opinion_dependency, created = self.dependencies.get_or_create(content=content)
-            else:
-                opinion_dependency = get_or_none(self.dependencies, content=content)
-
-        return opinion_dependency
-
     def cache(self):
         """Save opinion dependencies."""
-        self.get_dependencies(cache=True)
+        self.save_dependencies(self.get_dependencies())
 
-    def get_dependencies(self, cache=False, verbose_level=0):
-        """Return opinion dependencies (use cache if available)."""
-        # debug
-        if verbose_level > 0:
-            print("get_dependencies()")
-        # get dependencies
-        if self.saved_dependencies is not None:
-            dependencies = self.saved_dependencies
-        elif cache:
-            self.saved_dependencies = self.dependencies.all()
-            list(self.saved_dependencies)
-            dependencies = self.saved_dependencies
-        else:
-            dependencies = self.dependencies.all()
-        # debug
-        if verbose_level > 0:
-            for dependency in dependencies:
-                print("  - %s" % dependency)
-        return dependencies
-
-    def get_flat_dependency(self, content, create=True):
-        """Return a flat opinion dependency corresponding to the input content.
-           This action also populates saved_flat_dependencies, which is a dictionary of
-           non-db objects."""
-        # setup
-        if self.saved_flat_dependencies is None:
-            self.get_flat_dependencies()
-        # blah
-        dependency = self.saved_flat_dependencies.get(content.pk)
-        if dependency is None and create:
-            dependency = DependencyPointerBase.create(
-                parent=self,
-                content=content,
-            )
-            self.saved_flat_dependencies.add(dependency)
-        return dependency
-
-    def get_flat_dependencies(self, verbose_level=0):
+    def get_flat_dependencies(self, cache=True, verbose_level=10):
         """Return a list of non-db objects representing the flattened opinion.
-           This action populates saved_flat_dependencies."""
+           This action populates saved_flat_dependencies.
 
-        # debug
+            Todo: utilize cache argument.
+        """
+
+        # Debug
         if verbose_level > 0:
-            print("get_flat_dependencies()")
+            print(self, "get_flat_dependencies()")
 
-        # populate flat dependencies
-        if self.saved_flat_dependencies is None:
-            # initialize a set of flattened opinion_dependencies
-            self.saved_flat_dependencies = QuerySetDict('content.pk')
+        # Check cache first.
+        flat_dependencies = self.get_saved_flat_dependencies()
 
-            # setup intuition
-            intuition = self.get_flat_dependency(self.content.get_intuition())
+        # Populate flat dependencies.
+        if flat_dependencies is None:
 
-            # evidence
+            # Initialize a set of flattened opinion_dependencies
+            flat_dependencies = QuerySetDict('content.pk')
+            self.save_flat_dependencies(flat_dependencies)
+
+            # Get the intuition node.
+            intuition_dependency = self.get_flat_dependency(self.content.get_intuition())
+            print(1318, type(intuition_dependency))
+
+            # Evidence
             for evidence in self.get_theory_evidence():
                 flat_dependency = self.get_flat_dependency(evidence.content)
-                flat_dependency.saved_true_points += evidence.true_percent() * self.true_points()
-                flat_dependency.saved_false_points += evidence.false_percent() * \
-                    self.false_points()
+                flat_dependency.save_points(
+                    flat_dependency.true_points() + evidence.true_percent() * self.true_points(),
+                    flat_dependency.false_points() + evidence.false_percent() * self.false_points())
 
-                # debug
+                # Debug
                 if verbose_level >= 10:
                     print('\n\n\n')
                     print(1690, '%s: %s' % (self, evidence))
@@ -1389,13 +1339,21 @@ class Opinion(TheoryPointerBase, models.Model):
                             0,
                         ))
 
-            # sub-theories
+            # Sub-theories
             for subtheory in self.get_theory_subtheories():
                 subtheory_opinion = subtheory.get_root()
                 if subtheory_opinion is not None:
                     for evidence in subtheory_opinion.get_flat_dependencies():
+                        flat_dependency = self.get_flat_dependency(evidence.content)
+                        flat_dependency.save_points(
+                            flat_dependency.true_points() +
+                            evidence.true_percent() * subtheory.tt_points() +
+                            evidence.false_percent() * subtheory.ft_points(),
+                            flat_dependency.false_points() +
+                            evidence.true_percent() * subtheory.tf_points() +
+                            evidence.false_percent() * subtheory.ff_points())
 
-                        # debug
+                        # Debug
                         if verbose_level >= 10:
                             print('\n\n\n')
                             print(1720, '%s: %s' % (subtheory_opinion, evidence))
@@ -1409,70 +1367,63 @@ class Opinion(TheoryPointerBase, models.Model):
                                     evidence.false_percent() * subtheory.ff_points(),
                                 ))
 
-                        flat_dependency = self.get_flat_dependency(evidence.content)
-                        # true_points
-                        flat_dependency.saved_true_points += evidence.true_percent() * \
-                            subtheory.tt_points()
-                        flat_dependency.saved_true_points += evidence.false_percent() * \
-                            subtheory.ft_points()
-
-                        # false points
-                        flat_dependency.saved_false_points += evidence.true_percent() * \
-                            subtheory.tf_points()
-                        flat_dependency.saved_false_points += evidence.false_percent() * \
-                            subtheory.ff_points()
-
-                # intuition true points
+                # Intuition true points.
                 if subtheory_opinion is None or subtheory_opinion.true_points() == 0:
-                    intuition.saved_true_points += subtheory.tt_points()
-                    intuition.saved_false_points += subtheory.tf_points()
+                    intuition_dependency.save_points(
+                        intuition_dependency.true_points() + subtheory.tt_points(),
+                        intuition_dependency.false_points() + subtheory.tf_points(),
+                    )
 
-                    # debug
+                    # Debug
                     if verbose_level >= 10:
                         print('\n\n\n')
-                        print(1740, '%s: %s' % (subtheory, intuition))
-                        print(1741, '  : true_points  = %0.2f' % intuition.true_points())
-                        print(1742, '  : false_points = %0.2f' % intuition.false_points())
+                        print(1740, '%s: %s' % (subtheory, intuition_dependency))
+                        print(1741, '  : true_points  = %0.2f' % intuition_dependency.true_points())
+                        print(1742,
+                              '  : false_points = %0.2f' % intuition_dependency.false_points())
                         print(
-                            1744, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                                subtheory.tt_points(),
-                                subtheory.tf_points(),
-                                0,
-                                0,
-                            ))
+                            1744, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' %
+                            (subtheory.tt_points(), subtheory.tf_points(), subtheory.ft_points(),
+                             subtheory.ff_points()))
 
-                # intuition false points
+                # Intuition true points.
                 if subtheory_opinion is None or subtheory_opinion.false_points() == 0:
-                    intuition.saved_true_points += subtheory.ft_points()
-                    intuition.saved_false_points += subtheory.ff_points()
+                    intuition_dependency.save_points(
+                        intuition_dependency.true_points() + subtheory.ft_points(),
+                        intuition_dependency.false_points() + subtheory.ff_points(),
+                    )
+                    print(1395, intuition_dependency, intuition_dependency.true_points(),
+                          intuition_dependency.false_points())
 
-                    # debug
+                    # Debug
                     if verbose_level >= 10:
                         print('\n\n\n')
-                        print(1760, '%s: %s' % (subtheory, intuition))
-                        print(1761, '  : true_points  = %0.2f' % intuition.true_points())
-                        print(1762, '  : false_points = %0.2f' % intuition.false_points())
+                        print(1760, '%s: %s' % (subtheory, intuition_dependency))
+                        print(1761, '  : true_points  = %0.2f' % intuition_dependency.true_points())
+                        print(1762,
+                              '  : false_points = %0.2f' % intuition_dependency.false_points())
                         print(
-                            1764, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' % (
-                                0,
-                                0,
-                                subtheory.ft_points(),
-                                subtheory.ff_points(),
-                            ))
+                            1764, '  : tt += %0.2f, tf += %0.2f, ft += %0.2f, ff += %0.2f' %
+                            (subtheory.tt_points(), subtheory.tf_points(), subtheory.ft_points(),
+                             subtheory.ff_points()))
+            if cache:
+                self.save_flat_dependencies(flat_dependencies)
 
-        # debug
+        # Debug
         if verbose_level > 0:
-            for flat_dependency in self.saved_flat_dependencies:
-                print("  - %s" % flat_dependency)
+            print(1407, self)
+            for flat_dependency in flat_dependencies:
+                print("  - %s %0.2f:%0.2f" % (flat_dependency, flat_dependency.true_points(),
+                                              flat_dependency.false_points()))
 
-        return self.saved_flat_dependencies
+        return flat_dependencies
 
     def get_intuition(self, create=True):
         """Return an opinion dependency for intuition (optionally, create the dependency).
            Additionally, this action adds an intuition dependency to theory.dependencies."""
         content = self.content.get_intuition()
         if create:
-            intuition, created = self.dependencies.get_or_create(content=content)
+            intuition, _created = self.dependencies.get_or_create(content=content)
         else:
             intuition = get_or_none(self.get_dependencies(), content=content)
         return intuition
@@ -1480,12 +1431,12 @@ class Opinion(TheoryPointerBase, models.Model):
     def get_theory_evidence(self):
         """Returns a query set of the evidence opinion dependencies."""
 
-        return self.dependencies.filter(~Q(content__content_type=Content.TYPE.THEORY) &
-                                        ~Q(content__content_type=-Content.TYPE.THEORY))
+        return self.get_dependencies().filter(~Q(content__content_type=Content.TYPE.THEORY) &
+                                              ~Q(content__content_type=-Content.TYPE.THEORY))
 
     def get_theory_subtheories(self):
         """Return all opinion dependencies that point to sub-theories of self.content"""
-        return self.dependencies.filter(
+        return self.get_dependencies().filter(
             Q(content__content_type=Content.TYPE.THEORY) |
             Q(content__content_type=-Content.TYPE.THEORY))
 
@@ -1496,7 +1447,7 @@ class Opinion(TheoryPointerBase, models.Model):
     def update_points(self, verbose_level=0):
         """Use true_input and false_input for opinion and dependencies to update true_points and false_points."""
 
-        # debug
+        # Debug
         if verbose_level > 0:
             print("update_points()")
 
@@ -1511,14 +1462,14 @@ class Opinion(TheoryPointerBase, models.Model):
             self.false_total += false_input
             if true_input == 0 and false_input == 0:
                 dependency.delete()
-                # debug
+                # Debug
                 if verbose_level >= 10:
                     print("  delete: %s" % dependency)
             elif verbose_level >= 10:
                 print("  %s: true_input = %d, false_input = %d" %
                       (dependency, true_input, false_input))
 
-        # debug
+        # Debug
         if verbose_level > 0:
             print("  total input points: true = %d, false = %d" %
                   (self.true_total, self.false_total))
@@ -1541,7 +1492,7 @@ class Opinion(TheoryPointerBase, models.Model):
 
     def copy(self, user, recursive=False, path=None, verbose_level=0):
         """Copy opinion to user's opinion"""
-        # debug
+        # Debug
         if verbose_level > 0:
             print("opinion.copy()")
 
@@ -1558,7 +1509,7 @@ class Opinion(TheoryPointerBase, models.Model):
             user_opinion.delete()
 
         # new opinion
-        user_opinion, created = theory.opinions.get_or_create(user=user)
+        user_opinion, _created = theory.opinions.get_or_create(user=user)
         user_opinion.true_input = self.true_input
         user_opinion.false_input = self.false_input
         user_opinion.force = self.force
@@ -1566,7 +1517,7 @@ class Opinion(TheoryPointerBase, models.Model):
 
         # populate dependencies
         for opinion_dependency in self.get_dependencies():
-            user_dependency, created = OpinionDependency.objects.get_or_create(
+            OpinionDependency.objects.get_or_create(
                 parent=user_opinion,
                 content=opinion_dependency.content,
                 tt_input=opinion_dependency.tt_input,
@@ -1582,14 +1533,14 @@ class Opinion(TheoryPointerBase, models.Model):
         if recursive:
             for subtheory in self.get_theory_subtheories():
                 root_opinion = subtheory.get_root()
-                if root_opinion is not None and root_opinion.get_dependency_pk() not in path:
+                if root_opinion is not None and root_opinion.content.pk not in path:
                     root_opinion.copy(user, recursive=True)
 
         # stats
         theory.add_to_stats(user_opinion, cache=True, save=False)
         theory.save_stats()
 
-        # debug
+        # Debug
         if verbose_level > 0:
             print("opinion.copy()")
         return user_opinion
@@ -1672,7 +1623,7 @@ class Opinion(TheoryPointerBase, models.Model):
         return self.deleted
 
 
-class OpinionDependency(DependencyPointerBase, models.Model):
+class OpinionDependency(OpinionDependencyBase, models.Model):
     """A container for user opinion dependencies."""
 
     parent = models.ForeignKey(Opinion, related_name='dependencies', on_delete=models.CASCADE)
@@ -1765,7 +1716,7 @@ class OpinionDependency(DependencyPointerBase, models.Model):
         return not self.parent.content.get_dependencies().filter(pk=self.content.pk).exists()
 
 
-class Stats(TheoryPointerBase, models.Model):
+class Stats(OpinionBase, models.Model):
     """A container for theory statistical data."""
 
     # Defines
@@ -1777,6 +1728,9 @@ class Stats(TheoryPointerBase, models.Model):
     )
 
     # Variables
+    altered = False
+
+    # Model Variables
     content = models.ForeignKey(Content, related_name='stats', on_delete=models.CASCADE)
     opinions = models.ManyToManyField(Opinion, related_name='stats', blank=True)
     stats_type = models.SmallIntegerField(choices=TYPE)
@@ -1801,9 +1755,9 @@ class Stats(TheoryPointerBase, models.Model):
     def __str__(self):
         """Return stats_type + title."""
         if self.is_true():
-            return self.content.get_true_statement()
+            return self.content.true_statement()
         else:
-            return self.content.get_false_statement()
+            return self.content.false_statement()
 
     @classmethod
     def initialize(cls, theory):
@@ -1816,7 +1770,7 @@ class Stats(TheoryPointerBase, models.Model):
             * Fix list(cls.TYPE).
         """
         for stats_type in [x[0] for x in list(cls.TYPE)]:
-            stats, created = theory.stats.get_or_create(stats_type=stats_type)
+            theory.stats.get_or_create(stats_type=stats_type)
 
     @classmethod
     def type_to_slug(cls, stats_type):
@@ -1842,6 +1796,54 @@ class Stats(TheoryPointerBase, models.Model):
         if slug == 'opposers':
             return cls.TYPE.OPPOSERS
         return cls.TYPE.ALL
+
+    def reset(self, save=True):
+        """Reset this objects points as well as all dependency points."""
+        # Reset self.
+        self.total_true_points = 0.0
+        self.total_false_points = 0.0
+        # Reset theory dependencies.
+        for stats_dependency in self.get_dependencies():
+            stats_dependency.reset(save=save)
+        # Reset theory flat dependencies.
+        for stats_flat_dependency in self.get_flat_dependencies():
+            stats_flat_dependency.reset(save=save)
+        # Opinions
+        self.opinions.clear()
+        if save:
+            self.save()
+        else:
+            self.altered = True
+
+    def save_changes(self):
+        """Save changes to all dependencies."""
+        # Update the root.
+        if self.altered:
+            self.altered = False
+            self.save()
+
+        # Update the dependencies.
+        if self.get_saved_dependencies() is not None:
+            for dependency in self.get_dependencies():
+                if dependency.altered:
+                    dependency.altered = False
+                    dependency.save()
+
+        # Update the flat dependencies.
+        if self.get_saved_flat_dependencies() is not None:
+            for flat_dependency in self.get_flat_dependencies():
+                if flat_dependency.altered:
+                    flat_dependency.altered = False
+                    flat_dependency.save()
+
+    def cache(self, lazy=False):
+        """Save regular and flat dependency queries for the purpose of db efficiency."""
+        if lazy:
+            self.save_dependencies()
+            self.save_flat_dependencies()
+        else:
+            self.save_dependencies(self.get_dependencies())
+            self.save_flat_dependencies(self.get_flat_dependencies())
 
     def get_slug(self):
         """Return the slug used for urls to reference this object."""
@@ -1888,56 +1890,12 @@ class Stats(TheoryPointerBase, models.Model):
             assert False
 
     def get_dependency(self, content, create=True):
-        """Return the stats dependency for the corresponding content (optionally, create the stats dependency)."""
-        # check saved dependencies first
-        if self.saved_dependencies is not None and content.pk in self.saved_dependencies:
-            return self.saved_dependencies.get(content.pk)
-        # make db query
-        elif create:
-            dependency, created = self.dependencies.get_or_create(content=content)
-            if self.saved_dependencies is not None:
-                self.saved_dependencies.add(dependency)
-            return dependency
-        else:
-            return get_or_none(self.dependencies, content=content)
-
-    def get_dependencies(self, cache=False):
-        """Return the stats dependency for the theory (use cache if available)."""
-        if self.saved_dependencies is not None:
-            return self.saved_dependencies
-        elif cache:
-            self.saved_dependencies = QuerySetDict('content.pk')
-            for dependency in self.dependencies.all():
-                self.saved_dependencies.add(dependency)
-            return self.saved_dependencies
-        else:
-            return self.dependencies.all()
+        # return super(OpinionBase, self).get_dependency(content, create)
+        return super().get_dependency(content, create)
 
     def get_flat_dependency(self, content, create=True):
-        """Return the flat stats dependency for the input content (optionally, create the dependency)."""
-        # check saved dependencies first
-        if self.saved_flat_dependencies is not None and content.pk in self.saved_flat_dependencies:
-            return self.saved_flat_dependencies.get(content.pk)
-        # make db query
-        elif create:
-            dependency, created = self.flat_dependencies.get_or_create(content=content)
-            if self.saved_flat_dependencies is not None:
-                self.saved_flat_dependencies.add(dependency)
-            return dependency
-        else:
-            return get_or_none(self.flat_dependencies, content=content)
-
-    def get_flat_dependencies(self, cache=False):
-        """Return a query set of the flat dependencies/nested evidence (use cache if available)."""
-        if self.saved_flat_dependencies is not None:
-            return self.saved_flat_dependencies
-        elif cache:
-            self.saved_flat_dependencies = QuerySetDict('content.pk')
-            for dependency in self.flat_dependencies.all():
-                self.saved_flat_dependencies.add(dependency)
-            return self.saved_flat_dependencies
-        else:
-            return self.flat_dependencies.all()
+        # return super(OpinionBase, self).get_flat_dependency(content, create)
+        return super().get_flat_dependency(content, create)
 
     def add_opinion(self, opinion, save=True):
         if self.opinion_is_member(opinion):
@@ -2013,17 +1971,17 @@ class Stats(TheoryPointerBase, models.Model):
         """Return a query set of all opinions that meet the stats category's criterion."""
         return self.opinions.filter(deleted=False)
 
-    def get_absolute_url(self):
-        return self.opinion_url()
-
     def url(self):
         """Return the url for viewing the details of this object (opinion-details)."""
         return self.get_absolute_url()
 
+    def get_absolute_url(self):
+        return self.opinion_url()
+
     def opinion_url(self):
         return reverse('theories:opinion-detail',
                        kwargs={
-                           'content_pk': self.get_dependency_pk(),
+                           'content_pk': self.content.pk,
                            'opinion_slug': self.get_slug()
                        })
 
@@ -2077,15 +2035,6 @@ class Stats(TheoryPointerBase, models.Model):
         else:
             return False
 
-    def cache(self, lazy=False):
-        """Save regular and flat dependency queries for the purpose of db efficiency."""
-        if lazy:
-            self.saved_dependencies = QuerySetDict('content.pk')
-            self.saved_flat_dependencies = QuerySetDict('content.pk')
-        else:
-            self.get_dependencies(cache=True)
-            self.get_flat_dependencies(cache=True)
-
     def true_points(self):
         """Returns true points (a percentage of total)."""
         if self.total_points() > 0:
@@ -2112,45 +2061,6 @@ class Stats(TheoryPointerBase, models.Model):
         """Returns the number of opposers."""
         return round(self.false_points() * self.opinions.count())
 
-    def reset(self, save=True):
-        """Reset this objects points as well as all dependency points."""
-        # reset self
-        self.total_true_points = 0.0
-        self.total_false_points = 0.0
-        # reset theory dependencies
-        for stats_dependency in self.get_dependencies():
-            stats_dependency.reset(save=save)
-        # reset theory flat dependencies
-        for stats_flat_dependency in self.get_flat_dependencies():
-            stats_flat_dependency.reset(save=save)
-        # opinions
-        self.opinions.clear()
-        if save:
-            self.save()
-        else:
-            self.altered = True
-
-    def save_changes(self):
-        """Save changes to all dependencies."""
-        # self
-        if self.altered:
-            self.altered = False
-            self.save()
-
-        # dependencies
-        if self.saved_dependencies is not None:
-            for dependency in self.get_dependencies():
-                if dependency.altered:
-                    dependency.altered = False
-                    dependency.save()
-
-        # flat_dependencies
-        if self.saved_flat_dependencies is not None:
-            for flat_dependency in self.get_flat_dependencies():
-                if flat_dependency.altered:
-                    flat_dependency.altered = False
-                    flat_dependency.save()
-
     def swap_true_false(self):
         """Swap the true and false points."""
 
@@ -2169,8 +2079,10 @@ class Stats(TheoryPointerBase, models.Model):
             dependency.save()
 
 
-class StatsDependency(DependencyPointerBase, models.Model):
+class StatsDependencyBase(OpinionDependencyBase, models.Model):
     """A container for dependency based statistics.
+
+    We want seperate tables for dependencies and flat dependeices to help speed up the queries.
 
     Attributes:
         parent (Stats): The parent statistic for the dependency (the parent dependency will be a theory
@@ -2182,10 +2094,6 @@ class StatsDependency(DependencyPointerBase, models.Model):
         total_false_points (double): Total number of false points awared to the dependency (each user
             has a total of 1.0 points to distribute to theories/dependencies).
     """
-    parent = models.ForeignKey(Stats, related_name='dependencies', on_delete=models.CASCADE)
-    content = models.ForeignKey(Content,
-                                related_name='stats_dependencies',
-                                on_delete=models.CASCADE)
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
 
@@ -2199,9 +2107,7 @@ class StatsDependency(DependencyPointerBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
-        db_table = 'theories_stats_dependency'
-        verbose_name = 'Stats Dependency'
-        verbose_name_plural = 'Stats Dependency'
+        abstract = True
         unique_together = (('content', 'parent'),)
 
     def url(self):
@@ -2247,14 +2153,47 @@ class StatsDependency(DependencyPointerBase, models.Model):
             self.altered = True
 
 
-class StatsFlatDependency(DependencyPointerBase, models.Model):
+class StatsDependency(StatsDependencyBase):
+    """A container for dependency based statistics.
+
+    Attributes:
+        parent (Stats): The parent statistic for the dependency (the parent dependency will be a theory
+            or sub-theory).
+        content (Content): The dependency (theory, sub-theory, or evidence) that this stat
+            pertains to.
+        total_true_points (double): Total number of true points awared to the dependency (each user
+            has a total of 1.0 points to distribute to theories/dependencies).
+        total_false_points (double): Total number of false points awared to the dependency (each user
+            has a total of 1.0 points to distribute to theories/dependencies).
+    """
+
+    parent = models.ForeignKey(Stats, related_name='dependencies', on_delete=models.CASCADE)
+    content = models.ForeignKey(Content,
+                                related_name='stats_dependencies',
+                                on_delete=models.CASCADE)
+
+    class Meta:
+        """Where the model options are defined.
+
+        Model metadata is “anything that’s not a field”, such as ordering options (ordering),
+        database table name (db_table), or human-readable singular and plural names
+        (verbose_name and verbose_name_plural). None are required, and adding class Meta to a
+        model is completely optional.
+
+        For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
+        """
+        db_table = 'theories_stats_dependency'
+        verbose_name = 'Stats Dependency'
+        verbose_name_plural = 'Stats Dependency'
+
+
+class StatsFlatDependency(StatsDependencyBase):
     """A container for flat dependency (nested evidence) statistics"""
+
     parent = models.ForeignKey(Stats, related_name='flat_dependencies', on_delete=models.CASCADE)
     content = models.ForeignKey(Content,
                                 related_name='stats_flat_dependencies',
                                 on_delete=models.CASCADE)
-    total_true_points = models.FloatField(default=0.0)
-    total_false_points = models.FloatField(default=0.0)
 
     class Meta:
         """Where the model options are defined.
@@ -2269,68 +2208,3 @@ class StatsFlatDependency(DependencyPointerBase, models.Model):
         db_table = 'theories_stats_flat_dependency'
         verbose_name = 'Stats Flat Dependency'
         verbose_name_plural = 'Stats Flat Dependencys'
-        unique_together = (('content', 'parent'),)
-
-    def url(self):
-        """Return a url pointing to content's root (not dependency).
-
-        Returns:
-            str: [description]
-        """
-        root = self.get_root()
-        if root is None:
-            return None
-        else:
-            return root.url()
-
-    def get_root(self):
-        """Get the root stats pointing to content.
-
-        Returns:
-            [type]: [description]
-        """
-        return get_or_none(self.content.stats, stats_type=self.parent.stats_type)
-
-    def true_points(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.parent.total_points() > 0:
-            return self.total_true_points / self.parent.total_points()
-        else:
-            return 0.0
-
-    def false_points(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        if self.parent.total_points() > 0:
-            return self.total_false_points / self.parent.total_points()
-        else:
-            return 0.0
-
-    def total_points(self):
-        """Returns the total points awarded to this dependency (a percentage of total).
-
-        Returns:
-            float: The points.
-        """
-        return self.true_points() + self.false_points()
-
-    def reset(self, save=True):
-        """Zero the true and false points.
-
-        Args:
-            save (bool, optional): If true, the changes are saved to the database.
-                Defaults to True.
-        """
-        self.total_true_points = 0.0
-        self.total_false_points = 0.0
-        if save:
-            self.save()
-        else:
-            self.altered = True
