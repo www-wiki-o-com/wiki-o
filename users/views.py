@@ -28,7 +28,7 @@ from users.forms import UserForm, SelectNotificationForm
 from users.forms import SelectViolationForm, ReportViolationForm
 from users.forms import ResolveViolationForm, VoteForm
 from theories.models import Category, Content, Opinion
-from theories.forms import TheoryForm, TheoryRevisionForm
+from theories.forms import TheoryForm, EvidenceForm, TheoryRevisionForm
 from core.utils import Parameters, get_page_list, get_first_or_none
 
 # *******************************************************************************
@@ -343,15 +343,21 @@ def violation_resolve_view(request, pk):
         # Display the content in contention.
         if content is not None:
             if content.is_theory():
-                content_form = TheoryForm(request.POST, instance=content, user=user, prefix='content')
+                content_form = TheoryForm(request.POST,
+                                          instance=content,
+                                          user=user,
+                                          prefix='content')
                 if 'save_content' in request.POST.keys() and \
                         user.has_perm('theories.change_content', content):
                     if content_form.is_valid():
                         content = content_form.save()
                         content.update_activity_logs(user, verb=content_form.get_verb())
                     return redirect(next_url)
-            elif content.is_evidence():
-                content_form = EvidenceForm(request.POST, instance=content, user=user, prefix='content')
+            else:
+                content_form = EvidenceForm(request.POST,
+                                            instance=content,
+                                            user=user,
+                                            prefix='content')
                 if 'save_content' in request.POST.keys() and \
                         user.has_perm('theories.change_content', content):
                     if content_form.is_valid():

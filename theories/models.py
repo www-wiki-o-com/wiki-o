@@ -1651,7 +1651,7 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
         """
         db_table = 'theories_opinion_dependency'
         verbose_name = 'Opinion Dependency'
-        verbose_name_plural = 'Opinion Dependencys'
+        verbose_name_plural = 'Opinion Dependencies'
         unique_together = (('content', 'parent'),)
 
     def get_absolute_url(self):
@@ -2082,17 +2082,17 @@ class Stats(OpinionBase, models.Model):
 class StatsDependencyBase(OpinionDependencyBase, models.Model):
     """A container for dependency based statistics.
 
-    We want seperate tables for dependencies and flat dependeices to help speed up the queries.
+    We want separate tables for dependencies and flat dependencies to help speed up the queries.
 
     Attributes:
-        parent (Stats): The parent statistic for the dependency (the parent dependency will be a theory
-            or sub-theory).
+        parent (Stats): The parent statistic for the dependency (the parent dependency will be a
+            theory or sub-theory).
         content (Content): The dependency (theory, sub-theory, or evidence) that this stat
             pertains to.
-        total_true_points (double): Total number of true points awared to the dependency (each user
+        total_true_points (double): Total number of true points awarded to the dependency (each user
             has a total of 1.0 points to distribute to theories/dependencies).
-        total_false_points (double): Total number of false points awared to the dependency (each user
-            has a total of 1.0 points to distribute to theories/dependencies).
+        total_false_points (double): Total number of false points awarded to the dependency (each
+            user has a total of 1.0 points to distribute to theories/dependencies).
     """
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)

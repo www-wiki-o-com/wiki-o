@@ -412,6 +412,7 @@ class QuerySetDict():
             _key, obj = list(kwargs.items())[0]
         else:
             assert False
+            return
         if isinstance(obj, (int, str)):
             # Argument is a key.
             key = obj
@@ -421,6 +422,7 @@ class QuerySetDict():
                 attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
             else:
                 assert False
+                return
             key = self.get_object_key(obj, attrib_key)
         # Get value.
         if key in self.dict.keys():
@@ -446,6 +448,7 @@ class QuerySetDict():
             attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
         else:
             assert False
+            return
         # Get primary keys.
         keys = []
         for arg in args:
