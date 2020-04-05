@@ -10,21 +10,20 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
+import copy
+import datetime
+import enum
 # *******************************************************************************
 # Imports
 # *******************************************************************************
 import re
-import copy
-import enum
-import datetime
 
+from actstream import action
+from actstream.models import Action
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils import timezone
 from django.utils.http import urlencode
 from model_utils import Choices as DjangoChoices
-
-from actstream import action
-from actstream.models import Action
 from notifications.signals import notify
 
 # *******************************************************************************
@@ -318,21 +317,24 @@ def get_form_data(response, verbose_level=0):
 
 
 class QuerySetDict():
-    """A class for converting query sets into dicts.
+    """A class for mimicking django's query sets.
+
+    The dictionary keys can only integers or strings.
 
     Attributes:
-        dict (dict):
+        dict (dict): The container that stores the keys/objects for the query set.
+        attrib_key (str): The
     """
 
     def __init__(self, attrib_key, queryset=None):
         """Todo
 
         Args:
-            attrib_key ([type]): [description]
-            queryset ([type], optional): [description]. Defaults to None.
-
-        Returns:
-            [type]: [description]
+            attrib_key (string): The attribute path for the lookup key. For example, suppose the
+                objects being stored have an attribute content, which have a pk (primary key), then
+                we would have attrib_key = 'content.pk'.
+            queryset (QuerySet, optional): A django query set that is to be convert to QuerySetDict.
+                Defaults to None.
         """
         self.dict = {}
         self.dict_iter = None
@@ -341,97 +343,128 @@ class QuerySetDict():
             for x in queryset:
                 self.dict[self.get_object_key(x)] = x
 
-    def __iter__(self):
-        """Todo
+    def __str__(self):
+        """Outputs a list of the stored items.
 
         Returns:
-            [type]: [description]
+            str: The output.
+        """
+        return str(list(self))
+
+    def __iter__(self):
+        """Iterator initializer.
+
+        Returns:
+            QuerySetDict: A reference to self.
         """
         self.dict_iter = self.dict.values().__iter__()
         return self
 
     def __next__(self):
-        """Todo
+        """A getter for the next item in the dict.
 
         Returns:
-            [type]: [description]
+            type(key): The key for the next dict item.
         """
         return self.dict_iter.__next__()
 
-    def __str__(self):
-        """Todo
-
-        Returns:
-            [type]: [description]
-        """
-        return str(list(self))
-
     def get_object_key(self, obj, attrib_key=None):
-        """Todo
+        """A getter for the object's primary key.
 
         Args:
-            obj ([type]): [description]
+            obj (Generic): The input object that contains attributes described by self.attrib_key
+                or attrib_key.
+            attrib_key (str or None): The attribute string that describes how to get the objects
+                primary key.
 
         Returns:
-            [type]: [description]
+            int or str: The object's primary key.
         """
         key = obj
         if attrib_key is None:
             attrib_key = self.attrib_key
         for key_str in attrib_key.split('.'):
             key = getattr(key, key_str)
+        assert isinstance(key, (int, str))
         return key
 
-    def add(self, x):
-        """Todo
+    def add(self, obj):
+        """Adds the object to the dictionary.
 
         Args:
-            x ([type]): [description]
-
-        Returns:
-            [type]: [description]
+            obj (Generic): The object to add to the dictionary.
         """
-        self.dict[self.get_object_key(x)] = x
+        self.dict[self.get_object_key(obj)] = obj
 
     def get(self, *args, **kwargs):
-        """Todo needs fixing. Consider only allowing integers as keys so that we can distingish
-        between given an object or a key.
+        """A getter for retriving data from the dict.
 
         Args:
-            key ([type]): [description]
+            *args, **kwargs (int,str,obj): A key or reference to the lookup object.
 
         Returns:
-            [type]: [description]
+            Object: The stored object that matches the query or None if it doesn't exist.
         """
-        # Prereqs
-        assert len(args) + len(kwargs) == 1
-
-        # Setup
-        key = obj = None
+        # Get key.
         if len(args) == 1:
-            key = args[0]
-        else:
+            obj = args[0]
+        elif len(kwargs) == 1:
             _key, obj = list(kwargs.items())[0]
-        if key is None:
+        else:
+            assert False
+        if isinstance(obj, (int, str)):
+            # Argument is a key.
+            key = obj
+        else:
+            # Argument is a reference.
             if '.' in self.attrib_key:
                 attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
             else:
-                attrib_key = ''
+                assert False
             key = self.get_object_key(obj, attrib_key)
+        # Get value.
         if key in self.dict.keys():
             return self.dict[key]
         return None
 
     def count(self):
-        """Todo
+        """A getter for the number of objects stored in the dict.
 
         Returns:
-            [type]: [description]
+            int: The length of the dict.
         """
         return len(self.dict)
 
     def exclude(self, *args, **kwargs):
-        return self.dict
+        """Not implemented yet.
+
+        Returns:
+            QuerySetDict: A reference to a QuerySetDict that does not contain the excluded objects.
+        """
+        # Setup
+        if '.' in self.attrib_key:
+            attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
+        else:
+            assert False
+        # Get primary keys.
+        keys = []
+        for arg in args:
+            if isinstance(arg, (int, str)):
+                keys.append(arg)
+            else:
+                keys.append(self.get_object_key(arg, attrib_key))
+        for _key_word, arg in kwargs.items():
+            if isinstance(arg, (int, str)):
+                keys.append(arg)
+            else:
+                keys.append(self.get_object_key(arg, attrib_key))
+        # Create new QuerySetDict.
+        new_query_set = copy.copy(self)
+        new_query_set.dict = copy.copy(self.dict)
+        for pk in keys:
+            new_query_set.dict.pop(pk, None)
+        # Done
+        return new_query_set
 
 
 class Parameters():
