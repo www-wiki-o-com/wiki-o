@@ -376,7 +376,7 @@ class VoteForm(forms.ModelForm):
         else:
             self.fields['vote'].widget.attrs['readonly'] = True
 
-        # blah
+        # Blah
         self.fields['vote'].required = False
 
     def save(self, commit=True):

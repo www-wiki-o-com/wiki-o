@@ -36,7 +36,7 @@ def post_save_user_signal_handler(sender, instance, created, **kwargs):
         created ([type]): [description]
     """
     if created:
-        group, created = Group.objects.get_or_create(name='user level: 1')
+        group, _created = Group.objects.get_or_create(name='user level: 1')
         instance.groups.add(group)
         instance.save()
 

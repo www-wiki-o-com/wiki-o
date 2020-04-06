@@ -339,7 +339,7 @@ class QuerySetDict():
         self.attrib_key = attrib_key
         if queryset is not None:
             for x in queryset:
-                self.dict[self.get_key(x)] = x
+                self.dict[self.get_object_key(x)] = x
 
     def __iter__(self):
         """Todo
@@ -366,7 +366,7 @@ class QuerySetDict():
         """
         return str(list(self))
 
-    def get_key(self, obj):
+    def get_object_key(self, obj, attrib_key=None):
         """Todo
 
         Args:
@@ -376,7 +376,9 @@ class QuerySetDict():
             [type]: [description]
         """
         key = obj
-        for key_str in self.attrib_key.split('.'):
+        if attrib_key is None:
+            attrib_key = self.attrib_key
+        for key_str in attrib_key.split('.'):
             key = getattr(key, key_str)
         return key
 
@@ -389,10 +391,11 @@ class QuerySetDict():
         Returns:
             [type]: [description]
         """
-        self.dict[self.get_key(x)] = x
+        self.dict[self.get_object_key(x)] = x
 
-    def get(self, key):
-        """Todo
+    def get(self, *args, **kwargs):
+        """Todo needs fixing. Consider only allowing integers as keys so that we can distingish
+        between given an object or a key.
 
         Args:
             key ([type]): [description]
@@ -400,10 +403,24 @@ class QuerySetDict():
         Returns:
             [type]: [description]
         """
+        # Prereqs
+        assert len(args) + len(kwargs) == 1
+
+        # Setup
+        key = obj = None
+        if len(args) == 1:
+            key = args[0]
+        else:
+            _key, obj = list(kwargs.items())[0]
+        if key is None:
+            if '.' in self.attrib_key:
+                attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
+            else:
+                attrib_key = ''
+            key = self.get_object_key(obj, attrib_key)
         if key in self.dict.keys():
             return self.dict[key]
-        else:
-            return None
+        return None
 
     def count(self):
         """Todo
@@ -412,6 +429,9 @@ class QuerySetDict():
             [type]: [description]
         """
         return len(self.dict)
+
+    def exclude(self, *args, **kwargs):
+        return self.dict
 
 
 class Parameters():
@@ -569,7 +589,7 @@ class Parameters():
         self.keys.add(key)
         return self
 
-    def get_key_value(self, key):
+    def get_object_key_value(self, key):
         """A getter for the key-value pair.
 
         Args:

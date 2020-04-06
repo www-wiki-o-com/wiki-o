@@ -185,10 +185,10 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td style="text-align:left; padding-left:5px">
                   {% if form.url %}
                   <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
-                    {{ content.get_true_statement }}
+                    {{ content.true_statement }}
                   </a>
                   {% else %}
-                  {{ content.get_true_statement }}
+                  {{ content.true_statement }}
                   {% endif %}
                 </td>
 
@@ -235,7 +235,7 @@ LICENSE.md file in the root directory of this source tree.-->
                 <td style="text-align:left; padding-left:5px">
                   {% if form.url %}
                   <a class=plain href={{ form.url|add:params.get_next }} target="_blank">
-                    <font color="red"> {{ content.get_false_statement }} </font>
+                    <font color="red"> {{ content.false_statement }} </font>
                   </a>
                   {% else %}
                   <font color="red"> {{ content.getfalse_title }} </font>

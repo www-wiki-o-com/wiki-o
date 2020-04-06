@@ -17,7 +17,7 @@ import random
 import logging
 
 from theories.models import Category, Content
-from theories.abstract_models import TheoryPointerBase
+from theories.abstract_models import OpinionBase
 
 # *******************************************************************************
 # Defines
@@ -63,7 +63,7 @@ def create_reserved_dependencies(extra=False):
     @details    Primarily used for initializing the database.
     @param[in]  extra (optional, default False): If True, 100 reserved dependencies will be created.
     """
-    intuition, created = Content.objects.get_or_create(
+    _intuition, created = Content.objects.get_or_create(
         title01='Intuition',
         content_type=Content.TYPE.EVIDENCE,
     )
@@ -96,12 +96,12 @@ def get_demo_opinion():
     """Generate a fake opinion.
 
     Returns:
-        TheoryPointerBase: The demo opinion.
+        OpinionBase: The demo opinion.
     """
     theory = get_demo_theory()
     true_points = random.random()
     false_points = 1.0 - true_points
-    opinion = TheoryPointerBase.create(
+    opinion = OpinionBase.create(
         content=theory,
         true_points=true_points,
         false_points=false_points,

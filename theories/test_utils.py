@@ -41,7 +41,7 @@ def get_or_create_theory(true_title, false_title=None, created_by=None, category
     if created_by is not None:
         kwargs['created_by'] = created_by
         kwargs['modified_by'] = created_by
-    theory, created = Content.objects.get_or_create(**kwargs)
+    theory, _created = Content.objects.get_or_create(**kwargs)
     theory.categories.add(Category.get(category))
     return theory
 
@@ -58,7 +58,7 @@ def get_or_create_subtheory(parent_theory, true_title, false_title=None, created
     if created_by is not None:
         kwargs['created_by'] = created_by
         kwargs['modified_by'] = created_by
-    subtheory, created = Content.objects.get_or_create(**kwargs)
+    subtheory, _created = Content.objects.get_or_create(**kwargs)
     parent_theory.add_dependency(subtheory)
     return subtheory
 
@@ -75,7 +75,7 @@ def get_or_create_evidence(parent_theory, title, created_by=None, fact=False):
     if created_by is not None:
         kwargs['created_by'] = created_by
         kwargs['modified_by'] = created_by
-    evidence, created = Content.objects.get_or_create(**kwargs)
+    evidence, _created = Content.objects.get_or_create(**kwargs)
     parent_theory.add_dependency(evidence)
     return evidence
 
