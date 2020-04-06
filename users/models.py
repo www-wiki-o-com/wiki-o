@@ -142,7 +142,7 @@ class User(AbstractUser):
 
         # Get or create system user.
         if create:
-            system_user, created = cls.objects.get_or_create(username='system')
+            system_user, _created = cls.objects.get_or_create(username='system')
             system_user.set_password(User.objects.make_random_password())
             system_user.save()
             cls.SYSTEM_USER_PK = system_user.pk

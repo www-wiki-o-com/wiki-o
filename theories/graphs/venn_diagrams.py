@@ -16,7 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 import math
 import random
 
-from theories.models import DependencyPointerBase, Opinion
+from theories.models import OpinionDependencyBase, Opinion
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
 from theories.utils import get_demo_opinion
@@ -498,7 +498,7 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
             # Get or create dependency01
             points_dependency01 = get_dependency01(content=dependency)
             if points_dependency01 is None:
-                points_dependency01 = DependencyPointerBase.create(
+                points_dependency01 = OpinionDependencyBase.create(
                     parent=self.opinion01,
                     content=dependency,
                     true_points=0.0,
@@ -507,7 +507,7 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
             # Get or create dependency02
             points_dependency02 = get_dependency02(content=dependency)
             if points_dependency02 is None:
-                points_dependency02 = DependencyPointerBase.create(
+                points_dependency02 = OpinionDependencyBase.create(
                     parent=self.opinion02,
                     content=dependency,
                     true_points=0.0,
@@ -566,6 +566,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         theory = opinion.content
         theory_dependencies = theory.get_dependencies()
 
+        # Todo: change demo opinion to OpinionBase and delete Opinion.save_points()
         opinion.saved_true_points = opinion.true_points()
         opinion.saved_false_points = opinion.false_points()
 
@@ -574,7 +575,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         opinion.saved_dependencies = []
 
         for i in range(random.randint(1, true_set_size)):
-            new_dependency = DependencyPointerBase.create(
+            new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 100),
@@ -585,7 +586,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, intersection_set_size)):
-            new_dependency = DependencyPointerBase.create(
+            new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 10),
@@ -596,7 +597,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, false_set_size)):
-            new_dependency = DependencyPointerBase.create(
+            new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 10),
@@ -607,7 +608,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_false_points += new_dependency.false_points()
 
         for i in range(random.randint(1, outside_set_size)):
-            new_dependency = DependencyPointerBase.create(
+            new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
                 true_points=random.randint(1, 5),
@@ -619,16 +620,11 @@ class DemoVennDiagram(OpinionVennDiagram):
 
         # normalize points to create the weights
         for dependency in opinion.saved_dependencies:
-            if total_true_points > 0:
-                dependency.saved_true_points = (dependency.true_points() /
-                                                total_true_points) * opinion.true_points()
-            else:
-                dependency.saved_true_points = 0.0
-            if total_false_points > 0:
-                dependency.saved_false_points = (dependency.false_points() /
-                                                 total_false_points) * opinion.false_points()
-            else:
-                dependency.saved_false_points = 0.0
+            dependency.save_points(
+                dependency.true_points() / total_true_points *
+                opinion.true_points() if total_true_points > 0 else 0.0,
+                dependency.false_points() / total_false_points *
+                opinion.false_points() if total_false_points > 0 else 0.0)
 
         super().__init__(opinion, bottom_text=str(seed))
 

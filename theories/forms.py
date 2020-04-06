@@ -681,7 +681,7 @@ class TheoryRevisionForm(forms.ModelForm):
         self.fields['title01'].widget.attrs['readonly'] = True
         self.fields['details'].widget.attrs['readonly'] = True
 
-        # blah
+        # Blah
         if hide_delete:
             self.fields['delete'].widget = forms.HiddenInput()
 

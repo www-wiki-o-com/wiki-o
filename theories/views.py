@@ -911,7 +911,7 @@ def TheoryReportView(request, content_pk):
     # Post request
     if request.method == 'POST':
 
-        # debug
+        # Debug
         print('\n\n\n')
         print(request.POST)
         print('\n\n\n')
