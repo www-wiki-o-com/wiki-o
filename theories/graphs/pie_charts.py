@@ -237,7 +237,7 @@ class OpinionPieChart(PieChart):
         Used to create a pie chart visualizing the point distribution for the opinion.
 
         Args:
-            opinion (OpinionNode, optional): The opinion to visualize. Defaults to None.
+            opinion (Opinion, optional): The opinion to visualize. Defaults to None.
         """
         self.opinion = opinion
         if opinion is None:
@@ -301,8 +301,8 @@ class OpinionComparisionPieChart(OpinionPieChart):
         """Create a side by side pie-chart for two opinions.
 
         Args:
-            opinion01 (OpinionNode): The left opinion for the comparision.
-            opinion02 (OpinionNode): The right opinion for the comparision.
+            opinion01 (Opinion): The left opinion for the comparision.
+            opinion02 (Opinion): The right opinion for the comparision.
         """
         self.opinion01 = opinion01
         self.opinion02 = opinion02

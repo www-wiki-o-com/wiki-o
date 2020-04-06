@@ -16,7 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 import random
 import logging
 
-from theories.models import Category, TheoryNode
+from theories.models import Category, Content
 from theories.abstract_models import TheoryPointerBase
 
 # *******************************************************************************
@@ -56,24 +56,24 @@ def get_category_suggestions():
     return suggestions
 
 
-def create_reserved_nodes(extra=False):
+def create_reserved_dependencies(extra=False):
     """
-    Create the set of reserved nodes (so far just 'intuition') used by Wiki-O.
+    Create the set of reserved dependencies (so far just 'intuition') used by Wiki-O.
 
     @details    Primarily used for initializing the database.
-    @param[in]  extra (optional, default False): If True, 100 reserved nodes will be created.
+    @param[in]  extra (optional, default False): If True, 100 reserved dependencies will be created.
     """
-    intuition_node, created = TheoryNode.objects.get_or_create(
+    intuition, created = Content.objects.get_or_create(
         title01='Intuition',
-        node_type=TheoryNode.TYPE.EVIDENCE,
+        content_type=Content.TYPE.EVIDENCE,
     )
     if created:
-        LOGGER.info('Created intuition theory node.')
+        LOGGER.info('Created intuition theory dependency.')
     if extra:
         for i in range(1, 100):
-            TheoryNode.objects.get_or_create(
+            Content.objects.get_or_create(
                 title01='R%d' % i,
-                node_type=TheoryNode.TYPE.EVIDENCE,
+                content_type=Content.TYPE.EVIDENCE,
             )
 
 
@@ -81,14 +81,14 @@ def get_demo_theory():
     """Generator a fake theory and populate it with fake evidence.
 
     Returns:
-        TheoryNode: The demo theory.
+        Content: The demo theory.
     """
-    theory = TheoryNode(node_type=TheoryNode.TYPE.THEORY, title01='Demo Theory')
-    subtheory = TheoryNode(node_type=TheoryNode.TYPE.THEORY, title01='Demo Sub-Theory')
-    fact = TheoryNode(node_type=TheoryNode.TYPE.FACT, title01='Demo Fact')
-    intuition = TheoryNode(node_type=TheoryNode.TYPE.EVIDENCE, title01='Demo Intuition')
+    theory = Content(content_type=Content.TYPE.THEORY, title01='Demo Theory')
+    subtheory = Content(content_type=Content.TYPE.THEORY, title01='Demo Sub-Theory')
+    fact = Content(content_type=Content.TYPE.FACT, title01='Demo Fact')
+    intuition = Content(content_type=Content.TYPE.EVIDENCE, title01='Demo Intuition')
     theory.id = subtheory.id = fact.id = intuition.id = 0
-    theory.saved_nodes = [subtheory, fact, intuition]
+    theory.saved_dependencies = [subtheory, fact, intuition]
     return theory
 
 
@@ -102,7 +102,7 @@ def get_demo_opinion():
     true_points = random.random()
     false_points = 1.0 - true_points
     opinion = TheoryPointerBase.create(
-        theory=theory,
+        content=theory,
         true_points=true_points,
         false_points=false_points,
     )

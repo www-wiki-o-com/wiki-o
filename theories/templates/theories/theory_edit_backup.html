@@ -83,7 +83,7 @@ LICENSE.md file in the root directory of this source tree.-->
         <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
         <!-- Backup -->
-        {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
+        {% has_perm 'theories.backup_content' user theory as can_backup %}
         <button>
           <a class="plain" data-target="#snapshot_modal" data-toggle="modal" href="#snapshot_modal"> Backup </a>
         </button>
@@ -109,7 +109,7 @@ LICENSE.md file in the root directory of this source tree.-->
             </div>
 
             <!-- footer -->
-            {% has_perm 'theories.backup_theorynode' user theory as can_backup %}
+            {% has_perm 'theories.backup_content' user theory as can_backup %}
             <div class="modal-footer">
               <input type="submit" class="btn btn-danger" name="yes" value="Yes" {% if not can_backup %} disabled
                 {% endif %}>

@@ -48,14 +48,14 @@ LICENSE.md file in the root directory of this source tree.-->
         <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
         <!-- Delete -->
-        {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
+        {% has_perm 'theories.delete_content' user evidence as can_delete %}
         <button type="button" data-toggle="modal" data-target="#del_modal" {% if not can_delete %} disabled {% endif %}>
           Delete
         </button>
         &nbsp
 
         <!-- Save -->
-        {% has_perm 'theories.change_theorynode' user evidence as can_change %}
+        {% has_perm 'theories.change_content' user evidence as can_change %}
         <input type="submit" name="save" value="Save" {% if not can_change %} disabled {% endif %}>
 
       </center>
@@ -74,7 +74,7 @@ LICENSE.md file in the root directory of this source tree.-->
           <ul class="mb-0">
 
             <!-- Convert to Sub-Theory -->
-            {% has_perm 'theories.convert_theorynode' user evidence as can_convert %}
+            {% has_perm 'theories.convert_content' user evidence as can_convert %}
             {% if can_convert %}
             <li><a data-target="#convert_modal" data-toggle="modal" href="#convert_modal"> Convert to Sub-theory </a>
             </li>
@@ -110,7 +110,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
       <!-- footer -->
       <div class="modal-footer">
-        {% has_perm 'theories.convert_theorynode' user evidence as can_convert %}
+        {% has_perm 'theories.convert_content' user evidence as can_convert %}
         <form action="{% url_extra 'theories:evidence-convert' evidence.id extra=params %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-danger" name="convert" value="Yes" {% if not can_convert %} disabled
@@ -155,7 +155,7 @@ LICENSE.md file in the root directory of this source tree.-->
         {% endif %}
 
         <!-- full delete -->
-        {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
+        {% has_perm 'theories.delete_content' user evidence as can_delete %}
         <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled

@@ -75,8 +75,8 @@ LICENSE.md file in the root directory of this source tree.-->
                   <a class="plain" data-toggle="collapse" role="button" aria-expanded="false"
                     href="#for{{ forloop.counter }}" aria-controls="for{{ forloop.counter }}">
 
-                    <!-- theory node -->
-                    {% if violation.content_type.model == 'theorynode' %}
+                    <!-- theory dependency -->
+                    {% if violation.content_type.model == 'content' %}
                     {{ violation }}
                     {% endif %}
 

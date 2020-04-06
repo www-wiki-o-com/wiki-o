@@ -41,8 +41,8 @@ LICENSE.md file in the root directory of this source tree.-->
       <!-- Details -->
       <div style="text-align: justify">{{  theory.details|long_details }}</div>
 
-      <!-- Nodes -->
-      {% if theory_nodes %}
+      <!-- Dependencys -->
+      {% if theory_dependencies %}
       <!-- Heading -->
       <h4> Evidence: </h4>
       <table style="margin-left: 1em">
@@ -54,19 +54,19 @@ LICENSE.md file in the root directory of this source tree.-->
           </tr>
         </thead>
         <tbody align="left" valign="top">
-          {% for node in theory_nodes %}
+          {% for dependency in theory_dependencies %}
           <tr>
             <!-- Link -->
-            <td> {% include "include/link.html" with x=node %} </td>
+            <td> {% include "include/link.html" with x=dependency %} </td>
             <!-- Info -->
-            <td> {% include "include/info.html" with x=node %} </td>
+            <td> {% include "include/info.html" with x=dependency %} </td>
             <!-- Description -->
             <td style="padding-left:5px;">
-              <a class="plain" href="{{ node.url|add:params.get_next }}">
-                {% if node.is_deleted %}
-                <strike>{{ node }}</strike>
+              <a class="plain" href="{{ dependency.url|add:params.get_next }}">
+                {% if dependency.is_deleted %}
+                <strike>{{ dependency }}</strike>
                 {% else %}
-                {{ node }}
+                {{ dependency }}
                 {% endif %}
               </a>
             </td>
@@ -74,7 +74,7 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endfor %}
         </tbody>
       </table>
-      {% include "include/paginator.html" with list=theory_nodes %}
+      {% include "include/paginator.html" with list=theory_dependencies %}
       {% else %}
       No evidence.
       {% endif %}
@@ -94,7 +94,7 @@ LICENSE.md file in the root directory of this source tree.-->
         <ul class="list-unstyled mb-0">
 
           <!-- Edit -->
-          {% has_perm 'theories.change_theorynode' user theory as can_edit %}
+          {% has_perm 'theories.change_content' user theory as can_edit %}
           {% if can_edit %}
           <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
           {% endif %}
@@ -211,7 +211,7 @@ LICENSE.md file in the root directory of this source tree.-->
         {% endif %}
 
         <!-- full delete -->
-        {% has_perm 'theories.delete_theorynode' user theory as can_delete %}
+        {% has_perm 'theories.delete_content' user theory as can_delete %}
         <form action="{% url_extra 'theories:theory-delete' theory.id extra=params %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled

@@ -62,7 +62,7 @@ LICENSE.md file in the root directory of this source tree.-->
         <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
         <!-- Inherit -->
-        {% has_perm 'theories.add_theorynode' user as can_inherit %}
+        {% has_perm 'theories.add_content' user as can_inherit %}
         <input type="submit" name="inherit" value="Inherit" {% if not can_inherit %} disabled {% endif %}>
 
       </center>
@@ -77,7 +77,7 @@ LICENSE.md file in the root directory of this source tree.-->
       <h5 class="card-header">Inherit From Others</h5>
       <div class="card-body">
         <ul class="mb-0">
-          {% has_perm 'theories.add_theorynode' user as can_inherit %}
+          {% has_perm 'theories.add_content' user as can_inherit %}
           {% if can_inherit %}
           {% for x in other_theories %}
           <li> <a href="{% url_extra 'theories:theory-inherit' theory.id x.id extra=params %}">{{ x }}</a> </li>

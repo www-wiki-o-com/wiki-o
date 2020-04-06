@@ -48,24 +48,24 @@
         "opinion"
       ],
       [
-        "add_theorynode",
+        "add_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "change_theorynode",
+        "change_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "delete_theorynode",
+        "delete_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "view_theorynode",
+        "view_content",
         "theories",
-        "theorynode"
+        "content"
       ]
     ]
   }
@@ -96,24 +96,24 @@
         "opinion"
       ],
       [
-        "add_theorynode",
+        "add_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "change_theorynode",
+        "change_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "delete_theorynode",
+        "delete_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "view_theorynode",
+        "view_content",
         "theories",
-        "theorynode"
+        "content"
       ]
     ]
   }
@@ -144,24 +144,24 @@
         "opinion"
       ],
       [
-        "add_theorynode",
+        "add_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "change_theorynode",
+        "change_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "delete_theorynode",
+        "delete_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "view_theorynode",
+        "view_content",
         "theories",
-        "theorynode"
+        "content"
       ]
     ]
   }
@@ -252,64 +252,64 @@
         "opinion"
       ],
       [
-        "add_theorynode",
+        "add_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "backup_theorynode",
+        "backup_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
         "change_details",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "change_theorynode",
+        "change_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
         "change_title",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "convert_theorynode",
+        "convert_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
         "delete_reversion",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "delete_theorynode",
+        "delete_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "merge_theorynode",
+        "merge_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "restore_theorynode",
+        "restore_content",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
         "swap_title",
         "theories",
-        "theorynode"
+        "content"
       ],
       [
-        "view_theorynode",
+        "view_content",
         "theories",
-        "theorynode"
+        "content"
       ]
     ]
   }

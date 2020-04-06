@@ -17,13 +17,13 @@ import rules
 from rules.contrib.views import permission_required, objectgetter
 from rules.contrib.views import PermissionRequiredMixin
 
-from theories.models import TheoryNode, Opinion
+from theories.models import Content, Opinion
 from reversion.models import Version
 
 # *******************************************************************************
 # ToDos:
 #   - update update update
-# add num_contributers to theory_node
+# add num_contributers to content
 #
 # *******************************************************************************
 
@@ -43,7 +43,7 @@ has_level04 = rules.is_group_member('user level: 4')
 @rules.predicate
 def is_author(user, obj):
     if user.is_authenticated:
-        if isinstance(obj, TheoryNode):
+        if isinstance(obj, Content):
             return obj.created_by == user
         elif isinstance(obj, Opinion):
             return obj.user == user
@@ -53,7 +53,7 @@ def is_author(user, obj):
 
 @rules.predicate
 def can_edit_title(user, obj=None):
-    if isinstance(obj, TheoryNode) and user.is_authenticated:
+    if isinstance(obj, Content) and user.is_authenticated:
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
@@ -77,7 +77,7 @@ def can_edit_details(user, obj):
 
 @rules.predicate
 def can_remove(user, obj):
-    if isinstance(obj, TheoryNode) and user.is_authenticated:
+    if isinstance(obj, Content) and user.is_authenticated:
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
@@ -94,7 +94,7 @@ def can_remove(user, obj):
 
 @rules.predicate
 def can_delete(user, obj):
-    if isinstance(obj, TheoryNode) and user.is_authenticated:
+    if isinstance(obj, Content) and user.is_authenticated:
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
@@ -121,15 +121,15 @@ def can_restore(user, obj):
 
 # theories/evidence
 rules.set_perm('theories.change_details', can_edit_details)
-rules.set_perm('theories.change_theorynode', can_edit_details)
+rules.set_perm('theories.change_content', can_edit_details)
 
 rules.set_perm('theories.change_title', can_edit_title)
 rules.set_perm('theories.swap_title', can_edit_title)
-rules.set_perm('theories.merge_theorynode', can_edit_title)
-rules.set_perm('theories.convert_theorynode', can_edit_title)
+rules.set_perm('theories.merge_content', can_edit_title)
+rules.set_perm('theories.convert_content', can_edit_title)
 
-rules.set_perm('theories.remove_theorynode', can_remove)
-rules.set_perm('theories.delete_theorynode', can_delete)
+rules.set_perm('theories.remove_content', can_remove)
+rules.set_perm('theories.delete_content', can_delete)
 
 # opinions
 rules.set_perm('theories.change_opinion', is_author)
@@ -137,8 +137,8 @@ rules.set_perm('theories.delete_opinion', is_author)
 
 # revisions
 rules.set_perm('theories.delete_reversion', has_level04)
-rules.set_perm('theories.backup_theorynode', has_level04)
-rules.set_perm('theories.restore_theorynode', has_level04)
+rules.set_perm('theories.backup_content', has_level04)
+rules.set_perm('theories.restore_content', has_level04)
 
 # report
 rules.set_perm('theories.report', has_level01)

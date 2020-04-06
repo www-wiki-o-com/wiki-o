@@ -13,7 +13,6 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-from django.conf.urls import url
 from django.urls import path
 from core.views import *
 

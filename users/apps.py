@@ -17,6 +17,8 @@ from django.apps import AppConfig
 
 
 class UsersConfig(AppConfig):
+    """Class representing a Django application and its configuration."""
+
     name = 'users'
 
     def ready(self):

@@ -14,7 +14,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
 {% load static %} {% load extra %}
 
-{% if opinion_nodes %} <table style="margin:5px">
+{% if opinion_dependencies %} <table style="margin:5px">
   <tbody align="left" valign="top">
     <tr>
       <td width="10">
@@ -25,14 +25,14 @@ LICENSE.md file in the root directory of this source tree.-->
     <tr>
       <th colspan="4"> {{ title }} </th>
     </tr>
-    {% for x in opinion_nodes %}
+    {% for x in opinion_dependencies %}
     <tr">
       <!-- Blank -->
       <td />
       <!-- Link -->
-      <td> {% include "include/link.html" with x=x.theory_node %} </td>
+      <td> {% include "include/link.html" with x=x.content %} </td>
       <!-- Info -->
-      <td> {% include "include/info.html" with x=x.theory_node %} </td>
+      <td> {% include "include/info.html" with x=x.content %} </td>
       <!-- Description -->
       <td style="padding-left:5px">
         {% if x.url %}

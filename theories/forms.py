@@ -21,7 +21,7 @@ from django.forms import TextInput
 from django.contrib.auth.models import AnonymousUser
 from reversion.models import Version
 
-from theories.models import Category, TheoryNode, Opinion, OpinionNode
+from theories.models import Category, Content, Opinion, OpinionDependency
 from core.utils import string_to_list, get_or_none
 
 # *******************************************************************************
@@ -64,7 +64,7 @@ class TheoryForm(forms.ModelForm):
     """Theory form.
 
     This form is used to create and edit theories and sub-theories. The form class itself will
-    take care of updating the TheoryNode and its related fields, which includes the categories.
+    take care of updating the theory and its related fields, which includes the categories.
 
     Attributes:
         user (User): The current user requesting the changes.
@@ -92,7 +92,7 @@ class TheoryForm(forms.ModelForm):
         placeholder_text += '  - Evidence or theories that go towards proving or disproving the theory should\n'
         placeholder_text += '    be provided as evidence, not details.'
 
-        model = TheoryNode
+        model = Content
         fields = ('title01', 'title00', 'details')
         labels = {
             'title01': 'True Statement',
@@ -198,12 +198,12 @@ class TheoryForm(forms.ModelForm):
         return self.action_verb
 
     def save(self, commit=True):
-        """Sets node_type to THEORY."""
+        """Sets content_type to THEORY."""
         created = self.instance.pk is None
         theory = super().save(commit=False)
 
         # Populate data
-        theory.node_type = TheoryNode.TYPE.THEORY
+        theory.content_type = Content.TYPE.THEORY
         if created and self.user is not None:
             theory.created_by = self.user
 
@@ -238,7 +238,7 @@ class TheoryForm(forms.ModelForm):
                 theory.categories.add(category)
             # Update the "All" category
             all_category = Category.get('All')
-            if len(theory.parent_nodes.all()) == 0 or theory.categories.count() > 0:
+            if len(theory.parents.all()) == 0 or theory.categories.count() > 0:
                 theory.categories.add(all_category)
             else:
                 theory.categories.remove(all_category)
@@ -259,7 +259,7 @@ class EvidenceForm(forms.ModelForm):
         placeholder_text += '      a) non-verifiable or\n'
         placeholder_text += '      b) a sub-theory.'
 
-        model = TheoryNode
+        model = Content
         fields = ('title01', 'details', 'verifiable')
         labels = {
             'title01': 'Statement',
@@ -281,7 +281,7 @@ class EvidenceForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form. Fields that the user does not
            have permission to change are set as readonly. Additionally, evidence
-           nodes do not utilize the title00 field."""
+           content do not utilize the title00 field."""
 
         # setup
         if 'user' in kwargs.keys():
@@ -302,7 +302,7 @@ class EvidenceForm(forms.ModelForm):
         self.fields['verifiable'].required = False
 
         # intial data
-        if self.instance.pk and self.instance.node_type == TheoryNode.TYPE.FACT:
+        if self.instance.pk and self.instance.content_type == Content.TYPE.FACT:
             self.fields['verifiable'].initial = True
 
         # permissions
@@ -342,22 +342,22 @@ class EvidenceForm(forms.ModelForm):
         elif self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('verifiable')
         else:
-            return self.instance.node_type == TheoryNode.TYPE.FACT
+            return self.instance.content_type == Content.TYPE.FACT
 
     def get_verb(self):
         return self.action_verb
 
     def save(self, commit=True):
-        """Sets node_type to EVIDENCE (optinally, verifiable)."""
+        """Sets content_type to EVIDENCE (optinally, verifiable)."""
         # setup
         created = self.instance.pk is None
         evidence = super().save(commit=False)
 
         # populate data
         if self.cleaned_data['verifiable']:
-            evidence.node_type = TheoryNode.TYPE.FACT
+            evidence.content_type = Content.TYPE.FACT
         else:
-            evidence.node_type = TheoryNode.TYPE.EVIDENCE
+            evidence.content_type = Content.TYPE.EVIDENCE
         if created and self.user is not None:
             self.created_by = self.user
 
@@ -380,15 +380,15 @@ class EvidenceForm(forms.ModelForm):
         return evidence
 
 
-class SelectTheoryNodeForm(forms.ModelForm):
-    """A form for slecting theory nodes."""
+class SelectDependencyForm(forms.ModelForm):
+    """A form for slecting theory dependencies."""
 
     # non-model fields
     select = forms.BooleanField(initial=False)
 
     class Meta:
         """Where the form options are defined."""
-        model = TheoryNode
+        model = Content
         fields = ('select',)
 
     def __init__(self, *args, **kwargs):
@@ -478,8 +478,8 @@ class OpinionForm(forms.ModelForm):
         return opinion
 
 
-class OpinionNodeForm(forms.ModelForm):
-    """A form for user opinion node points."""
+class OpinionDependencyForm(forms.ModelForm):
+    """A form for user opinion dependency points."""
 
     # non-model fields
     CHOICES = [
@@ -491,7 +491,7 @@ class OpinionNodeForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
-        model = OpinionNode
+        model = OpinionDependency
         fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input', 'select_collaborate',
                   'select_contradict')
         labels = {
@@ -522,15 +522,15 @@ class OpinionNodeForm(forms.ModelForm):
         # initial data
         self.refresh_parent = False
         if self.instance.id is None and 'initial' in kwargs.keys():
-            self.instance.theory_node = kwargs['initial']['theory_node']
+            self.instance.content = kwargs['initial']['content']
             self.instance.parent = kwargs['initial']['parent']
             if self.instance.parent.id is None:
                 self.refresh_parent = True
-        theory_node = self.instance.theory_node
+        content = self.instance.content
 
         # url
-        if theory_node.is_theory():
-            self.url = reverse('theories:get_my_opinion', kwargs={'theory_node_pk': theory_node.pk})
+        if content.is_theory():
+            self.url = reverse('theories:get_my_opinion', kwargs={'content_pk': content.pk})
         else:
             self.url = None
 
@@ -579,14 +579,14 @@ class OpinionNodeForm(forms.ModelForm):
             self.fields['select_contradict'].widget = forms.HiddenInput()
 
         # setup initial display
-        if theory_node.is_subtheory():
+        if content.is_subtheory():
             if self.instance.id is not None:
                 if self.instance.ft_input + self.instance.ff_input > 0:
                     self.display_true = False
                 else:
                     self.display_true = True
             else:
-                opinion_root = get_or_none(theory_node.opinions.all(), user=self.user)
+                opinion_root = get_or_none(content.opinions.all(), user=self.user)
                 if opinion_root is None or opinion_root.is_true():
                     self.display_true = True
                 else:
@@ -594,45 +594,45 @@ class OpinionNodeForm(forms.ModelForm):
 
     def save(self, commit=True):
         # setup
-        opinion_node = super().save(commit=False)
+        opinion_dependency = super().save(commit=False)
         # hack for refreshing parent
         if self.refresh_parent:
-            opinion_node.parent = opinion_node.parent
+            opinion_dependency.parent = opinion_dependency.parent
 
         # collaborate
         if 'select_collaborate' in self.changed_data:
             data = self.cleaned_data.get('select_collaborate')
             initial = self.fields['select_collaborate'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true = opinion_node.parent.true_input >= opinion_node.parent.false_input
+                opinion_is_true = opinion_dependency.parent.true_input >= opinion_dependency.parent.false_input
                 if data == 'True' and opinion_is_true:
-                    opinion_node.tt_input = 10
+                    opinion_dependency.tt_input = 10
                 elif data == 'True' and not opinion_is_true:
-                    opinion_node.tf_input = 10
+                    opinion_dependency.tf_input = 10
                 elif data == 'False' and opinion_is_true:
-                    opinion_node.ft_input = 10
+                    opinion_dependency.ft_input = 10
                 elif data == 'False' and not opinion_is_true:
-                    opinion_node.ff_input = 10
+                    opinion_dependency.ff_input = 10
 
         # contradict
         if 'select_contradict' in self.changed_data:
             data = self.cleaned_data.get('select_contradict')
             initial = self.fields['select_contradict'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true = opinion_node.parent.true_input >= opinion_node.parent.false_input
+                opinion_is_true = opinion_dependency.parent.true_input >= opinion_dependency.parent.false_input
                 if data == 'True' and opinion_is_true:
-                    opinion_node.tf_input = 10
+                    opinion_dependency.tf_input = 10
                 elif data == 'True' and not opinion_is_true:
-                    opinion_node.tt_input = 10
+                    opinion_dependency.tt_input = 10
                 elif data == 'False' and opinion_is_true:
-                    opinion_node.ff_input = 10
+                    opinion_dependency.ff_input = 10
                 elif data == 'False' and not opinion_is_true:
-                    opinion_node.ft_input = 10
+                    opinion_dependency.ft_input = 10
 
         # save
         if commit:
-            opinion_node.save()
-        return opinion_node
+            opinion_dependency.save()
+        return opinion_dependency
 
 
 class TheoryRevisionForm(forms.ModelForm):
@@ -719,7 +719,7 @@ class EvidenceRevisionForm(forms.ModelForm):
         self.fields['title01'].initial = self.instance.field_dict['title01']
         self.fields['details'].initial = self.instance.field_dict['details']
         self.fields['verifiable'].initial = self.instance.field_dict[
-            'node_type'] == TheoryNode.TYPE.FACT
+            'content_type'] == Content.TYPE.FACT
 
         # config
         self.fields['delete'].required = False

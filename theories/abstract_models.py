@@ -27,51 +27,115 @@ LOGGER = logging.getLogger('django')
 # *******************************************************************************
 
 
-class TheoryPointerBase():
+class PointerBase():
     """Abstract manager for accessing and agregating the theory's points.
 
-    Usage: This class can also be used to construct dummy TheoryNodes that will not show up in
+    Usage: This class can also be used to construct dummy Contents that will not show up in
         the database.
 
     Attributes:
-        theory (TheoryNode): The theory.
+        content (Content): The theory dependency.
         saved_true_points (float): Cache for the true points.
         saved_false_points (float): Cache for the fasle points.
-        saved_opinions (QuerySet:Opinion): Cache for the theory's opinions.
-        saved_nodes (QuerySet:TheoryNode): Cache for the the theory's nodes.
-        saved_flat_nodes (QuerySet:TheoryNode): Cache for the theory's flat nodes.
-        saved_point_distribution (list[float]): Cache for the theory's point distribution.
     """
-    theory = None
+    content = None
     saved_true_points = None
     saved_false_points = None
-    saved_opinions = None
-    saved_nodes = None
-    saved_flat_nodes = None
-    saved_point_distribution = None
-    altered = False
 
     @classmethod
-    def create(cls, theory=None, true_points=0.0, false_points=0.0):
+    def create(cls, content=None, true_points=0.0, false_points=0.0):
         """Generator for constructing instances."""
         new_object = cls()
-        new_object.theory = theory
+        new_object.content = content
         new_object.saved_true_points = true_points
         new_object.saved_false_points = false_points
         return new_object
 
     def check_data_for_errors(self):
         """A helper method for logging errors with the data."""
-        if self.theory.is_evidence():
+        pass
+
+    def __str__(self):
+        """Pass-through for content."""
+        return self.content.__str__()
+
+    def get_dependency_pk(self):
+        """Returns content.pk."""
+        return self.content.pk
+
+    def true_points(self):
+        """Returns true points."""
+        if self.saved_true_points is None:
+            return 0.0
+        return self.saved_true_points
+
+    def false_points(self):
+        """Returns false points."""
+        if self.saved_false_points is None:
+            return 0.0
+        return self.saved_false_points
+
+    def is_true(self):
+        """Returns true if more points are awarded to true."""
+        self.check_data_for_errors()
+        return self.true_points() >= self.false_points()
+
+    def is_false(self):
+        """Returns true if more points are awarded to false."""
+        self.check_data_for_errors()
+        return self.false_points() > self.true_points()
+
+    def get_point_range(self):
+        """Return the range of true points this object possesses."""
+        self.check_data_for_errors()
+        return self.true_points(), self.true_points()
+
+
+class TheoryPointerBase():
+    """Abstract manager for accessing and agregating the theory's points.
+
+    Usage: This class can also be used to construct dummy Contents that will not show up in
+        the database.
+
+    Attributes:
+        theory (Content): The theory.
+        saved_true_points (float): Cache for the true points.
+        saved_false_points (float): Cache for the fasle points.
+        saved_opinions (QuerySet:Opinion): Cache for the theory's opinions.
+        saved_dependencies (QuerySet:Content): Cache for the the theory's dependencies.
+        saved_flat_dependencies (QuerySet:Content): Cache for the theory's flat dependencies.
+        saved_point_distribution (list[float]): Cache for the theory's point distribution.
+    """
+    content = None
+    saved_true_points = None
+    saved_false_points = None
+    saved_opinions = None
+    saved_dependencies = None
+    saved_flat_dependencies = None
+    saved_point_distribution = None
+    altered = False
+
+    @classmethod
+    def create(cls, content=None, true_points=0.0, false_points=0.0):
+        """Generator for constructing instances."""
+        new_object = cls()
+        new_object.content = content
+        new_object.saved_true_points = true_points
+        new_object.saved_false_points = false_points
+        return new_object
+
+    def check_data_for_errors(self):
+        """A helper method for logging errors with the data."""
+        if self.content.is_evidence():
             curframe = inspect.currentframe()
             calframe = inspect.getouterframes(curframe, 2)
             LOGGER.error(
                 'TheoryPointerBase.check_data_for_errors: is pointing at evidence (%d). '
-                'Problem method: TheoryPointerBase.%s', self.theory.pk, calframe[1][3])
+                'Problem method: TheoryPointerBase.%s', self.content.pk, calframe[1][3])
 
     def __str__(self):
         """Pass-through for theory."""
-        return self.theory.__str__()
+        return self.content.__str__()
 
     def url(self):
         """Return none. Abstract objects have no data in the db."""
@@ -81,22 +145,22 @@ class TheoryPointerBase():
         LOGGER.error('TheoryPointerBase.compare_url: There is no url for an abstract object (%s).',
                      str(self))
 
-    def get_node_pk(self):
+    def get_dependency_pk(self):
         """Returns theory.pk."""
-        return self.theory.pk
+        return self.content.pk
 
-    def get_nodes(self):
-        """Return a set of saved nodes."""
+    def get_dependencies(self):
+        """Return a set of saved dependencies."""
         self.check_data_for_errors()
-        if self.saved_nodes is not None:
-            return self.saved_nodes
+        if self.saved_dependencies is not None:
+            return self.saved_dependencies
         return []
 
-    def get_flat_nodes(self):
-        """Return a set of saved nodes."""
+    def get_flat_dependencies(self):
+        """Return a set of saved dependencies."""
         self.check_data_for_errors()
-        if self.saved_flat_nodes is not None:
-            return self.saved_flat_nodes
+        if self.saved_flat_dependencies is not None:
+            return self.saved_flat_dependencies
         return []
 
     def get_opinions(self):
@@ -108,7 +172,7 @@ class TheoryPointerBase():
         self.check_data_for_errors()
         if self.saved_opinions is not None:
             return self.saved_opinions
-        return self.theory.get_opinions()
+        return self.content.get_opinions()
 
     def get_point_distribution(self):
         """Calculate true/false and facts/other point distribution (use cache if available)."""
@@ -122,14 +186,14 @@ class TheoryPointerBase():
             'false_facts': 0.0,
             'false_other': 0.0
         }
-        for evidence_node in self.get_flat_nodes():
-            if evidence_node.is_verifiable():
-                distribution['true_facts'] += evidence_node.true_points()
-                distribution['false_facts'] += evidence_node.false_points()
+        for evidence in self.get_flat_dependencies():
+            if evidence.is_verifiable():
+                distribution['true_facts'] += evidence.true_points()
+                distribution['false_facts'] += evidence.false_points()
             else:
-                distribution['true_other'] += evidence_node.true_points()
-                distribution['false_other'] += evidence_node.false_points()
-            total_points += evidence_node.total_points()
+                distribution['true_other'] += evidence.true_points()
+                distribution['false_other'] += evidence.false_points()
+            total_points += evidence.total_points()
         if total_points > 0:
             distribution['true_facts'] = distribution['true_facts'] / total_points
             distribution['true_other'] = distribution['true_other'] / total_points
@@ -166,94 +230,67 @@ class TheoryPointerBase():
         return self.true_points(), self.true_points()
 
 
-class NodePointerBase():
-    """Abstract manager for passing through methods to linked theory_nodes.
+class DependencyPointerBase(PointerBase):
+    """Abstract manager for passing through methods to linked theory_dependencies.
 
     Todo:
         * Move to seperate file.
     """
     parent = None
-    theory_node = None
-    saved_true_points = None
-    saved_false_points = None
-    altered = False
 
     @classmethod
-    def create(cls, parent=None, theory_node=None, true_points=0.0, false_points=0.0):
+    def create(cls, parent=None, content=None, true_points=0.0, false_points=0.0):
         """Generator for constructing instances."""
-        node = cls()
-        node.parent = parent
-        node.theory_node = theory_node
-        node.saved_true_points = true_points
-        node.saved_false_points = false_points
-        return node
-
-    def __str__(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.__str__()
+        new_object = super().create(content, true_points, false_points)
+        new_object.parent = parent
+        return new_object
 
     def get_true_statement(self):
         """Pass-through method."""
-        return self.theory_node.get_true_statement()
+        return self.content.get_true_statement()
 
     def get_false_statement(self):
         """Pass-through method."""
-        return self.theory_node.get_false_statement()
-
-    def get_node_pk(self):
-        """Returns theory_node.pk."""
-        return self.theory_node.pk
+        return self.content.get_false_statement()
 
     def tag_id(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.tag_id()
+        """Pass-through for content."""
+        return self.content.tag_id()
 
     def about(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.about()
+        """Pass-through for content."""
+        return self.content.about()
 
     def url(self):
-        """Return a url pointing to theory_node's root (not node)."""
+        """Return a url pointing to content's root (not dependency)."""
         return None
 
     def is_theory(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_theory()
+        """Pass-through for content."""
+        return self.content.is_theory()
 
     def is_subtheory(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_theory()
+        """Pass-through for content."""
+        return self.content.is_subtheory()
 
     def is_evidence(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_evidence()
+        """Pass-through for content."""
+        return self.content.is_evidence()
 
     def is_fact(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_fact()
+        """Pass-through for content."""
+        return self.content.is_fact()
 
     def is_verifiable(self):
-        """Pass-through for theory_node."""
-        return self.theory_node.is_verifiable()
-
-    def true_points(self):
-        """Returns true points."""
-        if self.saved_true_points is None:
-            return 0.0
-        return self.saved_true_points
-
-    def false_points(self):
-        """Returns false points."""
-        if self.saved_false_points is None:
-            return 0.0
-        return self.saved_false_points
+        """Pass-through for content."""
+        return self.content.is_verifiable()
 
     def total_points(self):
         """Returns total points."""
         return self.true_points() + self.false_points()
 
     def true_percent(self):
-        """Calculate the percentage awarded to true with respect all parent nodes.
+        """Calculate the percentage awarded to true with respect all parent dependencies.
 
         The true and true points are flipped when necessary.
         """
@@ -262,7 +299,7 @@ class NodePointerBase():
         return 0.0
 
     def false_percent(self):
-        """Calculate the percentage awarded to false with respect all parent nodes.
+        """Calculate the percentage awarded to false with respect all parent dependencies.
 
         The true and false points are flipped when necessary.
         """

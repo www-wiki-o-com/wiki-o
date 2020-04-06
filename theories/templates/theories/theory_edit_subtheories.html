@@ -55,7 +55,7 @@ LICENSE.md file in the root directory of this source tree.-->
         </div>
       </div>
       {% endfor %}
-      {% include "include/paginator.html" with list=subtheory_nodes %}
+      {% include "include/paginator.html" with list=subtheory_list %}
 
       <!-- Buttons -->
       <center>
@@ -63,7 +63,7 @@ LICENSE.md file in the root directory of this source tree.-->
         <button><a class="plain" href="{{ prev }}">Back</a></button> &nbsp
 
         <!-- Save -->
-        {% has_perm 'theories.add_theorynode' user as can_add %}
+        {% has_perm 'theories.add_content' user as can_add %}
         <input type="submit" name="save" value="Save" {% if not can_add %} disabled {% endif %}>
       </center>
     </form>

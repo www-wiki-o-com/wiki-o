@@ -17,7 +17,7 @@ LICENSE.md file in the root directory of this source tree.-->
   <ul class="nav nav-tabs">
 
     <!-- Edit Theory -->
-    {% has_perm 'theories.change_theorynode' user theory as can_edit %}
+    {% has_perm 'theories.change_content' user theory as can_edit %}
     {% if can_edit %}
     <li class="nav-item">
       {% if TheoryTab %}
@@ -33,7 +33,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Edit Evidence -->
-    {% has_perm 'theories.add_theorynode' user as can_add %}
+    {% has_perm 'theories.add_content' user as can_add %}
     {% if can_add %}
     <li class="nav-item">
       {% if EvidenceTab %}
@@ -64,7 +64,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Inherit -->
-    {% has_perm 'theories.add_theorynode' user as can_inherit %}
+    {% has_perm 'theories.add_content' user as can_inherit %}
     {% if can_inherit %}
     <li class="nav-item">
       {% if InheritTab %}
@@ -80,7 +80,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Merge -->
-    {% has_perm 'theories.merge_theorynode' user theory as can_merge %}
+    {% has_perm 'theories.merge_content' user theory as can_merge %}
     {% if can_merge %}
     <li class="nav-item">
       {% if MergeTab %}
@@ -96,7 +96,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Resotre -->
-    {% has_perm 'theories.change_theorynode' user as can_restore %}
+    {% has_perm 'theories.change_content' user as can_restore %}
     {% if can_restore and theory.get_revisions %}
     <li class="nav-item">
       {% if RestoreTab %}
@@ -112,7 +112,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Backup -->
-    {% has_perm 'theories.backup_theorynode' user as can_backup %}
+    {% has_perm 'theories.backup_content' user as can_backup %}
     {% if can_backup %}
     <li class="nav-item">
       {% if BackupTab %}

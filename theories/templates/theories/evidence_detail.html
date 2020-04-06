@@ -49,19 +49,19 @@ LICENSE.md file in the root directory of this source tree.-->
         <ul class="list-unstyled mb-0">
 
           <!-- Edit -->
-          {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
+          {% has_perm 'theories.change_content' user evidence as can_edit %}
           {% if can_edit %}
           <li><a href="{% url_extra 'theories:evidence-edit' evidence.id extra=params %}"> Edit Evidence </a></li>
           {% endif %}
 
           <!-- Delete -->
-          {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
+          {% has_perm 'theories.delete_content' user evidence as can_delete %}
           {% if can_delete %}
           <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete Evidence </a></li>
           {% endif %}
 
           <!-- Backup -->
-          {% has_perm 'theories.backup_theorynode' user evidence as can_backup %}
+          {% has_perm 'theories.backup_content' user evidence as can_backup %}
           {% if can_backup %}
           <li><a data-target="#backup_modal" data-toggle="modal" href="#backup_modal"> Backup Evidence </a></li>
           {% endif %}
@@ -134,7 +134,7 @@ LICENSE.md file in the root directory of this source tree.-->
 
         <!-- footer -->
         <div class="modal-footer">
-          {% has_perm 'theories.backup_theorynode' user evidence as can_backup %}
+          {% has_perm 'theories.backup_content' user evidence as can_backup %}
           <input type="submit" class="btn btn-danger" name="backup" value="Yes" {% if not can_backup %} disabled
             {% endif %}>
           <button type="button" class="btn" data-dismiss="modal">No</button>
@@ -177,7 +177,7 @@ LICENSE.md file in the root directory of this source tree.-->
         {% endif %}
 
         <!-- full delete -->
-        {% has_perm 'theories.delete_theorynode' user evidence as can_delete %}
+        {% has_perm 'theories.delete_content' user evidence as can_delete %}
         <form action="{% url_extra 'theories:evidence-delete' evidence.id extra=params %}" method="post">
           {% csrf_token %}
           <input type="submit" class="btn btn-danger" name="delete" value="Delete" {% if not can_delete %} disabled

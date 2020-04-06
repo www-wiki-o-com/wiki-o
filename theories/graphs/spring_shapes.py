@@ -161,18 +161,18 @@ class SpringShapeBase(ShapeBase):
 class EvidenceShape(SpringShapeBase):
     """A sub-class of spring shape for square objects (evidence)."""
 
-    def __init__(self, node, x, y, area):
+    def __init__(self, dependency, x, y, area):
         """Constructor for the EvidenceShape.
 
         The bounding radius is setup to encompase the square and is used for the spring force logic.
 
         Args:
-            node (OpinionNode): [description]
+            dependency (OpinionDependencyBase): [description]
             x (float): The initial x coordinate.
             y (float): The initial y coordinate.
             area (float): The area of the square.
         """
-        self.node = node
+        self.dependency = dependency
         self.length = math.sqrt(area)
         bounding_radius = (self.length / 2) * math.sqrt(2)
         super().__init__(x, y, bounding_radius)
@@ -193,7 +193,7 @@ class EvidenceShape(SpringShapeBase):
         x = self.x - length / 2
         y = self.y - length / 2
         x, y = offset_xy(x, y, offset)
-        svg = '<rect id="%s" visibility="hidden"' % self.node.tag_id()
+        svg = '<rect id="%s" visibility="hidden"' % self.dependency.tag_id()
         svg += ' x="%d" y="%d" ' % (x, y)
         svg += ' width="%d" height="%d" ' % (length, length)
         svg += ' fill="none" stroke="lime" stroke-width="10"/>'
@@ -203,7 +203,7 @@ class EvidenceShape(SpringShapeBase):
         """Output the svg code for the shape (shade is a function of fact/intuition).
 
         The colour and shade are calculated based on:
-            - How the node is being used in the theory, red for false, black for true,
+            - How the dependency is being used in the theory, red for false, black for true,
             - The colour is transparent if the evidence is non-factual.
 
         Args:
@@ -213,13 +213,13 @@ class EvidenceShape(SpringShapeBase):
         Returns:
             str: The svg code for displaying the shape.
         """
-        if self.node.true_points() >= self.node.false_points():
-            if self.node.is_verifiable():
+        if self.dependency.true_points() >= self.dependency.false_points():
+            if self.dependency.is_verifiable():
                 colour = Colour.BLACK
             else:
                 colour = Colour.GREY
         else:
-            if self.node.is_verifiable():
+            if self.dependency.is_verifiable():
                 colour = Colour.RED
             else:
                 colour = Colour.PINK
@@ -227,11 +227,11 @@ class EvidenceShape(SpringShapeBase):
         x = self.x - length / 2
         y = self.y - length / 2
         x, y = offset_xy(x, y, offset)
-        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
+        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.dependency.content.url()
         svg += '<rect x="%d" y="%d"' % (x, y)
         svg += ' width="%d" height="%d"' % (length, length)
         svg += ' fill="%s" stroke-width="0">' % colour
-        svg += '<title>%s</title>' % str(self.node)
+        svg += '<title>%s</title>' % str(self.dependency)
         svg += '</rect></a>'
         return svg
 
@@ -239,16 +239,16 @@ class EvidenceShape(SpringShapeBase):
 class SubtheoryShape(SpringShapeBase):
     """A sub-class of spring shape for circle objects (sub-theories)."""
 
-    def __init__(self, node, x, y, area):
+    def __init__(self, dependency, x, y, area):
         """The constructor for the SubTheoryShape class.
 
         Args:
-            node (OpinionNode): The sub-theory node (used for colour and captions).
+            dependency (OpinionDependencyBase): The sub-theory dependency (used for colour and captions).
             x (float): The initial x coordinate.
             y (float): The initial y coordinate.
             area (float): The area of the circle.
         """
-        self.node = node
+        self.dependency = dependency
         bounding_radius = math.sqrt(area / PI)
         super().__init__(x, y, bounding_radius)
 
@@ -268,7 +268,7 @@ class SubtheoryShape(SpringShapeBase):
         y = self.y
         x, y = offset_xy(x, y, offset)
         r = self.r + 7.5
-        svg = '<circle id="%s" visibility="hidden"' % self.node.tag_id()
+        svg = '<circle id="%s" visibility="hidden"' % self.dependency.tag_id()
         svg += ' cx="%d" cy="%d" r="%d"' % (x, y, r)
         svg += ' fill="none" stroke="lime" stroke-width="10"/>'
         return svg
@@ -277,7 +277,7 @@ class SubtheoryShape(SpringShapeBase):
         """Output the svg code for the shape (opacity is a function of fact/intuition).
 
         The colour and opacity are calculated based on:
-            - how the node is being used in the theory, red for false, black for true,
+            - how the dependency is being used in the theory, red for false, black for true,
             - currently the colour is never transparent.
 
         Args:
@@ -291,15 +291,15 @@ class SubtheoryShape(SpringShapeBase):
         y = self.y
         x, y = offset_xy(x, y, offset)
         r = self.r
-        if self.node.true_points() >= self.node.false_points():
+        if self.dependency.true_points() >= self.dependency.false_points():
             colour = Colour.BLACK
         else:
             colour = Colour.RED
-        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.node.theory_node.url()
+        svg = '<a target="_blank" xlink:href="%s" target="_blank">' % self.dependency.content.url()
         svg += '<circle'
         svg += ' cx="%d" cy="%d" r="%d"' % (x, y, r)
         svg += ' fill="%s" stroke-width="0">' % colour
-        svg += '<title>%s</title>' % str(self.node)
+        svg += '<title>%s</title>' % str(self.dependency)
         svg += '</circle></a>'
         return svg
 

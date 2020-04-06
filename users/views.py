@@ -27,7 +27,7 @@ from users.models import User, Violation, ViolationVote
 from users.forms import UserForm, SelectNotificationForm
 from users.forms import SelectViolationForm, ReportViolationForm
 from users.forms import ResolveViolationForm, VoteForm
-from theories.models import Category, TheoryNode, Opinion
+from theories.models import Category, Content, Opinion
 from theories.forms import TheoryForm, TheoryRevisionForm
 from core.utils import Parameters, get_page_list, get_first_or_none
 
@@ -143,7 +143,7 @@ def notifications_view(request):
     # Setup
     user = request.user
     opinions = following(user, Opinion)
-    theories = following(user, TheoryNode)
+    theories = following(user, Content)
     categories = following(user, Category)
     notifications = user.notifications.all()
     user_violations = user.violations.all()
@@ -280,11 +280,11 @@ def violation_resolve_view(request, pk):
     if vote is None:
         vote = ViolationVote(violation=violation, user=user)
 
-    # Content - theory_node
+    # Content - content
     content_type = violation.content_type.model
-    if content_type == 'theorynode':
-        theory_node = violation.content
-        revisions = theory_node.get_revisions().filter(
+    if content_type == 'content':
+        content = violation.content
+        revisions = content.get_revisions().filter(
             revision__date_created__date__lte=violation.pub_date)
         RevisionFormSet = modelformset_factory(Version, form=TheoryRevisionForm, extra=0)
         revision_formset = RevisionFormSet(queryset=revisions,
@@ -293,7 +293,7 @@ def violation_resolve_view(request, pk):
                                                'hide_delete': True
                                            })
     else:
-        theory_node = None
+        content = None
         revision_formset = []
 
     # Navigation
@@ -340,30 +340,36 @@ def violation_resolve_view(request, pk):
                 print(340, feedback_form.errors)
             return redirect(next_url)
 
-        # Display the theory node in contention.
-        if theory_node is not None:
-            theorynode_form = TheoryForm(request.POST,
-                                         instance=theory_node,
-                                         user=user,
-                                         prefix='theorynode')
-            if 'save_theorynode' in request.POST.keys() and \
-                    user.has_perm('theories.change_theorynode', theory_node):
-                if theorynode_form.is_valid():
-                    theory_node = theorynode_form.save()
-                    theory_node.update_activity_logs(user, verb=theorynode_form.get_verb())
-                return redirect(next_url)
+        # Display the content in contention.
+        if content is not None:
+            if content.is_theory():
+                content_form = TheoryForm(request.POST, instance=content, user=user, prefix='content')
+                if 'save_content' in request.POST.keys() and \
+                        user.has_perm('theories.change_content', content):
+                    if content_form.is_valid():
+                        content = content_form.save()
+                        content.update_activity_logs(user, verb=content_form.get_verb())
+                    return redirect(next_url)
+            elif content.is_evidence():
+                content_form = EvidenceForm(request.POST, instance=content, user=user, prefix='content')
+                if 'save_content' in request.POST.keys() and \
+                        user.has_perm('theories.change_content', content):
+                    if content_form.is_valid():
+                        content = content_form.save()
+                        content.update_activity_logs(user, verb=content_form.get_verb())
+                    return redirect(next_url)
         else:
-            theorynode_form = None
+            content_form = None
 
     # Get request
     else:
         vote_form = VoteForm(instance=vote, violation=violation, user=user, prefix='vote')
         report_form = ReportViolationForm(content=violation, user=user, prefix='report')
         feedback_form = ResolveViolationForm(violation=violation, user=user, prefix='feedback')
-        if theory_node is not None:
-            theorynode_form = TheoryForm(instance=theory_node, user=user, prefix='theorynode')
+        if content is not None:
+            content_form = TheoryForm(instance=content, user=user, prefix='content')
         else:
-            theorynode_form = None
+            content_form = None
 
     # Render
     context = {
@@ -373,7 +379,7 @@ def violation_resolve_view(request, pk):
         'feedback_form': feedback_form,
         'report_form': report_form,
         'vote_form': vote_form,
-        'theorynode_form': theorynode_form,
+        'content_form': content_form,
         'revision_formset': revision_formset,
         'params': params,
         'prev_url': prev_url,

@@ -18,7 +18,7 @@ LICENSE.md file in the root directory of this source tree.-->
   <ul class="nav nav-tabs">
 
     <!-- Edit Evidence -->
-    {% has_perm 'theories.change_theorynode' user evidence as can_edit %}
+    {% has_perm 'theories.change_content' user evidence as can_edit %}
     {% if can_edit %}
     <li class="nav-item">
       {% if EvidenceTab %}
@@ -34,7 +34,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Merge -->
-    {% has_perm 'theories.merge_theorynode' user evidence as can_merge %}
+    {% has_perm 'theories.merge_content' user evidence as can_merge %}
     {% if can_merge %}
     <li class="nav-item">
       {% if MergeTab %}
@@ -50,7 +50,7 @@ LICENSE.md file in the root directory of this source tree.-->
     {% endif %}
 
     <!-- Restore -->
-    {% has_perm 'theories.restore_theorynode' user evidence as can_restore %}
+    {% has_perm 'theories.restore_content' user evidence as can_restore %}
     {% if evidence.get_revisions %}
     <li class="nav-item">
       {% if RestoreTab %}

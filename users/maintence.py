@@ -52,7 +52,7 @@ def create_groups_and_permissions(max_level=4):
             if level == 0:
                 content = ['opinion']
             else:
-                content = ['category', 'theorynode', 'opinion']
+                content = ['category', 'content', 'opinion']
             for y in content:
                 name = '%s_%s' % (x, y)
                 content_type = ContentType.objects.get(app_label='theories', model=y)
