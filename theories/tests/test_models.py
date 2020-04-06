@@ -28,10 +28,12 @@ from hitcount.models import HitCount
 from theories.models import Category, Content, Opinion, Stats
 from theories.models import OpinionDependency, StatsDependency, StatsFlatDependency
 from theories.utils import create_categories, create_reserved_dependencies
-from theories.test_utils import get_or_create_subtheory, get_or_create_evidence, create_test_opinion
-from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_groups_and_permissions, create_test_user
 from core.utils import get_or_none
+
+from theories.tests.utils import create_test_theory, create_test_opinion
+from theories.tests.utils import get_or_create_subtheory, get_or_create_evidence
+from theories.tests.utils import create_test_subtheory, create_test_evidence
 
 # *******************************************************************************
 # Defines

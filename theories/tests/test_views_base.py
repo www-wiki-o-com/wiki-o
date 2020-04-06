@@ -23,8 +23,8 @@ from django.shortcuts import get_object_or_404, render, redirect
 from theories.converters import CONTENT_PK_CYPHER
 from theories.models import Content, Opinion, OpinionDependency
 from theories.utils import create_categories, create_reserved_dependencies
-from theories.test_utils import create_test_opinion
-from theories.test_utils import create_test_theory, create_test_subtheory, create_test_evidence
+from theories.tests.utils import create_test_opinion
+from theories.tests.utils import create_test_theory, create_test_subtheory, create_test_evidence
 from users.maintence import create_test_user
 from core.utils import get_form_data, get_or_none
 
