@@ -4,12 +4,10 @@
      \        /|  |    <|  | |__| |  |  |
       \__/\__/ |__|__|__\__|       \___/
 
-A web service for sharing opinions and avoiding arguments
+Copyright (C) 2018 Wiki-O, Frank Imeson
 
-@file       core/management/command/clean.py
-@copyright  GNU Public License, 2018
-@authors    Frank Imeson
-@brief      A managment script for cleaning up the database
+This source code is licensed under the GPL license found in the
+LICENSE.md file in the root directory of this source tree.
 """
 
 # *******************************************************************************
