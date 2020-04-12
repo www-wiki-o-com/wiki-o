@@ -19,14 +19,14 @@ import sys
 from django.core import serializers
 from django.core.management.base import BaseCommand
 
-from theories.models import (Category, Opinion, OpinionNode, Stats, StatsFlatNode, StatsNode,
-                             TheoryNode)
+from theories.models import (Category, Opinion, OpinionDependency, Stats, StatsFlatDependency,
+                             StatsDependency, Content)
 from users.models import User, Violation, ViolationFeedback, ViolationVote
 
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-VALID_MODELS = set(['TheoryNode', 'Opinion', 'Stats'])
+VALID_MODELS = set(['Content', 'Opinion', 'Stats'])
 
 # *******************************************************************************
 # Methods
@@ -86,13 +86,12 @@ class Command(BaseCommand):
                 else:
                     print('Error, model not implemented', model)
                     sys.exit()
-            if 'TheoryNode' in querry_set:
-                if querry_set['TheoryNode']:
-                    data += serializers.serialize('json',
-                                                  TheoryNode.objects.all(),
-                                                  fields=querry_set['TheoryNode']).strip() + ','
+            if 'Content' in querry_set:
+                if querry_set['Content']:
+                    data += serializers.serialize(
+                        'json', Content.objects.all(), fields=querry_set['Content']).strip() + ','
                 else:
-                    data += serializers.serialize('json', TheoryNode.objects.all()).strip() + ','
+                    data += serializers.serialize('json', Content.objects.all()).strip() + ','
             if 'Opinion' in querry_set:
                 if querry_set['Opinion']:
                     data += serializers.serialize(
@@ -121,18 +120,19 @@ class Command(BaseCommand):
         data = ""
         if Category.objects.count() > 0:
             data += serializers.serialize('json', Category.objects.all()).strip('[]') + ','
-        if TheoryNode.objects.count() > 0:
-            data += serializers.serialize('json', TheoryNode.objects.all()).strip('[]') + ','
+        if Content.objects.count() > 0:
+            data += serializers.serialize('json', Content.objects.all()).strip('[]') + ','
         if Opinion.objects.count() > 0:
             data += serializers.serialize('json', Opinion.objects.all()).strip('[]') + ','
-        if OpinionNode.objects.count() > 0:
-            data += serializers.serialize('json', OpinionNode.objects.all()).strip('[]') + ','
+        if OpinionDependency.objects.count() > 0:
+            data += serializers.serialize('json', OpinionDependency.objects.all()).strip('[]') + ','
         if Stats.objects.count() > 0:
             data += serializers.serialize('json', Stats.objects.all()).strip('[]') + ','
-        if StatsNode.objects.count() > 0:
-            data += serializers.serialize('json', StatsNode.objects.all()).strip('[]') + ','
-        if StatsFlatNode.objects.count() > 0:
-            data += serializers.serialize('json', StatsFlatNode.objects.all()).strip('[]') + ','
+        if StatsDependency.objects.count() > 0:
+            data += serializers.serialize('json', StatsDependency.objects.all()).strip('[]') + ','
+        if StatsFlatDependency.objects.count() > 0:
+            data += serializers.serialize('json',
+                                          StatsFlatDependency.objects.all()).strip('[]') + ','
         if User.objects.count() > 0:
             data += serializers.serialize('json', User.objects.all()).strip('[]') + ','
         if Violation.objects.count() > 0:
