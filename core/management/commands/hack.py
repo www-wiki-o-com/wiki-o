@@ -25,7 +25,7 @@ from notifications.models import Notification
 
 from wiki_o.env_vars import CONTENT_KEYS
 from users.models import User, Violation
-from theories.models import Content
+from theories.models.models import Content
 from core.converters import IntegerCypher
 
 # *******************************************************************************

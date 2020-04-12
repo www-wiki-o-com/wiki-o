@@ -13,61 +13,53 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import copy
+import datetime
+import inspect
+import re
+import unicodedata
+
+import reversion
+from actstream import action
+from actstream.actions import is_following
+from actstream.models import (followers, model_stream, target_stream, user_stream)
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth import authenticate, login, logout
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse, reverse_lazy
-from django.http import HttpResponse
-from django.template import loader
-from django.views import generic
-from django.views.generic.edit import CreateView, UpdateView, DeleteView, FormView
-from django.views.generic import TemplateView
-from django.forms import Textarea, modelformset_factory
-from django.views.generic.base import RedirectView
-from django.core import mail
-from django.db.models import Count, Sum, F, Q
-from rules.contrib.views import permission_required
-from rules.contrib.views import objectgetter as get_object
-from rules.contrib.views import PermissionRequiredMixin
-from django.utils.http import unquote
-from django.core.paginator import Paginator
-from django.utils import timezone
 from django.contrib.auth.models import Group, Permission
-from django.http import Http404
-
-import re
-import copy
-import inspect
-import datetime
-import reversion
-import unicodedata
-from reversion.models import Version
-from actstream import action
-from actstream.models import user_stream, model_stream, target_stream, followers
-from actstream.actions import is_following
+from django.core import mail
+from django.core.paginator import Paginator
+from django.db.models import Count, F, Q, Sum
+from django.forms import Textarea, modelformset_factory
+from django.http import Http404, HttpResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.template import loader
+from django.urls import reverse, reverse_lazy
+from django.utils import timezone
+from django.utils.http import unquote
+from django.views import generic
+from django.views.generic import TemplateView
+from django.views.generic.base import RedirectView
+from django.views.generic.edit import (CreateView, DeleteView, FormView, UpdateView)
 from notifications.signals import notify
+from reversion.models import Version
+from rules.contrib.views import PermissionRequiredMixin
+from rules.contrib.views import objectgetter as get_object
+from rules.contrib.views import permission_required
 
-from theories.converters import CONTENT_PK_CYPHER
-from theories.models import Category, Content, Opinion, OpinionDependency, Stats
-from theories.forms import TheoryForm, EvidenceForm, OpinionForm
-from theories.forms import SelectDependencyForm, OpinionDependencyForm
-from theories.forms import TheoryRevisionForm, EvidenceRevisionForm
-from theories.graphs.pie_charts import OpinionPieChart
-from theories.graphs.pie_charts import OpinionComparisionPieChart
-from theories.graphs.pie_charts import DemoPieChart
-from theories.graphs.bar_graphs import OpinionBarGraph
-from theories.graphs.bar_graphs import OpinionComparisionBarGraph
-from theories.graphs.bar_graphs import DemoBarGraph
-from theories.graphs.venn_diagrams import OpinionVennDiagram
-from theories.graphs.venn_diagrams import OpinionComparisionVennDiagram
-from theories.graphs.venn_diagrams import DemoVennDiagram
-from theories.utils import get_demo_opinion
-from theories.utils import get_category_suggestions
-
-from users.models import User
-from users.forms import ReportViolationForm
 from core.utils import Parameters, get_or_none, get_page_list
+from theories.converters import CONTENT_PK_CYPHER
+from theories.forms import (EvidenceForm, EvidenceRevisionForm, OpinionDependencyForm, OpinionForm,
+                            SelectDependencyForm, TheoryForm, TheoryRevisionForm)
+from theories.graphs.bar_graphs import (DemoBarGraph, OpinionBarGraph, OpinionComparisionBarGraph)
+from theories.graphs.pie_charts import (DemoPieChart, OpinionComparisionPieChart, OpinionPieChart)
+from theories.graphs.venn_diagrams import (DemoVennDiagram, OpinionComparisionVennDiagram,
+                                           OpinionVennDiagram)
+from theories.models.models import (Category, Content, Opinion, OpinionDependency, Stats,
+                                    merge_content, convert_content_type)
+from theories.utils import get_category_suggestions, get_demo_opinion
+from users.forms import ReportViolationForm
+from users.models import User
 
 # *******************************************************************************
 # Defines
@@ -652,7 +644,8 @@ def TheoryMergeView(request, content_pk):
                 if form.cleaned_data['select']:
                     content = form.instance
                     # merge
-                    theory.merge(content, user=user)
+                    merge_content(theory, content, user=user)
+                    content.delete()
                     # activity log
                     theory.update_activity_logs(user,
                                                 verb='Merged with <# object.url {{ object }} #>',
@@ -1122,7 +1115,7 @@ def EvidenceMergeView(request, content_pk):
                 if form.cleaned_data['select']:
                     content = form.instance
                     # merge
-                    evidence.merge(content, user=user)
+                    merge_content(evidence, content, user=user)
                     # activity log
                     evidence.update_activity_logs(user, verb='Merge', action_object=content)
             return redirect(next)
@@ -1441,7 +1434,7 @@ def ContentConvert(request, content_pk):
     # Post request
     if request.method == 'POST':
         # convert
-        content.convert(user, verifiable=verifiable)
+        convert_content_type(content, user, verifiable=verifiable)
         # activity
         if content.is_evidence():
             content.update_activity_logs(user, verb='Converted to Evidence')
@@ -1472,7 +1465,7 @@ def TheorySwapTitles(request, content_pk):
 
     # Post request
     if request.method == 'POST':
-        theory.swap_titles(user=user)
+        content_swap_true_false(theory)
         theory.update_activity_logs(user, verb='Swapped T/F Titles')
         return redirect(next)
 
@@ -1501,7 +1494,7 @@ def OpinionIndexView(request, content_pk, stats_slug='all'):
     # Setup
     theory = get_object_or_404(Content, pk=content_pk)
     stats_type = Stats.slug_to_type(stats_slug)
-    stats = theory.get_stats(stats_type)
+    stats = Status.get_stats(theory, stats_type)
     opinions = list(stats.opinions.filter(anonymous=True))
     opinions += list(stats.opinions.filter(anonymous=False).order_by('user__username'))
 
@@ -1568,7 +1561,7 @@ def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
             theory = opinion.content
         else:
             theory = get_object_or_404(Content, pk=content_pk)
-            opinion = theory.get_stats(opinion_slug)
+            opinion = Stats.get(theory, opinion_slug)
             opinion.cache()
     else:
         raise Http404("Opinion does not exist.")
@@ -1726,14 +1719,14 @@ def OpinionCompareView(request,
     if opinion_pk01 is not None:
         opinion01 = get_object_or_404(Opinion, pk=opinion_pk01)
     elif opinion_slug01 is not None:
-        opinion01 = theory.get_stats(opinion_slug01)
+        opinion01 = Stats.get(theory, opinion_slug01)
     else:
         raise Http404("Opinion does not exist.")
     # Opinion02
     if opinion_pk02 is not None:
         opinion02 = get_object_or_404(Opinion, pk=opinion_pk02)
     elif opinion_slug02 is not None:
-        opinion02 = theory.get_stats(opinion_slug02)
+        opinion02 = Stats.get(theory, opinion_slug02)
     else:
         raise Http404("Opinion does not exist.")
     # Compare list
@@ -1865,7 +1858,7 @@ def OpinionEditView(request, content_pk, wizard=False):
 
             # remove opinion from stats
             if opinion_form.instance.id is not None:
-                theory.remove_from_stats(opinion, cache=True, save=False)
+                Stats.remove(opinion, cache=True, save=False)
 
             # save opinion
             if opinion_form.has_changed() or opinion.pk is None:
@@ -1878,8 +1871,8 @@ def OpinionEditView(request, content_pk, wizard=False):
 
             # update points
             opinion.update_points()
-            theory.add_to_stats(opinion, cache=True, save=False)
-            theory.save_stats()
+            Stats.add(opinion, cache=True, save=False)
+            Stats.save(opinion)
             opinion.update_activity_logs(user, verb='Modified.')
 
             # update utilization

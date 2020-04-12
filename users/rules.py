@@ -19,7 +19,7 @@ from django.contrib.auth.models import Group
 from django.db.models.signals import post_save
 
 from users.models import User, Violation
-from theories.models import Content
+from theories.models.models import Content
 
 # *******************************************************************************
 # Promotions/Demotions

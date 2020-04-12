@@ -17,7 +17,7 @@ import rules
 from rules.contrib.views import permission_required, objectgetter
 from rules.contrib.views import PermissionRequiredMixin
 
-from theories.models import Content, Opinion
+from theories.models.models import Content, Opinion
 from reversion.models import Version
 
 # *******************************************************************************

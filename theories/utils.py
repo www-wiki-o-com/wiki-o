@@ -13,17 +13,16 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import random
 import logging
+import random
 
-from theories.models import Category, Content
 from theories.abstract_models import OpinionBase
+from theories.models.models import Category, Content
 
 # *******************************************************************************
 # Defines
 # *******************************************************************************
 LOGGER = logging.getLogger(__name__)
-
 CATEGORY_TITLES = [
     'All',
     'Science',

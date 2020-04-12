@@ -15,7 +15,8 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import random
 from nose.tools import nottest
-from theories.models import Category, Content
+from theories.models.content import Content
+from theories.models.models import Category, Stats
 
 # *******************************************************************************
 # Defines
@@ -172,5 +173,5 @@ def create_test_opinion(content,
                 ff_input=random.randint(0, 100),
             )
     opinion.update_points()
-    content.add_to_stats(opinion)
+    Stats.add(opinion)
     return opinion

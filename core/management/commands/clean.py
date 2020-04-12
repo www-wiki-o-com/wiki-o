@@ -18,7 +18,7 @@ import re
 from django.core.management.base import BaseCommand
 from django.template.defaultfilters import slugify
 
-from theories.models import Category, Content
+from theories.models.models import Category, Content
 
 # *******************************************************************************
 # Defines

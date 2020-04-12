@@ -27,7 +27,7 @@ from users.models import User, Violation, ViolationVote
 from users.forms import UserForm, SelectNotificationForm
 from users.forms import SelectViolationForm, ReportViolationForm
 from users.forms import ResolveViolationForm, VoteForm
-from theories.models import Category, Content, Opinion
+from theories.models.models import Category, Content, Opinion
 from theories.forms import TheoryForm, EvidenceForm, TheoryRevisionForm
 from core.utils import Parameters, get_page_list, get_first_or_none
 

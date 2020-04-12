@@ -21,7 +21,7 @@ from django.forms import TextInput
 from django.contrib.auth.models import AnonymousUser
 from reversion.models import Version
 
-from theories.models import Category, Content, Opinion, OpinionDependency
+from theories.models.models import Category, Content, Opinion, OpinionDependency
 from core.utils import string_to_list, get_or_none
 
 # *******************************************************************************
