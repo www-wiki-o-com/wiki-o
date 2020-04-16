@@ -22,7 +22,7 @@ import unicodedata
 import reversion
 from actstream import action
 from actstream.actions import is_following
-from actstream.models import (followers, model_stream, target_stream, user_stream)
+from actstream.models import followers, model_stream, target_stream, user_stream
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -40,7 +40,7 @@ from django.utils.http import unquote
 from django.views import generic
 from django.views.generic import TemplateView
 from django.views.generic.base import RedirectView
-from django.views.generic.edit import (CreateView, DeleteView, FormView, UpdateView)
+from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
 from notifications.signals import notify
 from reversion.models import Version
 from rules.contrib.views import PermissionRequiredMixin
@@ -51,14 +51,14 @@ from core.utils import Parameters, get_or_none, get_page_list
 from theories.converters import CONTENT_PK_CYPHER
 from theories.forms import (EvidenceForm, EvidenceRevisionForm, OpinionDependencyForm, OpinionForm,
                             SelectDependencyForm, TheoryForm, TheoryRevisionForm)
-from theories.graphs.bar_graphs import (DemoBarGraph, OpinionBarGraph, OpinionComparisionBarGraph)
-from theories.graphs.pie_charts import (DemoPieChart, OpinionComparisionPieChart, OpinionPieChart)
-from theories.graphs.venn_diagrams import (DemoVennDiagram, OpinionComparisionVennDiagram,
-                                           OpinionVennDiagram)
+from theories.graphs.bar_graphs import DemoBarGraph, OpinionBarGraph, OpinionComparisionBarGraph
+from theories.graphs.pie_charts import DemoPieChart, OpinionComparisionPieChart, OpinionPieChart
+from theories.graphs.venn_diagrams import DemoVennDiagram, OpinionComparisionVennDiagram, OpinionVennDiagram
+from theories.model_utils import convert_content_type, copy_opinion, get_compare_url, merge_content
+from theories.models.categories import Category
 from theories.models.content import Content
-from theories.models.category import Category
-from theories.models.models import (Opinion, OpinionDependency, Stats, merge_content,
-                                    convert_content_type, get_compare_url, copy_opinion)
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.statistics import Stats
 from theories.utils import get_category_suggestions, get_demo_opinion
 from users.forms import ReportViolationForm
 from users.models import User

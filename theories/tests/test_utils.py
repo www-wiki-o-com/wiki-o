@@ -19,7 +19,7 @@ from django.test import TestCase
 from actstream.actions import follow
 
 from theories.models.content import Content
-from theories.models.category import Category
+from theories.models.categories import Category
 from theories.utils import get_demo_theory, get_demo_opinion
 from theories.utils import create_categories, create_reserved_dependencies
 from users.maintence import create_groups_and_permissions, create_test_user

@@ -14,12 +14,12 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 import rules
-from django.dispatch import receiver
 from django.contrib.auth.models import Group
 from django.db.models.signals import post_save
+from django.dispatch import receiver
 
+from theories.models.content import Content
 from users.models import User, Violation
-from theories.models.models import Content
 
 # *******************************************************************************
 # Promotions/Demotions

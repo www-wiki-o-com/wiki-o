@@ -25,12 +25,12 @@ from django.utils import timezone
 from hitcount.models import HitCount
 
 from core.utils import get_or_none
-from theories.models.category import Category
+from theories.model_utils import (convert_content_type, copy_opinion, get_compare_url,
+                                  merge_content, swap_true_false)
+from theories.models.categories import Category
 from theories.models.content import Content
-from theories.models.opinion import Opinion
-from theories.models.models import (OpinionDependency, Stats, StatsDependency, StatsFlatDependency,
-                                    merge_content, convert_content_type, swap_true_false,
-                                    get_compare_url, copy_opinion, get_parent_opinions)
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
                                   create_test_theory, get_or_create_evidence,
                                   get_or_create_subtheory)
@@ -1187,7 +1187,7 @@ class OpinionTests(TestCase):
         )
 
         # Blah
-        parents = get_parent_opinions(child_opinion)
+        parents = child_opinion.get_parent_opinions()
         self.assertEqual(parents.count(), 1)
         self.assertIn(opinion_dependency, parents)
 

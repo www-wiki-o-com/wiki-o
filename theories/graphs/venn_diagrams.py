@@ -16,7 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 import math
 import random
 
-from theories.models.models import OpinionDependencyBase, Opinion
+from theories.models.opinions import OpinionBase, OpinionDependencyBase
 from theories.graphs.shapes import Colour, Text
 from theories.graphs.spring_shapes import Direction, Ring, EvidenceShape, SubtheoryShape, Wall
 from theories.utils import get_demo_opinion

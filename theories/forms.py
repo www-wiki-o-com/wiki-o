@@ -22,8 +22,8 @@ from django.contrib.auth.models import AnonymousUser
 from reversion.models import Version
 
 from theories.models.content import Content
-from theories.models.category import Category
-from theories.models.models import Opinion, OpinionDependency
+from theories.models.categories import Category
+from theories.models.opinions import Opinion, OpinionDependency
 from core.utils import string_to_list, get_or_none
 
 # *******************************************************************************

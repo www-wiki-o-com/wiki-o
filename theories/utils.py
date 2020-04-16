@@ -16,9 +16,9 @@ LICENSE.md file in the root directory of this source tree.
 import logging
 import random
 
-from theories.abstract_models import OpinionBase
+from theories.models.categories import Category
 from theories.models.content import Content
-from theories.models.category import Category
+from theories.models.opinions import OpinionBase
 
 # *******************************************************************************
 # Defines

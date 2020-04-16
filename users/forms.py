@@ -16,8 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 from django import forms
 from notifications.models import Notification
 
-from users.models import User
-from users.models import Violation, ViolationFeedback, ViolationVote
+from users.models import User, Violation, ViolationFeedback, ViolationVote
 
 # *******************************************************************************
 # Classes

@@ -13,20 +13,18 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import sys
-import time
 import random
+import time
 
-from django.core.management.base import BaseCommand
-from django.contrib.auth.models import Permission
 from actstream.models import Action
-from reversion.models import Version
+from django.contrib.auth.models import Permission
+from django.core.management.base import BaseCommand
 from notifications.models import Notification
+from reversion.models import Version
 
-from wiki_o.env_vars import CONTENT_KEYS
-from users.models import User, Violation
-from theories.models.models import Content
 from core.converters import IntegerCypher
+from theories.models.content import Content
+from users.models import User, Violation
 
 # *******************************************************************************
 # Defines

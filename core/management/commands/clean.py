@@ -18,8 +18,8 @@ import re
 from django.core.management.base import BaseCommand
 from django.template.defaultfilters import slugify
 
-from theories.models.models.content import Content
-from theories.models.models.category import Category
+from theories.models.content import Content
+from theories.models.categories import Category
 
 # *******************************************************************************
 # Defines

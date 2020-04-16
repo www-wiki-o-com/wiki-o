@@ -15,10 +15,11 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 from django.contrib import admin
 from reversion.admin import VersionAdmin
+
+from theories.models.categories import Category
 from theories.models.content import Content
-from theories.models.category import Category
-from theories.models.models import Opinion, OpinionDependency
-from theories.models.models import Stats, StatsDependency, StatsFlatDependency
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
 
 # *******************************************************************************
 # Classes

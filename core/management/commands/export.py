@@ -19,10 +19,10 @@ import sys
 from django.core import serializers
 from django.core.management.base import BaseCommand
 
+from theories.models.categories import Category
 from theories.models.content import Content
-from theories.models.category import Category
-from theories.models import (Opinion, OpinionDependency, Stats, StatsFlatDependency,
-                             StatsDependency)
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
 from users.models import User, Violation, ViolationFeedback, ViolationVote
 
 # *******************************************************************************

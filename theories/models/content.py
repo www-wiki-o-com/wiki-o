@@ -15,28 +15,23 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import inspect
 import logging
-import reversion
 
+import reversion
+from actstream.models import followers
+from django.contrib.contenttypes.fields import GenericRelation
 from django.db import models
+from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from django.db.models import Q
-from django.contrib.contenttypes.fields import GenericRelation
-from model_utils import Choices
-from actstream import action
-from actstream.models import followers
-from actstream.actions import is_following
-from notifications.signals import notify
-from reversion.models import Version
 from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
+from model_utils import Choices
+from notifications.signals import notify
+from reversion.models import Version
 
+from core.utils import notify_if_unique, stream_if_unique
+from theories.models.abstract import SavedDependencies, SavedOpinions
 from users.models import User, Violation
-from core.utils import QuerySetDict
-from core.utils import get_or_none, get_first_or_none
-from core.utils import stream_if_unique, notify_if_unique
-from theories.abstract_models import SavedOpinions, SavedDependencies
-from theories.abstract_models import OpinionBase, OpinionDependencyBase
 
 # *******************************************************************************
 # Defines

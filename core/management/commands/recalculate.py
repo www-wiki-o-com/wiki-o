@@ -14,7 +14,8 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 from django.core.management.base import BaseCommand
-from theories.models.models import Content, Stats
+from theories.models.content import Content
+from theories.models.statistics import Stats
 
 # *******************************************************************************
 # Defines
