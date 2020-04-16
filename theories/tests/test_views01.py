@@ -518,8 +518,8 @@ class AnonymousUserViews(TestCase, ViewsTestBase):
     # ******************************
     # Post - AnonymousUser
     # ******************************
-    def test_post_opinion_copy(self):
-        super().test_post_opinion_copy(
+    def test_post_copy_opinion(self):
+        super().test_post_copy_opinion(
             override=True,
             code=302,
             redirect_url='/accounts/login/',

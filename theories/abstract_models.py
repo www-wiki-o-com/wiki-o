@@ -218,11 +218,6 @@ class OpinionBase(ContentPointerBase, SavedPoints, SavedDependencies):
     def url(self):
         """Return none. Abstract objects have no data in the db."""
 
-    def compare_url(self, opinion02=None):
-        """Return none. Abstract objects have no data in the db."""
-        LOGGER.error('TheoryPointerBase.compare_url: There is no url for an abstract object (%s).',
-                     str(self))
-
     def get_dependency(self, content, create=False):
         """Return the stats dependency for the corresponding content (optionally, create the stats dependency)."""
         # Get dependencies.

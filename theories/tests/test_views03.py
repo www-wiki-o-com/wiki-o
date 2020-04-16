@@ -457,8 +457,8 @@ class Level01aUserViews(TestCase, ViewsTestBase):
     # ******************************
     # Post - Level01aUser
     # ******************************
-    def test_post_opinion_copy(self):
-        super().test_post_opinion_copy(override=True,)
+    def test_post_copy_opinion(self):
+        super().test_post_copy_opinion(override=True,)
 
     # ******************************
     # Post - Level01aUser

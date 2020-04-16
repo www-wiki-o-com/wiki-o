@@ -10,10 +10,10 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
-import datetime
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import datetime
 import random
 
 from actstream.actions import follow
@@ -25,11 +25,12 @@ from django.utils import timezone
 from hitcount.models import HitCount
 
 from core.utils import get_or_none
-from theories.models.content import Content
 from theories.models.category import Category
-from theories.models.models import (Opinion, OpinionDependency, Stats, StatsDependency,
-                                    StatsFlatDependency, merge_content, convert_content_type,
-                                    swap_true_false)
+from theories.models.content import Content
+from theories.models.opinion import Opinion
+from theories.models.models import (OpinionDependency, Stats, StatsDependency, StatsFlatDependency,
+                                    merge_content, convert_content_type, swap_true_false,
+                                    get_compare_url, copy_opinion, get_parent_opinions)
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
                                   create_test_theory, get_or_create_evidence,
                                   get_or_create_subtheory)
@@ -955,9 +956,9 @@ class OpinionTests(TestCase):
     def test_compare_url(self):
         opinion = self.content.opinions.create(user=self.user)
         stats = Stats.get(self.content, Stats.TYPE.ALL)
-        self.assertIsNotNone(opinion.compare_url())
-        self.assertIsNotNone(opinion.compare_url(opinion))
-        self.assertIsNotNone(opinion.compare_url(stats))
+        self.assertIsNotNone(get_compare_url(opinion))
+        self.assertIsNotNone(get_compare_url(opinion, opinion))
+        self.assertIsNotNone(get_compare_url(opinion, stats))
 
     def test_get_absolute_url(self):
         opinion = self.content.opinions.create(user=self.user)
@@ -1186,7 +1187,7 @@ class OpinionTests(TestCase):
         )
 
         # Blah
-        parents = child_opinion.get_parent_opinions()
+        parents = get_parent_opinions(child_opinion)
         self.assertEqual(parents.count(), 1)
         self.assertIn(opinion_dependency, parents)
 
@@ -1583,7 +1584,7 @@ class OpinionTests(TestCase):
         child_opinion.update_points()
 
         # Blah
-        copied_opinion = opinion.copy(self.user)
+        copied_opinion = copy_opinion(opinion, self.user)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
         copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
@@ -1593,7 +1594,7 @@ class OpinionTests(TestCase):
         self.assertNotEqual(copied_child.true_points(), child_opinion.true_points())
 
         # Blah
-        copied_opinion = opinion.copy(self.user, recursive=True)
+        copied_opinion = copy_opinion(opinion, self.user, recursive=True)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
         copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
@@ -2092,7 +2093,7 @@ class StatsTests(TestCase):
         self.assertIsNotNone(self.stats.url())
 
     def test_compare_url(self):
-        self.assertIsNotNone(self.stats.compare_url())
+        self.assertIsNotNone(get_compare_url(self.stats))
 
 
 # ************************************************************

@@ -1071,7 +1071,7 @@ class ViewsTestBase():
     # ******************************
     # Post - ViewsTestBase
     # ******************************
-    def test_post_opinion_copy(self, override=False, redirect_url=None, code=302, copied=True):
+    def test_post_copy_opinion(self, override=False, redirect_url=None, code=302, copied=True):
         # setup
         if redirect_url is None:
             redirect_url = reverse('theories:opinion-detail',

@@ -58,7 +58,7 @@ from theories.graphs.venn_diagrams import (DemoVennDiagram, OpinionComparisionVe
 from theories.models.content import Content
 from theories.models.category import Category
 from theories.models.models import (Opinion, OpinionDependency, Stats, merge_content,
-                                    convert_content_type)
+                                    convert_content_type, get_compare_url, copy_opinion)
 from theories.utils import get_category_suggestions, get_demo_opinion
 from users.forms import ReportViolationForm
 from users.models import User
@@ -147,7 +147,7 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
                 'text': 'My Opinion',
                 'true_points': round(my_opinion.true_points() * 100),
                 'false_points': round(my_opinion.false_points() * 100),
-                'url': opinion01.compare_url(my_opinion),
+                'url': get_compare_url(opinion01, my_opinion),
             }
             compare_list.append(entry)
             exclude_users.append(current_user)
@@ -159,7 +159,7 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
                 'text': stats.get_owner(),
                 'true_points': round(stats.true_points() * 100),
                 'false_points': round(stats.false_points() * 100),
-                'url': opinion01.compare_url(stats),
+                'url': get_compare_url(opinion01, stats),
             }
             compare_list.append(entry)
 
@@ -169,7 +169,7 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
             'text': opinion02.get_owner(),
             'true_points': round(opinion02.true_points() * 100),
             'false_points': round(opinion02.false_points() * 100),
-            'url': opinion01.compare_url(opinion02),
+            'url': get_compare_url(opinion01, opinion02),
         })
 
     return compare_list
@@ -1611,7 +1611,7 @@ def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
             if parent_opinion is not None and \
                (parent_opinion.is_anonymous() == opinion.is_anonymous()):
                 prev = parent_opinion.url() + params.get_prev()
-    compare_url = opinion.compare_url()
+    compare_url = get_compare_url(opinion)
 
     # Flatten
     flat = 'flat' in params.flags
@@ -1736,7 +1736,7 @@ def OpinionCompareView(request,
 
     # Navigation
     params = Parameters(request)
-    swap_compare_url = opinion02.compare_url(opinion01) + params
+    swap_compare_url = get_compare_url(opinion02, opinion01) + params
 
     # Flatten
     flat = 'flat' in params.flags
@@ -1745,7 +1745,7 @@ def OpinionCompareView(request,
         params00.flags.remove('flat')
     else:
         params00.flags.append('flat')
-    swap_flat_url = opinion01.compare_url(opinion02) + params00
+    swap_flat_url = get_compare_url(opinion01, opinion02) + params00
 
     # Diagrams
     points_diagram = OpinionComparisionPieChart(opinion01, opinion02)
@@ -1937,7 +1937,7 @@ def OpinionCopy(request, opinion_pk):
 
     # Post request
     if request.method == 'POST':
-        user_opinion = opinion.copy(user, recursive=recursive)
+        user_opinion = copy_opinion(opinion, user, recursive=recursive)
         user_opinion.update_activity_logs(user, verb='Copied', action_object=user_opinion)
         next = user_opinion.url() + params
         return redirect(next)
