@@ -17,7 +17,8 @@ import logging
 import random
 
 from theories.abstract_models import OpinionBase
-from theories.models.models import Category, Content
+from theories.models.content import Content
+from theories.models.category import Category
 
 # *******************************************************************************
 # Defines

@@ -25,9 +25,11 @@ from django.utils import timezone
 from hitcount.models import HitCount
 
 from core.utils import get_or_none
-from theories.models.models import (Category, Content, Opinion, OpinionDependency, Stats,
-                                    StatsDependency, StatsFlatDependency, merge_content,
-                                    convert_content_type, swap_true_false)
+from theories.models.content import Content
+from theories.models.category import Category
+from theories.models.models import (Opinion, OpinionDependency, Stats, StatsDependency,
+                                    StatsFlatDependency, merge_content, convert_content_type,
+                                    swap_true_false)
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
                                   create_test_theory, get_or_create_evidence,
                                   get_or_create_subtheory)

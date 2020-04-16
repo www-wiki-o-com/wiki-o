@@ -16,7 +16,8 @@ LICENSE.md file in the root directory of this source tree.
 import random
 from nose.tools import nottest
 from theories.models.content import Content
-from theories.models.models import Category, Stats
+from theories.models.category import Category
+from theories.models.models import Stats
 
 # *******************************************************************************
 # Defines

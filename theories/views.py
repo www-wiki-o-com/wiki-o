@@ -55,8 +55,10 @@ from theories.graphs.bar_graphs import (DemoBarGraph, OpinionBarGraph, OpinionCo
 from theories.graphs.pie_charts import (DemoPieChart, OpinionComparisionPieChart, OpinionPieChart)
 from theories.graphs.venn_diagrams import (DemoVennDiagram, OpinionComparisionVennDiagram,
                                            OpinionVennDiagram)
-from theories.models.models import (Category, Content, Opinion, OpinionDependency, Stats,
-                                    merge_content, convert_content_type)
+from theories.models.content import Content
+from theories.models.category import Category
+from theories.models.models import (Opinion, OpinionDependency, Stats, merge_content,
+                                    convert_content_type)
 from theories.utils import get_category_suggestions, get_demo_opinion
 from users.forms import ReportViolationForm
 from users.models import User
