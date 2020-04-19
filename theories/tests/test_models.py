@@ -13,27 +13,29 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import random
 import datetime
-
-from django.test import TestCase
-from django.urls import reverse
-from django.contrib import auth
-from django.shortcuts import get_object_or_404, render, redirect
-from django.utils import timezone
+import random
 
 from actstream.actions import follow
+from django.contrib import auth
+from django.shortcuts import get_object_or_404, redirect, render
+from django.test import TestCase
+from django.urls import reverse
+from django.utils import timezone
 from hitcount.models import HitCount
 
-from theories.models import Category, Content, Opinion, Stats
-from theories.models import OpinionDependency, StatsDependency, StatsFlatDependency
+from core.utils import get_or_none
+from theories.model_utils import (convert_content_type, copy_opinion, get_compare_url,
+                                  merge_content, swap_true_false)
+from theories.models.categories import Category
+from theories.models.content import Content
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
+from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
+                                  create_test_theory, get_or_create_evidence,
+                                  get_or_create_subtheory)
 from theories.utils import create_categories, create_reserved_dependencies
 from users.maintence import create_groups_and_permissions, create_test_user
-from core.utils import get_or_none
-
-from theories.tests.utils import create_test_theory, create_test_opinion
-from theories.tests.utils import get_or_create_subtheory, get_or_create_evidence
-from theories.tests.utils import create_test_subtheory, create_test_evidence
 
 # *******************************************************************************
 # Defines
@@ -177,7 +179,7 @@ class ContentTests(TestCase):
                                             created_by=self.user)
         self.intuition = Content.get_intuition()
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             if stats.opinion_is_member(self.opinion):
                 stats.add_opinion(self.opinion, save=False)
             stats.save_changes()
@@ -621,36 +623,34 @@ class ContentTests(TestCase):
         result = self.evidence.cache()
         self.assertFalse(result)
 
-        result = self.content.cache(dependencies=True, flat_dependencies=False, stats=False)
+        result = self.content.cache(dependencies=True, flat_dependencies=False)
         self.assertTrue(result)
         self.assertIsNotNone(self.content.get_saved_dependencies())
         self.assertIsNone(self.content.get_saved_flat_dependencies())
         self.assertIsNone(self.content.saved_stats)
 
-        result = self.content.cache(dependencies=False, flat_dependencies=True, stats=False)
+        result = self.content.cache(dependencies=False, flat_dependencies=True)
         self.assertTrue(result)
         self.assertIsNotNone(self.content.get_saved_dependencies())
         self.assertIsNotNone(self.content.get_saved_flat_dependencies())
         self.assertIsNone(self.content.saved_stats)
 
-        result = self.content.cache(dependencies=False, flat_dependencies=False, stats=True)
+        result = self.content.cache(dependencies=False, flat_dependencies=False)
         self.assertTrue(result)
         self.assertIsNotNone(self.content.get_saved_dependencies())
         self.assertIsNotNone(self.content.get_saved_flat_dependencies())
-        self.assertIsNotNone(self.content.saved_stats)
 
     def test_get_stats(self):
 
-        stats = self.evidence.get_stats(Stats.TYPE.ALL)
+        stats = Stats.get(self.evidence, Stats.TYPE.ALL)
         self.assertIsNone(stats)
 
-        stats = self.content.get_stats(Stats.TYPE.ALL)
+        stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.assertIsNotNone(stats)
 
-        self.content.cache(stats=True)
-
-        stats = self.content.get_stats(Stats.TYPE.ALL)
+        stats = Stats.get(self.content, Stats.TYPE.ALL, cache=True)
         self.assertIsNotNone(stats)
+        self.assertIsNotNone(self.content.saved_stats)
 
         self.assertEqual(self.content.stats.count(), 4)
         self.assertEqual(self.evidence.stats.count(), 0)
@@ -658,15 +658,15 @@ class ContentTests(TestCase):
     def test_get_all_stats(self):
         assert self.content.saved_stats is None
 
-        stats = self.content.get_all_stats()
+        stats = Stats.get(self.content)
         self.assertEqual(stats.count(), 4)
         self.assertIsNone(self.content.saved_stats)
 
-        stats = self.content.get_all_stats(cache=True)
+        stats = Stats.get(self.content, cache=True)
         self.assertEqual(stats.count(), 4)
         self.assertIsNotNone(self.content.saved_stats)
 
-        stats = self.evidence.get_all_stats()
+        stats = Stats.get(self.evidence)
         self.assertIsNone(stats)
 
     def test_update_hits(self):
@@ -771,39 +771,39 @@ class ContentTests(TestCase):
 
     def test_swap_titles00(self):
         self.evidence.title00 = 'False'
-        self.evidence.swap_titles()
+        swap_true_false(self.evidence)
         self.assertNotEqual(self.evidence.title01, 'False')
 
     def test_swap_titles01(self):
         self.content.title00 = 'False'
-        self.content.swap_titles()
+        swap_true_false(self.content)
         self.assertEqual(self.content.title01, 'False')
         self.assertEqual(self.user.notifications.count(), 1)
         # ToDo: test that points were reversed
 
     def test_convert00(self):
-        success = self.content.convert()
+        success = convert_content_type(self.content)
         self.assertTrue(self.content.is_theory())
         self.assertFalse(success)
 
     def test_convert01(self):
-        self.subtheory.convert()
+        convert_content_type(self.subtheory)
         self.assertTrue(self.subtheory.is_evidence())
         self.assertFalse(self.subtheory.is_fact())
         # ToDo: lots...
         # ToDo: test notify
 
     def test_convert02(self):
-        self.subtheory.convert(verifiable=True)
+        convert_content_type(self.subtheory, verifiable=True)
         self.assertTrue(self.subtheory.is_evidence())
         self.assertTrue(self.subtheory.is_fact())
 
     def test_convert03(self):
-        self.evidence.convert()
+        convert_content_type(self.evidence)
         self.assertTrue(self.subtheory.is_subtheory())
 
     def test_merge00(self):
-        result = self.fact.merge(self.fiction)
+        result = merge_content(self.fact, self.fiction)
         self.assertFalse(result)
         # todo lots more
 
@@ -813,10 +813,10 @@ class ContentTests(TestCase):
 
     def test_recalculate_stats(self):
 
-        result = self.evidence.recalculate_stats()
+        result = Stats.recalculate(self.evidence)
         self.assertFalse(result)
 
-        result = self.content.recalculate_stats()
+        result = Stats.recalculate(self.content)
         self.assertTrue(result)
         # toDo lots more
 
@@ -955,10 +955,10 @@ class OpinionTests(TestCase):
 
     def test_compare_url(self):
         opinion = self.content.opinions.create(user=self.user)
-        stats = self.content.get_stats(Stats.TYPE.ALL)
-        self.assertIsNotNone(opinion.compare_url())
-        self.assertIsNotNone(opinion.compare_url(opinion))
-        self.assertIsNotNone(opinion.compare_url(stats))
+        stats = Stats.get(self.content, Stats.TYPE.ALL)
+        self.assertIsNotNone(get_compare_url(opinion))
+        self.assertIsNotNone(get_compare_url(opinion, opinion))
+        self.assertIsNotNone(get_compare_url(opinion, stats))
 
     def test_get_absolute_url(self):
         opinion = self.content.opinions.create(user=self.user)
@@ -1584,7 +1584,7 @@ class OpinionTests(TestCase):
         child_opinion.update_points()
 
         # Blah
-        copied_opinion = opinion.copy(self.user)
+        copied_opinion = copy_opinion(opinion, self.user)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
         copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
@@ -1594,7 +1594,7 @@ class OpinionTests(TestCase):
         self.assertNotEqual(copied_child.true_points(), child_opinion.true_points())
 
         # Blah
-        copied_opinion = opinion.copy(self.user, recursive=True)
+        copied_opinion = copy_opinion(opinion, self.user, recursive=True)
         copied_dependency = copied_opinion.get_dependencies().get(
             content=opinion_dependency.content)
         copied_child = get_or_none(self.subtheory.get_opinions(), user=self.user)
@@ -1749,7 +1749,7 @@ class OpinionDependencyTests(TestCase):
         self.sub_opinion = create_test_opinion(content=self.subtheory,
                                                user=self.user,
                                                dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.opinion_dependency = self.opinion.get_dependency(self.fact)
 
     def test_get_absolute_url(self):
@@ -1858,19 +1858,19 @@ class StatsTests(TestCase):
                                             fact=False,
                                             created_by=self.user)
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
 
     def test_str(self):
         self.assertIsNotNone(self.stats.__str__())
 
     def test_initialize(self):
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             stats.delete()
         assert self.content.stats.count() == 0
 
         # Blah
         Stats.initialize(self.content)
-        stats = self.content.get_all_stats()
+        stats = Stats.get(self.content)
         self.assertEqual(stats.count(), 4)
 
     def test_get_slug(self):
@@ -1884,7 +1884,7 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.get_owner(), 'Everyone')
 
         # coverage
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             stats.get_owner()
 
     def test_get_owner_long(self):
@@ -1892,7 +1892,7 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.get_owner_long(), 'Everyone')
 
         # coverage
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             stats.get_owner_long()
 
     def test_point_range(self):
@@ -1900,7 +1900,7 @@ class StatsTests(TestCase):
         self.assertEqual(self.stats.get_point_range(), (0.0, 1.0))
 
         # coverage
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             stats.get_point_range()
 
     def test_get_dependency(self):
@@ -2093,7 +2093,7 @@ class StatsTests(TestCase):
         self.assertIsNotNone(self.stats.url())
 
     def test_compare_url(self):
-        self.assertIsNotNone(self.stats.compare_url())
+        self.assertIsNotNone(get_compare_url(self.stats))
 
 
 # ************************************************************
@@ -2132,7 +2132,7 @@ class StatsDependencyTests(TestCase):
                                             fact=False,
                                             created_by=self.user)
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.stats_dependency = self.stats.get_dependency(self.fact)
 
     def test_url(self):
@@ -2209,7 +2209,7 @@ class StatsFlatDependencyTests(TestCase):
                                             fact=False,
                                             created_by=self.user)
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.stats_dependency = self.stats.get_flat_dependency(self.fact)
 
     def test_url(self):
@@ -2277,7 +2277,7 @@ class OpinionBaseTests(TestCase):
                                             fact=False,
                                             created_by=self.user)
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.stats_dependency = self.stats.get_flat_dependency(self.fact)
 
     def test_create(self):
@@ -2357,7 +2357,7 @@ class OpinionDependencyBaseTests(TestCase):
                                             fact=False,
                                             created_by=self.user)
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        self.stats = self.content.get_stats(Stats.TYPE.ALL)
+        self.stats = Stats.get(self.content, Stats.TYPE.ALL)
         self.stats_dependency = self.stats.get_flat_dependency(self.fact)
 
     def test_create(self):

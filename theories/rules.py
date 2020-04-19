@@ -14,11 +14,11 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 import rules
-from rules.contrib.views import permission_required, objectgetter
-from rules.contrib.views import PermissionRequiredMixin
-
-from theories.models import Content, Opinion
 from reversion.models import Version
+from rules.contrib.views import PermissionRequiredMixin, objectgetter, permission_required
+
+from theories.models.content import Content
+from theories.models.opinions import Opinion
 
 # *******************************************************************************
 # ToDos:

@@ -13,14 +13,14 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+from django.contrib import auth
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib import auth
 from notifications.signals import notify
 
+from core.utils import get_form_data, timezone_today
 from theories.utils import create_categories
 from users.maintence import create_test_user
-from core.utils import timezone_today, get_form_data
 from users.models import Violation, ViolationFeedback, ViolationVote
 
 # *******************************************************************************

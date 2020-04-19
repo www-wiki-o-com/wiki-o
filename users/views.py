@@ -13,23 +13,24 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+from actstream.models import following
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, render, redirect
-from django.urls import reverse
 from django.core.paginator import Paginator
 from django.forms import modelformset_factory
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils.http import unquote
-from actstream.models import following
 from notifications.models import Notification
 from reversion.models import Version
 
+from core.utils import Parameters, get_first_or_none, get_page_list
+from theories.forms import EvidenceForm, TheoryForm, TheoryRevisionForm
+from theories.models.categories import Category
+from theories.models.content import Content
+from theories.models.opinions import Opinion
+from users.forms import (ReportViolationForm, ResolveViolationForm, SelectNotificationForm,
+                         SelectViolationForm, UserForm, VoteForm)
 from users.models import User, Violation, ViolationVote
-from users.forms import UserForm, SelectNotificationForm
-from users.forms import SelectViolationForm, ReportViolationForm
-from users.forms import ResolveViolationForm, VoteForm
-from theories.models import Category, Content, Opinion
-from theories.forms import TheoryForm, EvidenceForm, TheoryRevisionForm
-from core.utils import Parameters, get_page_list, get_first_or_none
 
 # *******************************************************************************
 # Defines

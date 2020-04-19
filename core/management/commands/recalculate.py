@@ -14,7 +14,8 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 from django.core.management.base import BaseCommand
-from theories.models import Content
+from theories.models.content import Content
+from theories.models.statistics import Stats
 
 # *******************************************************************************
 # Defines
@@ -47,7 +48,7 @@ class Command(BaseCommand):
         # Recalculate stats.
         for theory in thoeries:
             if theory.is_theory():
-                theory.recalculate_stats()
+                Stats.recalculate(theory)
             else:
                 print("recalculate.py (error): pk=%d does not correspond to a theory." % theory.pk)
 

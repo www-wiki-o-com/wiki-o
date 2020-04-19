@@ -13,21 +13,20 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import re
 import datetime
 import logging
+import re
 
+from django.contrib.auth.models import AbstractUser
+from django.contrib.contenttypes.fields import (GenericForeignKey, GenericRelation)
+from django.contrib.contenttypes.models import ContentType
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.urls import reverse
-from django.contrib.auth.models import AbstractUser
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.fields import GenericRelation
-from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
-from django.core.exceptions import ObjectDoesNotExist
 
+from core.utils import Choices, get_or_none, timezone_today
 from users.utils import level_to_group
-from core.utils import Choices, timezone_today, get_or_none
 
 # *******************************************************************************
 # Defines

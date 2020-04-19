@@ -376,8 +376,8 @@ class Level04UserViews(TestCase, ViewsTestBase):
     # ******************************
     # Post - Level04User
     # ******************************
-    def test_post_opinion_copy(self):
-        super().test_post_opinion_copy(override=True,)
+    def test_post_copy_opinion(self):
+        super().test_post_copy_opinion(override=True,)
 
     # ******************************
     # Post - Level04User

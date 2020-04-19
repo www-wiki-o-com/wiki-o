@@ -18,7 +18,8 @@ import random
 from django.test import TestCase
 from actstream.actions import follow
 
-from theories.models import Category, Content
+from theories.models.content import Content
+from theories.models.categories import Category
 from theories.utils import get_demo_theory, get_demo_opinion
 from theories.utils import create_categories, create_reserved_dependencies
 from users.maintence import create_groups_and_permissions, create_test_user
@@ -59,7 +60,7 @@ class UtilsTests(TestCase):
                                             created_by=self.user)
         self.intuition = Content.get_intuition()
         self.opinion = create_test_opinion(content=self.content, user=self.user, dependencies=True)
-        for stats in self.content.get_all_stats():
+        for stats in Stats.get(self.content):
             if stats.opinion_is_member(self.opinion):
                 stats.add_opinion(self.opinion, save=False)
             stats.save_changes()

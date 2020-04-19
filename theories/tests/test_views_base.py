@@ -15,18 +15,20 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import random
 
+from django.contrib import auth
+from django.shortcuts import get_object_or_404, redirect, render
 from django.test import TestCase
 from django.urls import reverse
-from django.contrib import auth
-from django.shortcuts import get_object_or_404, render, redirect
 
-from theories.converters import CONTENT_PK_CYPHER
-from theories.models import Content, Opinion, OpinionDependency
-from theories.utils import create_categories, create_reserved_dependencies
-from theories.tests.utils import create_test_opinion
-from theories.tests.utils import create_test_theory, create_test_subtheory, create_test_evidence
-from users.maintence import create_test_user
 from core.utils import get_form_data, get_or_none
+from theories.converters import CONTENT_PK_CYPHER
+from theories.model_utils import convert_content_type
+from theories.models.content import Content
+from theories.models.opinions import Opinion, OpinionDependency
+from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
+                                  create_test_theory)
+from theories.utils import create_categories, create_reserved_dependencies
+from users.maintence import create_test_user
 
 # *******************************************************************************
 # Defines
@@ -1071,7 +1073,7 @@ class ViewsTestBase():
     # ******************************
     # Post - ViewsTestBase
     # ******************************
-    def test_post_opinion_copy(self, override=False, redirect_url=None, code=302, copied=True):
+    def test_post_copy_opinion(self, override=False, redirect_url=None, code=302, copied=True):
         # setup
         if redirect_url is None:
             redirect_url = reverse('theories:opinion-detail',
