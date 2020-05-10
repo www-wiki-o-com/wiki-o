@@ -1481,13 +1481,13 @@ def TheorySwapTitles(request, content_pk):
 # *******************************************************************************
 
 
-def OpinionIndexView(request, content_pk, stats_slug='all'):
+def OpinionIndexView(request, content_pk, opinion_slug='all'):
     """Index view for opinions.
 
     Args:
         request ([type]): The post request data.
         pk (int): The theory key.
-        stats_slug (str, optional): The category of opinion. Defaults to 'all'.
+        opinion_slug (str, optional): The category of opinion. Defaults to 'all'.
     """
 
     # Params
@@ -1495,8 +1495,8 @@ def OpinionIndexView(request, content_pk, stats_slug='all'):
 
     # Setup
     theory = get_object_or_404(Content, pk=content_pk)
-    stats_type = Stats.slug_to_type(stats_slug)
-    stats = Status.get_stats(theory, stats_type)
+    stats_type = Stats.slug_to_type(opinion_slug)
+    stats = Stats.get(theory, stats_type)
     opinions = list(stats.opinions.filter(anonymous=True))
     opinions += list(stats.opinions.filter(anonymous=False).order_by('user__username'))
 

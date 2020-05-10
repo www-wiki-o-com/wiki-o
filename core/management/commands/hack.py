@@ -25,6 +25,7 @@ from reversion.models import Version
 from core.converters import IntegerCypher
 from theories.models.content import Content
 from users.models import User, Violation
+from theories.models.statistics import StatsFlatDependency
 
 # *******************************************************************************
 # Defines
@@ -62,6 +63,12 @@ class Command(BaseCommand):
             help='Test cypher.',
         )
 
+        parser.add_argument(
+            '--fix_flat_dependencies',
+            action='store_true',
+            help='Fix FlatDependencies.',
+        )
+
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
         if options['report01']:
@@ -86,6 +93,8 @@ class Command(BaseCommand):
         if options['test02']:
             theory = Content.objects.get(pk=10)
             print(theory.url())
+        if options['fix_flat_dependencies']:
+            self.fix_flat_dependencies()
         print('done')
 
     def report01(self, username):
@@ -143,3 +152,9 @@ class Command(BaseCommand):
         """Fix all broken notifications."""
         for notification in Notification.objects.all():
             print('Notification:', notification)
+
+    def fix_flat_dependencies(self):
+        """Fix all broken flat dependencies."""
+        for dependency in StatsFlatDependency.objects.all():
+            if dependency.is_theory():
+                dependency.delete()
