@@ -15,7 +15,7 @@ import sys
 from .settings_base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True  # TODO (#159) change back to False
 
 # Host Config
 ALLOWED_HOSTS = ['www.wiki-o.com', 'admin.wiki-o.com', 'wiki-o.com', '75.98.169.10']
