@@ -28,8 +28,9 @@ Examples:
 # Imports
 # *******************************************************************************
 from django.conf import settings
-from django.contrib import admin
 from django.urls import include, path
+
+from users.admin import invitation_admin_site
 
 # *******************************************************************************
 # urls
@@ -42,6 +43,7 @@ urlpatterns = [
     path('accounts/', include('django.contrib.auth.urls')),
     path('accounts/actstream/', include('users.activity_urls', namespace='activity')),
     path('accounts/notifications/', include('users.notifications_urls', namespace='notifications')),
+    path('accounts/invite/', invitation_admin_site.urls),
     path('accounts/invitations/', include('invitations.urls', namespace='invitations')),
 ]
 

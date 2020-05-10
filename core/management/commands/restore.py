@@ -78,7 +78,6 @@ class Command(BaseCommand):
                     continue
                 date = date.group()
                 date = datetime.datetime.strptime(date, '%Y.%m.%d')
-                print(date, archive)
                 if latest_date is None or date > latest_date:
                     latest_date = date
                     archive_path = archive
