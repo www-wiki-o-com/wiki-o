@@ -233,7 +233,6 @@ class OpinionBarGraph(BarGraph):
         self.content = opinion.content
         self.opinions = self.content.get_opinions()
 
-        print(236, type(self.content), type(self.opinions))
         bins = min(24, max(6, 6 * (math.floor(self.opinions.count() / 18) - 1)))
         data00 = [0.5 - x.true_points() for x in self.opinions]
         data01 = numpy.histogram(data00, bins=bins, range=(-0.5, 0.5))

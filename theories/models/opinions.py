@@ -130,7 +130,6 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
                     parent=self,
                     content=content,
                 )
-                print(272, self, content)
             else:
                 dependency, _created = self.flat_dependencies.get_or_create(content=content)
             # Add to cache (if it exists).
@@ -240,7 +239,6 @@ class Opinion(OpinionBase, models.Model):
 
     def get_flat_dependency(self, content, create=True):
         # return super(OpinionBase, self).get_flat_dependency(content, create)
-        print(1217, content, create)
         return super().get_flat_dependency(content, create)
 
     def delete(self):
@@ -292,7 +290,7 @@ class Opinion(OpinionBase, models.Model):
         """Save opinion dependencies."""
         self.save_dependencies(self.get_dependencies())
 
-    def get_flat_dependencies(self, cache=True, verbose_level=10):
+    def get_flat_dependencies(self, cache=True, verbose_level=0):
         """Return a list of non-db objects representing the flattened opinion.
            This action populates saved_flat_dependencies.
 
@@ -314,8 +312,8 @@ class Opinion(OpinionBase, models.Model):
             self.save_flat_dependencies(flat_dependencies)
 
             # Get the intuition node.
+            # TODO: Need to change this, currently get_flat_dependency calls get_flat_dependencies.
             intuition_dependency = self.get_flat_dependency(self.content.get_intuition())
-            print(1318, type(intuition_dependency))
 
             # Evidence
             for evidence in self.get_theory_evidence():
@@ -391,8 +389,6 @@ class Opinion(OpinionBase, models.Model):
                         intuition_dependency.true_points() + subtheory.ft_points(),
                         intuition_dependency.false_points() + subtheory.ff_points(),
                     )
-                    print(1395, intuition_dependency, intuition_dependency.true_points(),
-                          intuition_dependency.false_points())
 
                     # Debug
                     if verbose_level >= 10:
