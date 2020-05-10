@@ -264,14 +264,7 @@ LICENSE.md file in the root directory of this source tree.-->
 {% comment %} Suggestions {% endcomment %}
 <script>
   $(document).ready(function () {
-    {
-      %
-      comment %
-    }
-    Inital setup {
-      %
-      endcomment %
-    }
+    /* Inital setup */
     categories = document.getElementById('category-suggestions').getAttribute('suggestions').split(',');
     category_tags = new AmsifySuggestags($('input[name="category_list_input"]'));
     category_tags._settings({
@@ -279,14 +272,7 @@ LICENSE.md file in the root directory of this source tree.-->
     });
     category_tags._init();
 
-    {
-      %
-      comment %
-    }
-    On Click {
-      %
-      endcomment %
-    }
+    /* On Click */
     $('div[name="category-item-input"]').click(function () {
       category_tags.addTag($(this).attr("title"));
     });
