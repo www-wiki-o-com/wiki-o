@@ -276,10 +276,10 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             return False
         elif check_dependencies:
             if self.dependencies.count() > 0:
-                LOGGER.error('592: This dependency should not have dependencies (pk=%d).' % self.pk)
+                LOGGER.error('592: This dependency should not have dependencies (pk=%d).', self.pk)
                 return False
             if self.flat_dependencies.count() > 0:
-                LOGGER.error('593: This dependency should not have flat dependencies (pk=%d).' %
+                LOGGER.error('593: This dependency should not have flat dependencies (pk=%d).',
                              self.pk)
                 return False
         return True

@@ -37,7 +37,7 @@ class HelpView(generic.ListView):
         return None
 
 
-class PolicyView(generic.ListView):
+class PoliciesView(generic.ListView):
     template_name = 'core/policy01.html'
     context_object_name = 'policy'
 
@@ -64,15 +64,10 @@ class AboutView(generic.ListView):
         return None
 
 
-def ContactView(request):
+class ContactView(generic.ListView):
+    template_name = 'core/contact.html'
+    context_object_name = 'contact'
 
-    # Setup
-    user = request.user
-
-    # Render
-    context = {}
-    return render(
-        request,
-        'core/contact.html',
-        context,
-    )
+    def get_queryset(self):
+        """Return nothing."""
+        return None
