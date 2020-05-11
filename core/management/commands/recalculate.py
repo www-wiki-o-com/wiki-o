@@ -49,7 +49,5 @@ class Command(BaseCommand):
         for theory in thoeries:
             if theory.is_theory():
                 Stats.recalculate(theory)
-            else:
-                print("recalculate.py (error): pk=%d does not correspond to a theory." % theory.pk)
 
         print("Done")

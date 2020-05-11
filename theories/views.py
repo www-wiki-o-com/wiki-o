@@ -180,7 +180,7 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
 # *******************************************************************************
 
 
-def ActivityView(request, category_slug=None):
+def activity_view(request, category_slug=None):
     """Home view for display all root theories."""
 
     # Setup
@@ -228,7 +228,7 @@ def ActivityView(request, category_slug=None):
     )
 
 
-def CategoryIndexView(request):
+def category_index_view(request):
     """Index view for categories.
 
     Args:
@@ -269,7 +269,7 @@ def CategoryIndexView(request):
 # *******************************************************************************
 
 
-def TheoryIndexView(request, category_slug=None):
+def theory_index_view(request, category_slug=None):
     """Home view for display all root theories."""
 
     # Categories
@@ -309,7 +309,7 @@ def TheoryIndexView(request, category_slug=None):
     )
 
 
-def TheoryDetail(request, content_pk):
+def theory_detail_view(request, content_pk):
     """A view for displaying theory details."""
     # Preconditions
     Content.update_intuition()
@@ -362,7 +362,7 @@ def TheoryDetail(request, content_pk):
 
 @login_required
 @permission_required('theories.add_content', raise_exception=True)
-def TheoryCreateView(request, category_slug):
+def theory_create_view(request, category_slug):
     """View for create a new theory."""
 
     # Setup
@@ -408,7 +408,7 @@ def TheoryCreateView(request, category_slug):
 @permission_required('theories.change_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def TheoryEditView(request, content_pk):
+def theory_edit_view(request, content_pk):
     """A view for editing theory details."""
 
     # Setup
@@ -469,7 +469,7 @@ def TheoryEditView(request, content_pk):
 
 @login_required
 @permission_required('theories.add_content', raise_exception=True)
-def TheoryEditEvidenceView(request, content_pk):
+def theory_edit_evidence_view(request, content_pk):
     """A view for editing evidence details for the pertaining theory."""
 
     # Setup
@@ -536,7 +536,7 @@ def TheoryEditEvidenceView(request, content_pk):
 
 @login_required
 @permission_required('theories.add_content', raise_exception=True)
-def TheoryEditSubtheoriesView(request, content_pk):
+def theory_edit_subtheories_view(request, content_pk):
     """A view for editing sub-theory details for the pertaining theory."""
 
     # Setup
@@ -605,7 +605,7 @@ def TheoryEditSubtheoriesView(request, content_pk):
 @permission_required('theories.merge_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def TheoryMergeView(request, content_pk):
+def theory_merge_view(request, content_pk):
     """A view for merging theories."""
 
     # Setup
@@ -678,7 +678,7 @@ def TheoryMergeView(request, content_pk):
 
 @login_required
 @permission_required('theories.add_edge', raise_exception=True)
-def TheoryInheritView(request, content_pk01, content_pk02):
+def theory_inherit_view(request, content_pk01, content_pk02):
     """A view for inheriting evidence/sub-theories into the pertaining theory."""
 
     # Setup
@@ -755,7 +755,7 @@ def TheoryInheritView(request, content_pk01, content_pk02):
 
 @login_required
 @permission_required('theories.change_content', raise_exception=True)
-def TheoryRestoreView(request, content_pk):
+def theory_restore_view(request, content_pk):
     """A view for reviewing/deleting theory revisions."""
 
     # Setup
@@ -823,7 +823,7 @@ def TheoryRestoreView(request, content_pk):
 
 @login_required
 @permission_required('theories.backup_content', raise_exception=True)
-def TheoryBackupView(request, content_pk):
+def theory_backup_view(request, content_pk):
     """A method for taking a snap-shot (backup) of a theory dependency."""
 
     # Setup
@@ -883,7 +883,7 @@ def TheoryBackupView(request, content_pk):
     )
 
 
-def TheoryReportView(request, content_pk):
+def theory_report_view(request, content_pk):
 
     # Setup
     user = request.user
@@ -941,7 +941,7 @@ def TheoryReportView(request, content_pk):
     )
 
 
-def TheoryActivityView(request, content_pk):
+def theory_activity_view(request, content_pk):
     """A view for theory activity."""
 
     # Setup
@@ -996,7 +996,7 @@ def TheoryActivityView(request, content_pk):
 # *******************************************************************************
 
 
-def EvidenceDetail(request, content_pk):
+def evidence_detail_view(request, content_pk):
     """A view for displaying evidence details."""
 
     # Setup
@@ -1033,7 +1033,7 @@ def EvidenceDetail(request, content_pk):
 @permission_required('theories.change_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def EvidenceEditView(request, content_pk):
+def evidence_edit_view(request, content_pk):
     """A view for editing evidence details."""
 
     # Setup
@@ -1079,7 +1079,7 @@ def EvidenceEditView(request, content_pk):
 @permission_required('theories.merge_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def EvidenceMergeView(request, content_pk):
+def evidence_merge_view(request, content_pk):
     """A view for merging theories."""
 
     # Setup
@@ -1145,7 +1145,7 @@ def EvidenceMergeView(request, content_pk):
 
 @login_required
 @permission_required('theories.change_content', raise_exception=True)
-def EvidenceRestoreView(request, content_pk):
+def evidence_restore_view(request, content_pk):
     """A view for reviewing evidence revisions."""
 
     # Setup
@@ -1202,7 +1202,7 @@ def EvidenceRestoreView(request, content_pk):
     )
 
 
-def EvidenceReportView(request, content_pk):
+def evidence_report_view(request, content_pk):
 
     # Setup
     user = request.user
@@ -1240,7 +1240,7 @@ def EvidenceReportView(request, content_pk):
     )
 
 
-def EvidenceActivityView(request, content_pk):
+def evidence_activity_view(request, content_pk):
     """A view for evidence activity."""
 
     # Setup
@@ -1290,7 +1290,7 @@ def EvidenceActivityView(request, content_pk):
 @permission_required('theories.delete_edge',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def ContentRemove(request, content_pk):
+def content_remove_redirect_view(request, content_pk):
     """A redirect for deleting theory dependency edges (removing from parents)."""
 
     # Setup
@@ -1327,7 +1327,7 @@ def ContentRemove(request, content_pk):
 @permission_required('theories.delete_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def ContentDelete(request, content_pk):
+def content_delete_redirect_view(request, content_pk):
     """A redirect for deleting theory dependencies."""
 
     # Setup
@@ -1358,7 +1358,7 @@ def ContentDelete(request, content_pk):
 
 @login_required
 @permission_required('theories.backup_content', raise_exception=True)
-def BackupContent(request, content_pk):
+def content_backup_redirect_view(request, content_pk):
     """A method for taking a snap-shot (backup) of a theory dependency."""
 
     # Setup
@@ -1383,7 +1383,7 @@ def BackupContent(request, content_pk):
 @permission_required('theories.restore_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def RevertContent(request, content_pk, version_id):
+def content_revert_redirect_view(request, content_pk, version_id):
     """A method for restoring a theory-dependency snap-shot (backup)."""
 
     # Setup
@@ -1415,7 +1415,7 @@ def RevertContent(request, content_pk, version_id):
 @permission_required('theories.convert_content',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def ContentConvert(request, content_pk):
+def content_convert_redirect_view(request, content_pk):
     """A method for converting a sub-theories to evidence and vise-a-versa."""
 
     # Setup
@@ -1453,7 +1453,7 @@ def ContentConvert(request, content_pk):
 @permission_required('theories.swap_title',
                      fn=get_object(Content, 'content_pk'),
                      raise_exception=True)
-def TheorySwapTitles(request, content_pk):
+def content_swap_titles_redirect_view(request, content_pk):
     """A redirect for swapping the theory true/false statements."""
 
     # Setup
@@ -1481,7 +1481,7 @@ def TheorySwapTitles(request, content_pk):
 # *******************************************************************************
 
 
-def OpinionIndexView(request, content_pk, opinion_slug='all'):
+def opinion_index_view(request, content_pk, opinion_slug='all'):
     """Index view for opinions.
 
     Args:
@@ -1529,7 +1529,7 @@ def OpinionIndexView(request, content_pk, opinion_slug='all'):
 
 
 @login_required
-def RetrieveMyOpinion(request, content_pk):
+def retrieve_my_opinion_redirect_view(request, content_pk):
     """A method for retrieving and redirecting to edit or view the user's opinion."""
 
     # Setup
@@ -1548,7 +1548,7 @@ def RetrieveMyOpinion(request, content_pk):
         return redirect(opinion.url() + params)
 
 
-def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
+def opinion_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
     """The view for displaying opinion and statistical details."""
 
     # Setup
@@ -1699,17 +1699,17 @@ def OpinionDetailView(request, content_pk, opinion_pk=None, opinion_slug=None):
     )
 
 
-def OpinionDemoView(request):
+def opinion_demo_view(request):
     """A view for demoing the graph visualizations used for opinions."""
-    return OpinionDetailView(request, 0, 'debug')
+    return opinion_detail_view(request, 0, 'debug')
 
 
-def OpinionCompareView(request,
-                       content_pk,
-                       opinion_pk01=None,
-                       opinion_pk02=None,
-                       opinion_slug01=None,
-                       opinion_slug02=None):
+def opinion_compare_view(request,
+                         content_pk,
+                         opinion_pk01=None,
+                         opinion_pk02=None,
+                         opinion_slug01=None,
+                         opinion_slug02=None):
     """A view for displaying the differences between two opinions."""
 
     # Setup
@@ -1784,7 +1784,7 @@ def OpinionCompareView(request,
 
 
 @login_required
-def RetrieveMyOpinionEditor(request, content_pk):
+def opinion_retrieve_my_editor_redirect_view(request, content_pk):
     """A method for choosing OpinionAdvEditView or OpinionEditWizardView."""
 
     # setup
@@ -1801,12 +1801,12 @@ def RetrieveMyOpinionEditor(request, content_pk):
 
 
 @login_required
-def OpinionWizardView(request, content_pk):
-    return OpinionEditView(request, content_pk, wizard=True)
+def opinion_wizard_view(request, content_pk):
+    return opinion_edit_view(request, content_pk, wizard=True)
 
 
 @login_required
-def OpinionEditView(request, content_pk, wizard=False):
+def opinion_edit_view(request, content_pk, wizard=False):
     """A view for constructing and editing user opinions."""
 
     # Setup
@@ -1922,7 +1922,7 @@ def OpinionEditView(request, content_pk, wizard=False):
 
 
 @login_required
-def OpinionCopy(request, opinion_pk):
+def opinion_copy_view(request, opinion_pk):
     """A method for copying another user's opinion."""
 
     # Setup
@@ -1950,7 +1950,7 @@ def OpinionCopy(request, opinion_pk):
 @permission_required('theories.delete_opinion',
                      fn=get_object(Opinion, 'opinion_pk'),
                      raise_exception=True)
-def OpinionDelete(request, opinion_pk):
+def opinion_delete_redirect_view(request, opinion_pk):
     """A method for deleting the opinion and redirecting the view."""
 
     # Setup
@@ -1977,7 +1977,7 @@ def OpinionDelete(request, opinion_pk):
 @permission_required('theories.change_opinion',
                      fn=get_object(Opinion, 'opinion_pk'),
                      raise_exception=True)
-def OpinionHideUser(request, opinion_pk):
+def opinion_hide_user_redirect_view(request, opinion_pk):
     """A method for hiding the user for the current opinion."""
 
     # Setup
@@ -2004,7 +2004,7 @@ def OpinionHideUser(request, opinion_pk):
 @permission_required('theories.change_opinion',
                      fn=get_object(Opinion, 'opinion_pk'),
                      raise_exception=True)
-def OpinionRevealUser(request, opinion_pk):
+def opinion_reveal_user_redirect_view(request, opinion_pk):
     """A method for revealing the user for the current opinion."""
 
     # Setup
@@ -2033,7 +2033,7 @@ def OpinionRevealUser(request, opinion_pk):
 # *******************************************************************************
 
 
-def ImageView(request, pk=None):
+def image_view(request, pk=None):
     """The view for displaying opinion and statistical details."""
 
     # Setup
