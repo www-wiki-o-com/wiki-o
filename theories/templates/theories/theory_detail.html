@@ -39,16 +39,23 @@ LICENSE.md file in the root directory of this source tree.-->
       <!-- Main Card -->
 
       <!-- Details -->
-      <div style="text-align: justify">{{  theory.details|long_details }}</div>
+      <div style="text-align: justify;">{{  theory.details|long_details }}</div>
 
       <!-- Dependencys -->
       {% if theory_dependencies %}
       <!-- Heading -->
-      <h4> Evidence: </h4>
+      <h4>
+        {{ theory.get_owner_long }}:
+        <b style="word-spacing:-0.3ex;">
+          {{ theory.true_points|float_to_percent }}
+          /
+          <font color="red">{{ theory.false_points|float_to_percent }}</font>
+        </b>
+      </h4>
       <table style="margin-left: 1em">
         <thead>
           <tr>
-            <td width="17" />
+            <td width="24" />
             <td width="17" />
             <td />
           </tr>
@@ -56,13 +63,22 @@ LICENSE.md file in the root directory of this source tree.-->
         <tbody align="left" valign="top">
           {% for dependency in theory_dependencies %}
           <tr>
-            <!-- Link -->
-            <td> {% include "include/link.html" with x=dependency %} </td>
+            <!-- Guage -->
+            <td>
+              <div class="points">
+                {{ dependency.svg|safe }}
+                <span class="pointstext"><b>
+                    {{ dependency.true_points|float_to_percent }}
+                    /
+                    <font style=" color:red">{{ dependency.false_points|float_to_percent }}</font>
+                  </b></span>
+              </div>
+            </td>
             <!-- Info -->
             <td> {% include "include/info.html" with x=dependency %} </td>
             <!-- Description -->
             <td style="padding-left:5px;">
-              <a class="plain" href="{{ dependency.url|add:params.get_next }}">
+              <a class="plain" href="{{ dependency.content_url|add:params.get_next }}">
                 {% if dependency.is_deleted %}
                 <strike>{{ dependency }}</strike>
                 {% else %}

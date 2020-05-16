@@ -266,9 +266,9 @@ class Opinion(OpinionBase, models.Model):
     def get_owner_long(self):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
         if self.is_anonymous():
-            return 'Anonymous'
+            return 'Opinion for Anonymous'
         else:
-            return self.user.__str__(print_fullname=True)
+            return 'Opinion for %s' % self.user.__str__(print_fullname=True)
 
     def edit_url(self):
         """Return url for editing this opinion."""

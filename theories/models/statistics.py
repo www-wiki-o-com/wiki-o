@@ -253,14 +253,15 @@ class Stats(OpinionBase, models.Model):
 
     def get_owner_long(self, short=False):
         """Return a human readable possessive type of this object."""
+        pre_str = 'Aggregated Opinion for '
         if self.stats_type == self.TYPE.ALL:
-            return "Everyone"
+            return pre_str + 'Everyone'
         elif self.stats_type == self.TYPE.SUPPORTERS:
-            return "The Supporters'"
+            return pre_str + 'Supporters'
         elif self.stats_type == self.TYPE.MODERATES:
-            return "The Moderates'"
+            return pre_str + 'Moderates'
         elif self.stats_type == self.TYPE.OPPOSERS:
-            return "The Opposers'"
+            return pre_str + 'The Opposers'
         else:
             assert False
 

@@ -52,9 +52,12 @@ from theories.converters import CONTENT_PK_CYPHER
 from theories.forms import (EvidenceForm, EvidenceRevisionForm, OpinionDependencyForm, OpinionForm,
                             SelectDependencyForm, TheoryForm, TheoryRevisionForm)
 from theories.graphs.bar_graphs import DemoBarGraph, OpinionBarGraph, OpinionComparisionBarGraph
+from theories.graphs.guage import DependencyGuage
 from theories.graphs.pie_charts import DemoPieChart, OpinionComparisionPieChart, OpinionPieChart
-from theories.graphs.venn_diagrams import DemoVennDiagram, OpinionComparisionVennDiagram, OpinionVennDiagram
-from theories.model_utils import convert_content_type, copy_opinion, get_compare_url, merge_content
+from theories.graphs.venn_diagrams import (DemoVennDiagram, OpinionComparisionVennDiagram,
+                                           OpinionVennDiagram)
+from theories.model_utils import (convert_content_type, copy_opinion, get_compare_url,
+                                  merge_content, swap_true_false)
 from theories.models.categories import Category
 from theories.models.content import Content
 from theories.models.opinions import Opinion, OpinionDependency
@@ -318,7 +321,9 @@ def theory_detail_view(request, content_pk):
     theory = get_object_or_404(Content, pk=content_pk)
     deleted = theory.is_deleted()
     parent_theories = theory.get_parent_theories(deleted=deleted)
-    theory_dependencies = theory.get_dependencies(deleted=deleted).exclude(pk=Content.INTUITION_PK)
+    stats = stats = Stats.get(theory, Stats.TYPE.ALL)
+    theory_dependencies = stats.get_dependencies().annotate(
+        total_points=F('total_true_points') + F('total_false_points')).order_by('-total_points')
 
     opinions = {}
     opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
@@ -344,9 +349,17 @@ def theory_detail_view(request, content_pk):
     # Hit counts
     theory.update_hits(request)
 
+    # Diagrams
+    max_points = 0.0
+    for dependency in theory_dependencies:
+        total_points = dependency.true_points() + dependency.false_points()
+        max_points = max(max_points, total_points)
+    for dependency in theory_dependencies:
+        dependency.svg = DependencyGuage(dependency, normalize=max_points).get_svg()
+
     # Context
     context = {
-        'theory': theory,
+        'theory': stats,
         'theory_dependencies': theory_dependencies,
         'parent_theories': parent_theories,
         'opinions': opinions,
@@ -1467,7 +1480,7 @@ def content_swap_titles_redirect_view(request, content_pk):
 
     # Post request
     if request.method == 'POST':
-        content_swap_true_false(theory)
+        swap_true_false(theory)
         theory.update_activity_logs(user, verb='Swapped T/F Titles')
         return redirect(next)
 
