@@ -52,7 +52,7 @@ LICENSE.md file in the root directory of this source tree.-->
                 {% include "include/info.html" with x=opinion.content %}
               </td>
               <td>
-                <a class="plain" href="{% url 'theories:opinion-detail' opinion.content.pk opinion.pk %}">
+                <a class="plain" href="{% url 'theories:opinion-analysis' opinion.content.pk opinion.pk %}">
                   {{ opinion }}
                 </a>
               </td>
@@ -88,7 +88,7 @@ LICENSE.md file in the root directory of this source tree.-->
                 {% include "include/info.html" with x=opinion.content %}
               </td>
               <td>
-                <a class="plain" href="{% url 'theories:opinion-detail' opinion.content.pk opinion.pk %}">
+                <a class="plain" href="{% url 'theories:opinion-analysis' opinion.content.pk opinion.pk %}">
                   {{ opinion }}
                 </a>
               </td>

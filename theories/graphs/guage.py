@@ -98,7 +98,7 @@ class Guage():
 
 class DependencyGuage(Guage):
     """A class for drawing guages."""
-    BLACK_RED_THRESHOLD = 0.5  # 1.0 * 2 / 3
+    BLACK_RED_THRESHOLD = 1.0 # 100 %
 
     def __init__(self, dependency, normalize=1.0):
         """Constructor for the Guage class.
@@ -129,7 +129,8 @@ class DependencyGuage(Guage):
         elif false_points / total_points >= self.BLACK_RED_THRESHOLD:
             colour = Colour.RED
         else:
-            colour = Colour.BLACK_AND_RED
+            colour = Colour.get_red_black_mix(red_percent=false_points)
+            print(135)
 
         # Graph
         super().__init__(width=width, colour=colour)

@@ -221,7 +221,7 @@ class PieChart():
                       y01 - length,
                       x01 + length,
                       y01 + length,
-                      colour=Colour.get_transparent_colour(Colour, colour)))
+                      colour=Colour.get_transparent_colour(colour)))
 
         # Add the points text
         if points_text is not None:
