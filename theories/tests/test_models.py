@@ -942,12 +942,12 @@ class OpinionTests(TestCase):
         # Blah
         self.user.hidden = False
         opinion.anonymous = False
-        self.assertEqual(opinion.get_owner_long(), self.user.__str__(print_fullname=True))
+        self.assertIn(self.user.__str__(print_fullname=True), opinion.get_owner_long())
 
         # Blah
         self.user.hidden = True
         opinion.anonymous = True
-        self.assertEqual(opinion.get_owner_long(), 'Anonymous')
+        self.assertIn('Anonymous', opinion.get_owner_long())
 
     def test_edit_url(self):
         opinion = self.content.opinions.create(user=self.user)
@@ -1889,7 +1889,7 @@ class StatsTests(TestCase):
 
     def test_get_owner_long(self):
         # Blah
-        self.assertEqual(self.stats.get_owner_long(), 'Everyone')
+        self.assertIn('Everyone', self.stats.get_owner_long())
 
         # coverage
         for stats in Stats.get(self.content):

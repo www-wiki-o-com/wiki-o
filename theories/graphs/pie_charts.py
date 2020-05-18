@@ -17,6 +17,7 @@ import random
 
 from theories.graphs.shapes import offset_xy
 from theories.graphs.shapes import Colour, Circle, Wedge, Text, Rectangle
+from theories.models.statistics import Stats
 
 # *******************************************************************************
 # Diagrams
@@ -33,7 +34,7 @@ class PieChart():
     """A class for drawing pie-charts."""
 
     # Constants
-    DEFAULT_CONFIG = {'radius': 100, 'c_offset': 4, 'gap': 4}
+    DEFAULT_CONFIG = {'radius': 100, 'c_offset': 4, 'gap': 4, 'stroke_width': 2.0}
     DEFAULT_BOARDER = {'top': 30, 'bottom': 30, 'left': 400, 'right': 400}
 
     def __init__(self, data, config=None, boarder=None):
@@ -131,10 +132,21 @@ class PieChart():
             theta01 += gap
             theta02 += gap
             if data['true_facts'] > 0.999:
-                full_circle = Circle(x, y, r, colour=Colour.BLACK)
+                full_circle = Circle(x,
+                                     y,
+                                     r,
+                                     stroke_width=self.config['stroke_width'],
+                                     colour=Colour.BLACK)
                 self.shapes.append(full_circle)
             else:
-                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.BLACK)
+                wedge = Wedge(x,
+                              y,
+                              theta01,
+                              theta02,
+                              r,
+                              c_offset=c_offset,
+                              stroke_width=self.config['stroke_width'],
+                              colour=Colour.BLACK)
                 self.shapes.append(wedge)
 
         # Construct the false_facts wedge
@@ -144,10 +156,21 @@ class PieChart():
             theta01 += gap
             theta02 += gap
             if data['false_facts'] > 0.999:
-                full_circle = Circle(x, y, r, colour=Colour.RED)
+                full_circle = Circle(x,
+                                     y,
+                                     r,
+                                     stroke_width=self.config['stroke_width'],
+                                     colour=Colour.RED)
                 self.shapes.append(full_circle)
             else:
-                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.RED)
+                wedge = Wedge(x,
+                              y,
+                              theta01,
+                              theta02,
+                              r,
+                              c_offset=c_offset,
+                              stroke_width=self.config['stroke_width'],
+                              colour=Colour.RED)
                 self.shapes.append(wedge)
 
         # Construct the false_other wedge
@@ -160,7 +183,14 @@ class PieChart():
                 full_circle = Circle(x, y, r, colour=Colour.PINK)
                 self.shapes.append(full_circle)
             else:
-                wedge = Wedge(x, y, theta01, theta02, r, c_offset=c_offset, colour=Colour.PINK)
+                wedge = Wedge(x,
+                              y,
+                              theta01,
+                              theta02,
+                              r,
+                              c_offset=c_offset,
+                              stroke_width=self.config['stroke_width'],
+                              colour=Colour.PINK)
                 self.shapes.append(wedge)
         # assert (theta02 - theta00 + 360) % 360 < 0.1
 
@@ -226,6 +256,61 @@ class PieChart():
             str: blank
         """
         return ''
+
+
+class SimpleOpinionPieChart(PieChart):
+    """A sub-class for theory pie-charts."""
+
+    DEFAULT_CONFIG = {'radius': 100, 'c_offset': 4, 'gap': 4, 'stroke_width': 0}
+    DEFAULT_BOARDER = {'top': 0, 'bottom': 0, 'left': 0, 'right': 0}
+
+    def __init__(self, theory=None):
+        """Constructor for the SimpleOpinionPieChart class.
+
+        Used to create a pie chart visualizing the point distribution for the theory.
+
+        Args:
+            theory (Content, optional): The theory to visualize. Defaults to None.
+        """
+        self.theory = theory
+        if theory is None:
+            data = None
+        else:
+            stats = Stats.get(theory, Stats.TYPE.ALL)
+            data = {
+                'true_facts': stats.true_points(),
+                'true_other': 0.0,
+                'false_facts': stats.false_points(),
+                'false_other': 0.0
+            }
+        super().__init__(data, config=self.DEFAULT_CONFIG, boarder=self.DEFAULT_BOARDER)
+
+    def construct(self):
+        """Construct the diagram."""
+        self.create_graph()
+
+    def get_svg(self):
+        """Output the svg code for the diagram.
+
+        Returns:
+            str: The svg code for displaying the diagram.
+        """
+        # Setup
+        r = self.config['radius']
+        boarder = self.boarder
+        offset = {'x': 0, 'y': 0}
+        width = (2.0 * r + boarder['left'] + boarder['right'])
+        height = (2.0 * r + boarder['top'] + boarder['bottom'])
+
+        # SVG
+        svg = '<svg class="icon" baseProfile="full" version="1.1"'
+        svg += ' width="15" height="15"'
+        svg += ' viewBox="%d %d' % (-width / 2 + offset['x'], -height / 2 + offset['y'])
+        svg += ' %d %d">' % (width, height)
+        for shape in self.shapes:
+            svg += shape.get_svg()
+        svg += """</svg>"""
+        return svg
 
 
 class OpinionPieChart(PieChart):

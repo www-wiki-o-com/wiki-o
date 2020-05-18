@@ -220,7 +220,7 @@ def float_to_percent(x):
         x = float(x)
     except ValueError:
         x = 0.0
-    return str(int(x * 100))
+    return str(int(round(x * 100)))
 
 
 @register.filter

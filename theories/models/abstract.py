@@ -49,9 +49,17 @@ class ContentPointer():
         """Pass-through for content."""
         return self.content.tag_id()
 
+    def details(self):
+        """Pass-through for content."""
+        return self.content.details
+
     def about(self):
         """Pass-through for content."""
         return self.content.about()
+
+    def content_url(self):
+        """Pass-through for content."""
+        return self.content.url()
 
     def is_theory(self):
         """Pass-through for content."""

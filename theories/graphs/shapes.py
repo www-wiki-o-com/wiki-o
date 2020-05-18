@@ -25,6 +25,7 @@ class Colour():
     BLACK = '#000000'
     PINK = '#FF8080'
     GREY = '#808080'
+    BLACK_AND_RED = 'B&R'
     NONE = 'none'
 
     def get_transparent_colour(self, colour):
@@ -157,7 +158,7 @@ class Text(ShapeBase):
 class Circle(ShapeBase):
     """A class for drawing circles."""
 
-    def __init__(self, x, y, r, colour=Colour.BLACK):
+    def __init__(self, x, y, r, stroke_width=2.0, colour=Colour.BLACK):
         """The constructor for the Circle class.
 
         Args:
@@ -169,7 +170,7 @@ class Circle(ShapeBase):
         self.x = x
         self.y = y
         self.r = r
-        super().__init__(colour)
+        super().__init__(stroke_width=stroke_width, colour=colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the circle object.
@@ -183,7 +184,7 @@ class Circle(ShapeBase):
         """
         x, y = offset_xy(self.x, self.y, offset)
         svg = '<circle cx="%d" cy="%d" r="%d" fill="%s"' % (x, y, self.r, self.colour)
-        svg += ' stroke="black" stroke-width="2.0"/>'
+        svg += ' stroke="black" stroke-width="%0.2f"/>' % self.stroke_width
         return svg
 
 
@@ -259,6 +260,7 @@ class Wedge(ShapeBase):
                  radius=100,
                  c_offset=0.0,
                  explode=0.0,
+                 stroke_width=2.0,
                  colour=Colour.BLACK):
         """The constructor for the Wedge class.
 
@@ -281,7 +283,7 @@ class Wedge(ShapeBase):
         self.radius = radius
         self.c_offset = c_offset
         self.explode = explode
-        super().__init__(colour)
+        super().__init__(stroke_width=stroke_width, colour=colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the wedge object.
@@ -312,7 +314,8 @@ class Wedge(ShapeBase):
         dr02 = self.c_offset
         dx02, dy02 = offset_xy(1.0 * dr02 * math.cos(dt), 1.0 * dr02 * math.sin(dt), offset)
 
-        svg = '<path fill="%s" stroke="black" stroke-width="2.0"' % self.colour
+        svg = '<path fill="%s" stroke="black" stroke-width="%0.2f"' % (self.colour,
+                                                                       self.stroke_width)
         svg += ' d="M %0.2f,%0.2f' % (dx00 + dx01 + dx02, dy00 + dy01 + dy02)
         svg += ' L %0.2f,%0.2f' % (x01 + dx00 + dx01, y01 + dy00 + dy01)
         svg += ' A %0.2f,%0.2f 0 %d 1 %0.2f,%0.2f' % (r, r, large_arc_flag, x02 + dx00 + dx01,
@@ -324,7 +327,7 @@ class Wedge(ShapeBase):
 class Polygon(ShapeBase):
     """A class for drawing polygons."""
 
-    def __init__(self, path, colour=Colour.BLACK):
+    def __init__(self, path, stroke_width=2.0, colour=Colour.BLACK):
         """The constructor for the Polygon class.
 
         Args:
@@ -332,7 +335,7 @@ class Polygon(ShapeBase):
             colour ([type], optional): The fill colour for the polygon. Defaults to Colour.BLACK.
         """
         self.path = path
-        super().__init__(colour)
+        super().__init__(stroke_width=stroke_width, colour=colour)
 
     def get_svg(self, offset=None):
         """Output the svg code for the polygon object.
@@ -348,7 +351,8 @@ class Polygon(ShapeBase):
         Returns:
             str: The svg code for displaying the polygon.
         """
-        svg = '<path fill="%s" stroke="black" stroke-width="1.0"' % self.colour
+        svg = '<path fill="%s" stroke="black" stroke-width="%0.2f"' % (self.colour,
+                                                                       self.stroke_width)
         svg += ' d="'
         for i, (x, y) in enumerate(self.path):
             if i == 0:
