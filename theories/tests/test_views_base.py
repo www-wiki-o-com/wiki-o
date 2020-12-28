@@ -316,7 +316,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_demo(self, override=False):
-        test_url = reverse('theories:opinion-detail',
+        test_url = reverse('theories:opinion-analysis',
                            kwargs={
                                'content_pk': 0,
                                'opinion_slug': 'debug'
@@ -329,7 +329,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_detail(self, override=False):
-        test_url = reverse('theories:opinion-detail',
+        test_url = reverse('theories:theory-detail',
                            kwargs={
                                'content_pk': self.bobs_opinion.content.pk,
                                'opinion_pk': self.bobs_opinion.pk
@@ -360,7 +360,7 @@ class ViewsTestBase():
     # Get - ViewsTestBase
     # ******************************
     def test_get_opinion_slug(self, override=False):
-        test_url = reverse('theories:opinion-detail',
+        test_url = reverse('theories:theory-detail',
                            kwargs={
                                'content_pk': self.content.pk,
                                'opinion_slug': 'all'
@@ -977,7 +977,7 @@ class ViewsTestBase():
         if modified:
             self.assertIsNotNone(opinion)
             self.assertEqual(opinion.true_input, 100)
-            redirect_url = reverse('theories:opinion-detail',
+            redirect_url = reverse('theories:theory-detail',
                                    kwargs={
                                        'content_pk': opinion.content.pk,
                                        'opinion_pk': opinion.pk
@@ -995,7 +995,7 @@ class ViewsTestBase():
     def test_post_opinion_edit(self, override=False, redirect_url=None, code=302, modified=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:opinion-detail',
+            redirect_url = reverse('theories:theory-detail',
                                    kwargs={
                                        'content_pk': self.my_opinion.content.pk,
                                        'opinion_pk': self.my_opinion.pk
@@ -1076,7 +1076,7 @@ class ViewsTestBase():
     def test_post_copy_opinion(self, override=False, redirect_url=None, code=302, copied=True):
         # setup
         if redirect_url is None:
-            redirect_url = reverse('theories:opinion-detail',
+            redirect_url = reverse('theories:theory-detail',
                                    kwargs={
                                        'content_pk': self.my_opinion.content.pk,
                                        'opinion_pk': self.my_opinion.pk

@@ -45,17 +45,30 @@ LICENSE.md file in the root directory of this source tree.-->
       {% if theory_dependencies %}
       <!-- Heading -->
       <h4>
-        {{ theory.get_owner_long }}:
+        {% if opinion|get_class == 'Stats' %}
+        Aggregated Opinion for {{ opinion.get_owner }}:
         <b style="word-spacing:-0.3ex;">
-          {{ theory.true_points|float_to_percent }}
-          /
-          <font color="red">{{ theory.false_points|float_to_percent }}</font>
+          {{ opinion.true_points|float_to_percent }}
+          -
+          <font color="red">{{ opinion.false_points|float_to_percent }}</font>
         </b>
+        {% elif opinion|get_class == 'Opinion' %}
+        Opinion for {{ opinion.get_owner }}:
+        <b style="word-spacing:-0.3ex;">
+          {{ opinion.true_points|float_to_percent }}
+          -
+          <font color="red">{{ opinion.false_points|float_to_percent }}</font>
+        </b>
+        {% else %}
+        Evidence:
+        {% endif %}
       </h4>
       <table style="margin-left: 1em">
         <thead>
           <tr>
+            {% if opinion|get_class == 'Opinion' or opinion|get_class == 'Stats'%}
             <td width="24" />
+            {% endif %}
             <td width="17" />
             <td />
           </tr>
@@ -64,21 +77,23 @@ LICENSE.md file in the root directory of this source tree.-->
           {% for dependency in theory_dependencies %}
           <tr>
             <!-- Guage -->
+            {% if dependency.svg %}
             <td>
               <div class="points">
                 {{ dependency.svg|safe }}
                 <span class="pointstext"><b>
                     {{ dependency.true_points|float_to_percent }}
-                    /
+                    -
                     <font style=" color:red">{{ dependency.false_points|float_to_percent }}</font>
                   </b></span>
               </div>
             </td>
+            {% endif %}
             <!-- Info -->
             <td> {% include "include/info.html" with x=dependency %} </td>
             <!-- Description -->
             <td style="padding-left:5px;">
-              <a class="plain" href="{{ dependency.content_url|add:params.get_next }}">
+              <a class="plain" href="{{ dependency.url|add:params.get_next }}">
                 {% if dependency.is_deleted %}
                 <strike>{{ dependency }}</strike>
                 {% else %}
@@ -109,12 +124,24 @@ LICENSE.md file in the root directory of this source tree.-->
       <div class="card-body">
         <ul class="list-unstyled mb-0">
 
+          <!-- Stats -->
+          <li><a href="{{ opinion.stats_url|add:params }}"> Analyze </a></li>
+
           <!-- Edit -->
           {% has_perm 'theories.change_content' user theory as can_edit %}
           {% if can_edit %}
           <li><a href="{% url_extra 'theories:theory-edit' theory.id extra=params %}"> Edit Theory </a></li>
           {% endif %}
 
+          <!-- My Opinion -->
+          {% has_perm 'theories.change_opinion' user opinion as can_change %}
+          {% if can_change %}
+          <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit Opinion </a></li>
+          {% else %}
+          <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
+          {% endif %}
+
+          <!-- Other Opinions -->
           <li><a href="{% url 'theories:opinion-index' theory.pk 'all' %}">Browse Opinions</a></li>
 
           <!-- Activity -->

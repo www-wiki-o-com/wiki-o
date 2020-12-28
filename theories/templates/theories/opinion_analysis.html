@@ -19,25 +19,24 @@ LICENSE.md file in the root directory of this source tree.-->
 {% block content %}
 <!-- Title -->
 <h3 style="padding-top:1ex; margin-bottom:-0.25ex">
-
-  <!-- username -->
-  {% if opinion|get_class == 'Opinion' and not opinion.is_anonymous %}
+  <!-- Username -->
+  {% if opinion|get_class == 'Opinion' %}
+  {% if opinion.is_anonymous %}
+  {{ opinion.get_owner_long }}
+  {% else %}
   <a class="plain" href="{{ opinion.user.url }}">
     {{ opinion.get_owner_long }}
   </a>
-  {% else %}
-  {{ opinion.get_owner_long }}
-  {% endif %}
   believes
+  {% endif %}
+  {% else %}
+  {{ opinion.get_owner_long }} believe
+  {% endif %}
   <a href={{ theory.url|add:params }} class="plain">
     <font {% if opinion.is_true %} color="black" {% else %} color="red" {% endif %}>
       &ldquo;{{ opinion|remove_punctuation }}&rdquo; </font>
   </a>
 </h3>
-<small>(this user believes the theory is <b>{% if opinion.is_true %}true{% else %}false{% endif %}</b>, thus they
-  belong
-  to the {% if opinion.is_true %} <b>Black</b> {% else %} <font color="red"><b>Red</b></font> {% endif %}
-  side)</small>
 
 <div class="row">
   <!-- Row -->
@@ -46,8 +45,6 @@ LICENSE.md file in the root directory of this source tree.-->
 
     <!-- Details -->
     <!-- <div style="text-align: justify">{{  theory.details|long_details }}</div> -->
-
-    {% if stats %}
 
     <!-- PieChart -->
     <div class="card my-3">
@@ -67,13 +64,11 @@ LICENSE.md file in the root directory of this source tree.-->
       </div>
     </div>
 
-    {% else %}
-
     <!-- VennDiagram -->
     <a id="VennDiagram" class="anchor"></a>
     <div class="card my-3">
       <h5 class="card-header">
-        Evidence Dependencies
+        Dependencies
         <small><small>
             <a href={{ swap_flat_url }}>
               {% if flat %}
@@ -94,14 +89,12 @@ LICENSE.md file in the root directory of this source tree.-->
       </div>
     </div>
 
-    {% endif %}
-
     <p>
       {% if prev %}
       <a href={{ prev }}>Go to parent opinion.</a>
       <br>
       {% endif %}
-      <a href={{ theory.url|add:params }}> Back to theory. </a>
+      <a href={{ opinion.url|add:params }}> Back to theory. </a>
     </p>
 
   </div> <!-- end column -->
@@ -114,15 +107,31 @@ LICENSE.md file in the root directory of this source tree.-->
       <div class="card-body">
         <ul class="list-unstyled mb-0">
 
-          <!-- Share -->
-          <li> Share </li>
-
           {% if opinion|get_class == 'Opinion' %}
 
-          <!-- Edit -->
+          <!-- Follow/Un-Follow -->
+          {% if user.is_authenticated %}
+          {% if opinion.user != user %}
+          {% if subscribed %}
+          <li><a href="{{ opinion|unfollow_url }}?next={{ request.get_full_path }}"> Un-Follow </a></li>
+          {% else %}
+          <li><a href="{{ opinion|follow_url }}?next={{ request.get_full_path }}"> Follow </a></li>
+          {% endif %}
+          {% endif %}
+          {% endif %}
+
+          <!-- Compare -->
+          <li><a href="{{ compare_url }}"> Compare </a></li>
+
+          <!-- My Opinion -->
           {% has_perm 'theories.change_opinion' user opinion as can_change %}
           {% if can_change %}
           <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit Opinion </a></li>
+          {% endif %}
+
+          {% if opinion.user != user %}
+          <li><a href="{% url_extra 'theories:get_my_opinion_stats' theory.id extra=params %}"> My Opinion </a></li>
+          <li><a data-target="#copy_modal" data-toggle="modal" href="#copy_modal"> Copy Opinion </a></li>
           {% endif %}
 
           <!-- Delete -->
@@ -145,29 +154,9 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
           {% endif %}
 
-
-          {% if opinion.user != user %}
-
-          <!-- Copy -->
-          <li><a data-target="#copy_modal" data-toggle="modal" href="#copy_modal"> Copy Opinion </a></li>
-
-          <!-- Follow/Un-Follow -->
-          {% if user.is_authenticated %}
-          {% if subscribed %}
-          <li><a href="{{ opinion|unfollow_url }}?next={{ request.get_full_path }}"> Un-Follow </a></li>
-          {% else %}
-          <li><a href="{{ opinion|follow_url }}?next={{ request.get_full_path }}"> Follow </a></li>
-          {% endif %}
           {% endif %}
 
-          {% endif %}
-          {% endif %}
-
-          <!-- Compare -->
-          <li><a href="{{ compare_url }}"> Compare </a></li>
-
-          <li><a href={{ swap_stats_url }}> {% if stats %} View Dependencies {% else %} View Stats {% endif %} </a>
-          </li>
+          {% comment %} <li><a href="{{ opinion.url|add:params }}">View Dependencies</a></li> {% endcomment %}
 
           <li><a href="{% url 'theories:opinion-index' opinion.content.pk 'all' %}">Browse Opinions</a></li>
 
@@ -182,8 +171,8 @@ LICENSE.md file in the root directory of this source tree.-->
         <ul class="list-unstyled mb-0">
           <!-- My Opinion -->
           {% if opinions.user %}
-          <li><a href="{{ opinions.user.url }}"> My Opinion <span
-                style="color:black">({{ opinions.user.true_points|float_to_percent }}/</span><span
+          <li><a href="{{ opinions.user.url }}"> My Opinion <span class="points"
+                style="color:black">({{ opinions.user.true_points|float_to_percent }} - </span><span
                 style="color:red">{{ opinions.user.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>
           <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />

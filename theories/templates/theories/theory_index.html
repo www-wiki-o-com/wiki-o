@@ -88,7 +88,9 @@ LICENSE.md file in the root directory of this source tree.-->
             <td> {% include "include/info.html" with x=theory %} </td>
             <!-- Description -->
             <td style="padding-left:5px">
-              <a class="plain" href={{ theory.url|add:params.get_next }}> {{ theory }} </a>
+              <a class="plain" href={% url 'theories:theory-detail' content_pk=theory.pk opinion_slug='all' %}>
+                {{ theory }}
+              </a>
             </td>
           </tr>
           {% endfor %}

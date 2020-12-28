@@ -28,7 +28,7 @@ class Colour():
     BLACK_AND_RED = 'B&R'
     NONE = 'none'
 
-    def get_transparent_colour(self, colour):
+    def get_transparent_colour(colour):
         """Converts a dark colour to a light colour.
 
         Args:
@@ -37,11 +37,21 @@ class Colour():
         Returns:
             Colour: The lighter version of the input colour.
         """
-        if colour == self.RED:
-            return self.PINK
-        if colour == self.BLACK:
-            return self.GREY
+        if colour == Colour.RED:
+            return Colour.PINK
+        if colour == Colour.BLACK:
+            return Colour.GREY
         assert False
+
+    def get_red_black_mix(red_percent):
+        if isinstance(red_percent, int) and 0 <= red_percent and red_percent <= 100:
+            red_mix = 1.0 * red_percent / 100
+        assert isinstance(red_percent, float) and 0.0 <= red_percent and red_percent <= 1.0
+
+        red_mix = int(0xff * red_percent)
+        print('#' + hex(red_mix)[2:] + '0000')
+        return '#' + hex(red_mix)[2:] + '0000'
+
 
 
 # *******************************************************************************

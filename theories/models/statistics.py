@@ -253,15 +253,14 @@ class Stats(OpinionBase, models.Model):
 
     def get_owner_long(self, short=False):
         """Return a human readable possessive type of this object."""
-        pre_str = 'Aggregated Opinion for '
         if self.stats_type == self.TYPE.ALL:
-            return pre_str + 'Everyone'
+            return 'The Majority (Everyone)'
         elif self.stats_type == self.TYPE.SUPPORTERS:
-            return pre_str + 'Supporters'
+            return 'The Supporters'
         elif self.stats_type == self.TYPE.MODERATES:
-            return pre_str + 'Moderates'
+            return 'The Moderates'
         elif self.stats_type == self.TYPE.OPPOSERS:
-            return pre_str + 'The Opposers'
+            return 'The Opposers'
         else:
             assert False
 
@@ -361,20 +360,24 @@ class Stats(OpinionBase, models.Model):
         return self.opinions.filter(deleted=False)
 
     def url(self):
-        """Return the url for viewing the details of this object (opinion-details)."""
+        """Return the url for viewing the details of this object (opinion-analysis)."""
         return self.get_absolute_url()
 
     def get_absolute_url(self):
-        return self.opinion_url()
-
-    def opinion_url(self):
-        return reverse('theories:opinion-detail',
+        return reverse('theories:theory-detail',
                        kwargs={
                            'content_pk': self.content.pk,
                            'opinion_slug': self.get_slug()
                        })
 
-    def opinions_url(self):
+    def stats_url(self):
+        return reverse("theories:opinion-analysis",
+                       kwargs={
+                           'content_pk': self.content.pk,
+                           'opinion_slug': self.get_slug()
+                       })
+
+    def opinion_index_url(self):
         return reverse("theories:opinion-index",
                        kwargs={
                            'content_pk': self.content.pk,
@@ -474,11 +477,7 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
 
     def url(self):
         """Return a url pointing to content's root (not dependency)."""
-        root = self.get_root()
-        if root is None:
-            return None
-        else:
-            return root.url()
+        return self.content.url()
 
     def get_root(self):
         """Get the root stats pointing to content."""

@@ -58,7 +58,8 @@ LICENSE.md file in the root directory of this source tree.-->
           {% if user.is_authenticated %}
           <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
           {% endif %}
-          <li><a href="{{ theory.url }}">Back to Theory</a></li>
+          <li><a href="{% url 'theories:theory-detail' content_pk=theory.pk opinion_slug='all' %}">Back to Theory</a>
+          </li>
         </ul>
       </div>
     </div>
@@ -70,14 +71,14 @@ LICENSE.md file in the root directory of this source tree.-->
       </h5>
       <div class="card-body">
         <ul class="list-unstyled mb-0">
-          <li><a href="{{ categories.supporters.opinions_url|add:params }}">Supporters <div class="float-right">
+          <li><a href="{{ categories.supporters.opinion_index_url|add:params }}">Supporters <div class="float-right">
                 {{ categories.supporters.opinions.count }}</div></a></li>
-          <li><a href="{{ categories.moderates.opinions_url|add:params }}">Moderates <div class="float-right">
+          <li><a href="{{ categories.moderates.opinion_index_url|add:params }}">Moderates <div class="float-right">
                 {{ categories.moderates.opinions.count }}</a></li>
-          <li><a href="{{ categories.opposers.opinions_url|add:params }}">Opposers <div class="float-right">
+          <li><a href="{{ categories.opposers.opinion_index_url|add:params }}">Opposers <div class="float-right">
                 {{ categories.opposers.opinions.count }}</a></li>
           <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />
-          <li><a href="{{ categories.all.opinions_url|add:params }}">Everyone <div class="float-right">
+          <li><a href="{{ categories.all.opinion_index_url|add:params }}">Everyone <div class="float-right">
                 {{ categories.all.opinions.count }}</a></li>
         </ul>
       </div>

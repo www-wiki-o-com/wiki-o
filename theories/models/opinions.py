@@ -266,25 +266,29 @@ class Opinion(OpinionBase, models.Model):
     def get_owner_long(self):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
         if self.is_anonymous():
-            return 'Opinion for Anonymous'
+            return 'Anonymous'
         else:
-            return 'Opinion for %s' % self.user.__str__(print_fullname=True)
+            return self.user.__str__(print_fullname=True)
 
-    def edit_url(self):
-        """Return url for editing this opinion."""
-        return reverse('theories:opinion-my-editor', kwargs={'content_pk': self.content.pk})
+    def url(self):
+        """Return the url that views the details of this opinion."""
+        return self.get_absolute_url()
 
     def get_absolute_url(self):
         """Return the url that views the details of this opinion."""
-        return reverse('theories:opinion-detail',
+        return reverse('theories:theory-detail',
                        kwargs={
                            'content_pk': self.content.pk,
                            'opinion_pk': self.pk
                        })
 
-    def url(self):
-        """Return the url that views the details of this opinion."""
-        return self.get_absolute_url()
+    def stats_url(self):
+        """Return url for viewing the stats of this opinion."""
+        return reverse('theories:opinion-analysis', kwargs={'content_pk': self.content.pk, 'opinion_pk': self.pk})
+
+    def edit_url(self):
+        """Return url for editing this opinion."""
+        return reverse('theories:opinion-my-editor', kwargs={'content_pk': self.content.pk})
 
     def cache(self):
         """Save opinion dependencies."""

@@ -1685,7 +1685,7 @@ class OpinionTests(TestCase):
         assert hit_count.hits == 0
 
         # Blah
-        url = reverse('theories:opinion-detail',
+        url = reverse('theories:opinion-analysis',
                       kwargs={
                           'content_pk': opinion.content.pk,
                           'opinion_pk': opinion.pk
@@ -2138,7 +2138,7 @@ class StatsDependencyTests(TestCase):
     def test_url(self):
         # Blah
         stats_dependency = self.stats.get_dependency(self.fact)
-        self.assertIsNone(stats_dependency.url())
+        self.assertIsNotNone(stats_dependency.url())
 
         # Blah
         stats_dependency = self.stats.get_dependency(self.subtheory)
@@ -2214,7 +2214,7 @@ class StatsFlatDependencyTests(TestCase):
 
     def test_url(self):
         stats_dependency = self.stats.get_flat_dependency(self.fact)
-        self.assertIsNone(stats_dependency.url())
+        self.assertIsNotNone(stats_dependency.url())
 
     def test_get_root(self):
         stats_dependency = self.stats.get_flat_dependency(self.fact)

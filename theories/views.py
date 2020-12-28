@@ -312,7 +312,7 @@ def theory_index_view(request, category_slug=None):
     )
 
 
-def theory_detail_view(request, content_pk):
+def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
     """A view for displaying theory details."""
     # Preconditions
     Content.update_intuition()
@@ -321,9 +321,21 @@ def theory_detail_view(request, content_pk):
     theory = get_object_or_404(Content, pk=content_pk)
     deleted = theory.is_deleted()
     parent_theories = theory.get_parent_theories(deleted=deleted)
-    stats = stats = Stats.get(theory, Stats.TYPE.ALL)
-    theory_dependencies = stats.get_dependencies().annotate(
-        total_points=F('total_true_points') + F('total_false_points')).order_by('-total_points')
+    if opinion_pk is not None:
+        opinion = get_object_or_404(Opinion, pk=opinion_pk)
+    elif opinion_slug is not None:
+        opinion = Stats.get(theory, opinion_slug)
+    else:
+        opinion = theory
+
+    theory_dependencies = opinion.get_dependencies()
+    if isinstance(opinion, Opinion):
+        theory_dependencies = theory_dependencies.annotate(total_points=F('tt_input') +
+                                                           F('tf_input') + F('ft_input') +
+                                                           F('ff_input')).order_by('-total_points')
+    elif isinstance(opinion, Stats):
+        theory_dependencies = theory_dependencies.annotate(
+            total_points=F('total_true_points') + F('total_false_points')).order_by('-total_points')
 
     opinions = {}
     opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)
@@ -350,16 +362,18 @@ def theory_detail_view(request, content_pk):
     theory.update_hits(request)
 
     # Diagrams
-    max_points = 0.0
-    for dependency in theory_dependencies:
-        total_points = dependency.true_points() + dependency.false_points()
-        max_points = max(max_points, total_points)
-    for dependency in theory_dependencies:
-        dependency.svg = DependencyGuage(dependency, normalize=max_points).get_svg()
+    if isinstance(opinion, Opinion) or isinstance(opinion, Stats):
+        max_points = 0.0
+        for dependency in theory_dependencies:
+            total_points = dependency.true_points() + dependency.false_points()
+            max_points = max(max_points, total_points)
+        for dependency in theory_dependencies:
+            dependency.svg = DependencyGuage(dependency, normalize=max_points).get_svg()
 
     # Context
     context = {
-        'theory': stats,
+        'theory': theory,
+        'opinion': opinion,
         'theory_dependencies': theory_dependencies,
         'parent_theories': parent_theories,
         'opinions': opinions,
@@ -1561,7 +1575,27 @@ def retrieve_my_opinion_redirect_view(request, content_pk):
         return redirect(opinion.url() + params)
 
 
-def opinion_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
+@login_required
+def retrieve_my_opinion_stats_redirect_view(request, content_pk):
+    """A method for retrieving and redirecting to edit or view the user's opinion."""
+
+    # Setup
+    user = request.user
+    theory = get_object_or_404(Content, pk=content_pk)
+    opinion = get_or_none(theory.opinions, user=user)
+
+    # Navigation
+    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
+
+    # Redirect
+    if opinion is None or opinion.is_deleted():
+        return redirect(
+            reverse('theories:opinion-my-editor', kwargs={'content_pk': content_pk}) + params)
+    else:
+        return redirect(opinion.stats_url() + params)
+
+
+def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=None):
     """The view for displaying opinion and statistical details."""
 
     # Setup
@@ -1642,42 +1676,36 @@ def opinion_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None)
         params00.flags.remove('stats')
     else:
         params00.flags.append('stats')
-    swap_stats_url = opinion.url() + params00
 
     # Diagrams
-    if stats:
-        if opinion_slug == 'debug':
-            points_diagram = DemoPieChart()
-            population_diagram = DemoBarGraph()
-        else:
-            points_diagram = OpinionPieChart(opinion)
-            population_diagram = OpinionBarGraph(opinion)
-        evidence_diagram = None
-        evidence = None
+    if opinion_slug == 'debug':
+        points_diagram = DemoPieChart()
+        population_diagram = DemoBarGraph()
     else:
-        points_diagram = None
-        population_diagram = None
-        if opinion_slug == 'debug':
-            evidence_diagram = DemoVennDiagram()
-            evidence = {
-                'collaborative': [],
-                'controversial': [],
-                'contradicting': [],
-                'unaccounted': [],
-            }
-        else:
-            evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
-            evidence = {
-                'collaborative': evidence_diagram.get_collaborative_evidence(sort_list=True),
-                'controversial': evidence_diagram.get_controversial_evidence(sort_list=True),
-                'contradicting': evidence_diagram.get_contradicting_evidence(sort_list=True),
-                'unaccounted': evidence_diagram.get_unaccounted_evidence(sort_list=True),
-            }
-            for dependency in theory.get_dependencies().exclude(pk=Content.INTUITION_PK):
-                if dependency not in evidence['collaborative'] and dependency not in evidence['controversial'] and \
-                   dependency not in evidence['contradicting'] and dependency not in evidence['unaccounted']:
-                    pass
-                    # evidence['unaccounted'].append(dependency)
+        points_diagram = OpinionPieChart(opinion)
+        population_diagram = OpinionBarGraph(opinion)
+
+    if opinion_slug == 'debug':
+        evidence_diagram = DemoVennDiagram()
+        evidence = {
+            'collaborative': [],
+            'controversial': [],
+            'contradicting': [],
+            'unaccounted': [],
+        }
+    else:
+        evidence_diagram = OpinionVennDiagram(opinion, flat=flat)
+        evidence = {
+            'collaborative': evidence_diagram.get_collaborative_evidence(sort_list=True),
+            'controversial': evidence_diagram.get_controversial_evidence(sort_list=True),
+            'contradicting': evidence_diagram.get_contradicting_evidence(sort_list=True),
+            'unaccounted': evidence_diagram.get_unaccounted_evidence(sort_list=True),
+        }
+        for dependency in theory.get_dependencies().exclude(pk=Content.INTUITION_PK):
+            if dependency not in evidence['collaborative'] and dependency not in evidence['controversial'] and \
+                dependency not in evidence['contradicting'] and dependency not in evidence['unaccounted']:
+                pass
+                # evidence['unaccounted'].append(dependency)
 
     # Render
     context = {
@@ -1692,7 +1720,6 @@ def opinion_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None)
         'flat': flat,
         'stats': stats,
         'swap_flat_url': swap_flat_url,
-        'swap_stats_url': swap_stats_url,
         'compare_url': compare_url,
     }
     if evidence_diagram is not None:
@@ -1707,14 +1734,14 @@ def opinion_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None)
 
     return render(
         request,
-        'theories/opinion_detail.html',
+        'theories/opinion_analysis.html',
         context,
     )
 
 
 def opinion_demo_view(request):
     """A view for demoing the graph visualizations used for opinions."""
-    return opinion_detail_view(request, 0, 'debug')
+    return opinion_analysis_view(request, 0, 'debug')
 
 
 def opinion_compare_view(request,
