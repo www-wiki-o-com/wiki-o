@@ -479,7 +479,11 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
 
     def url(self):
         """Return a url pointing to content's root (not dependency)."""
-        return self.content.url()
+        root = self.get_root()
+        if root is None:
+            return self.content.url()
+        else:
+            return root.url()
 
     def get_root(self):
         """Get the root stats pointing to content."""
