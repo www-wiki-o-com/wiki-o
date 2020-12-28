@@ -143,14 +143,11 @@ class Stats(OpinionBase, models.Model):
     @classmethod
     def recalculate(cls, theory):
         """Recalculate all stats attached to this theory."""
-        # Error checking
-        if not theory.assert_theory(check_dependencies=True):
+        if not theory.is_theory():
             return False
-        # Reset
-        cls.get_and_reset(theory, cache=True, save=False)
-        # Add
+        cls.get_and_reset(theory, cache=True, save=True)
         for opinion in theory.get_opinions():
-            cls.add(opinion, cache=True, save=False)
+            cls.add(opinion, cache=True, save=True)
         return True
 
     @classmethod
@@ -187,17 +184,22 @@ class Stats(OpinionBase, models.Model):
 
     def reset(self, save=True):
         """Reset this objects points as well as all dependency points."""
-        # Reset self.
+        # Reset self
         self.total_true_points = 0.0
         self.total_false_points = 0.0
-        # Reset theory dependencies.
+        # Reset theory dependencies
         for stats_dependency in self.get_dependencies():
             stats_dependency.reset(save=save)
-        # Reset theory flat dependencies.
+            if stats_dependency.content.is_deleted():
+                stats_dependency.delete()
+        # Remove dependencies
         for stats_flat_dependency in self.get_flat_dependencies():
             stats_flat_dependency.reset(save=save)
-        # Opinions
+            if stats_flat_dependency.content.is_deleted():
+                stats_flat_dependency.delete()
+        # Remove opinions
         self.opinions.clear()
+        # Save
         if save:
             self.save()
         else:

@@ -257,9 +257,11 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             return False
         elif check_dependencies:
             if self.flat_dependencies.filter(content_type__lt=0).exists():
-                LOGGER.error(
-                    'Content.assert_theory: There should not be any flat deleted dependencies (pk=%d).',
-                    self.pk)
+                log = 'Content.assert_theory: There should not be any flat deleted dependencies (pk=%d).\n' % self.pk
+                log += '  %s\n' % str(self)
+                for flat_dependency in self.flat_dependencies.filter(content_type__lt=0).all():
+                    log += '    %s\n' % str(flat_dependency)
+                LOGGER.error(log)
                 return False
         return True
 
