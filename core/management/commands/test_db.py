@@ -27,7 +27,7 @@ from theories.models.statistics import Stats
 
 
 class Command(BaseCommand):
-    """Recalculates the stats stored within the databse."""
+    """Tests the data within the database against a series of validation checks."""
     help = __doc__
 
     def add_arguments(self, parser):
@@ -35,7 +35,7 @@ class Command(BaseCommand):
         parser.add_argument('primary_keys',
                             nargs='*',
                             type=int,
-                            help='A set of theory keys to recaculate the stats for.')
+                            help='A set of theory keys to check.')
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
@@ -48,6 +48,6 @@ class Command(BaseCommand):
         # Recalculate stats.
         for theory in thoeries:
             if theory.is_theory():
-                Stats.recalculate(theory)
+                theory.assert_theory(check_dependencies=True, fix=True)
 
         print("Done")

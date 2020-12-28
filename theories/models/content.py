@@ -235,7 +235,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         self.assert_evidence()
         return self.is_verifiable()
 
-    def assert_theory(self, check_dependencies=False):
+    def assert_theory(self, check_dependencies=False, fix=False):
         if self.is_evidence():
             stack01 = inspect.stack()[1]
             stack02 = inspect.stack()[2]
@@ -257,11 +257,14 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             return False
         elif check_dependencies:
             if self.flat_dependencies.filter(content_type__lt=0).exists():
-                log = 'Content.assert_theory: There should not be any flat deleted dependencies (pk=%d).\n' % self.pk
+                log = 'Content.assert_theory: There should not be any deleted flat dependencies (pk=%d).\n' % self.pk
                 log += '  %s\n' % str(self)
                 for flat_dependency in self.flat_dependencies.filter(content_type__lt=0).all():
                     log += '    %s\n' % str(flat_dependency)
                 LOGGER.error(log)
+                if fix:
+                    for flat_dependency in self.flat_dependencies.filter(content_type__lt=0):
+                        self.flat_dependencies.remove(flat_dependency)
                 return False
         return True
 
