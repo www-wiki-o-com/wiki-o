@@ -21,17 +21,10 @@ from theories.models.content import Content
 from theories.models.opinions import Opinion
 
 # *******************************************************************************
-# ToDos:
-#   - update update update
-# add num_contributers to content
-#
-# *******************************************************************************
-
-# *******************************************************************************
-# predicates
-# https://github.com/dfunckt/django-rule
-# https://cheat.readthedocs.io/en/latest/django/permissions.html
-# https://stackoverflow.com/questions/41821921/model-field-level-permission-and-field-value-level-permission-in-django-and-drf
+# Predicates
+#   https://github.com/dfunckt/django-rule
+#   https://cheat.readthedocs.io/en/latest/django/permissions.html
+#   https://stackoverflow.com/questions/41821921/model-field-level-permission-and-field-value-level-permission-in-django-and-drf
 # *******************************************************************************
 has_level00 = rules.is_group_member('user level: 0')
 has_level01 = rules.is_group_member('user level: 1')

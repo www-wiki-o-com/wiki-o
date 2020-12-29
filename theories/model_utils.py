@@ -139,7 +139,7 @@ def swap_true_false(content, user=None):
 
 
 def convert_content_type(content, user=None, verifiable=False):
-    """Todo
+    """Converts a theory to evidence and vise-a-versa.
 
     Args:
         user ([type], optional): [description]. Defaults to None.
