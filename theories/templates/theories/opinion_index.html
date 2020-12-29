@@ -60,6 +60,8 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
           <li><a href="{% url 'theories:theory-detail' content_pk=theory.pk opinion_slug='all' %}">Back to Theory</a>
           </li>
+          <li><a href="{% url 'theories:theory-detail' content_pk=theory.pk %}"> Browse Without Opinions </a>
+          </li>
         </ul>
       </div>
     </div>

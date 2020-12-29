@@ -107,6 +107,36 @@ LICENSE.md file in the root directory of this source tree.-->
       <div class="card-body">
         <ul class="list-unstyled mb-0">
 
+          <!-- Compare -->
+          <li><a href="{{ compare_url }}"> Compare </a></li>
+
+          <!-- My Opinion -->
+          {% has_perm 'theories.change_opinion' user opinion as can_change %}
+          {% if can_change %}
+          <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit My Opinion </a></li>
+          {% endif %}
+
+          <!-- Delete -->
+          {% has_perm 'theories.delete_opinion' user opinion as can_del %}
+          {% if can_del %}
+          <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete My Opinion </a></li>
+          {% endif %}
+
+          <!-- Show/Hide -->
+          {% if user.is_visible %}
+          {% has_perm 'theories.change_opinion' user opinion as can_change %}
+          {% if can_change %}
+          <li><a data-target="#anonymous_modal" data-toggle="modal" href="#anonymous_modal">
+              {% if opinion.anonymous %}
+              Reveal My Username
+              {% else %}
+              Hide My Username
+              {% endif %}
+            </a></li>
+          {% endif %}
+          {% endif %}
+
+
           {% if opinion|get_class == 'Opinion' %}
 
           <!-- Follow/Un-Follow -->
@@ -120,43 +150,11 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
           {% endif %}
 
-          <!-- Compare -->
-          <li><a href="{{ compare_url }}"> Compare </a></li>
-
-          <!-- My Opinion -->
-          {% has_perm 'theories.change_opinion' user opinion as can_change %}
-          {% if can_change %}
-          <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit Opinion </a></li>
-          {% endif %}
-
           {% if opinion.user != user %}
-          <li><a href="{% url_extra 'theories:get_my_opinion_stats' theory.id extra=params %}"> My Opinion </a></li>
           <li><a data-target="#copy_modal" data-toggle="modal" href="#copy_modal"> Copy Opinion </a></li>
           {% endif %}
 
-          <!-- Delete -->
-          {% has_perm 'theories.delete_opinion' user opinion as can_del %}
-          {% if can_del %}
-          <li><a data-target="#del_modal" data-toggle="modal" href="#del_modal"> Delete Opinion </a></li>
-          {% endif %}
-
-          <!-- Show/Hide -->
-          {% if user.is_visible %}
-          {% has_perm 'theories.change_opinion' user opinion as can_change %}
-          {% if can_change %}
-          <li><a data-target="#anonymous_modal" data-toggle="modal" href="#anonymous_modal">
-              {% if opinion.anonymous %}
-              Reveal Username
-              {% else %}
-              Hide Username
-              {% endif %}
-            </a></li>
-          {% endif %}
-          {% endif %}
-
-          {% endif %}
-
-          {% comment %} <li><a href="{{ opinion.url|add:params }}">View Dependencies</a></li> {% endcomment %}
+          {% endif %} {% comment%} end of class == Opinion {% endcomment %}
 
           <li><a href="{% url 'theories:opinion-index' opinion.content.pk 'all' %}">Browse Opinions</a></li>
 
@@ -171,27 +169,27 @@ LICENSE.md file in the root directory of this source tree.-->
         <ul class="list-unstyled mb-0">
           <!-- My Opinion -->
           {% if opinions.user %}
-          <li><a href="{{ opinions.user.url }}"> My Opinion <span class="points"
-                style="color:black">({{ opinions.user.true_points|float_to_percent }} - </span><span
+          <li><a href="{% url_extra 'theories:get_my_opinion_stats' theory.id extra=params %}"> My Opinion <span
+                class="points" style="color:black">({{ opinions.user.true_points|float_to_percent }} - </span><span
                 style="color:red">{{ opinions.user.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>
           <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />
           {% endif %}
           {% if opinions.supporters %}
-          <li><a href="{{ opinions.supporters.url }}"> {{ opinions.supporters.get_owner }} <span
+          <li><a href="{{ opinions.supporters.stats_url }}"> {{ opinions.supporters.get_owner }} <span
                 style="color:black">({{ opinions.supporters.true_points|float_to_percent }}/</span><span
                 style="color:red">{{ opinions.supporters.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>
-          <li><a href="{{ opinions.moderates.url }}"> {{ opinions.moderates.get_owner }} <span
+          <li><a href="{{ opinions.moderates.stats_url }}"> {{ opinions.moderates.get_owner }} <span
                 style="color:black">({{ opinions.moderates.true_points|float_to_percent }}/</span><span
                 style="color:red">{{ opinions.moderates.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>
-          <li><a href="{{ opinions.opposers.url }}"> {{ opinions.opposers.get_owner }} <span
+          <li><a href="{{ opinions.opposers.stats_url }}"> {{ opinions.opposers.get_owner }} <span
                 style="color:black">({{ opinions.opposers.true_points|float_to_percent }}/</span><span
                 style="color:red">{{ opinions.opposers.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>
           <hr style="margin-top:0.5ex; margin-bottom:0.5ex;" />
-          <li><a href="{{ opinions.all.url }}"> {{ opinions.all.get_owner }} <span
+          <li><a href="{{ opinions.all.stats_url }}"> {{ opinions.all.get_owner }} <span
                 style="color:black">({{ opinions.all.true_points|float_to_percent }}/</span><span
                 style="color:red">{{ opinions.all.false_points|float_to_percent }}</span><span
                 style="color:black">)</span></a></li>

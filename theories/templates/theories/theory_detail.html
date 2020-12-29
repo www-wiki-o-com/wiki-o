@@ -134,11 +134,11 @@ LICENSE.md file in the root directory of this source tree.-->
           {% endif %}
 
           <!-- My Opinion -->
+          {% if opinion.user == user %}
           {% has_perm 'theories.change_opinion' user opinion as can_change %}
           {% if can_change %}
-          <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit Opinion </a></li>
-          {% else %}
-          <li><a href="{% url_extra 'theories:get_my_opinion' theory.id extra=params %}"> My Opinion </a></li>
+          <li><a href="{% url_extra 'theories:opinion-my-editor' theory.id extra=params %}"> Edit My Opinion </a></li>
+          {% endif %}
           {% endif %}
 
           <!-- Other Opinions -->
