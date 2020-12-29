@@ -23,6 +23,7 @@ app_name = 'users'
 urlpatterns = [
     path('accounts/profile/', private_profile_view, name='profile-edit'),
     path('accounts/<int:pk>/', public_profile_view, name='profile-detail'),
+    path('accounts/password/change/', CustomPasswordChangeView.as_view(), name='change_password'),
     path('accounts/notifications/', notifications_view, name='notifications'),
     path('violations/', violation_index_view, name='violations'),
     path('violation/<int:pk>/resolve/', violation_resolve_view, name='violation-resolve'),
