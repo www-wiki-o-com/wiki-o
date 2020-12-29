@@ -81,7 +81,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
     INTUITION_PK = -1
     content_type = models.SmallIntegerField(choices=TYPE)
     title00 = models.CharField(max_length=255, blank=True, null=True)
-    title01 = models.CharField(max_length=255, unique=True)
+    title01 = models.CharField(max_length=255)
     details = models.TextField(max_length=10000, blank=True)
 
     pub_date = models.DateField(auto_now_add=True)
