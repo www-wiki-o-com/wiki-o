@@ -112,8 +112,8 @@ class DependencyGuage(Guage):
                 The bounding box used to size the diagram. Defaults to None.
         """
         # Calculate width.
-        true_points = abs(dependency.true_points())  # hack, shouldn't need abs (TODO, fix)
-        false_points = abs(dependency.false_points())  # hack, shouldn't need abs (TODO, fix)
+        true_points = dependency.true_points()
+        false_points = dependency.false_points()
         total_points = true_points + false_points
         width = 100 * total_points
         if normalize > 0:

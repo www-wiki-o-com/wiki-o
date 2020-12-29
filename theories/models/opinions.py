@@ -296,9 +296,8 @@ class Opinion(OpinionBase, models.Model):
 
     def get_flat_dependencies(self, cache=True, verbose_level=0):
         """Return a list of non-db objects representing the flattened opinion.
-           This action populates saved_flat_dependencies.
 
-            Todo: utilize cache argument.
+           This action populates saved_flat_dependencies.
         """
 
         # Debug
@@ -316,7 +315,6 @@ class Opinion(OpinionBase, models.Model):
             self.save_flat_dependencies(flat_dependencies)
 
             # Get the intuition node.
-            # TODO: Need to change this, currently get_flat_dependency calls get_flat_dependencies.
             intuition_dependency = self.get_flat_dependency(self.content.get_intuition())
 
             # Evidence

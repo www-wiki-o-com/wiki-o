@@ -327,7 +327,7 @@ class QuerySetDict():
     """
 
     def __init__(self, attrib_key, queryset=None):
-        """Todo
+        """Initializer for QuerySetDict.
 
         Args:
             attrib_key (string): The attribute path for the lookup key. For example, suppose the

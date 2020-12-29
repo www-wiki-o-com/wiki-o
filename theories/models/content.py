@@ -303,7 +303,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         return self
 
     def autosave(self, user, force=False, *args, **kwargs):
-        """Todo
+        """Saves changes and automatically archieves changes as a revision.
 
         Args:
             user ([type]): [description]

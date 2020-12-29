@@ -566,7 +566,6 @@ class DemoVennDiagram(OpinionVennDiagram):
         theory = opinion.content
         theory_dependencies = theory.get_dependencies()
 
-        # Todo: change demo opinion to OpinionBase and delete Opinion.save_points()
         opinion.saved_true_points = opinion.true_points()
         opinion.saved_false_points = opinion.false_points()
 
