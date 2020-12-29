@@ -14,6 +14,8 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 from actstream.models import following
+from allauth.account.views import PasswordChangeView
+from core.utils import Parameters, get_first_or_none, get_page_list
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.forms import modelformset_factory
@@ -22,14 +24,14 @@ from django.urls import reverse
 from django.utils.http import unquote
 from notifications.models import Notification
 from reversion.models import Version
-
-from core.utils import Parameters, get_first_or_none, get_page_list
 from theories.forms import EvidenceForm, TheoryForm, TheoryRevisionForm
 from theories.models.categories import Category
 from theories.models.content import Content
 from theories.models.opinions import Opinion
-from users.forms import (ReportViolationForm, ResolveViolationForm, SelectNotificationForm,
-                         SelectViolationForm, UserForm, VoteForm)
+
+from users.forms import (ReportViolationForm, ResolveViolationForm,
+                         SelectNotificationForm, SelectViolationForm, UserForm,
+                         VoteForm)
 from users.models import User, Violation, ViolationVote
 
 # *******************************************************************************
@@ -45,6 +47,10 @@ NUM_ITEMS_PER_PAGE = 25
 # *******************************************************************************
 # Classes
 # *******************************************************************************
+
+
+class CustomPasswordChangeView(PasswordChangeView):
+    success_url = '/accounts/profile/'
 
 
 def public_profile_view(request, pk):
@@ -91,7 +97,6 @@ def public_profile_view(request, pk):
     )
 
 
-@login_required
 def private_profile_view(request):
     """The private page for a user's profile.
 
@@ -101,6 +106,10 @@ def private_profile_view(request):
     Returns:
         HttpResponse: The HTTP response.
     """
+    # Redirect
+    if not request.user.is_authenticated:
+        return redirect('theories:index')
+
     # Setup
     user = request.user
 
