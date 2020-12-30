@@ -36,7 +36,7 @@ VALID_MODELS = set(['Content', 'Opinion', 'Stats'])
 
 
 class Command(BaseCommand):
-    """Export user data."""
+    """Export wiki-o data as json."""
     help = __doc__
 
     def add_arguments(self, parser):

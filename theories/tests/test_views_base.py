@@ -16,6 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 import random
 
 from django.contrib import auth
+from django.core.exceptions import ObjectDoesNotExist
 from django.shortcuts import get_object_or_404, redirect, render
 from django.test import TestCase
 from django.urls import reverse
@@ -880,11 +881,14 @@ class ViewsTestBase():
         self.verify_post_response(test_url, redirect_url, None, code)
 
         # test change occured
-        self.evidence.refresh_from_db()
-        if deleted:
-            self.assertTrue(self.evidence.is_deleted())
-        else:
-            self.assertFalse(self.evidence.is_deleted())
+        try:
+            self.evidence.refresh_from_db()
+            if deleted:
+                self.assertTrue(self.evidence.is_deleted())
+            else:
+                self.assertFalse(self.evidence.is_deleted())
+        except ObjectDoesNotExist:
+            self.assertTrue(deleted)
 
         # method must be overide
         self.assertTrue(override)

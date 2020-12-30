@@ -199,12 +199,10 @@ def activity_view(request, category_slug=None):
     subscribed = user.is_authenticated and is_following(user, category)
 
     # Actions
-    if date is None:
-        actions = category.target_actions.exclude(verb='started following')
-    else:
+    actions = category.target_actions.exclude(verb='started following')
+    if date is not None:
         date = unquote(date)
-        actions = category.target_actions.exclude(verb='started following').filter(
-            timestamp__gte=date)
+        actions = actions.filter(timestamp__gte=date)
 
     # Pagination
     page = request.GET.get('page')
@@ -667,11 +665,13 @@ def theory_merge_view(request, content_pk):
                     content = form.instance
                     # merge
                     merge_content(theory, content, user=user)
-                    content.delete()
+                    deleted = content.delete()
                     # activity log
-                    theory.update_activity_logs(user,
-                                                verb='Merged with <# object.url {{ object }} #>',
-                                                action_object=content)
+                    if not deleted:
+                        theory.update_activity_logs(
+                            user,
+                            verb='Merged with <# object.url {{ object }} #>',
+                            action_object=content)
             return redirect(next)
         else:
             print(200, formset.errors)
@@ -971,11 +971,10 @@ def theory_activity_view(request, content_pk):
     subscribed = user.is_authenticated and is_following(user, theory)
 
     # Filter
-    if date is None:
-        actions = theory.target_actions.exclude(verb='started following')
-    else:
+    actions = theory.target_actions.exclude(verb='started following')
+    if date is not None:
         date = unquote(date)
-        actions = theory.target_actions.exclude(verb='following').filter(timestamp__gte=date)
+        actions = actions.filter(timestamp__gte=date)
 
     # Pagination
     page = request.GET.get('page')
@@ -1270,11 +1269,10 @@ def evidence_activity_view(request, content_pk):
     subscribed = user.is_authenticated and is_following(user, evidence)
 
     # Filter
-    if date is None:
-        actions = evidence.target_actions.exclude(verb='started following')
-    else:
+    actions = evidence.target_actions.exclude(verb='started following')
+    if date is not None:
         date = unquote(date)
-        actions = evidence.target_actions.exclude(verb='following').filter(timestamp__gte=date)
+        actions = actions.filter(timestamp__gte=date)
 
     # Pagination
     page = request.GET.get('page')
@@ -1367,8 +1365,9 @@ def content_delete_redirect_view(request, content_pk):
 
     # Post request
     if request.method == 'POST':
-        content.delete(user)
-        content.update_activity_logs(user, verb='Deleted')
+        deleted = content.delete(user)
+        if not deleted:
+            content.update_activity_logs(user, verb='Deleted')
         return redirect(next)
 
     # Get request
