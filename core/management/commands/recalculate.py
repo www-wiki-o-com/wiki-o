@@ -15,7 +15,9 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 from django.core.management.base import BaseCommand
 from theories.models.content import Content
-from theories.models.statistics import Stats
+from theories.models.opinions import OpinionDependency
+from theories.models.statistics import (Stats, StatsDependency,
+                                        StatsFlatDependency)
 
 # *******************************************************************************
 # Defines
@@ -45,9 +47,17 @@ class Command(BaseCommand):
         else:
             thoeries = Content.objects.all()
 
-        # Recalculate stats.
+        # Recalculate stats
         for theory in thoeries:
             if theory.is_theory():
                 Stats.recalculate(theory)
+
+        # Recalculate ranks
+        for dependency in StatsDependency.objects.all():
+            dependency.save()
+        for dependency in StatsFlatDependency.objects.all():
+            dependency.save()
+        for dependency in OpinionDependency.objects.all():
+            dependency.save()
 
         print("Done")
