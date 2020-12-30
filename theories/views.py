@@ -697,7 +697,7 @@ def theory_merge_view(request, content_pk):
 
 
 @login_required
-@permission_required('theories.add_edge', raise_exception=True)
+@permission_required('theories.add_content', raise_exception=True)
 def theory_inherit_view(request, content_pk01, content_pk02):
     """A view for inheriting evidence/sub-theories into the pertaining theory."""
 
