@@ -432,17 +432,17 @@ class Stats(OpinionBase, models.Model):
         """Swap the true and false points."""
 
         # self
-        self.total_true_points, self.total_false_points = self.total_false_points, self.total_true_points
+        (self.total_true_points, self.total_false_points) = (self.total_false_points, self.total_true_points)
         self.save()
 
         # dependencies
         for dependency in self.get_dependencies():
-            dependency.total_true_points, dependency.total_false_points = dependency.total_false_points, dependency.total_true_points
+            (dependency.total_true_points, dependency.total_false_points) = (dependency.total_false_points, dependency.total_true_points)
             dependency.save()
 
         # flat dependencies
         for dependency in self.get_flat_dependencies():
-            dependency.total_true_points, dependency.total_false_points = dependency.total_false_points, dependency.total_true_points
+            (dependency.total_true_points, dependency.total_false_points) = (dependency.total_false_points, dependency.total_true_points)
             dependency.save()
 
 
@@ -450,19 +450,20 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
     """A container for dependency based statistics.
 
     We want separate tables for dependencies and flat dependencies to help speed up the queries.
+    Note, each user has a total of 1.0 points to distribute to theories/dependencies.
 
     Attributes:
         parent (Stats): The parent statistic for the dependency (the parent dependency will be a
             theory or sub-theory).
         content (Content): The dependency (theory, sub-theory, or evidence) that this stat
             pertains to.
-        total_true_points (double): Total number of true points awarded to the dependency (each user
-            has a total of 1.0 points to distribute to theories/dependencies).
-        total_false_points (double): Total number of false points awarded to the dependency (each
-            user has a total of 1.0 points to distribute to theories/dependencies).
+        total_true_points (double): Total number of true points awarded to the dependency.
+        total_false_points (double): Total number of false points awarded to the dependency.
+        rank (double): Total points, used for sorting.
     """
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
+    rank = models.FloatField(default=0.0)
 
     class Meta:
         """Where the model options are defined.
@@ -476,6 +477,11 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
         """
         abstract = True
         unique_together = (('content', 'parent'),)
+
+    def save(self, *args, **kwargs):
+        """Saves and updates rank."""
+        self.rank = self.total_points()
+        return super().save(*args, **kwargs)
 
     def url(self):
         """Return a url pointing to content's root (not dependency)."""
@@ -553,6 +559,7 @@ class StatsDependency(StatsDependencyBase):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+        ordering = ['-rank']
         db_table = 'theories_stats_dependency'
         verbose_name = 'Stats Dependency'
         verbose_name_plural = 'Stats Dependency'

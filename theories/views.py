@@ -329,13 +329,6 @@ def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
         opinion = theory
 
     theory_dependencies = opinion.get_dependencies()
-    if isinstance(opinion, Opinion):
-        theory_dependencies = theory_dependencies.annotate(total_points=F('tt_input') +
-                                                           F('tf_input') + F('ft_input') +
-                                                           F('ff_input')).order_by('-total_points')
-    elif isinstance(opinion, Stats):
-        theory_dependencies = theory_dependencies.annotate(
-            total_points=F('total_true_points') + F('total_false_points')).order_by('-total_points')
 
     opinions = {}
     opinions['supporters'] = get_or_none(theory.stats, stats_type=Stats.TYPE.SUPPORTERS)

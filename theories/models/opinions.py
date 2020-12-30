@@ -629,6 +629,7 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
     tf_input = models.SmallIntegerField(default=0)
     ft_input = models.SmallIntegerField(default=0)
     ff_input = models.SmallIntegerField(default=0)
+    rank = models.FloatField(default=0.0)
 
     # Cache attributes
     saved_root_opinion = None
@@ -643,10 +644,16 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+        ordering = ['-rank']
         db_table = 'theories_opinion_dependency'
         verbose_name = 'Opinion Dependency'
         verbose_name_plural = 'Opinion Dependencies'
         unique_together = (('content', 'parent'),)
+
+    def save(self, *args, **kwargs):
+        """Saves and updates rank."""
+        self.rank = self.total_points()
+        return super().save(*args, **kwargs)
 
     def get_absolute_url(self):
         """Return a url pointing to the user's opinion of content (not opinion_dependency)."""
