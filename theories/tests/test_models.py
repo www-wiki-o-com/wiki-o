@@ -28,7 +28,7 @@ from core.utils import get_or_none
 from theories.model_utils import (convert_content_type, copy_opinion, get_compare_url,
                                   merge_content, swap_true_false)
 from theories.models.categories import Category
-from theories.models.content import Content
+from theories.models.content import Content, DeleteMode
 from theories.models.opinions import Opinion, OpinionDependency
 from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
@@ -596,7 +596,7 @@ class ContentTests(TestCase):
         self.assertEqual(dependency.title01, 'Intuition')
         self.assertEqual(dependencies.count(), 1)
 
-        dependency.delete(soft=False)
+        dependency.delete(mode=DeleteMode.HARD)
         Content.INTUITION_PK += 1
         dependencies = Content.objects.filter(title01='Intuition')
         self.assertEqual(dependencies.count(), 1)
@@ -723,13 +723,13 @@ class ContentTests(TestCase):
         self.assertEqual(self.bob.notifications.count(), 1)
 
     def test_delete00(self):
-        result = self.evidence.delete()
-        self.assertTrue(result)
+        hard_deleted = self.evidence.delete()
+        self.assertFalse(hard_deleted)
         self.assertTrue(self.evidence.is_deleted())
         self.assertEqual(self.evidence.parent_flat_theories.count(), 0)
 
-        result = self.evidence.delete()
-        self.assertFalse(result)
+        hard_deleted = self.evidence.delete()
+        self.assertFalse(hard_deleted)
 
     def test_delete01(self):
         self.evidence.delete()
@@ -737,7 +737,7 @@ class ContentTests(TestCase):
         self.assertEqual(self.evidence.parent_flat_theories.count(), 0)
 
     def test_delete02(self):
-        self.evidence.delete(soft=False)
+        self.evidence.delete(mode=DeleteMode.HARD)
         self.assertIsNone(self.evidence.id)
 
     def test_delete03(self):

@@ -15,7 +15,6 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import inspect
 import logging
-
 import reversion
 from actstream.models import followers
 from django.contrib.contenttypes.fields import GenericRelation
@@ -23,6 +22,7 @@ from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
+from enum import Enum
 from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
 from model_utils import Choices
@@ -38,6 +38,13 @@ from users.models import User, Violation
 # *******************************************************************************
 DEBUG = False
 LOGGER = logging.getLogger('django')
+
+
+class DeleteMode(Enum):
+    AUTO = 1
+    HARD = 2
+    SOFT = 3
+
 
 # *******************************************************************************
 # Models
@@ -311,9 +318,6 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
 
         Returns:
             [type]: [description]
-
-        Todo:
-            * Do not save if datetime matches.
         """
         rev_user = None
         save_rev = False
@@ -341,49 +345,68 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             reversion.set_user(user)
             reversion.set_comment('Snapshot')
 
-    def delete(self, user=None, soft=True):
+    def delete(self, user=None, mode=DeleteMode.AUTO):
         """Recursively deletes abandoned dependencies.
 
+        Auto choice of hard and soft delete (hard=):
+          - If
+
         Args:
-            user ([type], optional): [description]. Defaults to None.
-            soft (bool, optional): [description]. Defaults to True.
+            user (User, optional): The user responsible for the delete action. Defaults to None.
+            mode (DeleteMode, optional): If 'hard' the content will be permently deleted, if 'soft'
+              it will be flagged as deleted, if 'auto' the system will decide to use a soft or a
+              hard delete. Defaults to 'auto'.
 
         Returns:
-            [type]: [description]
+            [bool]: True if content was hard deleted.
 
         Todo:
-            * Reset cache.
+            * Reset cache?
+            * Update opinion points?
         """
         # Error checking
         if self.pk == self.INTUITION_PK:
-            LOGGER.error('content.delete: Intuition dependency should not be deleted (pk=%d).',
+            LOGGER.error('Content::delete: Intuition dependency should not be deleted (pk=%d).',
                          self.pk)
             return False
         if self.is_deleted():
-            LOGGER.error('content.delete: Theory dependency is already deleted (pk=%d).', self.pk)
+            LOGGER.error('Content::delete: Content is already deleted (pk=%d).', self.pk)
             return False
+        if self.id is None:
+            LOGGER.error('Content::delete: Content is already deleted or not saved.')
+            return False
+        assert isinstance(mode, DeleteMode)
+
         # Setup
         if user is None:
             user = User.get_system_user()
-        # Delete
-        self.content_type = -abs(self.content_type)
-        # Save
-        if soft:
-            self.save(user)
+        if mode == DeleteMode.AUTO:
+            hard = True
+            hard &= user == self.created_by
+            hard &= not self.get_opinions().exists()
+            hard &= not self.opinion_dependencies.exists()
+        elif mode == DeleteMode.HARD:
+            hard = True
+        elif mode == DeleteMode.SOFT:
+            hard = False
         else:
-            super().delete()
-        # Recursive delete
+            assert False
+
+        # Recursive delete dependencies
         if self.is_theory():
-            # Cleanup evidence
             for evidence in self.get_theory_evidence():
-                if evidence.get_parent_theories().count() == 0:
-                    evidence.delete(user, soft)
-            # Cleanup sub-theories
+                if evidence.get_parent_theories().count() == 1:
+                    evidence.delete(user, mode)
             for subtheory in self.get_theory_subtheories():
-                if not subtheory.is_root() and subtheory.get_parent_theories().count() == 0:
-                    subtheory.delete(user, soft)
-        # Remove flat dependencies
-        if soft:
+                if not subtheory.is_root() and subtheory.get_parent_theories().count() == 1:
+                    subtheory.delete(user, mode)
+
+        # Delete content
+        if hard:
+            super().delete()
+            return True
+        else:
+            # Remove flat dependencies
             self.parent_flat_theories.clear()
             for parent in self.get_parent_theories():
                 if self.is_theory():
@@ -393,7 +416,8 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                         pk__in=exclude_list)
                     for theory_dependency in nested_dependencies:
                         parent.remove_flat_dependency(theory_dependency)
-            # Notifications (opinion)
+
+            # Notifications for opinions
             if self.is_theory():
                 for opinion in self.get_opinions():
                     notify.send(
@@ -406,7 +430,8 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                         target=opinion,
                         level='warning',
                     )
-            # Notifications (opinion_dependency)
+
+            # Notifications for opinion_dependencies
             for opinion_dependency in self.opinion_dependencies.all():
                 notify.send(
                     sender=user,
@@ -417,7 +442,11 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                     target=opinion_dependency.parent,
                     level='warning',
                 )
-        return True
+
+            # Flat conent as deleted (negative => deleted)
+            self.content_type = -abs(self.content_type)
+            self.save(user)
+        return False
 
     def cache(self, dependencies=True, flat_dependencies=True, stats=False):
         """Cache sub-theory and evidence dependencies to save on db calls."""
