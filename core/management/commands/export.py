@@ -147,7 +147,5 @@ class Command(BaseCommand):
         return data
 
     def get_forum_sync_data(self):
-        data = data = serializers.serialize('json',
-                                            User.objects.all(),
-                                            fields=['username', 'password'])
+        data = serializers.serialize('json', User.objects.all(), fields=['username', 'password'])
         return data
