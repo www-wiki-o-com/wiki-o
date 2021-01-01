@@ -14,21 +14,31 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 import math
+from enum import Enum
 
 
 # *******************************************************************************
 # Defines
 # *******************************************************************************
-class Colour():
+class Colour(Enum):
     """A class for colour constants."""
+    CUSTOM = 0
+    NONE = 'none'
     RED = '#FF0000'
     BLACK = '#000000'
     PINK = '#FF8080'
     GREY = '#808080'
     BLACK_AND_RED = 'B&R'
-    NONE = 'none'
+    custom_colour = ''
 
-    def get_transparent_colour(colour):
+    def __str__(self):
+        if self == self.CUSTOM:
+            return self.custom_colour
+        if self == self.BLACK_AND_RED:
+            return None
+        return self.value
+
+    def get_transparent_colour(self):
         """Converts a dark colour to a light colour.
 
         Args:
@@ -37,21 +47,23 @@ class Colour():
         Returns:
             Colour: The lighter version of the input colour.
         """
-        if colour == Colour.RED:
+        if self == Colour.RED:
             return Colour.PINK
-        if colour == Colour.BLACK:
+        if self == Colour.BLACK:
             return Colour.GREY
         assert False
 
-    def get_red_black_mix(red_percent):
+    @classmethod
+    def get_red_black_mix(cls, red_percent):
+        red_ratio = red_percent
         if isinstance(red_percent, int) and 0 <= red_percent and red_percent <= 100:
-            red_mix = 1.0 * red_percent / 100
-        assert isinstance(red_percent, float) and 0.0 <= red_percent and red_percent <= 1.0
+            red_ratio = 1.0 * red_percent / 100
+        assert isinstance(red_ratio, float) and 0.0 <= red_percent and red_percent <= 1.0
+        red_mix = int(0xff * red_ratio)
 
-        red_mix = int(0xff * red_percent)
-        print('#' + hex(red_mix)[2:] + '0000')
-        return '#' + hex(red_mix)[2:] + '0000'
-
+        colour = cls.CUSTOM
+        colour.custom_colour = '#' + hex(red_mix)[2:] + '0000'
+        return colour
 
 
 # *******************************************************************************

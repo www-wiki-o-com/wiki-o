@@ -10,7 +10,6 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
-from django.shortcuts import render
 from django.views import generic
 from django.views.generic.base import RedirectView
 
