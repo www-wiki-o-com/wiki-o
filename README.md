@@ -43,6 +43,9 @@ LICENSE.md file in the root directory of this source tree.
     <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/context:python">
         <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
     </a>
+    <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/context:javascript">
+        <img alt="Language grade: JavaScript" src="https://img.shields.io/lgtm/grade/javascript/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
+    </a>
     <img src="https://img.shields.io/website?url=http%3A%2F%2Fwiki-o.com" />
 </p>
 
