@@ -31,14 +31,8 @@ LICENSE.md file in the root directory of this source tree.
     <!-- <a href="https://codeclimate.com/github/www-wiki-o-com/www-wiki-o-com/maintainability">
         <img src="https://api.codeclimate.com/v1/badges/0262c54df6ffeaf33973/maintainability" />
     </a> -->
-    <a href="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/?branch=master">
-        <img alt="Code Quality" src="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/badges/quality-score.png?b=master" />
-    </a>
     <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/alerts/">
         <img alt="Total alerts" src="https://img.shields.io/lgtm/alerts/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
-    </a>
-    <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/context:python">
-        <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
     </a>
     <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/context:python">
         <img alt="Language grade: Python" src="https://img.shields.io/lgtm/grade/python/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
@@ -48,6 +42,15 @@ LICENSE.md file in the root directory of this source tree.
     </a>
     <img src="https://img.shields.io/website?url=http%3A%2F%2Fwiki-o.com" />
 </p>
+<p align="center">
+    <a href="https://deepsource.io/gh/www-wiki-o-com/www-wiki-o-com/?ref=repository-badge" target="_blank">
+        <img alt="DeepSource" title="DeepSource" src="https://deepsource.io/gh/www-wiki-o-com/www-wiki-o-com.svg/?label=active+issues&show_trend=true"/>
+    </a>
+    <a href="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/?branch=master">
+        <img alt="Code Quality" src="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/badges/quality-score.png?b=master" />
+    </a>
+</p>
+
 
 # Requirements
 
