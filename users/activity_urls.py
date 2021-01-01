@@ -15,7 +15,7 @@ try:
 except ImportError:
     from django.conf.urls import url
 
-from actstream import feeds, views
+from actstream import views
 
 urlpatterns = [
     # Follow/Unfollow API

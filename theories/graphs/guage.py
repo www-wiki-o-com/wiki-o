@@ -13,10 +13,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import random
-
 from theories.graphs.shapes import Colour, Rectangle, Polygon
-from theories.models.statistics import Stats
 
 # *******************************************************************************
 # Diagrams
@@ -98,7 +95,7 @@ class Guage():
 
 class DependencyGuage(Guage):
     """A class for drawing guages."""
-    BLACK_RED_THRESHOLD = 1.0 # 100 %
+    BLACK_RED_THRESHOLD = 1.0  # 100 %
 
     def __init__(self, dependency, normalize=1.0):
         """Constructor for the Guage class.
@@ -130,7 +127,6 @@ class DependencyGuage(Guage):
             colour = Colour.RED
         else:
             colour = Colour.get_red_black_mix(red_percent=false_points)
-            print(135)
 
         # Graph
         super().__init__(width=width, colour=colour)

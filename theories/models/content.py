@@ -15,14 +15,16 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 import inspect
 import logging
+from enum import Enum
+
 import reversion
 from actstream.models import followers
 from django.contrib.contenttypes.fields import GenericRelation
+from django.core.exceptions import ObjectDoesNotExist
 from django.db import models
 from django.db.models import Q
 from django.urls import reverse
 from django.utils import timezone
-from enum import Enum
 from hitcount.models import HitCount
 from hitcount.views import HitCountMixin
 from model_utils import Choices
@@ -541,7 +543,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             intuition = cls.objects.get(pk=cls.INTUITION_PK)
             if intuition.title01 != 'Intuition':
                 intuition = None
-        except:
+        except ObjectDoesNotExist:
             intuition = None
         # get or create
         if create and intuition is None:
@@ -729,7 +731,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         return Version.objects.get_for_object(self)
 
     def get_utilization(self, user=None):
-        return 0
+        return 0  # TODO
         if user is None:
             return self.users.exclude(user=user).count()
         return self.users.count()

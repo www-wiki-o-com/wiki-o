@@ -13,37 +13,16 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
-import copy
-import datetime
-import inspect
-import re
-import unicodedata
-
 import reversion
-from actstream import action
 from actstream.actions import is_following
-from actstream.models import followers, model_stream, target_stream, user_stream
-from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.auth.models import Group, Permission
-from django.core import mail
 from django.core.paginator import Paginator
-from django.db.models import Count, F, Q, Sum
-from django.forms import Textarea, modelformset_factory
+from django.forms import modelformset_factory
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.template import loader
-from django.urls import reverse, reverse_lazy
-from django.utils import timezone
+from django.urls import reverse
 from django.utils.http import unquote
-from django.views import generic
-from django.views.generic import TemplateView
-from django.views.generic.base import RedirectView
-from django.views.generic.edit import CreateView, DeleteView, FormView, UpdateView
-from notifications.signals import notify
 from reversion.models import Version
-from rules.contrib.views import PermissionRequiredMixin
 from rules.contrib.views import objectgetter as get_object
 from rules.contrib.views import permission_required
 
@@ -77,13 +56,15 @@ NUM_ITEMS_PER_PAGE = 25
 # *******************************************************************************
 
 
-def get_opinion_list(theory, current_user, exclude_list=[]):
+def get_opinion_list(theory, current_user, exclude_list=None):
     """Generate a list of opinions based on the current user. The output is a list of dictionary
        items: text, true_points, false_points, and url."""
 
     # setup
     opinion_list = []
     exclude_users = []
+    if exclude_list is None:
+        exclude_list = []
     for x in exclude_list:
         if isinstance(x, User) and x.is_authenticated:
             exclude_users.append(x)
@@ -127,7 +108,7 @@ def get_opinion_list(theory, current_user, exclude_list=[]):
     return opinion_list
 
 
-def get_compare_list(opinion01, current_user, exclude_list=[]):
+def get_compare_list(opinion01, current_user, exclude_list=None):
     """Generate a list of comparisons based on the current opinion and current
        user. The output is a list of dictionary items: text, true_points,
        false_points, and url."""
@@ -136,6 +117,8 @@ def get_compare_list(opinion01, current_user, exclude_list=[]):
     theory = opinion01.content
     compare_list = []
     exclude_users = []
+    if exclude_list is None:
+        exclude_list = []
     for x in exclude_list:
         if isinstance(x, User) and x.is_authenticated:
             exclude_users.append(x)
@@ -353,7 +336,7 @@ def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
     theory.update_hits(request)
 
     # Diagrams
-    if isinstance(opinion, Opinion) or isinstance(opinion, Stats):
+    if isinstance(opinion, (Stats, Opinion)):
         max_points = 0.0
         for dependency in theory_dependencies:
             total_points = dependency.true_points() + dependency.false_points()
@@ -543,6 +526,7 @@ def theory_edit_evidence_view(request, content_pk):
         'formset': formset,
         'evidence_list': evidence_list,
         'prev': prev,
+        'next': next,
         'params': params,
     }
     return render(
@@ -1001,6 +985,7 @@ def theory_activity_view(request, content_pk):
         'actions': actions,
         'subscribed': subscribed,
         'prev': prev,
+        'next': next,
         'params': params,
     }
     return render(
@@ -1236,7 +1221,6 @@ def evidence_report_view(request, content_pk):
     if request.method == 'POST':
         form = ReportViolationForm(request.POST, user=user, content=evidence)
         if form.is_valid():
-            report = form.save()
             return redirect(next)
         else:
             print(1000, form.errors)
@@ -1291,6 +1275,7 @@ def evidence_activity_view(request, content_pk):
         'actions': actions,
         'subscribed': subscribed,
         'prev': prev,
+        'next': next,
         'params': params,
     }
     return render(
@@ -1360,7 +1345,6 @@ def content_delete_redirect_view(request, content_pk):
         parent_theory = get_object_or_404(Content, pk=pk)
         next = parent_theory.url() + params.get_prev()
     else:
-        parent_theory = None
         next = reverse('theories:index') + params
 
     # Post request
@@ -1385,7 +1369,6 @@ def content_backup_redirect_view(request, content_pk):
     content = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
-    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
@@ -1406,7 +1389,6 @@ def content_revert_redirect_view(request, content_pk, version_id):
     """A method for restoring a theory-dependency snap-shot (backup)."""
 
     # Setup
-    user = request.user
     content = get_object_or_404(Content, pk=content_pk)
     version = get_object_or_404(Version, id=version_id)
 
@@ -1448,9 +1430,6 @@ def content_convert_redirect_view(request, content_pk):
     if len(params.path) == 0:
         if content.is_root() or content.is_evidence():
             return redirect('theories:index')
-    else:
-        pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
-        parent_theory = get_object_or_404(Content, pk=pk)
 
     # Post request
     if request.method == 'POST':
@@ -1480,7 +1459,6 @@ def content_swap_titles_redirect_view(request, content_pk):
     theory = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
-    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
@@ -1901,7 +1879,7 @@ def opinion_edit_view(request, content_pk, wizard=False):
             # save altered dependencies
             for opinion_dependency_form in dependency_formset:
                 if opinion_dependency_form.has_changed():
-                    opinion_dependency = opinion_dependency_form.save()
+                    opinion_dependency_form.save()
 
             # update points
             opinion.update_points()
@@ -1910,7 +1888,7 @@ def opinion_edit_view(request, content_pk, wizard=False):
             opinion.update_activity_logs(user, verb='Modified.')
 
             # update utilization
-            for content in utilization_before.keys():
+            for content in utilization_before:
                 utilization_after = content.get_utilization(user)
                 if utilization_after and not utilization_before[content]:
                     content.utilization += 1
@@ -1960,7 +1938,6 @@ def opinion_copy_view(request, opinion_pk):
     # Setup
     user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
-    theory = opinion.content
     recursive = request.POST.get('recursive') == 'yes'
 
     # Navigation
@@ -2013,11 +1990,9 @@ def opinion_hide_user_redirect_view(request, opinion_pk):
     """A method for hiding the user for the current opinion."""
 
     # Setup
-    user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
 
     # Navigation
-    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(opinion_pk))
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 

@@ -119,7 +119,7 @@ class ViewsTestBase():
             form_data = get_form_data(response=self.client.get(url), verbose_level=verbose_level)
             if form_data is None:
                 form_data = {}
-            for key in form_data.keys():
+            for key in form_data:
                 if key not in post_data.keys():
                     if form_data[key] is None:
                         post_data[key] = ''

@@ -10,8 +10,6 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
-import os
-import sys
 from .settings_base import *
 
 # SECURITY WARNING: don't run with debug turned on in production!
