@@ -34,6 +34,9 @@ LICENSE.md file in the root directory of this source tree.
     <a href="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/?branch=master">
         <img alt="Code Quality" src="https://scrutinizer-ci.com/g/www-wiki-o-com/www-wiki-o-com/badges/quality-score.png?b=master" />
     </a>
+    <a href="https://lgtm.com/projects/g/www-wiki-o-com/www-wiki-o-com/alerts/">
+        <img alt="Total alerts" src="https://img.shields.io/lgtm/alerts/g/www-wiki-o-com/www-wiki-o-com.svg?logo=lgtm&logoWidth=18"/>
+    </a>
     <img src="https://img.shields.io/website?url=http%3A%2F%2Fwiki-o.com" />
 </p>
 
