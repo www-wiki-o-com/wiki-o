@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -13,6 +13,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import inspect
 import logging
 
 from actstream.models import followers
@@ -83,6 +84,7 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
 
     def url(self):
         """Return none. Abstract objects have no data in the db."""
+        return None
 
     def get_dependency(self, content, create=False):
         """Return the stats dependency for the corresponding content (optionally, create the stats dependency)."""
@@ -141,7 +143,7 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
                     self.save_flat_dependencies(self.flat_dependencies.all())
         return dependency
 
-    def get_flat_dependencies(self, cache=False):
+    def get_flat_dependencies(self, cache=False, verbose_level=0):
         """Return a query set of the flat dependencies/nested evidence (use cache if available)."""
         # Check cache first.
         flat_dependencies = self.get_saved_flat_dependencies()
@@ -149,6 +151,8 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
             flat_dependencies = self.flat_dependencies.all()
             if cache:
                 self.save_flat_dependencies(flat_dependencies)
+        if verbose_level >= 999:
+            print('get_flat_dependencies:', flat_dependencies)
         return flat_dependencies
 
     def get_point_range(self):
@@ -260,15 +264,13 @@ class Opinion(OpinionBase, models.Model):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
         if self.is_anonymous():
             return 'Anonymous'
-        else:
-            return self.user.__str__()
+        return self.user.__str__()
 
     def get_owner_long(self):
         """Return "Anonymous" if owner is hidden, otherwise return user."""
         if self.is_anonymous():
             return 'Anonymous'
-        else:
-            return self.user.__str__(print_fullname=True)
+        return self.user.__str__(print_fullname=True)
 
     def url(self):
         """Return the url that views the details of this opinion."""
@@ -284,7 +286,11 @@ class Opinion(OpinionBase, models.Model):
 
     def stats_url(self):
         """Return url for viewing the stats of this opinion."""
-        return reverse('theories:opinion-analysis', kwargs={'content_pk': self.content.pk, 'opinion_pk': self.pk})
+        return reverse('theories:opinion-analysis',
+                       kwargs={
+                           'content_pk': self.content.pk,
+                           'opinion_pk': self.pk
+                       })
 
     def edit_url(self):
         """Return url for editing this opinion."""
@@ -297,7 +303,7 @@ class Opinion(OpinionBase, models.Model):
     def get_flat_dependencies(self, cache=True, verbose_level=0):
         """Return a list of non-db objects representing the flattened opinion.
 
-           This action populates saved_flat_dependencies.
+        This action populates saved_flat_dependencies.
         """
 
         # Debug
@@ -417,7 +423,9 @@ class Opinion(OpinionBase, models.Model):
 
     def get_intuition(self, create=True):
         """Return an opinion dependency for intuition (optionally, create the dependency).
-           Additionally, this action adds an intuition dependency to theory.dependencies."""
+
+        Additionally, this action adds an intuition dependency to theory.dependencies.
+        """
         content = self.content.get_intuition()
         if create:
             intuition, _created = self.dependencies.get_or_create(content=content)
@@ -489,14 +497,11 @@ class Opinion(OpinionBase, models.Model):
             total = self.true_input + self.false_input
             if total > 0:
                 return self.true_input / total
-            else:
-                return 0.0
-        else:
-            total = self.true_total + self.false_total
-            if total > 0:
-                return self.true_total / total
-            else:
-                return 0.0
+            return 0.0
+        total = self.true_total + self.false_total
+        if total > 0:
+            return self.true_total / total
+        return 0.0
 
     def false_points(self):
         """Return the total false points for opinion."""
@@ -504,14 +509,11 @@ class Opinion(OpinionBase, models.Model):
             total = self.true_input + self.false_input
             if total > 0:
                 return self.false_input / total
-            else:
-                return 0.0
-        else:
-            total = self.true_total + self.false_total
-            if total > 0:
-                return self.false_total / total
-            else:
-                return 0.0
+            return 0.0
+        total = self.true_total + self.false_total
+        if total > 0:
+            return self.false_total / total
+        return 0.0
 
     def swap_true_false(self):
         """Swap the true and false points of the opinion (used when swapping the title of the theory)."""
@@ -551,7 +553,7 @@ class Opinion(OpinionBase, models.Model):
         stream_if_unique(self.target_actions, log)
 
         # subscribed users
-        log['verb'] = '<# target.url {{ target.get_owner }} has modified their opinion of "{{ target }}". #>',
+        log['verb'] = '<# target.url {{ target.get_owner }} has modified their opinion of "{{ target }}". #>'
         for follower in followers(self):
             if follower != user:
                 log['recipient'] = follower
@@ -660,8 +662,9 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
         opinion_root = self.get_root()
         if opinion_root is None:
             return None
-        elif opinion_root.anonymous == self.parent.anonymous:
+        if opinion_root.anonymous == self.parent.anonymous:
             return opinion_root.url()
+        raise RuntimeError
 
     def url(self):
         """Return a url pointing to the user's opinion of content (not opinion_dependency)."""
@@ -683,29 +686,25 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
         """Returns the percentage of true points (not total points) for the True-True category."""
         if self.parent.true_total > 0:
             return self.tt_input / self.parent.true_total * self.parent.true_points()
-        else:
-            return 0.0
+        return 0.0
 
     def tf_points(self):
         """Returns the percentage of true points (not total points) for the True-True category."""
         if self.parent.false_total > 0:
             return self.tf_input / self.parent.false_total * self.parent.false_points()
-        else:
-            return 0.0
+        return 0.0
 
     def ft_points(self):
         """Returns the percentage of true points (not total points) for the True-True category."""
         if self.parent.true_total > 0:
             return self.ft_input / self.parent.true_total * self.parent.true_points()
-        else:
-            return 0.0
+        return 0.0
 
     def ff_points(self):
         """Returns the percentage of true points (not total points) for the True-True category."""
         if self.parent.false_total > 0:
             return self.ff_input / self.parent.false_total * self.parent.false_points()
-        else:
-            return 0.0
+        return 0.0
 
     def true_points(self):
         return self.tt_points() + self.ft_points()

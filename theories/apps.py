@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -18,7 +18,6 @@ from django.apps import AppConfig
 
 class TheoriesConfig(AppConfig):
     """Class representing a Django application and its configuration."""
-
     name = 'theories'
 
     def ready(self):

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -106,22 +106,28 @@ class SpringShapeBase(ShapeBase):
         Returns:
             tuple(float, float, float): The direction vector (x, y, magnitude) relative to self.
                 Negative magnitude indicates that the shapes are in collision.
+
+        Raises:
+            RuntimeError: If direction == IN and neither self and shape02 is a Ring.
         """
         dx = shape02.x - self.x
         dy = shape02.y - self.y
-        d = math.sqrt(dx**2 + dy**2)
+        d = math.hypot(dx, dy)
         unit_x = 1.0 * dx / d
         unit_y = 1.0 * dy / d
         if direction == Direction.OUT:
             separation = d - self.r - shape02.r
             return unit_x, unit_y, separation
+
+        if not isinstance(self, Ring) and not isinstance(shape02, Ring):
+            raise RuntimeError(
+                f'self ({type(self)}) or shape02 ({type(shape02)}) needs to be a Ring')
+
+        if isinstance(self, Ring):
+            separation = self.r - (d + shape02.r)
         else:
-            assert isinstance(self, Ring) or isinstance(shape02, Ring)
-            if isinstance(self, Ring):
-                separation = self.r - (d + shape02.r)
-            else:
-                separation = shape02.r - (d + self.r)
-            return -unit_x, -unit_y, separation
+            separation = shape02.r - (d + self.r)
+        return -unit_x, -unit_y, separation
 
     def get_spring_force(self, shape02, direction=Direction.OUT):
         """Calculates the force imposed on shape02 by self.
@@ -377,10 +383,14 @@ class Wall(SpringShapeBase):
         Walls only have one coordinate, x or y, if x, then the wall extends the entire y axis.
 
         Args:
-            x (float or None): The x coordinate of the wall (must be float if y is None).
-            y (float or None): The x coordinate of the wall (must be float if x is None).
+            x (float or None): The x coordinate of the wall (must be None if y is specified).
+            y (float or None): The x coordinate of the wall (must be None if x is specified).
+
+        Raises:
+            RuntimeError: If x or y are not a float and None or None and float (only one can be specified).
         """
-        assert x is None or y is None
+        if not (isinstance(x, float) or isinstance(y, float)) or not (x is None or y is None):
+            raise RuntimeError(f'either x ({x}) or y ({y}) has to be a float and the other None.')
         super().__init__(x, y, 0)
 
     def get_separation_vector(self, shape02, direction=Direction.IN):
@@ -399,9 +409,17 @@ class Wall(SpringShapeBase):
         Returns:
             tuple(float, float, float): The direction vector (x, y, magnitude) relative to self.
                 Negative magnitude indicates that the shapes are in collision.
+
+        Raises:
+            RuntimeError: If the direction is not IN.
+            RuntimeError: If self.x and self.y is not flat and None or None and float.
         """
-        assert direction == Direction.IN
-        assert self.x is not None or self.y is not None
+        if direction != Direction.IN:
+            raise RuntimeError('direction (%r) must be IN.' % direction)
+        if not (isinstance(self.x, float) or isinstance(self.y, float)) or not (self.x is None or
+                                                                                self.y is None):
+            raise RuntimeError(
+                f'either x ({self.x}) or y ({self.y}) has to be a float and the other None.')
         unit_x = unit_y = 0.0
         if self.x is not None:
             if self.x < 0:
@@ -422,12 +440,20 @@ class Wall(SpringShapeBase):
         return unit_x, unit_y, separation
 
     def propigate(self, dx, dy):
-        """Dummy method, walls don't move."""
-        assert False
+        """Dummy method, walls don't move.
+
+        Raises:
+            RuntimeError: If this method is called.
+        """
+        raise RuntimeError("this (dummy) method shouldn't be called")
 
     def get_svg(self, offset=None):
-        """Dummy method, this shape has nothing to display."""
-        assert False
+        """Dummy method, this shape has nothing to display.
+
+        Raises:
+            RuntimeError: If this method is called.
+        """
+        raise RuntimeError("this (dummy) method shouldn't be called")
 
 
 # *******************************************************************************

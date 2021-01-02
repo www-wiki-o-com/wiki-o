@@ -1,4 +1,5 @@
-"""  __      __    __               ___
+#!/usr/bin/env python
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -10,7 +11,6 @@ This source code is licensed under the GPL license found in the
 LICENSE.md file in the root directory of this source tree.
 """
 
-#!/usr/bin/env python
 from setuptools import setup, find_packages
 
 setup(name='Wiki-O',

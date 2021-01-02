@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -143,8 +143,12 @@ def stream_if_unique(target_actions, log, accept_time=21600):
 
     Returns:
         bool: True if updated, false otherwise.
+
+    Raises:
+        ValueError: If log is not a dict.
     """
-    assert isinstance(log, dict)
+    if not isinstance(log, dict):
+        raise ValueError(f'log should be a dict, not {type(log)}.')
     last_action = target_actions.first()
     result = log_is_different(last_action, log, accept_time=accept_time)
     if result == LogDiffResult.DIFFERENT:
@@ -170,8 +174,12 @@ def notify_if_unique(follower, log, update_unread=True, accept_time=21600):
 
     Returns:
         bool: True if the user has ben notified, false otherwise.
+
+    Raises:
+        ValueError: If log is not a dict.
     """
-    assert isinstance(log, dict)
+    if not isinstance(log, dict):
+        raise ValueError(f'log should be a dict, not {type(log)}.')
     last_notification = follower.notifications.first()
     result = log_is_different(last_notification, log, update_unread, accept_time)
     if result == LogDiffResult.DIFFERENT:
@@ -199,9 +207,13 @@ def log_is_different(old_log, new_log, update_unread=False, accept_time=21600):
 
     Returns:
         LogDiffResult: May return DIFFERENT, MATCHED, or UPDATED.
+
+    Raises:
+        ValueError: If new_log is not a dict.
     """
     # Preconditions
-    assert isinstance(new_log, dict)
+    if not isinstance(new_log, dict):
+        raise ValueError(f'new_log should be a dict, not {type(new_log)}.')
 
     # Test if log is different
     if old_log is None:
@@ -304,8 +316,8 @@ def get_form_data(response, verbose_level=0):
 
     # Print debug info
     if verbose_level >= 10:
-        for x in data:
-            print("get_form_data:", x, data[x])
+        for key, value in data.items():
+            print("get_form_data:", key, value)
 
     # Return result
     return data
@@ -379,13 +391,17 @@ class QuerySetDict():
 
         Returns:
             int or str: The object's primary key.
+
+        Raises:
+            ValueError: If key is not an int or a string.
         """
         key = obj
         if attrib_key is None:
             attrib_key = self.attrib_key
         for key_str in attrib_key.split('.'):
             key = getattr(key, key_str)
-        assert isinstance(key, (int, str))
+        if not isinstance(key, (int, str)):
+            raise ValueError(f'key needs to be an int or a string, not {type(key)}.')
         return key
 
     def add(self, obj):
@@ -404,6 +420,10 @@ class QuerySetDict():
 
         Returns:
             Object: The stored object that matches the query or None if it doesn't exist.
+
+        Raises:
+            RuntimeError: If the number of arguements is anything other than 1.
+            ValueError: If self.attrib_key is ill defined.
         """
         # Get key.
         if len(args) == 1:
@@ -411,7 +431,8 @@ class QuerySetDict():
         elif len(kwargs) == 1:
             _key, obj = list(kwargs.items())[0]
         else:
-            assert False
+            raise RuntimeError(
+                'There has to be exactly one arguement.\n  args = {args}\n  kwargs = {kwargs}')
         if isinstance(obj, (int, str)):
             # Argument is a key.
             key = obj
@@ -420,7 +441,7 @@ class QuerySetDict():
             if '.' in self.attrib_key:
                 attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
             else:
-                assert False
+                raise ValueError(f'self.attrib_key ({self.attrib_key}) is malformed.')
             key = self.get_object_key(obj, attrib_key)
         # Get value.
         if key in self.dict.keys():
@@ -440,12 +461,15 @@ class QuerySetDict():
 
         Returns:
             QuerySetDict: A reference to a QuerySetDict that does not contain the excluded objects.
+
+        Raises:
+            ValueError: If self.attrib_key is ill defined.
         """
         # Setup
         if '.' in self.attrib_key:
             attrib_key = self.attrib_key[self.attrib_key.find('.') + 1:]
         else:
-            assert False
+            raise ValueError(f'self.attrib_key ({self.attrib_key}) is malformed.')
         # Get primary keys.
         keys = []
         for arg in args:
@@ -484,7 +508,6 @@ class Parameters():
 
     def __init__(self, request, pk=None):
         """Constructor."""
-
         # Setup
         self.pk = pk
         self.path = []
@@ -555,7 +578,7 @@ class Parameters():
         return self.path
 
     def get_new(self):
-        """"Create a copy of the object.
+        """Create a copy of the object.
 
         Returns:
             Parameters: A copy of the object.
@@ -631,7 +654,7 @@ class Parameters():
         Returns:
             str: The value.
         """
-        value = self.params.get(key, None)
+        value = self.params.get(key)
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         return value
@@ -648,7 +671,6 @@ class Choices(DjangoChoices):
         unique (Bool): If true, the addition between two Choice objects will act as set addition
             with respect to _db_values.
     """
-
     unique = True
 
     def __init__(self, *choices, unique=True):

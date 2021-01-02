@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -57,8 +57,10 @@ NUM_ITEMS_PER_PAGE = 25
 
 
 def get_opinion_list(theory, current_user, exclude_list=None):
-    """Generate a list of opinions based on the current user. The output is a list of dictionary
-       items: text, true_points, false_points, and url."""
+    """Generate a list of opinions based on the current user.
+
+    The output is a list of dictionary items: text, true_points, false_points, and url.
+    """
 
     # setup
     opinion_list = []
@@ -109,9 +111,10 @@ def get_opinion_list(theory, current_user, exclude_list=None):
 
 
 def get_compare_list(opinion01, current_user, exclude_list=None):
-    """Generate a list of comparisons based on the current opinion and current
-       user. The output is a list of dictionary items: text, true_points,
-       false_points, and url."""
+    """Generate a list of comparisons based on the current opinion and current user.
+
+    The output is alist of dictionary items: text, true_points, false_points, and url.
+    """
 
     # setup
     theory = opinion01.content
@@ -168,7 +171,6 @@ def get_compare_list(opinion01, current_user, exclude_list=None):
 
 def activity_view(request, category_slug=None):
     """Home view for display all root theories."""
-
     # Setup
     user = request.user
     date = request.GET.get('date', None)
@@ -255,7 +257,6 @@ def category_index_view(request):
 
 def theory_index_view(request, category_slug=None):
     """Home view for display all root theories."""
-
     # Categories
     if category_slug is None:
         category = get_object_or_404(Category, title='All')
@@ -328,9 +329,9 @@ def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
     if len(params.path) > 0:
         pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
         parent_theory = get_object_or_404(Content, pk=pk)
-        prev = parent_theory.url() + params.get_prev()
+        prev_url = parent_theory.url() + params.get_prev()
     else:
-        prev = reverse('theories:index') + params
+        prev_url = reverse('theories:index') + params
 
     # Hit counts
     theory.update_hits(request)
@@ -351,7 +352,7 @@ def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
         'theory_dependencies': theory_dependencies,
         'parent_theories': parent_theories,
         'opinions': opinions,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -365,14 +366,13 @@ def theory_detail_view(request, content_pk, opinion_pk=None, opinion_slug=None):
 @permission_required('theories.add_content', raise_exception=True)
 def theory_create_view(request, category_slug):
     """View for create a new theory."""
-
     # Setup
     user = request.user
     category = get_object_or_404(Category, slug=category_slug)
 
     # Navigation
     params = Parameters(request)
-    prev = reverse('theories:index') + params
+    prev_url = reverse('theories:index') + params
 
     # Post request
     if request.method == 'POST':
@@ -395,7 +395,7 @@ def theory_create_view(request, category_slug):
         'category_suggestions': get_category_suggestions(),
         'category': category,
         'form': form,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -411,15 +411,14 @@ def theory_create_view(request, category_slug):
                      raise_exception=True)
 def theory_edit_view(request, content_pk):
     """A view for editing theory details."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -444,7 +443,7 @@ def theory_edit_view(request, content_pk):
                                               verb='Added <# object.url {{ object }} #>',
                                               action_object=theory)
             theory.update_activity_logs(user, verb=form.get_verb())
-            return redirect(next)
+            return redirect(next_url)
 
     # Get request
     else:
@@ -458,7 +457,7 @@ def theory_edit_view(request, content_pk):
         'root_theory': root_theory,
         'theory': theory,
         'form': form,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -472,7 +471,6 @@ def theory_edit_view(request, content_pk):
 @permission_required('theories.add_content', raise_exception=True)
 def theory_edit_evidence_view(request, content_pk):
     """A view for editing evidence details for the pertaining theory."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -487,8 +485,8 @@ def theory_edit_evidence_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -511,9 +509,9 @@ def theory_edit_evidence_view(request, content_pk):
                     theory.add_dependency(evidence)
                     # activity log
                     evidence.update_activity_logs(user, form.get_verb())
-            return redirect(prev)
-        else:
-            print(238, formset.errors)
+            return redirect(prev_url)
+        # formset is invalid
+        print(238, formset.errors)
 
     # Get request
     else:
@@ -525,8 +523,8 @@ def theory_edit_evidence_view(request, content_pk):
         'theory': theory,
         'formset': formset,
         'evidence_list': evidence_list,
-        'prev': prev,
-        'next': next,
+        'prev': prev_url,
+        'next': next_url,
         'params': params,
     }
     return render(
@@ -540,7 +538,6 @@ def theory_edit_evidence_view(request, content_pk):
 @permission_required('theories.add_content', raise_exception=True)
 def theory_edit_subtheories_view(request, content_pk):
     """A view for editing sub-theory details for the pertaining theory."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -555,8 +552,8 @@ def theory_edit_subtheories_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -579,9 +576,9 @@ def theory_edit_subtheories_view(request, content_pk):
                     theory.add_dependency(subtheory)
                     # activity log
                     subtheory.update_activity_logs(user, verb=form.get_verb())
-            return redirect(next)
-        else:
-            print(220, formset.errors)
+            return redirect(next_url)
+        # formset is invalid
+        print(220, formset.errors)
 
     # Get request
     else:
@@ -593,7 +590,7 @@ def theory_edit_subtheories_view(request, content_pk):
         'theory': theory,
         'formset': formset,
         'subtheory_list': subtheory_list,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -609,15 +606,14 @@ def theory_edit_subtheories_view(request, content_pk):
                      raise_exception=True)
 def theory_merge_view(request, content_pk):
     """A view for merging theories."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -656,9 +652,9 @@ def theory_merge_view(request, content_pk):
                             user,
                             verb='Merged with <# object.url {{ object }} #>',
                             action_object=content)
-            return redirect(next)
-        else:
-            print(200, formset.errors)
+            return redirect(next_url)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -670,7 +666,7 @@ def theory_merge_view(request, content_pk):
         'theory': theory,
         'formset': formset,
         'candidates': candidates,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -684,7 +680,6 @@ def theory_merge_view(request, content_pk):
 @permission_required('theories.add_content', raise_exception=True)
 def theory_inherit_view(request, content_pk01, content_pk02):
     """A view for inheriting evidence/sub-theories into the pertaining theory."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk01)
@@ -692,8 +687,8 @@ def theory_inherit_view(request, content_pk01, content_pk02):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk01))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     search_term = request.GET.get('search', '')
@@ -734,7 +729,7 @@ def theory_inherit_view(request, content_pk01, content_pk02):
                     theory.update_activity_logs(user,
                                                 verb='Inherited <# object.url {{ object }} #>',
                                                 action_object=dependency)
-            return redirect(next)
+            return redirect(next_url)
 
     # Get request
     else:
@@ -747,7 +742,7 @@ def theory_inherit_view(request, content_pk01, content_pk02):
         'other_theories': other_theories,
         'formset': formset,
         'candidates': candidates,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -761,7 +756,6 @@ def theory_inherit_view(request, content_pk01, content_pk02):
 @permission_required('theories.change_content', raise_exception=True)
 def theory_restore_view(request, content_pk):
     """A view for reviewing/deleting theory revisions."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -776,8 +770,8 @@ def theory_restore_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -800,10 +794,10 @@ def theory_restore_view(request, content_pk):
                         version.delete()
                         # activity log
                         theory.update_activity_logs(user, verb='Revision (deleted)')
-            return redirect(next)
-        else:
-            print(200, formset.errors)
-            print(201, request.POST)
+            return redirect(next_url)
+        # formset is invalid
+        print(200, formset.errors)
+        print(201, request.POST)
 
     # Get request
     else:
@@ -815,7 +809,7 @@ def theory_restore_view(request, content_pk):
         'theory': theory,
         'formset': formset,
         'revisions': revisions,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -829,7 +823,6 @@ def theory_restore_view(request, content_pk):
 @permission_required('theories.backup_content', raise_exception=True)
 def theory_backup_view(request, content_pk):
     """A method for taking a snap-shot (backup) of a theory dependency."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -845,8 +838,8 @@ def theory_backup_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -863,9 +856,9 @@ def theory_backup_view(request, content_pk):
                 if form.cleaned_data['select']:
                     content = form.instance
                     content.save_snapshot(user)
-            return redirect(next)
-        else:
-            print(200, formset.errors)
+            return redirect(next_url)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -877,7 +870,7 @@ def theory_backup_view(request, content_pk):
         'theory': theory,
         'formset': formset,
         'candidates': candidates,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -897,8 +890,8 @@ def theory_report_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -920,9 +913,9 @@ def theory_report_view(request, content_pk):
             report = form.save()
             if report.offender == theory.modified_by:
                 theory.autosave(user, force=True)
-            return redirect(next)
-        else:
-            print(1000, form.errors)
+            return redirect(next_url)
+        # form is invalid
+        print(1000, form.errors)
 
     # Get request
     else:
@@ -935,7 +928,7 @@ def theory_report_view(request, content_pk):
         'open_violations': open_violations,
         'closed_violations': closed_violations,
         'form': form,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -947,7 +940,6 @@ def theory_report_view(request, content_pk):
 
 def theory_activity_view(request, content_pk):
     """A view for theory activity."""
-
     # Setup
     user = request.user
     date = request.GET.get('date', None)
@@ -968,8 +960,8 @@ def theory_activity_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = theory.url() + params
-    next = theory.url() + params
+    prev_url = theory.url() + params
+    next_url = theory.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -984,8 +976,8 @@ def theory_activity_view(request, content_pk):
         'theory': theory,
         'actions': actions,
         'subscribed': subscribed,
-        'prev': prev,
-        'next': next,
+        'prev': prev_url,
+        'next': next_url,
         'params': params,
     }
     return render(
@@ -1002,7 +994,6 @@ def theory_activity_view(request, content_pk):
 
 def evidence_detail_view(request, content_pk):
     """A view for displaying evidence details."""
-
     # Setup
     evidence = get_object_or_404(Content, pk=content_pk)
     parent_theories = evidence.get_parent_theories()
@@ -1012,9 +1003,9 @@ def evidence_detail_view(request, content_pk):
     if len(params.path) > 0:
         pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
         parent_theory = get_object_or_404(Content, pk=pk)
-        prev = parent_theory.url() + params.get_prev()
+        prev_url = parent_theory.url() + params.get_prev()
     else:
-        prev = reverse('theories:index') + params
+        prev_url = reverse('theories:index') + params
 
     # Hit counts
     evidence.update_hits(request)
@@ -1023,7 +1014,7 @@ def evidence_detail_view(request, content_pk):
     context = {
         'parent_theories': parent_theories,
         'evidence': evidence,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1039,15 +1030,14 @@ def evidence_detail_view(request, content_pk):
                      raise_exception=True)
 def evidence_edit_view(request, content_pk):
     """A view for editing evidence details."""
-
     # Setup
     user = request.user
     evidence = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = evidence.url() + params
-    next = evidence.url() + params
+    prev_url = evidence.url() + params
+    next_url = evidence.url() + params
 
     # Post request
     if request.method == 'POST':
@@ -1058,9 +1048,9 @@ def evidence_edit_view(request, content_pk):
             # activity log
             evidence.update_activity_logs(user, verb=form.get_verb())
             # redirect
-            return redirect(next)
-        else:
-            print(226, form.errors)
+            return redirect(next_url)
+        # form is invalid
+        print(226, form.errors)
     # Get request
     else:
         form = EvidenceForm(instance=evidence, user=user)
@@ -1069,7 +1059,7 @@ def evidence_edit_view(request, content_pk):
     context = {
         'form': form,
         'evidence': evidence,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1085,15 +1075,14 @@ def evidence_edit_view(request, content_pk):
                      raise_exception=True)
 def evidence_merge_view(request, content_pk):
     """A view for merging theories."""
-
     # Setup
     user = request.user
     evidence = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = evidence.url() + params
-    next = evidence.url() + params
+    prev_url = evidence.url() + params
+    next_url = evidence.url() + params
 
     # Setup cont'd
     if len(params.path) > 0:
@@ -1124,9 +1113,9 @@ def evidence_merge_view(request, content_pk):
                     merge_content(evidence, content, user=user)
                     # activity log
                     evidence.update_activity_logs(user, verb='Merge', action_object=content)
-            return redirect(next)
-        else:
-            print(200, formset.errors)
+            return redirect(next_url)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -1137,7 +1126,7 @@ def evidence_merge_view(request, content_pk):
         'evidence': evidence,
         'formset': formset,
         'candidates': candidates,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1151,7 +1140,6 @@ def evidence_merge_view(request, content_pk):
 @permission_required('theories.change_content', raise_exception=True)
 def evidence_restore_view(request, content_pk):
     """A view for reviewing evidence revisions."""
-
     # Setup
     user = request.user
     evidence = get_object_or_404(Content, pk=content_pk)
@@ -1166,8 +1154,8 @@ def evidence_restore_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = evidence.url() + params
-    next = evidence.url() + params
+    prev_url = evidence.url() + params
+    next_url = evidence.url() + params
 
     # Post request
     if request.method == 'POST':
@@ -1183,9 +1171,9 @@ def evidence_restore_view(request, content_pk):
                         version.delete()
                         # activity log
                         evidence.update_activity_logs(user, verb='Revision (deleted)')
-            return redirect(next)
-        else:
-            print(200, formset.errors)
+            return redirect(next_url)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -1196,7 +1184,7 @@ def evidence_restore_view(request, content_pk):
         'evidence': evidence,
         'formset': formset,
         'revisions': revisions,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1214,16 +1202,16 @@ def evidence_report_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = evidence.url() + params
-    next = evidence.url() + params
+    prev_url = evidence.url() + params
+    next_url = evidence.url() + params
 
     # Post request
     if request.method == 'POST':
         form = ReportViolationForm(request.POST, user=user, content=evidence)
         if form.is_valid():
-            return redirect(next)
-        else:
-            print(1000, form.errors)
+            return redirect(next_url)
+        # form is invalid
+        print(1000, form.errors)
 
     # Get request
     else:
@@ -1233,7 +1221,7 @@ def evidence_report_view(request, content_pk):
     context = {
         'evidence': evidence,
         'form': form,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1245,7 +1233,6 @@ def evidence_report_view(request, content_pk):
 
 def evidence_activity_view(request, content_pk):
     """A view for evidence activity."""
-
     # Setup
     user = request.user
     date = request.GET.get('date', None)
@@ -1266,16 +1253,16 @@ def evidence_activity_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = evidence.url() + params
-    next = evidence.url() + params
+    prev_url = evidence.url() + params
+    next_url = evidence.url() + params
 
     # Render
     context = {
         'evidence': evidence,
         'actions': actions,
         'subscribed': subscribed,
-        'prev': prev,
-        'next': next,
+        'prev': prev_url,
+        'next': next_url,
         'params': params,
     }
     return render(
@@ -1295,18 +1282,17 @@ def evidence_activity_view(request, content_pk):
                      raise_exception=True)
 def content_remove_redirect_view(request, content_pk):
     """A redirect for deleting theory dependency edges (removing from parents)."""
-
     # Setup
     user = request.user
     content = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = content.url() + params
+    prev_url = content.url() + params
     if len(params.path) > 0:
         pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
         parent_theory = get_object_or_404(Content, pk=pk)
-        next = parent_theory.url() + params.get_prev()
+        next_url = parent_theory.url() + params.get_prev()
     else:
         return reverse('theories:index')
 
@@ -1320,11 +1306,10 @@ def content_remove_redirect_view(request, content_pk):
         if content.parents.count() == 0 and not content.is_root():
             content.delete(user)
             content.update_activity_logs(user, verb='Deleted.')
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.delete_content',
@@ -1332,54 +1317,50 @@ def content_remove_redirect_view(request, content_pk):
                      raise_exception=True)
 def content_delete_redirect_view(request, content_pk):
     """A redirect for deleting theory dependencies."""
-
     # Setup
     user = request.user
     content = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = content.url() + params
+    prev_url = content.url() + params
     if len(params.path) > 0:
         pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
         parent_theory = get_object_or_404(Content, pk=pk)
-        next = parent_theory.url() + params.get_prev()
+        next_url = parent_theory.url() + params.get_prev()
     else:
-        next = reverse('theories:index') + params
+        next_url = reverse('theories:index') + params
 
     # Post request
     if request.method == 'POST':
         deleted = content.delete(user)
         if not deleted:
             content.update_activity_logs(user, verb='Deleted')
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @login_required
 @permission_required('theories.backup_content', raise_exception=True)
 def content_backup_redirect_view(request, content_pk):
     """A method for taking a snap-shot (backup) of a theory dependency."""
-
     # Setup
     user = request.user
     content = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    prev_url = request.META.get('HTTP_REFERER', '/')
+    next_url = request.META.get('HTTP_REFERER', '/')
 
     # Post request
     if request.method == 'POST':
         content.save_snapshot(user)
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.restore_content',
@@ -1387,15 +1368,14 @@ def content_backup_redirect_view(request, content_pk):
                      raise_exception=True)
 def content_revert_redirect_view(request, content_pk, version_id):
     """A method for restoring a theory-dependency snap-shot (backup)."""
-
     # Setup
     content = get_object_or_404(Content, pk=content_pk)
     version = get_object_or_404(Version, id=version_id)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = content.url() + params
+    prev_url = request.META.get('HTTP_REFERER', '/')
+    next_url = content.url() + params
 
     # Post request
     if request.method == 'POST':
@@ -1406,11 +1386,10 @@ def content_revert_redirect_view(request, content_pk, version_id):
         for key in version.field_dict.keys():
             setattr(content, key, version.field_dict[key])
         content.save()
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.convert_content',
@@ -1418,7 +1397,6 @@ def content_revert_redirect_view(request, content_pk, version_id):
                      raise_exception=True)
 def content_convert_redirect_view(request, content_pk):
     """A method for converting a sub-theories to evidence and vise-a-versa."""
-
     # Setup
     user = request.user
     content = get_object_or_404(Content, pk=content_pk)
@@ -1426,7 +1404,7 @@ def content_convert_redirect_view(request, content_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
-    prev = content.url() + params
+    prev_url = content.url() + params
     if len(params.path) == 0:
         if content.is_root() or content.is_evidence():
             return redirect('theories:index')
@@ -1440,12 +1418,11 @@ def content_convert_redirect_view(request, content_pk):
             content.update_activity_logs(user, verb='Converted to Evidence')
         else:
             content.update_activity_logs(user, verb='Converted to Sub-Theory')
-        next = content.url() + params
-        return redirect(next)
+        next_url = content.url() + params
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.swap_title',
@@ -1453,24 +1430,22 @@ def content_convert_redirect_view(request, content_pk):
                      raise_exception=True)
 def content_swap_titles_redirect_view(request, content_pk):
     """A redirect for swapping the theory true/false statements."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
 
     # Navigation
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    prev_url = request.META.get('HTTP_REFERER', '/')
+    next_url = request.META.get('HTTP_REFERER', '/')
 
     # Post request
     if request.method == 'POST':
         swap_true_false(theory)
         theory.update_activity_logs(user, verb='Swapped T/F Titles')
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 # *******************************************************************************
@@ -1528,7 +1503,6 @@ def opinion_index_view(request, content_pk, opinion_slug='all'):
 @login_required
 def retrieve_my_opinion_redirect_view(request, content_pk):
     """A method for retrieving and redirecting to edit or view the user's opinion."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -1541,14 +1515,12 @@ def retrieve_my_opinion_redirect_view(request, content_pk):
     if opinion is None or opinion.is_deleted():
         return redirect(
             reverse('theories:opinion-my-editor', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(opinion.url() + params)
+    return redirect(opinion.url() + params)
 
 
 @login_required
 def retrieve_my_opinion_stats_redirect_view(request, content_pk):
     """A method for retrieving and redirecting to edit or view the user's opinion."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -1561,12 +1533,15 @@ def retrieve_my_opinion_stats_redirect_view(request, content_pk):
     if opinion is None or opinion.is_deleted():
         return redirect(
             reverse('theories:opinion-my-editor', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(opinion.stats_url() + params)
+    return redirect(opinion.stats_url() + params)
 
 
 def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=None):
-    """The view for displaying opinion and statistical details."""
+    """The view for displaying opinion and statistical details.
+
+    Raises:
+        ValueError: If we fail to retrieve the parent statistics.
+    """
 
     # Setup
     user = request.user
@@ -1614,12 +1589,13 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
                 parent_opinions.append(parent_opinion)
         elif isinstance(opinion, Stats):
             parent_opinion = get_or_none(parent_theory.stats, stats_type=opinion.stats_type)
-            assert parent_opinion is not None
+            if parent_opinion is None:
+                raise RuntimeError('parent_opinion is None')
             parent_opinions.append(parent_opinion)
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(theory.pk))
-    prev = None
+    prev_url = None
     if len(params.path) > 0:
         pk = CONTENT_PK_CYPHER.to_python(params.path[-1])
         parent_theory = get_object_or_404(Content, pk=pk)
@@ -1627,7 +1603,7 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
             parent_opinion = get_or_none(parent_theory.opinions, user=opinion.user)
             if parent_opinion is not None and \
                (parent_opinion.is_anonymous() == opinion.is_anonymous()):
-                prev = parent_opinion.url() + params.get_prev()
+                prev_url = parent_opinion.url() + params.get_prev()
     compare_url = get_compare_url(opinion)
 
     # Flatten
@@ -1672,8 +1648,10 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
             'unaccounted': evidence_diagram.get_unaccounted_evidence(sort_list=True),
         }
         for dependency in theory.get_dependencies().exclude(pk=Content.INTUITION_PK):
-            if dependency not in evidence['collaborative'] and dependency not in evidence['controversial'] and \
-                dependency not in evidence['contradicting'] and dependency not in evidence['unaccounted']:
+            if dependency not in evidence['collaborative'] and \
+                    dependency not in evidence['controversial'] and \
+                    dependency not in evidence['contradicting'] and \
+                    dependency not in evidence['unaccounted']:
                 pass
                 # evidence['unaccounted'].append(dependency)
 
@@ -1685,7 +1663,7 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
         'subscribed': subscribed,
         'parent_opinions': parent_opinions,
         'evidence': evidence,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
         'flat': flat,
         'stats': stats,
@@ -1721,7 +1699,6 @@ def opinion_compare_view(request,
                          opinion_slug01=None,
                          opinion_slug02=None):
     """A view for displaying the differences between two opinions."""
-
     # Setup
     exclude_list = []
     user = request.user
@@ -1796,8 +1773,7 @@ def opinion_compare_view(request,
 @login_required
 def opinion_retrieve_my_editor_redirect_view(request, content_pk):
     """A method for choosing OpinionAdvEditView or OpinionEditWizardView."""
-
-    # setup
+    # Setup
     user = request.user
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
 
@@ -1805,9 +1781,7 @@ def opinion_retrieve_my_editor_redirect_view(request, content_pk):
     if user.use_wizard:
         return redirect(
             reverse('theories:opinion-wizard', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(
-            reverse('theories:opinion-edit', kwargs={'content_pk': content_pk}) + params)
+    return redirect(reverse('theories:opinion-edit', kwargs={'content_pk': content_pk}) + params)
 
 
 @login_required
@@ -1818,7 +1792,6 @@ def opinion_wizard_view(request, content_pk):
 @login_required
 def opinion_edit_view(request, content_pk, wizard=False):
     """A view for constructing and editing user opinions."""
-
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -1827,9 +1800,9 @@ def opinion_edit_view(request, content_pk, wizard=False):
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
     if opinion is None:
-        prev = theory.url() + params
+        prev_url = theory.url() + params
     else:
-        prev = opinion.url() + params
+        prev_url = opinion.url() + params
 
     # Setup cont'd
     if opinion is None:
@@ -1897,9 +1870,9 @@ def opinion_edit_view(request, content_pk, wizard=False):
 
             # done
             return redirect(opinion.url() + params)
-        else:
-            print(2200, opinion_form.errors)
-            print(2201, dependency_formset.errors)
+        # opinion form or the depedency formset is invalid
+        print(2200, opinion_form.errors)
+        print(2201, dependency_formset.errors)
 
     # Get request
     else:
@@ -1921,7 +1894,7 @@ def opinion_edit_view(request, content_pk, wizard=False):
         'opinion': opinion,
         'opinion_form': opinion_form,
         'dependency_formset': dependency_formset,
-        'prev': prev,
+        'prev': prev_url,
         'params': params,
     }
     return render(
@@ -1934,7 +1907,6 @@ def opinion_edit_view(request, content_pk, wizard=False):
 @login_required
 def opinion_copy_view(request, opinion_pk):
     """A method for copying another user's opinion."""
-
     # Setup
     user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
@@ -1942,18 +1914,17 @@ def opinion_copy_view(request, opinion_pk):
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(opinion_pk))
-    prev = opinion.url() + params
+    prev_url = opinion.url() + params
 
     # Post request
     if request.method == 'POST':
         user_opinion = copy_opinion(opinion, user, recursive=recursive)
         user_opinion.update_activity_logs(user, verb='Copied', action_object=user_opinion)
-        next = user_opinion.url() + params
-        return redirect(next)
+        next_url = user_opinion.url() + params
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.delete_opinion',
@@ -1961,26 +1932,23 @@ def opinion_copy_view(request, opinion_pk):
                      raise_exception=True)
 def opinion_delete_redirect_view(request, opinion_pk):
     """A method for deleting the opinion and redirecting the view."""
-
     # Setup
-    user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
     theory = opinion.content
 
     # Navigation
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(opinion_pk))
-    prev = opinion.url() + params
-    next = theory.url() + params
+    prev_url = opinion.url() + params
+    next_url = theory.url() + params
 
     # Post request
     if request.method == 'POST':
         theory = opinion.content
         opinion.delete()
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.change_opinion',
@@ -1988,24 +1956,22 @@ def opinion_delete_redirect_view(request, opinion_pk):
                      raise_exception=True)
 def opinion_hide_user_redirect_view(request, opinion_pk):
     """A method for hiding the user for the current opinion."""
-
     # Setup
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
 
     # Navigation
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    prev_url = request.META.get('HTTP_REFERER', '/')
+    next_url = request.META.get('HTTP_REFERER', '/')
 
     # Post request
     if request.method == 'POST':
         if not opinion.anonymous:
             opinion.anonymous = True
             opinion.save()
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 @permission_required('theories.change_opinion',
@@ -2013,26 +1979,22 @@ def opinion_hide_user_redirect_view(request, opinion_pk):
                      raise_exception=True)
 def opinion_reveal_user_redirect_view(request, opinion_pk):
     """A method for revealing the user for the current opinion."""
-
     # Setup
-    user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
 
     # Navigation
-    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(opinion_pk))
-    prev = request.META.get('HTTP_REFERER', '/')
-    next = request.META.get('HTTP_REFERER', '/')
+    prev_url = request.META.get('HTTP_REFERER', '/')
+    next_url = request.META.get('HTTP_REFERER', '/')
 
     # Post request
     if request.method == 'POST':
         if opinion.anonymous:
             opinion.anonymous = False
             opinion.save()
-        return redirect(next)
+        return redirect(next_url)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev_url)
 
 
 # *******************************************************************************
@@ -2040,30 +2002,29 @@ def opinion_reveal_user_redirect_view(request, opinion_pk):
 # *******************************************************************************
 
 
-def image_view(request, pk=None):
+def image_view(request):
     """The view for displaying opinion and statistical details."""
+    pass
 
     # Setup
-    user = request.user
-
-    # SVG
-    svg = """
-      <svg baseProfile="full" version="1.1" viewBox="0 0 755 390" width="453" height="234">
-        <rect width="100%" height="100%" fill="white"/>
-        <circle cx="250" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
-        <circle cx="505" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
-        <circle cx="154" cy="138" r="25" fill="black" stroke-width="0"/>
-        <circle cx="245" cy="180" r="25" fill="black" stroke-width="0"/>
-        <circle cx="160" cy="240" r="25" fill="black" stroke-width="0"/>
-        <circle cx="132" cy="190" r="25" fill="black" stroke-width="0"/>
-        <circle cx="243" cy="320" r="25" fill="black" stroke-width="0"/>
-        <circle cx="167" cy="296" r="25" fill="black" stroke-width="0"/>
-        <rect x="277" y="241" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
-        <rect x="188" y="319" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
-        <text text-anchor="middle" x="250" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="black">True</text>
-        <text text-anchor="middle" x="505" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="red">False</text>
-      </svg>
-    """
-    #    svg2png(bytestring=svg, write_to='output.png')
-    image = open("output.png", "rb").read()
-    return HttpResponse(image, content_type="image/png")
+    # svg = """
+    #   <svg baseProfile="full" version="1.1" viewBox="0 0 755 390" width="453" height="234">
+    #     <rect width="100%" height="100%" fill="white"/>
+    #     <circle cx="250" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
+    #     <circle cx="505" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
+    #     <circle cx="154" cy="138" r="25" fill="black" stroke-width="0"/>
+    #     <circle cx="245" cy="180" r="25" fill="black" stroke-width="0"/>
+    #     <circle cx="160" cy="240" r="25" fill="black" stroke-width="0"/>
+    #     <circle cx="132" cy="190" r="25" fill="black" stroke-width="0"/>
+    #     <circle cx="243" cy="320" r="25" fill="black" stroke-width="0"/>
+    #     <circle cx="167" cy="296" r="25" fill="black" stroke-width="0"/>
+    #     <rect x="277" y="241" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
+    #     <rect x="188" y="319" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
+    #     <text text-anchor="middle" x="250" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="black">True</text>
+    #     <text text-anchor="middle" x="505" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="red">False</text>
+    #   </svg>
+    # """
+    # svg2png(bytestring=svg, write_to='output.png')
+    # with open("output.png", "rb") as f:
+    #     image = f.read()
+    # return HttpResponse(image, content_type="image/png")

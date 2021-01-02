@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -14,13 +14,9 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 from distutils.version import StrictVersion  # pylint: disable=no-name-in-module,import-error
-from django import get_version
-from notifications import views
 
-# *******************************************************************************
-# defs
-# *******************************************************************************
-# -*- coding: utf-8 -*-
+from notifications import views
+from django import get_version
 if StrictVersion(get_version()) >= StrictVersion('2.0'):
     from django.urls import re_path as pattern
 else:

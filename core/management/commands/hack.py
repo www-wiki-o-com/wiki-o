@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -24,8 +24,8 @@ from reversion.models import Version
 
 from core.converters import IntegerCypher
 from theories.models.content import Content
-from users.models import User, Violation
 from theories.models.statistics import StatsFlatDependency
+from users.models import User, Violation
 
 # *******************************************************************************
 # Defines
@@ -86,8 +86,8 @@ class Command(BaseCommand):
                 # print(x01)
                 if x00 != x02:
                     print(
-                        "IntegerCypher: Error, plain text -> cypher -> plain text failed: %d, %b, %d"
-                        % (x00, x01, x02))
+                        f'IntegerCypher: Error, plain text -> cypher -> plain text failed: {x00}, {x01}, {x02}'
+                    )
             end = time.time()
             print(end - start)
         if options['test02']:

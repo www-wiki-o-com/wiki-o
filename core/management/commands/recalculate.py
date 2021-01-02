@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -16,8 +16,7 @@ LICENSE.md file in the root directory of this source tree.
 from django.core.management.base import BaseCommand
 from theories.models.content import Content
 from theories.models.opinions import OpinionDependency
-from theories.models.statistics import (Stats, StatsDependency,
-                                        StatsFlatDependency)
+from theories.models.statistics import (Stats, StatsDependency, StatsFlatDependency)
 
 # *******************************************************************************
 # Defines
@@ -41,7 +40,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
-
         if options['primary_keys']:
             thoeries = Content.objects.filter(pk__in=options['primary_keys'])
         else:

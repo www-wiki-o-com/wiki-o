@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -114,8 +114,10 @@ class TheoryForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """Create and populate the theory form. Fields that the user does not
-           have permission to change are set as readonly."""
+        """Create and populate the theory form.
+
+        Fields that the user does not have permission to change are set as readonly.
+        """
 
         # Remove key word arguments
         if 'user' in kwargs.keys():
@@ -126,10 +128,8 @@ class TheoryForm(forms.ModelForm):
             self.initial_categories = kwargs.pop('initial_categories')
         else:
             self.initial_categories = ''
-        if 'show_categories' not in kwargs.keys() or not kwargs.pop('show_categories'):
-            hide_category_list_input = True
-        else:
-            hide_category_list_input = False
+        hide_category_list_input = bool('show_categories' not in kwargs.keys() or
+                                        not kwargs.pop('show_categories'))
         super().__init__(*args, **kwargs)
 
         # Autosave
@@ -213,7 +213,7 @@ class TheoryForm(forms.ModelForm):
         if commit:
             if self.old_instance is not None:
                 self.old_instance.autosave(self.user)
-            theory.save(self.user)
+            theory.save(user=self.user)
 
         # Action verb (must come after the theory is created)
         if created:
@@ -281,9 +281,11 @@ class EvidenceForm(forms.ModelForm):
         }
 
     def __init__(self, *args, **kwargs):
-        """Create and populate the theory form. Fields that the user does not
-           have permission to change are set as readonly. Additionally, evidence
-           content do not utilize the title00 field."""
+        """Create and populate the theory form.
+
+        Fields that the user does not have permission to change are set as readonly. Additionally,
+        evidence content do not utilize the title00 field.
+        """
 
         # setup
         if 'user' in kwargs.keys():
@@ -378,13 +380,12 @@ class EvidenceForm(forms.ModelForm):
         if commit:
             if self.old_instance is not None:
                 self.old_instance.autosave(self.user)
-            evidence.save(self.user)
+            evidence.save(user=self.user)
         return evidence
 
 
 class SelectDependencyForm(forms.ModelForm):
     """A form for slecting theory dependencies."""
-
     # non-model fields
     select = forms.BooleanField(initial=False)
 
@@ -394,12 +395,11 @@ class SelectDependencyForm(forms.ModelForm):
         fields = ('select',)
 
     def __init__(self, *args, **kwargs):
-        # setup
+        """Create and populate the form."""
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')
         else:
             self.user = AnonymousUser
-        """Create and populate the form."""
         super().__init__(*args, **kwargs)
         self.fields['select'].required = False
 
@@ -482,7 +482,6 @@ class OpinionForm(forms.ModelForm):
 
 class OpinionDependencyForm(forms.ModelForm):
     """A form for user opinion dependency points."""
-
     # non-model fields
     CHOICES = [
         (True, 'true'),
@@ -511,7 +510,6 @@ class OpinionDependencyForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """Create and populate the form."""
-
         # setup
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')
@@ -657,7 +655,6 @@ class TheoryRevisionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
-
         # setup
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')
@@ -690,7 +687,6 @@ class TheoryRevisionForm(forms.ModelForm):
 
 class EvidenceRevisionForm(forms.ModelForm):
     """Theory Revision form."""
-
     # non-model fields
     title01 = forms.CharField(label='Statement')
     details = forms.CharField(**DETAILS_CHARFEILD)
@@ -709,7 +705,6 @@ class EvidenceRevisionForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         """Create and populate the theory form."""
-
         # setup
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')

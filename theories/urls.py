@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -92,10 +92,12 @@ urlpatterns = [
     path('opinion/<b64:content_pk>/my_editor/',
          opinion_retrieve_my_editor_redirect_view,
          name='opinion-my-editor'),
-    path('theory/pk_<b64:content_pk>/my_opinion/', retrieve_my_opinion_redirect_view, name='get_my_opinion'),
-
-    path('theory/pk_<b64:content_pk>/my_opinion_stats/', retrieve_my_opinion_stats_redirect_view, name='get_my_opinion_stats'),
-
+    path('theory/pk_<b64:content_pk>/my_opinion/',
+         retrieve_my_opinion_redirect_view,
+         name='get_my_opinion'),
+    path('theory/pk_<b64:content_pk>/my_opinion_stats/',
+         retrieve_my_opinion_stats_redirect_view,
+         name='get_my_opinion_stats'),
     path('opinion/<b64:opinion_pk>/del/', opinion_delete_redirect_view, name='opinion-delete'),
     path('opinion/<b64:opinion_pk>/copy/', opinion_copy_view, name='opinion-copy'),
     path('opinion/<b64:opinion_pk>/hide/',

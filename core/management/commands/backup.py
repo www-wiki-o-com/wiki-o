@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -16,7 +16,6 @@ LICENSE.md file in the root directory of this source tree.
 import os
 import re
 import socket
-from datetime import datetime
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
@@ -54,7 +53,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
-
         # Check that postgress username/password is setup.
         if not os.environ.get('PGUSER') or not os.environ.get('PGPASSWORD'):
             s = "Error: PGUSER and or PGPASSWORD environment variable does not exist!\n"

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -143,7 +143,7 @@ ACCOUNT_ADAPTER = 'invitations.models.InvitationsAdapter'
 
 STATICFILES_DIRS = ()
 
-CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',}}
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'}}
 
 # Search Engine
 HAYSTACK_CONNECTIONS = {
@@ -195,4 +195,3 @@ if 'test' in sys.argv:
 
 # Use nose to run all tests
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-

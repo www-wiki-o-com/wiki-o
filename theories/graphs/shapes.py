@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -46,19 +46,26 @@ class Colour(Enum):
 
         Returns:
             Colour: The lighter version of the input colour.
+
+        Raises:
+            ValueError: If self is not red or black.
         """
         if self == Colour.RED:
             return Colour.PINK
         if self == Colour.BLACK:
             return Colour.GREY
-        assert False
+        raise ValueError(f'This only works for red or black, not {self}')
 
     @classmethod
     def get_red_black_mix(cls, red_percent):
-        red_ratio = red_percent
-        if isinstance(red_percent, int) and 0 <= red_percent and red_percent <= 100:
-            red_ratio = 1.0 * red_percent / 100
-        assert isinstance(red_ratio, float) and 0.0 <= red_percent and red_percent <= 1.0
+        """Creates a CUSTOM Colour object that is a mix of red and black.
+
+        Raises:
+            ValueError: If red_percent is not a percentage.
+        """
+        red_ratio = 1.0 * red_percent / 100 if isinstance(red_percent, int) else red_percent
+        if not isinstance(red_ratio, float) or red_percent < 0.0 or red_percent > 1.0:
+            raise ValueError(f'red_ratio ({red_ratio}) is not a ratio')
         red_mix = int(0xff * red_ratio)
 
         colour = cls.CUSTOM

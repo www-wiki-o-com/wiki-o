@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -60,7 +60,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         """The method that is run when the commandline is invoked."""
-
         # Check that postgress username/password is setup.
         if not os.environ.get('PGUSER') or not os.environ.get('PGPASSWORD'):
             s = "Error: PGUSER and or PGPASSWORD environment variable does not exist!\n"

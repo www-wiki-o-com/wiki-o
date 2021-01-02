@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -306,7 +306,7 @@ class OpinionVennDiagram():
         Args:
             shapes (list(dict('prop':, 'in':, 'out'))): A list of all the shapes to propigate.
         """
-        for i in range(100):
+        for _ in range(100):
             max_step = 0.0
             for shape_set in shapes:
                 for shape01 in shape_set['prop']:
@@ -425,12 +425,12 @@ class OpinionVennDiagram():
 
         # Draw hidden elements first to appear below the rest.
         for shape in self.true_shapes + self.intersection_shapes + \
-                     self.false_shapes + self.outside_shapes:
+                self.false_shapes + self.outside_shapes:
             svg += shape.get_highlight_svg(offset=offset)
 
         # Draw the remaing shapes.
         for shape in [self.true_ring, self.false_ring] + self.true_shapes + \
-                     self.intersection_shapes + self.false_shapes + self.outside_shapes:
+                self.intersection_shapes + self.false_shapes + self.outside_shapes:
             svg += shape.get_svg(offset=offset)
         for text in self.text:
             svg += text.get_svg(offset=offset)
@@ -573,7 +573,7 @@ class DemoVennDiagram(OpinionVennDiagram):
         total_false_points = 0
         opinion.saved_dependencies = []
 
-        for i in range(random.randint(1, true_set_size)):
+        for _ in range(random.randint(1, true_set_size)):
             new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),

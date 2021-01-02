@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -50,7 +50,7 @@ class IntegerCypher:
         keys = []
         random.seed(seed)
         mask = 2**key_length - 1
-        for i in range(num_rounds):
+        for _ in range(num_rounds):
             keys.append(random.randint(mask // 2, mask) & mask)
         return keys
 
@@ -59,9 +59,13 @@ class IntegerCypher:
 
         Returns:
             [type]: [description]
+
+        Raises:
+            ValueError: If bit_length is not a multiple of 8.
         """
         # Preconditions
-        assert bit_length % 8 == 0
+        if bit_length % 8 != 0:
+            raise ValueError(f'bit_length ({bit_length}) needs to be a multiple of 8.')
         # Populate helper attributes and keys.
         self.half_length = bit_length // 2
         self.num_bytes = bit_length // 8

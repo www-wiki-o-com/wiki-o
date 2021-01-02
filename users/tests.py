@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -204,8 +204,7 @@ class UserViews(TestCase):
 class UserViolations(TestCase):
 
     def test_vote_choices(self):
-        """Test that ViolationVote.VOTE_OUTCOMES is consistent with Violation.STATUS"""
-
+        """Test that ViolationVote.VOTE_OUTCOMES is consistent with Violation.STATUS."""
         # Ensure all choices are accounted for.
         self.assertEqual(len(ViolationVote.VOTE_OUTCOMES), 3)
         self.assertEqual(len(ViolationVote.VOTE_OUTCOMES), len(Violation.STATUS_CLOSED))
@@ -225,8 +224,7 @@ class UserViolations(TestCase):
         self.assertEqual(ViolationVote.VOTE_CHOICES.STRIKE, Violation.STATUS.STRIKE)
 
     def test_feedback_choices(self):
-        """Test that ViolationFeedback.ACTION_FEEDBACK is consistent with Violation.STATUS"""
-
+        """Test that ViolationFeedback.ACTION_FEEDBACK is consistent with Violation.STATUS."""
         # Ensure all choices are accounted for.
         self.assertEqual(len(ViolationFeedback.ACTION_FEEDBACK), 7)
         self.assertEqual(len(ViolationFeedback.ACTION_FEEDBACK), len(Violation.STATUS) + 1)

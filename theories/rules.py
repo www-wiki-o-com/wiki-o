@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -37,10 +37,11 @@ def is_author(user, obj):
     if user.is_authenticated:
         if isinstance(obj, Content):
             return obj.created_by == user
-        elif isinstance(obj, Opinion):
+        if isinstance(obj, Opinion):
             return obj.user == user
-        elif isinstance(obj, Version):
+        if isinstance(obj, Version):
             return obj.revision.user == user
+    return False
 
 
 @rules.predicate
@@ -49,13 +50,13 @@ def can_edit_title(user, obj=None):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level02(user) and utilization <= 10:
+        if has_level02(user) and utilization <= 10:
             return True
-        elif has_level03(user) and utilization <= 100:
+        if has_level03(user) and utilization <= 100:
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 
@@ -73,13 +74,13 @@ def can_remove(user, obj):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level02(user) and utilization <= 10:
+        if has_level02(user) and utilization <= 10:
             return True
-        elif has_level03(user) and utilization <= 100:
+        if has_level03(user) and utilization <= 100:
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 
@@ -90,9 +91,9 @@ def can_delete(user, obj):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 

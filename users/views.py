@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -29,9 +29,8 @@ from theories.models.categories import Category
 from theories.models.content import Content
 from theories.models.opinions import Opinion
 
-from users.forms import (ReportViolationForm, ResolveViolationForm,
-                         SelectNotificationForm, SelectViolationForm, UserForm,
-                         VoteForm)
+from users.forms import (ReportViolationForm, ResolveViolationForm, SelectNotificationForm,
+                         SelectViolationForm, UserForm, VoteForm)
 from users.models import User, Violation, ViolationVote
 
 # *******************************************************************************

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -17,7 +17,6 @@ from django.contrib import admin
 from reversion.admin import VersionAdmin
 
 from theories.models.categories import Category
-from theories.models.content import Content
 from theories.models.opinions import Opinion, OpinionDependency
 from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
 
@@ -27,11 +26,6 @@ from theories.models.statistics import Stats, StatsDependency, StatsFlatDependen
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    pass
-
-
-@admin.register(Content)
-class ContentAdmin(VersionAdmin):
     pass
 
 
@@ -83,7 +77,6 @@ class StatsFlatDependencyAdmin(admin.ModelAdmin):
 # *******************************************************************************
 # register
 # *******************************************************************************
-#admin.site.register(Content, ContentAdmin)
 admin.site.register(Category, CategoryAdmin)
 admin.site.register(Opinion, OpinionAdmin)
 admin.site.register(OpinionDependency, OpinionDependencyAdmin)
