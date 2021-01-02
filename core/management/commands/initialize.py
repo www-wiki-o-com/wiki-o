@@ -29,6 +29,7 @@ from theories.utils import create_categories
 
 class Command(BaseCommand):
     """Updates permissions, categories, and site."""
+
     help = __doc__
 
     def handle(self, *args, **options):

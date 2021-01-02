@@ -29,6 +29,7 @@ from theories.models.statistics import (Stats, StatsDependency, StatsFlatDepende
 
 class Command(BaseCommand):
     """Recalculates the stats stored within the databse."""
+
     help = __doc__
 
     def add_arguments(self, parser):

@@ -106,10 +106,10 @@ urlpatterns = [
     path('opinion/<b64:opinion_pk>/unhide/',
          opinion_reveal_user_redirect_view,
          name='opinion-reveal-user'),
-    path(
-        'theory/pk_<b64:content_pk>/opinion/slug_<slug:opinion_slug01>/vs/slug_<slug:opinion_slug02>/',
-        opinion_compare_view,
-        name='opinion-compare'),
+    path(('theory/pk_<b64:content_pk>/opinion/slug_<slug:opinion_slug01>/vs/'
+          'slug_<slug:opinion_slug02>/'),
+         opinion_compare_view,
+         name='opinion-compare'),
     path('theory/pk_<b64:content_pk>/opinion/slug_<slug:opinion_slug01>/vs/pk_<b64:opinion_pk02>/',
          opinion_compare_view,
          name='opinion-compare'),

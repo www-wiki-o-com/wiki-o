@@ -27,6 +27,7 @@ from theories.models.content import Content
 
 class Command(BaseCommand):
     """Tests the data within the database against a series of validation checks."""
+
     help = __doc__
 
     def add_arguments(self, parser):

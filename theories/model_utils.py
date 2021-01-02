@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -83,8 +83,10 @@ def merge_content(content01, content02, user=None):
             log = {}
             log['sender'] = user
             log['recipient'] = opinion.user
-            log['verb'] = '<# object.url "{{ object }}" has gone through a merge that affects your opinion. #>'
-            log['description'] = 'We apologize for the inconvenience. Please review your <# target.url opinion #> and adjust as necessary.'
+            log['verb'] = ('<# object.url "{{ object }}" has gone through a merge that affects '
+                           'your opinion. #>')
+            log['description'] = ('We apologize for the inconvenience. Please review your '
+                                  '<# target.url opinion #> and adjust as necessary.')
             log['action_object'] = content01
             log['target'] = opinion
             log['level'] = 'warning'
@@ -120,13 +122,13 @@ def swap_true_false(content, user=None):
     content.title00, content.title01 = content.title01, content.title00
     content.save()
     # Opinions
-    verb = """<# object.url The theory, "{{ object }}" has had its true and false titles swapped. #>"""
     for opinion in content.get_opinions():
         opinion.swap_true_false()
         notify.send(
             sender=user,
             recipient=opinion.user,
-            verb=verb,
+            verb=('<# object.url The theory, "{{ object }}" has had its true and false titles '
+                  'swapped. #>'),
             description='This should not effect your <# target.url opinion #> in anyway.',
             action_object=content,
             target=opinion,
@@ -196,7 +198,8 @@ def convert_content_type(content, user=None, verifiable=False):
         if content.is_evidence():
             verb = '<# object.url The theory, "{{ object }}" has been converted to evidence. #>'
         else:
-            verb = '<# object.url The evidence, "{{ object }}" has been converted to a sub-theory. #>'
+            verb = ('<# object.url The evidence, "{{ object }}" has been converted to a '
+                    'sub-theory. #>')
         notify.send(
             sender=user,
             recipient=opinion_dependency.parent.user,
@@ -266,7 +269,7 @@ def get_compare_url(opinion01, opinion02=None):
 
 
 def copy_opinion(opinion, user, recursive=False, path=None, verbose_level=0):
-    """Copy opinion to user's opinion"""
+    """Copy opinion to user's opinion."""
     # Debug
     if verbose_level > 0:
         print("opinion.copy()")

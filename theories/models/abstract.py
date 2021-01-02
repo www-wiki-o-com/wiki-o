@@ -39,6 +39,7 @@ class ContentPointer():
         saved_true_points (float): Cache for the true points.
         saved_false_points (float): Cache for the fasle points.
     """
+
     content = None
 
     def __str__(self):
@@ -92,6 +93,7 @@ class SavedDependencies():
         saved_dependencies (QuerySet:Content): Cache for the the theory's dependencies.
         saved_flat_dependencies (QuerySet:Content): Cache for the theory's flat dependencies.
     """
+
     saved_dependencies = None
     saved_flat_dependencies = None
 
@@ -131,6 +133,7 @@ class SavedOpinions():
     Attributes:
         saved_opinions (QuerySet:Opinion): Cache for the theory's opinions.
     """
+
     saved_opinions = None
 
     def save_opinions(self, opinions=None):
@@ -157,6 +160,7 @@ class SavedPoints():
         saved_true_points (float): Cache for the true points.
         saved_false_points (float): Cache for the fasle points.
     """
+
     saved_true_points = None
     saved_false_points = None
 

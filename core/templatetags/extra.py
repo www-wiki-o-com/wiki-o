@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -451,9 +451,11 @@ class CustomRendererForDetails(SaferHtmlRenderer):
     Attributes:
         bib_labels(dict): A mapping for bib labels to bib numbers.
     """
+
     bib_labels = {}
 
-    def header(self, content, level):
+    @classmethod
+    def header(cls, content, level):
         """[summary]
 
         Args:
@@ -511,13 +513,13 @@ class CustomRendererForDetails(SaferHtmlRenderer):
             link = self.rewrite_url(link)
             if len(title) > 0 and len(alt) > 0:
                 return '<a href="%s" title="%s" alt="%s">image(%s)</a>' % (link, title, alt, title)
-            elif len(title) > 0:
+            if len(title) > 0:
                 return '<a href="%s">image(%s)</a>' % (link, title)
-            else:
-                return '<a href="%s">image</a>' % link
+            return '<a href="%s">image</a>' % link
         return '[%s](---broken image---)' % (title)
 
-    def table(self, content):
+    @classmethod
+    def table(cls, content):
         """[summary]
 
         Args:
@@ -526,8 +528,9 @@ class CustomRendererForDetails(SaferHtmlRenderer):
         Returns:
             [type]: [description]
         """
-        return ('<table class="table table-sm" style="width:90%;"  align="center">\n' + content +
-                '\n</table>')
+        table_open = '<table class="table table-sm" style="width:90%;" align="center">\n'
+        table_close = '\n</table>'
+        return table_open + content + table_close
 
 
 def render_details(raw_content):

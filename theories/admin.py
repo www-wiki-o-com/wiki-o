@@ -14,7 +14,6 @@ LICENSE.md file in the root directory of this source tree.
 # Imports
 # *******************************************************************************
 from django.contrib import admin
-from reversion.admin import VersionAdmin
 
 from theories.models.categories import Category
 from theories.models.opinions import Opinion, OpinionDependency
@@ -31,46 +30,54 @@ class CategoryAdmin(admin.ModelAdmin):
 
 class OpinionAdmin(admin.ModelAdmin):
 
-    def get_list_display(self, request):
+    @classmethod
+    def get_list_display(cls, request):
         return ('user', 'theory')
 
 
 class OpinionDependencyAdmin(admin.ModelAdmin):
 
-    def get_user(self, obj):
+    @classmethod
+    def get_user(cls, obj):
         return obj.parent.user
 
     get_user.short_description = 'User'
 
-    def get_list_display(self, request):
+    @classmethod
+    def get_list_display(cls, request):
         return ('get_user', 'content')
 
 
 class StatsAdmin(admin.ModelAdmin):
 
-    def get_list_display(self, request):
+    @classmethod
+    def get_list_display(cls, request):
         return ('stats_type', 'theory')
 
 
 class StatsDependencyAdmin(admin.ModelAdmin):
 
-    def get_owner(self, obj):
+    @classmethod
+    def get_owner(cls, obj):
         return obj.parent.get_owner()
 
     get_owner.short_description = 'Type'
 
-    def get_list_display(self, request):
+    @classmethod
+    def get_list_display(cls, request):
         return ('get_owner', 'content')
 
 
 class StatsFlatDependencyAdmin(admin.ModelAdmin):
 
-    def get_owner(self, obj):
+    @classmethod
+    def get_owner(cls, obj):
         return obj.parent.get_owner()
 
     get_owner.short_description = 'Type'
 
-    def get_list_display(self, request):
+    @classmethod
+    def get_list_display(cls, request):
         return ('get_owner', 'content')
 
 

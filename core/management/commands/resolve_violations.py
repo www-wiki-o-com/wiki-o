@@ -27,6 +27,7 @@ from users.models import Violation
 
 class Command(BaseCommand):
     """Tallies and closes open polls for violations."""
+
     help = __doc__
 
     def handle(self, *args, **options):

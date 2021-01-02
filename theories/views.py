@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -18,7 +18,7 @@ from actstream.actions import is_following
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.forms import modelformset_factory
-from django.http import Http404, HttpResponse
+from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.http import unquote
@@ -61,7 +61,6 @@ def get_opinion_list(theory, current_user, exclude_list=None):
 
     The output is a list of dictionary items: text, true_points, false_points, and url.
     """
-
     # setup
     opinion_list = []
     exclude_users = []
@@ -115,7 +114,6 @@ def get_compare_list(opinion01, current_user, exclude_list=None):
 
     The output is alist of dictionary items: text, true_points, false_points, and url.
     """
-
     # setup
     theory = opinion01.content
     compare_list = []
@@ -220,7 +218,6 @@ def category_index_view(request):
     Args:
         request ([type]): The post request data.
     """
-
     # Params
     params = Parameters(request)
 
@@ -881,7 +878,7 @@ def theory_backup_view(request, content_pk):
 
 
 def theory_report_view(request, content_pk):
-
+    """A view for reporting missconduct of theories."""
     # Setup
     user = request.user
     theory = get_object_or_404(Content, pk=content_pk)
@@ -1195,7 +1192,7 @@ def evidence_restore_view(request, content_pk):
 
 
 def evidence_report_view(request, content_pk):
-
+    """A view for reporting missconduct of evidence."""
     # Setup
     user = request.user
     evidence = get_object_or_404(Content, pk=content_pk)
@@ -1461,7 +1458,6 @@ def opinion_index_view(request, content_pk, opinion_slug='all'):
         pk (int): The theory key.
         opinion_slug (str, optional): The category of opinion. Defaults to 'all'.
     """
-
     # Params
     params = Parameters(request)
 
@@ -1542,7 +1538,6 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
     Raises:
         ValueError: If we fail to retrieve the parent statistics.
     """
-
     # Setup
     user = request.user
     if opinion_pk is not None:
@@ -1786,6 +1781,7 @@ def opinion_retrieve_my_editor_redirect_view(request, content_pk):
 
 @login_required
 def opinion_wizard_view(request, content_pk):
+    """Proxy for opinion_edit_view."""
     return opinion_edit_view(request, content_pk, wizard=True)
 
 
@@ -1943,7 +1939,6 @@ def opinion_delete_redirect_view(request, opinion_pk):
 
     # Post request
     if request.method == 'POST':
-        theory = opinion.content
         opinion.delete()
         return redirect(next_url)
 
@@ -2004,24 +1999,28 @@ def opinion_reveal_user_redirect_view(request, opinion_pk):
 
 def image_view(request):
     """The view for displaying opinion and statistical details."""
-    pass
-
     # Setup
     # svg = """
     #   <svg baseProfile="full" version="1.1" viewBox="0 0 755 390" width="453" height="234">
     #     <rect width="100%" height="100%" fill="white"/>
-    #     <circle cx="250" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
-    #     <circle cx="505" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25" stroke-width="4"/>
+    #     <circle cx="250" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25"
+    #             stroke-width="4"/>
+    #     <circle cx="505" cy="210" r="150" fill="none" stroke="black" fill-opacity="0.25"
+    #             stroke-width="4"/>
     #     <circle cx="154" cy="138" r="25" fill="black" stroke-width="0"/>
     #     <circle cx="245" cy="180" r="25" fill="black" stroke-width="0"/>
     #     <circle cx="160" cy="240" r="25" fill="black" stroke-width="0"/>
     #     <circle cx="132" cy="190" r="25" fill="black" stroke-width="0"/>
     #     <circle cx="243" cy="320" r="25" fill="black" stroke-width="0"/>
     #     <circle cx="167" cy="296" r="25" fill="black" stroke-width="0"/>
-    #     <rect x="277" y="241" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
-    #     <rect x="188" y="319" width="20" height="20" fill="black" fill-opacity="1.00" stroke-width="0"/>
-    #     <text text-anchor="middle" x="250" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="black">True</text>
-    #     <text text-anchor="middle" x="505" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="red">False</text>
+    #     <rect x="277" y="241" width="20" height="20" fill="black" fill-opacity="1.00"
+    #           stroke-width="0"/>
+    #     <rect x="188" y="319" width="20" height="20" fill="black" fill-opacity="1.00"
+    #           stroke-width="0"/>
+    #     <text text-anchor="middle" x="250" y="47" font-size="40" font-family="FreeSerif"
+    #           font-weight="bold" fill="black">True</text>
+    #     <text text-anchor="middle" x="505" y="47" font-size="40" font-family="FreeSerif"
+    #           font-weight="bold" fill="red">False</text>
     #   </svg>
     # """
     # svg2png(bytestring=svg, write_to='output.png')

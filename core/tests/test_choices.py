@@ -31,6 +31,7 @@ class ChoicesTests(TestCase):
             (0, "TEST00", ("Blah")),
             (1, "TEST01", ("Blah")),
         )
+        self.assertTrue(True)
 
     def test_addition01(self):
         x = Choices(

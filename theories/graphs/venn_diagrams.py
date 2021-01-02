@@ -300,7 +300,8 @@ class OpinionVennDiagram():
         # Propagate
         self.propagate(shapes)
 
-    def propagate(self, shapes):
+    @classmethod
+    def propagate(cls, shapes):
         """Incrementally propagate the spring-class shapes to avoid overlap.
 
         Args:
@@ -459,10 +460,11 @@ class OpinionComparisionVennDiagram(OpinionVennDiagram):
         """Constructor for the OpinionComparisionVennDiagram class.
 
         Args:
-            opinion01 (OpinionDependencyBase): The base opinion, used to decide the evidence/sub-theory
-                locatoin (the true ring, the false ring, the intersection, or the outside).
-            opinion02 (OpinionDependencyBase): The comparision opinion, used to decide the size and colour
-                of each shape.
+            opinion01 (OpinionDependencyBase): The base opinion, used to decide the
+                evidence/sub-theory locatoin (the true ring, the false ring, the intersection, or
+                the outside).
+            opinion02 (OpinionDependencyBase): The comparision opinion, used to decide the size and
+                colour of each shape.
             flat (bool, optional): If true, the sub-theories are flattend. Defaults to False.
             bottom_text ([type], optional): Mainly used for debug statements. Defaults to None.
 
@@ -552,8 +554,8 @@ class DemoVennDiagram(OpinionVennDiagram):
         """The constructor for the DemoVennDiagram class.
 
         Args:
-            true_set_size (int, optional): The number of random true opinion dependencies to be generated.
-                Defaults to 10.
+            true_set_size (int, optional): The number of random true opinion dependencies to be
+                generated. Defaults to 10.
             intersection_set_size (int, optional): [description]. Defaults to 10.
             false_set_size (int, optional): [description]. Defaults to 10.
             outside_set_size (int, optional): [description]. Defaults to 10.
@@ -584,7 +586,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_true_points += new_dependency.true_points()
             total_false_points += new_dependency.false_points()
 
-        for i in range(random.randint(1, intersection_set_size)):
+        for _ in range(random.randint(1, intersection_set_size)):
             new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
@@ -595,7 +597,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_true_points += new_dependency.true_points()
             total_false_points += new_dependency.false_points()
 
-        for i in range(random.randint(1, false_set_size)):
+        for _ in range(random.randint(1, false_set_size)):
             new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),
@@ -606,7 +608,7 @@ class DemoVennDiagram(OpinionVennDiagram):
             total_true_points += new_dependency.true_points()
             total_false_points += new_dependency.false_points()
 
-        for i in range(random.randint(1, outside_set_size)):
+        for _ in range(random.randint(1, outside_set_size)):
             new_dependency = OpinionDependencyBase.create(
                 parent=opinion,
                 content=random.choice(theory_dependencies),

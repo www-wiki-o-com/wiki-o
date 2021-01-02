@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -54,6 +54,7 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
         saved_flat_dependencies (QuerySet:Content): Cache for the theory's flat dependencies.
         saved_point_distribution (list[float]): Cache for the theory's point distribution.
     """
+
     dependencies = None
     flat_dependencies = None
     saved_point_distribution = None
@@ -82,12 +83,13 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
                 'OpinionBase.check_for_errors: is pointing at evidence (%d). '
                 'Problem method: OpinionBase.%s', self.content.pk, calframe[1][3])
 
-    def url(self):
+    @classmethod
+    def url(cls):
         """Return none. Abstract objects have no data in the db."""
         return None
 
     def get_dependency(self, content, create=False):
-        """Return the stats dependency for the corresponding content (optionally, create the stats dependency)."""
+        """Return stats dependency for content (optionally, create the stats dependency)."""
         # Get dependencies.
         dependencies = self.get_dependencies()
         # Get dependency.
@@ -121,7 +123,7 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
         return dependencies
 
     def get_flat_dependency(self, content, create=False):
-        """Return the flat stats dependency for the input content (optionally, create the dependency)."""
+        """Return flat stats dependency for content (optionally, create the dependency)."""
         # Get dependencies.
         flat_dependencies = self.get_flat_dependencies()
         # Get dependency.
@@ -203,6 +205,7 @@ class Opinion(OpinionBase, models.Model):
     Todo:
         * Remove all auto_now and auto_now_add.
     """
+
     user = models.ForeignKey(User, related_name='opinions', on_delete=models.CASCADE)
     content = models.ForeignKey(Content, related_name='opinions', on_delete=models.CASCADE)
     pub_date = models.DateField(auto_now_add=True)
@@ -228,6 +231,7 @@ class Opinion(OpinionBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         ordering = ['-rank']
         db_table = 'theories_opinion'
         verbose_name = 'Opinion'
@@ -238,8 +242,7 @@ class Opinion(OpinionBase, models.Model):
         """String method for Opinion."""
         if self.is_true():
             return self.content.true_statement()
-        else:
-            return self.content.false_statement()
+        return self.content.false_statement()
 
     def get_flat_dependency(self, content, create=True):
         # return super(OpinionBase, self).get_flat_dependency(content, create)
@@ -305,7 +308,6 @@ class Opinion(OpinionBase, models.Model):
 
         This action populates saved_flat_dependencies.
         """
-
         # Debug
         if verbose_level > 0:
             print(self, "get_flat_dependencies()")
@@ -435,19 +437,17 @@ class Opinion(OpinionBase, models.Model):
 
     def get_theory_evidence(self):
         """Returns a query set of the evidence opinion dependencies."""
-
         return self.get_dependencies().filter(~Q(content__content_type=Content.TYPE.THEORY) &
                                               ~Q(content__content_type=-Content.TYPE.THEORY))
 
     def get_theory_subtheories(self):
-        """Return all opinion dependencies that point to sub-theories of self.content"""
+        """Return all opinion dependencies that point to sub-theories of self.content."""
         return self.get_dependencies().filter(
             Q(content__content_type=Content.TYPE.THEORY) |
             Q(content__content_type=-Content.TYPE.THEORY))
 
     def update_points(self, verbose_level=0):
-        """Use true_input and false_input for opinion and dependencies to update true_points and false_points."""
-
+        """Use true_input and false_input to update true_points and false_points."""
         # Debug
         if verbose_level > 0:
             print("update_points()")
@@ -516,8 +516,7 @@ class Opinion(OpinionBase, models.Model):
         return 0.0
 
     def swap_true_false(self):
-        """Swap the true and false points of the opinion (used when swapping the title of the theory)."""
-
+        """Swap true and false points (used when swapping the title of the theory)."""
         # self
         self.true_total, self.false_total = self.false_total, self.true_total
         self.true_input, self.false_input = self.false_input, self.true_input
@@ -553,7 +552,8 @@ class Opinion(OpinionBase, models.Model):
         stream_if_unique(self.target_actions, log)
 
         # subscribed users
-        log['verb'] = '<# target.url {{ target.get_owner }} has modified their opinion of "{{ target }}". #>'
+        log['verb'] = ('<# target.url {{ target.get_owner }} has modified their opinion of '
+                       '"{{ target }}". #>')
         for follower in followers(self):
             if follower != user:
                 log['recipient'] = follower
@@ -573,6 +573,7 @@ class OpinionDependencyBase(ContentPointer, SavedPoints):
     Todo:
         * Move to seperate file.
     """
+
     parent = None
 
     @classmethod
@@ -646,6 +647,7 @@ class OpinionDependency(OpinionDependencyBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         ordering = ['-rank']
         db_table = 'theories_opinion_dependency'
         verbose_name = 'Opinion Dependency'

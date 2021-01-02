@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -135,6 +135,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         ordering = ['-rank']
         db_table = 'theories_content'
         verbose_name = 'Content'
@@ -152,7 +153,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         )
 
     def __str__(self, true_points=1, false_points=0):
-        """Returns title01 for evidence and true theories, otherwise title00, which represents the false title."""
+        """Returns title01 for evidence and true theories, otherwise title00 (the false title)."""
         s = ''
         if self.is_evidence():
             s = self.title01
@@ -199,15 +200,13 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         """Returns the action url for viewing the object's activity feed."""
         if self.is_theory():
             return reverse('theories:theory-activity', kwargs={'content_pk': self.pk})
-        else:
-            return reverse('theories:evidence-activity', kwargs={'content_pk': self.pk})
+        return reverse('theories:evidence-activity', kwargs={'content_pk': self.pk})
 
     def restore_url(self):
         """Returns the url for viewing the object's revisions."""
         if self.is_theory():
             return reverse('theories:theory-restore', kwargs={'content_pk': self.pk})
-        else:
-            return reverse('theories:evidence-restore', kwargs={'content_pk': self.pk})
+        return reverse('theories:evidence-restore', kwargs={'content_pk': self.pk})
 
     def tag_id(self):
         """Returns a unique id string used for html visibility tags."""
@@ -261,14 +260,14 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                     'Content.assert_theory: This dependency should not have dependencies (pk=%d).',
                     self.pk)
             if self.flat_dependencies.count() > 0:
-                LOGGER.error(
-                    'Content.assert_theory: This dependency should not have flat dependencies (pk=%d).',
-                    self.pk)
+                LOGGER.error(('Content.assert_theory: This dependency should not have flat '
+                              'dependencies (pk=%d).'), self.pk)
             return False
-        elif check_dependencies:
+        if check_dependencies:
             if self.flat_dependencies.filter(content_type__lt=0).exists():
-                log = 'Content.assert_theory: There should not be any deleted flat dependencies (pk=%d).\n' % self.pk
-                log += '  %s\n' % str(self)
+                log = ('Content.assert_theory: '
+                       f'There should not be any deleted flat dependencies (pk={self.pk}).\n'
+                       f'  {self}\n')
                 for flat_dependency in self.flat_dependencies.filter(content_type__lt=0).all():
                     log += '    %s\n' % str(flat_dependency)
                 LOGGER.error(log)
@@ -289,7 +288,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                 stack02[1].split('code')[-1], stack02[2], stack02[3], stack02[4][0].strip())
             LOGGER.error(error)
             return False
-        elif check_dependencies:
+        if check_dependencies:
             if self.dependencies.count() > 0:
                 LOGGER.error('592: This dependency should not have dependencies (pk=%d).', self.pk)
                 return False
@@ -406,51 +405,50 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                 if not subtheory.is_root() and subtheory.get_parent_theories().count() == 1:
                     subtheory.delete(user, mode)
 
-        # Delete content
+        # Hard delete
         if hard:
             super().delete()
             return True
-        else:
-            # Remove flat dependencies
-            self.parent_flat_theories.clear()
-            for parent in self.get_parent_theories():
-                if self.is_theory():
-                    exclude_list = list(parent.get_dependencies().values_list(
-                        'pk', flat=True)) + [self.INTUITION_PK]
-                    nested_dependencies = self.get_nested_dependencies().exclude(
-                        pk__in=exclude_list)
-                    for theory_dependency in nested_dependencies:
-                        parent.remove_flat_dependency(theory_dependency)
 
-            # Notifications for opinions
+        # Remove flat dependencies
+        self.parent_flat_theories.clear()
+        for parent in self.get_parent_theories():
             if self.is_theory():
-                for opinion in self.get_opinions():
-                    notify.send(
-                        sender=user,
-                        recipient=opinion.user,
-                        verb='<# object.url {{ object }} has been deleted. #>',
-                        description=
-                        'This change means that your <# target.url opinion #> of {{ target }} is no longer valid.',
-                        action_object=self,
-                        target=opinion,
-                        level='warning',
-                    )
+                exclude_list = list(parent.get_dependencies().values_list(
+                    'pk', flat=True)) + [self.INTUITION_PK]
+                nested_dependencies = self.get_nested_dependencies().exclude(pk__in=exclude_list)
+                for theory_dependency in nested_dependencies:
+                    parent.remove_flat_dependency(theory_dependency)
 
-            # Notifications for opinion_dependencies
-            for opinion_dependency in self.opinion_dependencies.all():
+        # Notifications for opinions
+        if self.is_theory():
+            for opinion in self.get_opinions():
                 notify.send(
                     sender=user,
-                    recipient=opinion_dependency.parent.user,
+                    recipient=opinion.user,
                     verb='<# object.url {{ object }} has been deleted. #>',
-                    description='Please update your <# target opinion #> to reflect the change.',
+                    description=('This change means that your <# target.url opinion #> of '
+                                 '{{ target }} is no longer valid.'),
                     action_object=self,
-                    target=opinion_dependency.parent,
+                    target=opinion,
                     level='warning',
                 )
 
-            # Flat conent as deleted (negative => deleted)
-            self.content_type = -abs(self.content_type)
-            self.save(user=user)
+        # Notifications for opinion_dependencies
+        for opinion_dependency in self.opinion_dependencies.all():
+            notify.send(
+                sender=user,
+                recipient=opinion_dependency.parent.user,
+                verb='<# object.url {{ object }} has been deleted. #>',
+                description='Please update your <# target opinion #> to reflect the change.',
+                action_object=self,
+                target=opinion_dependency.parent,
+                level='warning',
+            )
+
+        # Flat conent as deleted (negative => deleted)
+        self.content_type = -abs(self.content_type)
+        self.save(user=user)
         return False
 
     def cache(self, dependencies=True, flat_dependencies=True):
@@ -505,7 +503,8 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                     sender=user,
                     recipient=opinion.user,
                     verb='<# object.url {{ object }} has been removed from {{ target }}. #>',
-                    description='Please update your <# target.url opinion #> to reflect the change.',
+                    description=('Please update your <# target.url opinion #> to reflect the '
+                                 'change.'),
                     action_object=theory_dependency,
                     target=opinion,
                     level='warning',
@@ -617,7 +616,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         return dependencies
 
     def get_nested_subtheory_dependencies(self, deleted=False, distinct=True):
-        """Returns a query set of the theory's flat dependencies/nested evidence (use cache if available)."""
+        """Returns a query set of the theory's flat dependencies/nested evidence."""
         # error checking
         if not self.assert_theory():
             return None

@@ -37,7 +37,6 @@ def create_groups_and_permissions(max_level=4):
     This method is used for unit tests and the initial setup of Wiki-O's database. This method
     will not remove permissions add through the admin interface.
     """
-
     # Create the user level groups.
     for level in range(max_level + 1):
         _group, created = Group.objects.get_or_create(name='user level: %d' % level)

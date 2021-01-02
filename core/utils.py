@@ -34,6 +34,7 @@ DEBUG = False
 
 class LogDiffResult(enum.Enum):
     """Enum for log_is_different return result."""
+
     MATCH = 1
     DIFFERENT = 2
     UPDATED = 3

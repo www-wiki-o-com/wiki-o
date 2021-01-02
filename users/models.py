@@ -592,6 +592,7 @@ class Violation(models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'users_violation'
         verbose_name = 'Violation'
         verbose_name_plural = 'Violations'
@@ -1031,6 +1032,7 @@ class ViolationFeedback(models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'users_violation_feedback'
         verbose_name = 'Violation Feedback'
         verbose_name_plural = 'Violation Feedback'
@@ -1207,6 +1209,7 @@ class ViolationVote(models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'users_violation_vote'
         verbose_name = 'Violation Vote'
         verbose_name_plural = 'Violation Votes'

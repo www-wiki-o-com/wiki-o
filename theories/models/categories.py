@@ -58,6 +58,7 @@ class Category(models.Model):
             was the target action.
         followers (QuerySet:Users): The set of user's following the category.
     """
+
     slug = models.SlugField()
     title = models.CharField(max_length=50)
     theories = models.ManyToManyField(Content, related_name='categories', blank=True)
@@ -72,6 +73,7 @@ class Category(models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'theories_category'
         verbose_name = 'Category'
         verbose_name_plural = 'Categories'

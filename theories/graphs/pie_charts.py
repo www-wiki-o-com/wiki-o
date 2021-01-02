@@ -249,7 +249,8 @@ class PieChart():
         svg += """</svg></center>"""
         return svg
 
-    def get_caption(self):
+    @classmethod
+    def get_caption(cls):
         """Dummy method, there is no caption text for this diagram.
 
         Returns:

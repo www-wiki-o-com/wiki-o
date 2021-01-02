@@ -198,12 +198,14 @@ class BarGraph():
         offset = {'x': 0, 'y': -self.boarder['top']}
         width = self.config['width'] + self.boarder['left'] + self.boarder['right']
         height = self.config['height'] + self.boarder['top'] + self.boarder['bottom']
-        svg = """<center><svg baseProfile="full" version="1.1" viewBox="%d %d %d %d">
-               """ % (-width / 2 + offset['x'], offset['y'], width, height)
-        svg += """<defs>
-                    <pattern id="hatch" patternUnits="userSpaceOnUse" patternTransform="rotate(45 0 0)" width="15" height="15">
-                      <path d="M 0,0 L 15,0 M 0,0 L 0,15 Z" style="stroke:white; stroke-width:6.0" />
-                    </pattern>
+        svg = f"""<center>
+                  <svg baseProfile="full" version="1.1"
+                       viewBox="{-width / 2 + offset['x']} {offset['y']} {width} {height}">
+                  <defs>
+                  <pattern id="hatch" patternUnits="userSpaceOnUse"
+                           patternTransform="rotate(45 0 0)" width="15" height="15">
+                  <path d="M 0,0 L 15,0 M 0,0 L 0,15 Z" style="stroke:white; stroke-width:6.0"/>
+                  </pattern>
                   </defs>
                """
         for shape in self.shapes:
@@ -211,7 +213,8 @@ class BarGraph():
         svg += """</svg></center>"""
         return svg
 
-    def get_caption(self):
+    @classmethod
+    def get_caption(cls):
         """Dummy method, there is no caption for this diagram.
 
         Returns:

@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -37,6 +37,7 @@ VALID_MODELS = {'Content', 'Opinion', 'Stats'}
 
 class Command(BaseCommand):
     """Export wiki-o data as json."""
+
     help = __doc__
 
     def add_arguments(self, parser):
@@ -118,7 +119,8 @@ class Command(BaseCommand):
         else:
             print(data)
 
-    def get_database(self):
+    @classmethod
+    def get_database(cls):
         data = ""
         if Category.objects.count() > 0:
             data += serializers.serialize('json', Category.objects.all()).strip('[]') + ','
@@ -146,6 +148,7 @@ class Command(BaseCommand):
         data = '[' + data.strip(',') + ']'
         return data
 
-    def get_forum_sync_data(self):
+    @classmethod
+    def get_forum_sync_data(cls):
         data = serializers.serialize('json', User.objects.all(), fields=['username', 'password'])
         return data

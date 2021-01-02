@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -95,6 +95,7 @@ class Guage():
 
 class DependencyGuage(Guage):
     """A class for drawing guages."""
+
     BLACK_RED_THRESHOLD = 1.0  # 100 %
 
     def __init__(self, dependency, normalize=1.0):

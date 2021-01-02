@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -38,6 +38,7 @@ from users.models import User, Violation
 
 class Command(BaseCommand):
     """Updates permissions, categories, and site."""
+
     help = __doc__
 
     def add_arguments(self, parser):
@@ -85,9 +86,8 @@ class Command(BaseCommand):
                 x02 = cypher.to_python(x01)
                 # print(x01)
                 if x00 != x02:
-                    print(
-                        f'IntegerCypher: Error, plain text -> cypher -> plain text failed: {x00}, {x01}, {x02}'
-                    )
+                    print(('IntegerCypher: Error, plain text -> cypher -> plain text failed: '
+                           f'{x00}, {x01}, {x02}'))
             end = time.time()
             print(end - start)
         if options['test02']:
@@ -97,7 +97,8 @@ class Command(BaseCommand):
             self.fix_flat_dependencies()
         print('done')
 
-    def report01(self, username):
+    @classmethod
+    def report01(cls, username):
         user = User.objects.get(username=username)
         for content in Content.objects.all():
             content.created_by = user
@@ -110,20 +111,23 @@ class Command(BaseCommand):
             violation.offender = user
             violation.save()
 
-    def report02(self, username):
+    @classmethod
+    def report02(cls, username):
         user = User.objects.get(username=username)
         for violation in Violation.objects.all():
             violation.offender = user
             violation.save()
 
-    def fix_modified_by(self):
+    @classmethod
+    def fix_modified_by(cls):
         """Fixes the modified by field."""
         system = User.objects.get(username='system')
         for content in Content.objects.all():
             content.modified_by = system
             content.save()
 
-    def fix_permissions(self):
+    @classmethod
+    def fix_permissions(cls):
         """Fixes the set of permissions."""
         for permission in Permission.objects.all():
             if str(permission.content_type) == 'Content':
@@ -131,29 +135,34 @@ class Command(BaseCommand):
                     print('delete', permission.codename)
                     permission.delete()
 
-    def fix_ownerships(self):
+    @classmethod
+    def fix_ownerships(cls):
         """Fixes any objects with broken ownership."""
         fcimeson = User.objects.get(username='fcimeson')
         for content in Content.objects.filter(created_by__isnull=True):
             content.created_by = fcimeson
             content.save()
 
-    def delete_revisions(self):
+    @classmethod
+    def delete_revisions(cls):
         """Delete's all revisions."""
         for version in Version.objects.all():
             version.delete()
 
-    def fix_action_streams(self):
+    @classmethod
+    def fix_action_streams(cls):
         """Fixes all broken action stream messages."""
         for action in Action.objects.all():
             print('Action:', action)
 
-    def fix_notifications(self):
+    @classmethod
+    def fix_notifications(cls):
         """Fix all broken notifications."""
         for notification in Notification.objects.all():
             print('Notification:', notification)
 
-    def fix_flat_dependencies(self):
+    @classmethod
+    def fix_flat_dependencies(cls):
         """Fix all broken flat dependencies."""
         for dependency in StatsFlatDependency.objects.all():
             if dependency.is_theory():

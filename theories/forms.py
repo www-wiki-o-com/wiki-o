@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -53,8 +53,8 @@ FALSE_INPUT_WIDGET = TextInput(
 DETAILS_CHARFEILD = {
     'widget':
         forms.Textarea,
-    'help_text':
-        'Information pertaining to the theory that does not make assumptions about its correctness.',
+    'help_text': ('Information pertaining to the theory that does not make assumptions about its '
+                  'correctness.'),
 }
 
 # *******************************************************************************
@@ -74,6 +74,7 @@ class TheoryForm(forms.ModelForm):
     Todo:
         * Migrate activity stream updates to the form.
     """
+
     user = None
     action_verb = None
     old_instance = None
@@ -89,10 +90,12 @@ class TheoryForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
-        placeholder_text = 'Use this area to provide details of the theory.\n\n'
-        placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
-        placeholder_text += '  - Evidence or theories that go towards proving or disproving the theory should\n'
-        placeholder_text += '    be provided as evidence, not details.'
+
+        placeholder_text = (
+            'Use this area to provide details of the theory.\n\n'
+            '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
+            '  - Evidence or theories that go towards proving or disproving the theory should\n'
+            '    be provided as evidence, not details.')
 
         model = Content
         fields = ('title01', 'title00', 'details')
@@ -101,8 +104,8 @@ class TheoryForm(forms.ModelForm):
             'title00': 'False Statement',
         }
         help_texts = {
-            'details':
-                'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details': ('Information pertaining to the theory that does not make assumptions '
+                        'about its correctness.'),
         }
         widgets = {
             'details': forms.Textarea(attrs={
@@ -118,7 +121,6 @@ class TheoryForm(forms.ModelForm):
 
         Fields that the user does not have permission to change are set as readonly.
         """
-
         # Remove key word arguments
         if 'user' in kwargs.keys():
             self.user = kwargs.pop('user')
@@ -255,11 +257,13 @@ class EvidenceForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
-        placeholder_text = 'Use this area to provide details of the evidence.\n\n'
-        placeholder_text += '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
-        placeholder_text += '  - Evidence that could be interpreted as incorrect should either be:\n'
-        placeholder_text += '      a) non-verifiable or\n'
-        placeholder_text += '      b) a sub-theory.'
+
+        placeholder_text = (
+            'Use this area to provide details of the evidence.\n\n'
+            '  - Feel free to dump raw ideas here with the intention of cleaning them up later.\n'
+            '  - Evidence that could be interpreted as incorrect should either be:\n'
+            '      a) non-verifiable or\n'
+            '      b) a sub-theory.')
 
         model = Content
         fields = ('title01', 'details', 'verifiable')
@@ -268,8 +272,8 @@ class EvidenceForm(forms.ModelForm):
             'verifiable': 'Is this verifiable?',
         }
         help_texts = {
-            'details':
-                'Information pertaining to the theory that does not make assumptions about its correctness.',
+            'details': ('Information pertaining to the theory that does not make assumptions '
+                        'about its correctness.'),
         }
         widgets = {
             'details': forms.Textarea(attrs={
@@ -286,7 +290,6 @@ class EvidenceForm(forms.ModelForm):
         Fields that the user does not have permission to change are set as readonly. Additionally,
         evidence content do not utilize the title00 field.
         """
-
         # setup
         if 'user' in kwargs.keys():
             # Needs to come before the call to super.
@@ -325,28 +328,25 @@ class EvidenceForm(forms.ModelForm):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('title01')
-        elif self.user.has_perm('theories.change_title', self.instance):
+        if self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('title01')
-        else:
-            return self.instance.title01
+        return self.instance.title01
 
     def clean_details(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('details')
-        elif self.user.has_perm('theories.change_details', self.instance):
+        if self.user.has_perm('theories.change_details', self.instance):
             return self.cleaned_data.get('details')
-        else:
-            return self.instance.details
+        return self.instance.details
 
     def clean_verifiable(self):
         """Remove changes done by users without proper permission."""
         if self.instance.pk is None:
             return self.cleaned_data.get('verifiable')
-        elif self.user.has_perm('theories.change_title', self.instance):
+        if self.user.has_perm('theories.change_title', self.instance):
             return self.cleaned_data.get('verifiable')
-        else:
-            return self.instance.content_type == Content.TYPE.FACT
+        return self.instance.content_type == Content.TYPE.FACT
 
     def get_verb(self):
         return self.action_verb
@@ -386,11 +386,13 @@ class EvidenceForm(forms.ModelForm):
 
 class SelectDependencyForm(forms.ModelForm):
     """A form for slecting theory dependencies."""
+
     # non-model fields
     select = forms.BooleanField(initial=False)
 
     class Meta:
         """Where the form options are defined."""
+
         model = Content
         fields = ('select',)
 
@@ -406,6 +408,7 @@ class SelectDependencyForm(forms.ModelForm):
 
 class OpinionForm(forms.ModelForm):
     """A form for user's opinions (the root opinion)."""
+
     WIZARD_RESOLUTION = 10
     WIZARD_POINTS = []
     for x in range(WIZARD_RESOLUTION + 1):
@@ -417,6 +420,7 @@ class OpinionForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Opinion
         fields = ('true_input', 'false_input', 'force')
         labels = {
@@ -482,6 +486,7 @@ class OpinionForm(forms.ModelForm):
 
 class OpinionDependencyForm(forms.ModelForm):
     """A form for user opinion dependency points."""
+
     # non-model fields
     CHOICES = [
         (True, 'true'),
@@ -492,6 +497,7 @@ class OpinionDependencyForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = OpinionDependency
         fields = ('tt_input', 'tf_input', 'ft_input', 'ff_input', 'select_collaborate',
                   'select_contradict')
@@ -604,7 +610,8 @@ class OpinionDependencyForm(forms.ModelForm):
             data = self.cleaned_data.get('select_collaborate')
             initial = self.fields['select_collaborate'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true = opinion_dependency.parent.true_input >= opinion_dependency.parent.false_input
+                opinion_is_true = (opinion_dependency.parent.true_input >=
+                                   opinion_dependency.parent.false_input)
                 if data == 'True' and opinion_is_true:
                     opinion_dependency.tt_input = 10
                 elif data == 'True' and not opinion_is_true:
@@ -619,7 +626,8 @@ class OpinionDependencyForm(forms.ModelForm):
             data = self.cleaned_data.get('select_contradict')
             initial = self.fields['select_contradict'].initial
             if len(data) > 0 and bool(data) != initial:
-                opinion_is_true = opinion_dependency.parent.true_input >= opinion_dependency.parent.false_input
+                opinion_is_true = (opinion_dependency.parent.true_input >=
+                                   opinion_dependency.parent.false_input)
                 if data == 'True' and opinion_is_true:
                     opinion_dependency.tf_input = 10
                 elif data == 'True' and not opinion_is_true:
@@ -650,6 +658,7 @@ class TheoryRevisionForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Version
         fields = ('title01', 'title00', 'details', 'delete')
 
@@ -687,6 +696,7 @@ class TheoryRevisionForm(forms.ModelForm):
 
 class EvidenceRevisionForm(forms.ModelForm):
     """Theory Revision form."""
+
     # non-model fields
     title01 = forms.CharField(label='Statement')
     details = forms.CharField(**DETAILS_CHARFEILD)
@@ -695,6 +705,7 @@ class EvidenceRevisionForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Version
         fields = (
             'title01',

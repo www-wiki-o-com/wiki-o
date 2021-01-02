@@ -31,6 +31,7 @@ from django.core.management.base import BaseCommand
 
 class Command(BaseCommand):
     """Backup the database to an archive."""
+
     help = __doc__
 
     def add_arguments(self, parser):

@@ -3,8 +3,8 @@ version = 1
 test_patterns = ["/*/tests/*.py"]
 
 exclude_patterns = [
-    "migrations/**",
-    "/core/static/vendor/**"
+    "/*/migrations/*",
+    "/core/static/vendor/*"
 ]
 
 [[analyzers]]
@@ -13,7 +13,7 @@ enabled = true
 
   [analyzers.meta]
   runtime_version = "3.x.x"
-  max_line_check = 100
+  max_line_length = 100
 
 [[analyzers]]
 name = "javascript"

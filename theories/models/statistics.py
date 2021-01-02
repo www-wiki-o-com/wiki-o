@@ -65,6 +65,7 @@ class Stats(OpinionBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'theories_stats'
         verbose_name = 'Stats'
         verbose_name_plural = 'Stats'
@@ -88,7 +89,8 @@ class Stats(OpinionBase, models.Model):
         """Return the stats connected to theory.
 
         Args:
-            stats_type (Stats.TYPE or str, optional): The stats sub-type to retrive. Defaults to None.
+            stats_type (Stats.TYPE or str, optional): The stats sub-type to retrive. Defaults to
+                None.
 
         Returns:
             Stats or None: The stats object, or none if the query failed.
@@ -490,8 +492,7 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
         root = self.get_root()
         if root is None:
             return self.content.url()
-        else:
-            return root.url()
+        return root.url()
 
     def get_root(self):
         """Get the root stats pointing to content."""
@@ -533,14 +534,14 @@ class StatsDependency(StatsDependencyBase):
     """A container for dependency based statistics.
 
     Attributes:
-        parent (Stats): The parent statistic for the dependency (the parent dependency will be a theory
-            or sub-theory).
-        content (Content): The dependency (theory, sub-theory, or evidence) that this stat
-            pertains to.
+        parent (Stats): The parent statistic for the dependency (the parent dependency will be a
+            theory or sub-theory).
+        content (Content): The dependency (theory, sub-theory, or evidence) that this stat pertains
+            to.
         total_true_points (double): Total number of true points awared to the dependency (each user
             has a total of 1.0 points to distribute to theories/dependencies).
-        total_false_points (double): Total number of false points awared to the dependency (each user
-            has a total of 1.0 points to distribute to theories/dependencies).
+        total_false_points (double): Total number of false points awared to the dependency (each
+            user has a total of 1.0 points to distribute to theories/dependencies).
     """
 
     parent = models.ForeignKey(Stats, related_name='dependencies', on_delete=models.CASCADE)
@@ -566,7 +567,7 @@ class StatsDependency(StatsDependencyBase):
 
 
 class StatsFlatDependency(StatsDependencyBase):
-    """A container for flat dependency (nested evidence) statistics"""
+    """A container for flat dependency (nested evidence) statistics."""
 
     parent = models.ForeignKey(Stats, related_name='flat_dependencies', on_delete=models.CASCADE)
     content = models.ForeignKey(Content,
@@ -583,6 +584,7 @@ class StatsFlatDependency(StatsDependencyBase):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         db_table = 'theories_stats_flat_dependency'
         verbose_name = 'Stats Flat Dependency'
         verbose_name_plural = 'Stats Flat Dependencys'

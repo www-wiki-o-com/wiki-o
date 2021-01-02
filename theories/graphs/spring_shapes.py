@@ -1,4 +1,4 @@
-r""" __      __    __               ___
+"""  __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -26,6 +26,7 @@ from theories.graphs.shapes import offset_xy
 # *******************************************************************************
 class Direction(enum.Enum):
     """Enum for direction to shapes."""
+
     IN = 1
     OUT = 2
 
@@ -64,6 +65,7 @@ class SpringShapeBase(ShapeBase):
         DEFAULT_SPRING_LENGTH (float): The default value of spring_length.
         DEFAULT_SPRING_CONSTANT (float): The default value of spring_constant.
     """
+
     # Constants
     DEFAULT_SPRING_LENGTH = 5.0
     DEFAULT_SPRING_CONSTANT = 1.0
@@ -249,7 +251,8 @@ class SubtheoryShape(SpringShapeBase):
         """The constructor for the SubTheoryShape class.
 
         Args:
-            dependency (OpinionDependencyBase): The sub-theory dependency (used for colour and captions).
+            dependency (OpinionDependencyBase): The sub-theory dependency (used for colour and
+                captions).
             x (float): The initial x coordinate.
             y (float): The initial y coordinate.
             area (float): The area of the circle.
@@ -387,7 +390,8 @@ class Wall(SpringShapeBase):
             y (float or None): The x coordinate of the wall (must be None if x is specified).
 
         Raises:
-            RuntimeError: If x or y are not a float and None or None and float (only one can be specified).
+            RuntimeError: If x or y are not a float and None or None and float (only one can be
+                specified).
         """
         if not (isinstance(x, float) or isinstance(y, float)) or not (x is None or y is None):
             raise RuntimeError(f'either x ({x}) or y ({y}) has to be a float and the other None.')

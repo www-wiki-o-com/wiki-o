@@ -237,6 +237,7 @@ class ResolveViolationForm(forms.ModelForm):
     Attributes:
         forms ([type]): [description]
     """
+
     action = forms.ChoiceField(
         choices=ViolationFeedback.OPEN_ACTION_CHOICES,
         required=False,

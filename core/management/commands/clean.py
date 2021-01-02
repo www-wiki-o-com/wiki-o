@@ -34,6 +34,7 @@ RE_PUNCTUATOIN = r'\s*[\.!?]\s*$'
 
 class Command(BaseCommand):
     """Runs a series of scripts to clean up the database."""
+
     help = __doc__
 
     def add_arguments(self, parser):
