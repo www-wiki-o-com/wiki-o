@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -1954,7 +1954,7 @@ class StatsTests(TestCase):
     def test_add_opinion(self):
         # setup
         opinion = self.content.opinions.create(user=self.bob,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fact,
             tt_input=20,
             tf_input=80,
@@ -2015,7 +2015,7 @@ class StatsTests(TestCase):
     def test_total_points(self):
         # setup
         opinion = self.content.opinions.create(user=self.bob,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fact,
             tt_input=20,
             tf_input=80,
@@ -2030,7 +2030,7 @@ class StatsTests(TestCase):
     def test_true_points(self):
         # setup
         opinion = self.content.opinions.create(user=self.bob,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fact,
             tt_input=20,
             tf_input=80,
@@ -2045,7 +2045,7 @@ class StatsTests(TestCase):
     def test_false_points(self):
         # setup
         opinion = self.content.opinions.create(user=self.bob,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fact,
             tt_input=20,
             tf_input=80,

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -178,8 +178,7 @@ class Stats(OpinionBase, models.Model):
         """Return stats_type + title."""
         if self.is_true():
             return self.content.true_statement()
-        else:
-            return self.content.false_statement()
+        return self.content.false_statement()
 
     def reset(self, save=True):
         """Reset this objects points as well as all dependency points."""
@@ -266,13 +265,13 @@ class Stats(OpinionBase, models.Model):
     def get_point_range(self):
         """Return the range of true points this object possesses."""
         if self.stats_type == self.TYPE.ALL:
-            return 0.000, 1.000
+            return (0.000, 1.000)
         if self.stats_type == self.TYPE.SUPPORTERS:
-            return 0.666, 1.000
+            return (0.666, 1.000)
         if self.stats_type == self.TYPE.MODERATES:
-            return 0.333, 0.666
+            return (0.333, 0.666)
         if self.stats_type == self.TYPE.OPPOSERS:
-            return 0.000, 0.333
+            return (0.000, 0.333)
         raise ValueError(f'stats_type needs to be of type Stats.TYPE, not {type(self.stats_type)}')
 
     def get_dependency(self, content, create=True):
@@ -386,31 +385,28 @@ class Stats(OpinionBase, models.Model):
         """Test whether or not the opinion meets the criterion of the stat categorization."""
         if opinion.true_points() + opinion.false_points() == 0:
             return False
-        elif self.stats_type == self.TYPE.ALL:
+        if self.stats_type == self.TYPE.ALL:
             return True
-        elif self.stats_type == self.TYPE.SUPPORTERS and opinion.true_points() >= 0.666:
+        if self.stats_type == self.TYPE.SUPPORTERS and opinion.true_points() >= 0.666:
             return True
-        elif self.stats_type == self.TYPE.MODERATES and opinion.true_points(
+        if self.stats_type == self.TYPE.MODERATES and opinion.true_points(
         ) < 0.666 and opinion.false_points() < 0.666:
             return True
-        elif self.stats_type == self.TYPE.OPPOSERS and opinion.false_points() >= 0.666:
+        if self.stats_type == self.TYPE.OPPOSERS and opinion.false_points() >= 0.666:
             return True
-        else:
-            return False
+        return False
 
     def true_points(self):
         """Returns true points (a percentage of total)."""
         if self.total_points() > 0:
             return self.total_true_points / self.total_points()
-        else:
-            return 0.0
+        return 0.0
 
     def false_points(self):
         """Returns false points (a percentage of total)."""
         if self.total_points() > 0:
             return self.total_false_points / self.total_points()
-        else:
-            return 0.0
+        return 0.0
 
     def total_points(self):
         """Returns total opinion points awarded to this theory."""
@@ -426,7 +422,6 @@ class Stats(OpinionBase, models.Model):
 
     def swap_true_false(self):
         """Swap the true and false points."""
-
         # self
         (self.total_true_points, self.total_false_points) = (self.total_false_points,
                                                              self.total_true_points)
@@ -462,6 +457,11 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
         total_false_points (double): Total number of false points awarded to the dependency.
         rank (double): Total points, used for sorting.
     """
+
+    # Variables
+    altered = False
+
+    # Model Variables
     total_true_points = models.FloatField(default=0.0)
     total_false_points = models.FloatField(default=0.0)
     rank = models.FloatField(default=0.0)
@@ -476,6 +476,7 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         abstract = True
         unique_together = (('content', 'parent'),)
 
@@ -504,22 +505,19 @@ class StatsDependencyBase(OpinionDependencyBase, models.Model):
         """Returns true points (a percentage of total)."""
         if self.parent.total_points() > 0:
             return self.total_true_points / self.parent.total_points()
-        else:
-            return 0.0
+        return 0.0
 
     def false_points(self):
         """Returns false points (a percentage of total)."""
         if self.parent.total_points() > 0:
             return self.total_false_points / self.parent.total_points()
-        else:
-            return 0.0
+        return 0.0
 
     def total_points(self):
         """Returns total points (a percentage of total)."""
         if self.parent.total_points() > 0:
             return (self.total_true_points + self.total_false_points) / self.parent.total_points()
-        else:
-            return 0.0
+        return 0.0
 
     def reset(self, save=True):
         """Zero the true and false points (optionally, do not save results)."""
@@ -560,6 +558,7 @@ class StatsDependency(StatsDependencyBase):
 
         For more, see: https://docs.djangoproject.com/en/3.0/ref/models/options/
         """
+
         ordering = ['-rank']
         db_table = 'theories_stats_dependency'
         verbose_name = 'Stats Dependency'

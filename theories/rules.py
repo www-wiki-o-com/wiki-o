@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -50,13 +50,13 @@ def can_edit_title(user, obj=None):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level02(user) and utilization <= 10:
+        if has_level02(user) and utilization <= 10:
             return True
-        elif has_level03(user) and utilization <= 100:
+        if has_level03(user) and utilization <= 100:
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 
@@ -74,13 +74,13 @@ def can_remove(user, obj):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level02(user) and utilization <= 10:
+        if has_level02(user) and utilization <= 10:
             return True
-        elif has_level03(user) and utilization <= 100:
+        if has_level03(user) and utilization <= 100:
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 
@@ -91,9 +91,9 @@ def can_delete(user, obj):
         utilization = obj.get_utilization(user)
         if has_level00(user):
             return False
-        elif has_level01(user) and utilization == 0 and is_author(user, obj):
+        if has_level01(user) and utilization == 0 and is_author(user, obj):
             return True
-        elif has_level04(user):
+        if has_level04(user):
             return True
     return False
 

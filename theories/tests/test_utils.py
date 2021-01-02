@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -22,9 +22,8 @@ from theories.models.content import Content
 from theories.models.categories import Category
 from theories.utils import get_demo_theory, get_demo_opinion
 from theories.utils import create_categories, create_reserved_dependencies
-from users.maintence import create_groups_and_permissions, create_test_user
-
 from theories.tests.utils import *
+from users.maintence import create_groups_and_permissions, create_test_user
 
 # *******************************************************************************
 # Unit tests

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -120,13 +120,13 @@ def swap_true_false(content, user=None):
     content.title00, content.title01 = content.title01, content.title00
     content.save()
     # Opinions
+    verb = """<# object.url The theory, "{{ object }}" has had its true and false titles swapped. #>"""
     for opinion in content.get_opinions():
         opinion.swap_true_false()
         notify.send(
             sender=user,
             recipient=opinion.user,
-            verb=
-            """<# object.url The theory, "{{ object }}" has had its true and false titles swapped. #>""",
+            verb=verb,
             description='This should not effect your <# target.url opinion #> in anyway.',
             action_object=content,
             target=opinion,

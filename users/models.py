@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -407,7 +407,7 @@ class User(AbstractUser):
         Returns:
             int: The account age in days.
         """
-        age = timezone.now() - self.date_joined()
+        age = timezone.now() - self.date_joined
         return age.days
 
     def get_num_contributions(self):
@@ -426,8 +426,7 @@ class User(AbstractUser):
         """
         if len(self.get_levels()) > 0:
             return self.get_levels()[-1]
-        else:
-            return -1
+        return -1
 
     def get_levels(self):
         """A getter for the user's permission levels.
@@ -451,13 +450,13 @@ class User(AbstractUser):
             bool: True, if the user is up for promotion.
         """
         if self.count_warnings(recent=True, expired=False) > 0 or \
-            self.count_strikes(recent=True, expired=False) > 0:
+                self.count_strikes(recent=True, expired=False) > 0:
             return False
-        if self.get_level() == 1 and self.get_account_age() >= LEVEL02_AGE_REQUIREMENT \
-           and self.get_num_contributions() >= LEVEL02_CONTRIBUTIONS_REQUIREMENT:
+        if self.get_level() == 1 and self.get_account_age() >= LEVEL02_AGE_REQUIREMENT and \
+                self.get_num_contributions() >= LEVEL02_CONTRIBUTIONS_REQUIREMENT:
             return True
-        if self.get_level() == 2 and self.get_account_age() >= LEVEL03_AGE_REQUIREMENT \
-           and self.get_num_contributions() >= LEVEL03_CONTRIBUTIONS_REQUIREMENT:
+        if self.get_level() == 2 and self.get_account_age() >= LEVEL03_AGE_REQUIREMENT and \
+                self.get_num_contributions() >= LEVEL03_CONTRIBUTIONS_REQUIREMENT:
             return True
         return False
 

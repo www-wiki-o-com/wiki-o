@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -112,7 +112,7 @@ class SpringShapeBase(ShapeBase):
         """
         dx = shape02.x - self.x
         dy = shape02.y - self.y
-        d = math.sqrt(dx**2 + dy**2)
+        d = math.hypot(dx, dy)
         unit_x = 1.0 * dx / d
         unit_y = 1.0 * dy / d
         if direction == Direction.OUT:

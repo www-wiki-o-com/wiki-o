@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -91,7 +91,7 @@ def interpret_log_text(log, log_text, extra=''):
     # Interpret variables
     result = ''
     prev_index = 0
-    for start_index, end_index, nested_depth in get_brace_indices(log_text):
+    for start_index, end_index, _ in get_brace_indices(log_text):
         if log_text[start_index] == '{' and log_text[end_index] == '}':
             result += log_text[prev_index:start_index]
             name = log_text[start_index + 1:end_index].strip()
@@ -109,7 +109,7 @@ def interpret_log_text(log, log_text, extra=''):
     log_text = result
     result = ''
     prev_index = 0
-    for start_index, end_index, nested_depth in get_brace_indices(log_text):
+    for start_index, end_index, _ in get_brace_indices(log_text):
         if log_text[start_index] == '«' and log_text[end_index] == '»':
             result += log_text[prev_index:start_index]
             url, name = log_text[start_index + 1:end_index].strip().split(' ', 1)

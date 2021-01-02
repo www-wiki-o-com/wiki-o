@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -508,7 +508,6 @@ class Parameters():
 
     def __init__(self, request, pk=None):
         """Constructor."""
-
         # Setup
         self.pk = pk
         self.path = []
@@ -579,7 +578,7 @@ class Parameters():
         return self.path
 
     def get_new(self):
-        """"Create a copy of the object.
+        """Create a copy of the object.
 
         Returns:
             Parameters: A copy of the object.
@@ -655,7 +654,7 @@ class Parameters():
         Returns:
             str: The value.
         """
-        value = self.params.get(key, None)
+        value = self.params.get(key)
         if isinstance(value, list) and len(value) == 1:
             value = value[0]
         return value
@@ -672,7 +671,6 @@ class Choices(DjangoChoices):
         unique (Bool): If true, the addition between two Choice objects will act as set addition
             with respect to _db_values.
     """
-
     unique = True
 
     def __init__(self, *choices, unique=True):

@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -88,6 +88,8 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
 
     # Variables
     INTUITION_PK = -1
+    saved_opinion_dependencies = None
+
     content_type = models.SmallIntegerField(choices=TYPE)
     title00 = models.CharField(max_length=255, blank=True, null=True)
     title01 = models.CharField(max_length=255)
@@ -176,9 +178,8 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
     def false_statement(self):
         self.assert_theory()
         if self.title00 is None or self.title00 == '':
-            return '%s, is false.' % self.title01.strip('.')
-        else:
-            return self.title00
+            return r"{self.title01.strip('.')}, is false."
+        return self.title00
 
     def about(self):
         """Returns a string with a title and details."""
@@ -600,9 +601,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         return flat_dependencies
 
     def get_nested_dependencies(self, deleted=False, distinct=True):
-        """Returns a query set of the theory's flat dependencies (evidence and subthories).
-
-        """
+        """Returns a query set of the theory's flat dependencies (evidence and subthories)."""
         # Error checking.
         if not self.assert_theory():
             return None

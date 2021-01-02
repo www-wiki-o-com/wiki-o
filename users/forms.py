@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -40,6 +40,7 @@ class UserForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = User
         fields = (
             'username',
@@ -104,6 +105,7 @@ class SelectNotificationForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Notification
         fields = ('select',)
 
@@ -121,6 +123,7 @@ class SelectViolationForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Violation
         fields = ('select',)
 
@@ -153,6 +156,7 @@ class ReportViolationForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = Violation
         fields = ('offender', 'offences', 'intent', 'explanation')
         widgets = {
@@ -261,6 +265,7 @@ class ResolveViolationForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = ViolationFeedback
         fields = ()
 
@@ -345,6 +350,7 @@ class VoteForm(forms.ModelForm):
 
     class Meta:
         """Where the form options are defined."""
+
         model = ViolationVote
         fields = ('vote',)
         labels = {

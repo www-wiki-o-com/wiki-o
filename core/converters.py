@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -50,7 +50,7 @@ class IntegerCypher:
         keys = []
         random.seed(seed)
         mask = 2**key_length - 1
-        for i in range(num_rounds):
+        for _ in range(num_rounds):
             keys.append(random.randint(mask // 2, mask) & mask)
         return keys
 

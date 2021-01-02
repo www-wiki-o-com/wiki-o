@@ -1,4 +1,4 @@
-"""  __      __    __               ___
+r""" __      __    __               ___
     /  \    /  \__|  | _ __        /   \
     \   \/\/   /  |  |/ /  |  __  |  |  |
      \        /|  |    <|  | |__| |  |  |
@@ -24,8 +24,8 @@ from reversion.models import Version
 
 from core.converters import IntegerCypher
 from theories.models.content import Content
-from users.models import User, Violation
 from theories.models.statistics import StatsFlatDependency
+from users.models import User, Violation
 
 # *******************************************************************************
 # Defines
