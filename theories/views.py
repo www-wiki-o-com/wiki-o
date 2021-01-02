@@ -512,8 +512,8 @@ def theory_edit_evidence_view(request, content_pk):
                     # activity log
                     evidence.update_activity_logs(user, form.get_verb())
             return redirect(prev)
-        else:
-            print(238, formset.errors)
+        # formset is invalid
+        print(238, formset.errors)
 
     # Get request
     else:
@@ -580,8 +580,8 @@ def theory_edit_subtheories_view(request, content_pk):
                     # activity log
                     subtheory.update_activity_logs(user, verb=form.get_verb())
             return redirect(next)
-        else:
-            print(220, formset.errors)
+        # formset is invalid
+        print(220, formset.errors)
 
     # Get request
     else:
@@ -657,8 +657,8 @@ def theory_merge_view(request, content_pk):
                             verb='Merged with <# object.url {{ object }} #>',
                             action_object=content)
             return redirect(next)
-        else:
-            print(200, formset.errors)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -801,9 +801,9 @@ def theory_restore_view(request, content_pk):
                         # activity log
                         theory.update_activity_logs(user, verb='Revision (deleted)')
             return redirect(next)
-        else:
-            print(200, formset.errors)
-            print(201, request.POST)
+        # formset is invalid
+        print(200, formset.errors)
+        print(201, request.POST)
 
     # Get request
     else:
@@ -864,8 +864,8 @@ def theory_backup_view(request, content_pk):
                     content = form.instance
                     content.save_snapshot(user)
             return redirect(next)
-        else:
-            print(200, formset.errors)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -921,8 +921,8 @@ def theory_report_view(request, content_pk):
             if report.offender == theory.modified_by:
                 theory.autosave(user, force=True)
             return redirect(next)
-        else:
-            print(1000, form.errors)
+        # form is invalid
+        print(1000, form.errors)
 
     # Get request
     else:
@@ -1059,8 +1059,8 @@ def evidence_edit_view(request, content_pk):
             evidence.update_activity_logs(user, verb=form.get_verb())
             # redirect
             return redirect(next)
-        else:
-            print(226, form.errors)
+        # form is invalid
+        print(226, form.errors)
     # Get request
     else:
         form = EvidenceForm(instance=evidence, user=user)
@@ -1125,8 +1125,8 @@ def evidence_merge_view(request, content_pk):
                     # activity log
                     evidence.update_activity_logs(user, verb='Merge', action_object=content)
             return redirect(next)
-        else:
-            print(200, formset.errors)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -1184,8 +1184,8 @@ def evidence_restore_view(request, content_pk):
                         # activity log
                         evidence.update_activity_logs(user, verb='Revision (deleted)')
             return redirect(next)
-        else:
-            print(200, formset.errors)
+        # formset is invalid
+        print(200, formset.errors)
 
     # Get request
     else:
@@ -1222,8 +1222,8 @@ def evidence_report_view(request, content_pk):
         form = ReportViolationForm(request.POST, user=user, content=evidence)
         if form.is_valid():
             return redirect(next)
-        else:
-            print(1000, form.errors)
+        # form is invalid
+        print(1000, form.errors)
 
     # Get request
     else:
@@ -1323,8 +1323,7 @@ def content_remove_redirect_view(request, content_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.delete_content',
@@ -1355,8 +1354,7 @@ def content_delete_redirect_view(request, content_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @login_required
@@ -1378,8 +1376,7 @@ def content_backup_redirect_view(request, content_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.restore_content',
@@ -1409,8 +1406,7 @@ def content_revert_redirect_view(request, content_pk, version_id):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.convert_content',
@@ -1444,8 +1440,7 @@ def content_convert_redirect_view(request, content_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.swap_title',
@@ -1469,8 +1464,7 @@ def content_swap_titles_redirect_view(request, content_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 # *******************************************************************************
@@ -1541,8 +1535,7 @@ def retrieve_my_opinion_redirect_view(request, content_pk):
     if opinion is None or opinion.is_deleted():
         return redirect(
             reverse('theories:opinion-my-editor', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(opinion.url() + params)
+    return redirect(opinion.url() + params)
 
 
 @login_required
@@ -1561,12 +1554,15 @@ def retrieve_my_opinion_stats_redirect_view(request, content_pk):
     if opinion is None or opinion.is_deleted():
         return redirect(
             reverse('theories:opinion-my-editor', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(opinion.stats_url() + params)
+    return redirect(opinion.stats_url() + params)
 
 
 def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=None):
-    """The view for displaying opinion and statistical details."""
+    """The view for displaying opinion and statistical details.
+
+    Raises:
+        ValueError: If we fail to retrieve the parent statistics.
+    """
 
     # Setup
     user = request.user
@@ -1614,7 +1610,8 @@ def opinion_analysis_view(request, content_pk, opinion_pk=None, opinion_slug=Non
                 parent_opinions.append(parent_opinion)
         elif isinstance(opinion, Stats):
             parent_opinion = get_or_none(parent_theory.stats, stats_type=opinion.stats_type)
-            assert parent_opinion is not None
+            if parent_opinion is None:
+                raise RuntimeError('parent_opinion is None')
             parent_opinions.append(parent_opinion)
 
     # Navigation
@@ -1797,7 +1794,7 @@ def opinion_compare_view(request,
 def opinion_retrieve_my_editor_redirect_view(request, content_pk):
     """A method for choosing OpinionAdvEditView or OpinionEditWizardView."""
 
-    # setup
+    # Setup
     user = request.user
     params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(content_pk))
 
@@ -1805,9 +1802,7 @@ def opinion_retrieve_my_editor_redirect_view(request, content_pk):
     if user.use_wizard:
         return redirect(
             reverse('theories:opinion-wizard', kwargs={'content_pk': content_pk}) + params)
-    else:
-        return redirect(
-            reverse('theories:opinion-edit', kwargs={'content_pk': content_pk}) + params)
+    return redirect(reverse('theories:opinion-edit', kwargs={'content_pk': content_pk}) + params)
 
 
 @login_required
@@ -1897,9 +1892,9 @@ def opinion_edit_view(request, content_pk, wizard=False):
 
             # done
             return redirect(opinion.url() + params)
-        else:
-            print(2200, opinion_form.errors)
-            print(2201, dependency_formset.errors)
+        # opinion form or the depedency formset is invalid
+        print(2200, opinion_form.errors)
+        print(2201, dependency_formset.errors)
 
     # Get request
     else:
@@ -1952,8 +1947,7 @@ def opinion_copy_view(request, opinion_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.delete_opinion',
@@ -1963,7 +1957,6 @@ def opinion_delete_redirect_view(request, opinion_pk):
     """A method for deleting the opinion and redirecting the view."""
 
     # Setup
-    user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
     theory = opinion.content
 
@@ -1979,8 +1972,7 @@ def opinion_delete_redirect_view(request, opinion_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.change_opinion',
@@ -2004,8 +1996,7 @@ def opinion_hide_user_redirect_view(request, opinion_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 @permission_required('theories.change_opinion',
@@ -2015,11 +2006,9 @@ def opinion_reveal_user_redirect_view(request, opinion_pk):
     """A method for revealing the user for the current opinion."""
 
     # Setup
-    user = request.user
     opinion = get_object_or_404(Opinion, pk=opinion_pk)
 
     # Navigation
-    params = Parameters(request, pk=CONTENT_PK_CYPHER.to_url(opinion_pk))
     prev = request.META.get('HTTP_REFERER', '/')
     next = request.META.get('HTTP_REFERER', '/')
 
@@ -2031,8 +2020,7 @@ def opinion_reveal_user_redirect_view(request, opinion_pk):
         return redirect(next)
 
     # Get request
-    else:
-        return redirect(prev)
+    return redirect(prev)
 
 
 # *******************************************************************************
@@ -2040,13 +2028,10 @@ def opinion_reveal_user_redirect_view(request, opinion_pk):
 # *******************************************************************************
 
 
-def image_view(request, pk=None):
+def image_view(request):
     """The view for displaying opinion and statistical details."""
 
     # Setup
-    user = request.user
-
-    # SVG
     svg = """
       <svg baseProfile="full" version="1.1" viewBox="0 0 755 390" width="453" height="234">
         <rect width="100%" height="100%" fill="white"/>
@@ -2064,6 +2049,7 @@ def image_view(request, pk=None):
         <text text-anchor="middle" x="505" y="47" font-size="40" font-family="FreeSerif" font-weight="bold" fill="red">False</text>
       </svg>
     """
-    #    svg2png(bytestring=svg, write_to='output.png')
-    image = open("output.png", "rb").read()
+    svg2png(bytestring=svg, write_to='output.png')
+    with open("output.png", "rb") as f:
+        image = f.read()
     return HttpResponse(image, content_type="image/png")

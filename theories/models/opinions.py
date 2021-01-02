@@ -13,6 +13,7 @@ LICENSE.md file in the root directory of this source tree.
 # *******************************************************************************
 # Imports
 # *******************************************************************************
+import inspect
 import logging
 
 from actstream.models import followers
@@ -141,7 +142,7 @@ class OpinionBase(ContentPointer, SavedDependencies, SavedPoints):
                     self.save_flat_dependencies(self.flat_dependencies.all())
         return dependency
 
-    def get_flat_dependencies(self, cache=False):
+    def get_flat_dependencies(self, cache=False, verbose_level=0):
         """Return a query set of the flat dependencies/nested evidence (use cache if available)."""
         # Check cache first.
         flat_dependencies = self.get_saved_flat_dependencies()
@@ -284,7 +285,11 @@ class Opinion(OpinionBase, models.Model):
 
     def stats_url(self):
         """Return url for viewing the stats of this opinion."""
-        return reverse('theories:opinion-analysis', kwargs={'content_pk': self.content.pk, 'opinion_pk': self.pk})
+        return reverse('theories:opinion-analysis',
+                       kwargs={
+                           'content_pk': self.content.pk,
+                           'opinion_pk': self.pk
+                       })
 
     def edit_url(self):
         """Return url for editing this opinion."""

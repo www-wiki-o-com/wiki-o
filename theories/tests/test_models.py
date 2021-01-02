@@ -17,11 +17,8 @@ import datetime
 import random
 
 from actstream.actions import follow
-from django.contrib import auth
-from django.shortcuts import get_object_or_404, redirect, render
 from django.test import TestCase
 from django.urls import reverse
-from django.utils import timezone
 from hitcount.models import HitCount
 
 from core.utils import get_or_none
@@ -29,8 +26,7 @@ from theories.model_utils import (convert_content_type, copy_opinion, get_compar
                                   merge_content, swap_true_false)
 from theories.models.categories import Category
 from theories.models.content import Content, DeleteMode
-from theories.models.opinions import Opinion, OpinionDependency
-from theories.models.statistics import Stats, StatsDependency, StatsFlatDependency
+from theories.models.statistics import Stats
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
                                   create_test_theory, get_or_create_evidence,
                                   get_or_create_subtheory)
@@ -672,7 +668,7 @@ class ContentTests(TestCase):
     def test_update_hits(self):
         old_rank = self.content.rank
         old_hit_count = HitCount.objects.get_for_object(self.content)
-        response = self.client.get(self.content.url())
+        self.client.get(self.content.url())
         self.content.refresh_from_db()
         hit_count = HitCount.objects.get_for_object(self.content)
         self.assertEqual(hit_count.hits, old_hit_count.hits + 1)
@@ -867,36 +863,6 @@ class OpinionTests(TestCase):
         else:
             self.assertEqual(opinion.__str__(), self.content.false_statement())
 
-    def test_get_theory_evidence(self):
-        opinion = self.content.opinions.create(user=self.user,)
-        opinion_dependency01 = opinion.dependencies.create(
-            content=self.fact,
-            tt_input=100,
-        )
-        opinion_dependency02 = opinion.dependencies.create(
-            content=self.subtheory,
-            tt_input=100,
-        )
-        evidence = opinion.get_theory_evidence()
-        self.assertEqual(evidence.count(), 1)
-        self.assertIn(opinion_dependency01, evidence)
-        self.assertNotIn(opinion_dependency02, evidence)
-
-    def test_get_theory_subtheories(self):
-        opinion = self.content.opinions.create(user=self.user,)
-        opinion_dependency01 = opinion.dependencies.create(
-            content=self.fact,
-            tt_input=100,
-        )
-        opinion_dependency02 = opinion.dependencies.create(
-            content=self.subtheory,
-            tt_input=100,
-        )
-        subtheories = opinion.get_theory_subtheories()
-        self.assertEqual(subtheories.count(), 1)
-        self.assertNotIn(opinion_dependency01, subtheories)
-        self.assertIn(opinion_dependency02, subtheories)
-
     def test_is_anonymous(self):
         # setup
         opinion = self.content.opinions.create(user=self.user)
@@ -1081,20 +1047,19 @@ class OpinionTests(TestCase):
     def test_get_flat_dependencies(self):
         # setup
         opinion = self.content.opinions.create(user=self.user,)
-        opinion_dependency01 = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fact,
             ft_input=100,
         )
-        opinion_dependency02 = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.fiction,
             ft_input=100,
         )
-        opinion_dependency03 = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.subtheory,
             ft_input=100,
         )
-        child_opinion = self.subtheory.opinions.create(user=self.user,)
-        opinion_dependency04 = child_opinion.dependencies.create(
+        self.subtheory.opinions.create(user=self.user).dependencies.create(
             content=self.evidence,
             tt_input=100,
         )
@@ -1121,7 +1086,7 @@ class OpinionTests(TestCase):
         self.assertIsNotNone(dependency)
         self.assertEqual(dependency.content, self.intuition)
 
-    def test_get_theory_subtheories(self):
+    def test_get_theory_subtheories01(self):
         # setup
         opinion = self.content.opinions.create(user=self.user,)
         opinion.dependencies.create(
@@ -1146,7 +1111,22 @@ class OpinionTests(TestCase):
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.subtheory)
 
-    def test_get_theory_evidence(self):
+    def test_get_theory_subtheories02(self):
+        opinion = self.content.opinions.create(user=self.user,)
+        opinion_dependency01 = opinion.dependencies.create(
+            content=self.fact,
+            tt_input=100,
+        )
+        opinion_dependency02 = opinion.dependencies.create(
+            content=self.subtheory,
+            tt_input=100,
+        )
+        subtheories = opinion.get_theory_subtheories()
+        self.assertEqual(subtheories.count(), 1)
+        self.assertNotIn(opinion_dependency01, subtheories)
+        self.assertIn(opinion_dependency02, subtheories)
+
+    def test_get_theory_evidence01(self):
         # setup
         opinion = self.content.opinions.create(user=self.user,)
         opinion.dependencies.create(
@@ -1170,6 +1150,21 @@ class OpinionTests(TestCase):
         dependencies = opinion.get_theory_evidence()
         self.assertEqual(dependencies.count(), 1)
         self.assertEqual(dependencies[0].content, self.fact)
+
+    def test_get_theory_evidence02(self):
+        opinion = self.content.opinions.create(user=self.user,)
+        opinion_dependency01 = opinion.dependencies.create(
+            content=self.fact,
+            tt_input=100,
+        )
+        opinion_dependency02 = opinion.dependencies.create(
+            content=self.subtheory,
+            tt_input=100,
+        )
+        evidence = opinion.get_theory_evidence()
+        self.assertEqual(evidence.count(), 1)
+        self.assertIn(opinion_dependency01, evidence)
+        self.assertNotIn(opinion_dependency02, evidence)
 
     def test_get_parent_opinions(self):
         # setup
@@ -1552,7 +1547,7 @@ class OpinionTests(TestCase):
             false_input=20,
             force=True,
         )
-        child_dependency = child_opinion.dependencies.create(
+        child_opinion.dependencies.create(
             content=self.evidence,
             tt_input=100,
         )
@@ -1576,7 +1571,7 @@ class OpinionTests(TestCase):
             false_input=22,
             force=True,
         )
-        child_dependency = child_opinion.dependencies.create(
+        child_opinion.dependencies.create(
             content=self.evidence,
             ff_input=100,
         )
@@ -1606,7 +1601,7 @@ class OpinionTests(TestCase):
     def test_true_points(self):
         # setup
         opinion = self.content.opinions.create(user=self.user,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.subtheory,
             tt_input=80,
             ff_input=20,
@@ -1632,7 +1627,7 @@ class OpinionTests(TestCase):
     def test_false_points(self):
         # setup
         opinion = self.content.opinions.create(user=self.user,)
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.subtheory,
             tt_input=80,
             ff_input=20,
@@ -1662,7 +1657,7 @@ class OpinionTests(TestCase):
             true_input=80,
             false_input=20,
         )
-        opinion_dependency = opinion.dependencies.create(
+        opinion.dependencies.create(
             content=self.subtheory,
             tt_input=80,
             ff_input=20,

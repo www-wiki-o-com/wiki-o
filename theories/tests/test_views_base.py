@@ -17,15 +17,12 @@ import random
 
 from django.contrib import auth
 from django.core.exceptions import ObjectDoesNotExist
-from django.shortcuts import get_object_or_404, redirect, render
-from django.test import TestCase
 from django.urls import reverse
 
 from core.utils import get_form_data, get_or_none
 from theories.converters import CONTENT_PK_CYPHER
-from theories.model_utils import convert_content_type
 from theories.models.content import Content
-from theories.models.opinions import Opinion, OpinionDependency
+from theories.models.opinions import Opinion
 from theories.tests.utils import (create_test_evidence, create_test_opinion, create_test_subtheory,
                                   create_test_theory)
 from theories.utils import create_categories, create_reserved_dependencies
@@ -624,7 +621,7 @@ class ViewsTestBase():
         test_url = reverse('theories:theory-edit-evidence',
                            kwargs={'content_pk': self.subtheory.pk})
         post_data = {'form-1-title01': 'New Title'}
-        response = self.verify_post_response(test_url, redirect_url, post_data, code)
+        self.verify_post_response(test_url, redirect_url, post_data, code)
 
         # test change
         evidence = get_or_none(Content.objects.all(), title01='New Title')
@@ -652,7 +649,7 @@ class ViewsTestBase():
         test_url = reverse('theories:theory-edit-subtheories',
                            kwargs={'content_pk': self.content.pk})
         post_data = {'form-1-title01': 'New Title'}
-        response = self.verify_post_response(test_url, redirect_url, post_data, code)
+        self.verify_post_response(test_url, redirect_url, post_data, code)
 
         # test change
         subtheory = get_or_none(Content.objects.all(), title01='New Title')

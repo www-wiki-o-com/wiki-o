@@ -177,7 +177,7 @@ def convert_content_type(content, user=None, verifiable=False):
         content.flat_dependencies.clear()
     else:
         content.content_type = content.TYPE.THEORY
-    content.save(user)
+    content.save(user=user)
     # notifications (opinions)
     if content.is_theory():
         for opinion in content.get_opinions():

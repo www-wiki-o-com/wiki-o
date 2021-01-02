@@ -298,7 +298,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                 return False
         return True
 
-    def save(self, user=None, *args, **kwargs):
+    def save(self, *args, user=None, **kwargs):
         """Automatically adds stats and intuition dependencies."""
         if user is not None:
             self.modified_by = user
@@ -311,7 +311,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
             self.flat_dependencies.add(self.get_intuition())
         return self
 
-    def autosave(self, user, force=False, *args, **kwargs):
+    def autosave(self, user=None, force=False):
         """Saves changes and automatically archieves changes as a revision.
 
         Args:
@@ -365,6 +365,9 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         Todo:
             * Reset cache?
             * Update opinion points?
+
+        Raises:
+            ValueError: If mode is not of type DeleteMode.
         """
         # Error checking
         if self.pk == self.INTUITION_PK:
@@ -377,7 +380,6 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         if self.id is None:
             LOGGER.error('Content::delete: Content is already deleted or not saved.')
             return False
-        assert isinstance(mode, DeleteMode)
 
         # Setup
         if user is None:
@@ -392,7 +394,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
         elif mode == DeleteMode.SOFT:
             hard = False
         else:
-            assert False
+            ValueError(f'mode ({type(mode)}) is not of class DeleteMode.')
 
         # Recursive delete dependencies
         if self.is_theory():
@@ -447,10 +449,10 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
 
             # Flat conent as deleted (negative => deleted)
             self.content_type = -abs(self.content_type)
-            self.save(user)
+            self.save(user=user)
         return False
 
-    def cache(self, dependencies=True, flat_dependencies=True, stats=False):
+    def cache(self, dependencies=True, flat_dependencies=True):
         """Cache sub-theory and evidence dependencies to save on db calls."""
         # error checking
         if not self.assert_theory():
@@ -631,7 +633,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                 dependencies = dependencies.distinct()
         return dependencies
 
-    def get_theory_evidence(self, deleted=False, cache=False):
+    def get_theory_evidence(self, deleted=False):
         """Returns a query set of the theory's evidence."""
         # error checking
         if not self.assert_theory():
@@ -644,7 +646,7 @@ class Content(SavedOpinions, SavedDependencies, models.Model):
                 Q(content_type=-self.TYPE.FACT) | Q(content_type=-self.TYPE.EVIDENCE))
         return dependencies
 
-    def get_theory_subtheories(self, deleted=False, cache=False):
+    def get_theory_subtheories(self, deleted=False):
         """Returns a query set of the theory's sub-theories."""
         # error checking
         if not self.assert_theory():

@@ -126,10 +126,8 @@ class TheoryForm(forms.ModelForm):
             self.initial_categories = kwargs.pop('initial_categories')
         else:
             self.initial_categories = ''
-        if 'show_categories' not in kwargs.keys() or not kwargs.pop('show_categories'):
-            hide_category_list_input = True
-        else:
-            hide_category_list_input = False
+        hide_category_list_input = bool('show_categories' not in kwargs.keys() or
+                                        not kwargs.pop('show_categories'))
         super().__init__(*args, **kwargs)
 
         # Autosave
@@ -213,7 +211,7 @@ class TheoryForm(forms.ModelForm):
         if commit:
             if self.old_instance is not None:
                 self.old_instance.autosave(self.user)
-            theory.save(self.user)
+            theory.save(user=self.user)
 
         # Action verb (must come after the theory is created)
         if created:
@@ -378,7 +376,7 @@ class EvidenceForm(forms.ModelForm):
         if commit:
             if self.old_instance is not None:
                 self.old_instance.autosave(self.user)
-            evidence.save(self.user)
+            evidence.save(user=self.user)
         return evidence
 
 

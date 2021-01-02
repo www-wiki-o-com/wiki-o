@@ -155,14 +155,13 @@ class Stats(OpinionBase, models.Model):
         """Return the slug used for urls to reference this object."""
         if stats_type == cls.TYPE.ALL:
             return 'all'
-        elif stats_type == cls.TYPE.SUPPORTERS:
+        if stats_type == cls.TYPE.SUPPORTERS:
             return 'supporters'
-        elif stats_type == cls.TYPE.MODERATES:
+        if stats_type == cls.TYPE.MODERATES:
             return 'moderates'
-        elif stats_type == cls.TYPE.OPPOSERS:
+        if stats_type == cls.TYPE.OPPOSERS:
             return 'opposers'
-        else:
-            assert False
+        raise ValueError(f'stats_type needs to be of type Stats.TYPE, not {type(stats_type)}.')
 
     @classmethod
     def slug_to_type(cls, slug):
@@ -240,44 +239,41 @@ class Stats(OpinionBase, models.Model):
         cls = self.__class__
         return cls.type_to_slug(self.stats_type)
 
-    def get_owner(self, short=False):
+    def get_owner(self):
         """Return a human readable type of this object."""
         if self.stats_type == self.TYPE.ALL:
             return 'Everyone'
-        elif self.stats_type == self.TYPE.SUPPORTERS:
+        if self.stats_type == self.TYPE.SUPPORTERS:
             return 'Supporters'
-        elif self.stats_type == self.TYPE.MODERATES:
+        if self.stats_type == self.TYPE.MODERATES:
             return 'Moderates'
-        elif self.stats_type == self.TYPE.OPPOSERS:
+        if self.stats_type == self.TYPE.OPPOSERS:
             return 'Opposers'
-        else:
-            assert False
+        raise ValueError(f'stats_type needs to be of type Stats.TYPE, not {type(self.stats_type)}.')
 
-    def get_owner_long(self, short=False):
+    def get_owner_long(self):
         """Return a human readable possessive type of this object."""
         if self.stats_type == self.TYPE.ALL:
             return 'The Majority (Everyone)'
-        elif self.stats_type == self.TYPE.SUPPORTERS:
+        if self.stats_type == self.TYPE.SUPPORTERS:
             return 'The Supporters'
-        elif self.stats_type == self.TYPE.MODERATES:
+        if self.stats_type == self.TYPE.MODERATES:
             return 'The Moderates'
-        elif self.stats_type == self.TYPE.OPPOSERS:
+        if self.stats_type == self.TYPE.OPPOSERS:
             return 'The Opposers'
-        else:
-            assert False
+        raise ValueError(f'stats_type needs to be of type Stats.TYPE, not {type(self.stats_type)}')
 
     def get_point_range(self):
         """Return the range of true points this object possesses."""
         if self.stats_type == self.TYPE.ALL:
             return 0.000, 1.000
-        elif self.stats_type == self.TYPE.SUPPORTERS:
+        if self.stats_type == self.TYPE.SUPPORTERS:
             return 0.666, 1.000
-        elif self.stats_type == self.TYPE.MODERATES:
+        if self.stats_type == self.TYPE.MODERATES:
             return 0.333, 0.666
-        elif self.stats_type == self.TYPE.OPPOSERS:
+        if self.stats_type == self.TYPE.OPPOSERS:
             return 0.000, 0.333
-        else:
-            assert False
+        raise ValueError(f'stats_type needs to be of type Stats.TYPE, not {type(self.stats_type)}')
 
     def get_dependency(self, content, create=True):
         # return super(OpinionBase, self).get_dependency(content, create)
@@ -432,17 +428,22 @@ class Stats(OpinionBase, models.Model):
         """Swap the true and false points."""
 
         # self
-        (self.total_true_points, self.total_false_points) = (self.total_false_points, self.total_true_points)
+        (self.total_true_points, self.total_false_points) = (self.total_false_points,
+                                                             self.total_true_points)
         self.save()
 
         # dependencies
         for dependency in self.get_dependencies():
-            (dependency.total_true_points, dependency.total_false_points) = (dependency.total_false_points, dependency.total_true_points)
+            (dependency.total_true_points,
+             dependency.total_false_points) = (dependency.total_false_points,
+                                               dependency.total_true_points)
             dependency.save()
 
         # flat dependencies
         for dependency in self.get_flat_dependencies():
-            (dependency.total_true_points, dependency.total_false_points) = (dependency.total_false_points, dependency.total_true_points)
+            (dependency.total_true_points,
+             dependency.total_false_points) = (dependency.total_false_points,
+                                               dependency.total_true_points)
             dependency.save()
 
 

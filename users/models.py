@@ -635,10 +635,16 @@ class Violation(models.Model):
 
         Returns:
             QuerySet:Violation: The set of violatoins.
+
+        Raises:
+            RuntimeError: If both is_open and is_closed are false.
+            RuntimeError: If both recent and expired are false.
         """
         # Preconditions.
-        assert is_open or is_closed
-        assert recent or expired
+        if not is_open and not is_closed:
+            raise RuntimeError('at least is_open or is_closed needs to be true')
+        if not recent and not expired:
+            raise RuntimeError('at least recent or expired needs to be true')
 
         # Find all violations for the provided content.
         if content is None:

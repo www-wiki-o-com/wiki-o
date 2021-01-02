@@ -56,7 +56,7 @@ def get_brace_indices(text):
     stack = []
     result = []
     for i, c in enumerate(text):
-        if c == '[' or c == '<' or c == '{' or c == '«':
+        if c in ['[', '<', '{', '«']:
             stack.append((i, c))
         elif c == '>' and stack[-1][-1] == '<':
             start = stack.pop()[0]
@@ -451,7 +451,7 @@ class CustomRendererForDetails(SaferHtmlRenderer):
     Attributes:
         bib_labels(dict): A mapping for bib labels to bib numbers.
     """
-    bib_labels = dict()
+    bib_labels = {}
 
     def header(self, content, level):
         """[summary]
@@ -564,7 +564,7 @@ def render_details(raw_content):
     bib_labels = md.renderer.bib_labels
 
     if len(bib_content) > 0:
-        bib_entries = dict()
+        bib_entries = {}
         for entry in re.findall(r'\[\w*\]:.+', bib_content):
             i = entry.find(':')
             label = entry[1:i - 1]

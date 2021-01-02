@@ -37,10 +37,11 @@ def is_author(user, obj):
     if user.is_authenticated:
         if isinstance(obj, Content):
             return obj.created_by == user
-        elif isinstance(obj, Opinion):
+        if isinstance(obj, Opinion):
             return obj.user == user
-        elif isinstance(obj, Version):
+        if isinstance(obj, Version):
             return obj.revision.user == user
+    return False
 
 
 @rules.predicate

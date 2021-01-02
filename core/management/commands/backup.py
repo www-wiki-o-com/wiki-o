@@ -16,7 +16,6 @@ LICENSE.md file in the root directory of this source tree.
 import os
 import re
 import socket
-from datetime import datetime
 
 from django.utils import timezone
 from django.core.management.base import BaseCommand
