@@ -2,7 +2,10 @@ version = 1
 
 test_patterns = ["/*/tests/*.py"]
 
-exclude_patterns = ["/*/migrations/*.*"]
+exclude_patterns = [
+    "migrations/**",
+    "/core/static/vendor/**"
+]
 
 [[analyzers]]
 name = "python"
